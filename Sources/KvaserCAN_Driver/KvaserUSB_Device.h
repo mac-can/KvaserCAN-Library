@@ -30,7 +30,6 @@
 typedef struct kvaser_card_info_t_  {   /* card info: */
     uint8_t  channelCount;              /* - channel count */
     uint32_t serialNumber;              /* - serial no. */
-    uint32_t _reserved;                 /* - (not used) */
     uint32_t clockResolution;           /* - clock resolution */
     uint32_t mfgDate;                   /* - manufacturing date */
     uint8_t  EAN[8];                    /* - EAN code (LSB first) */
@@ -44,15 +43,15 @@ typedef struct kvaser_interface_info_t_ { /* channel info: */
     uint32_t channelCapabilities;       /* - channel capabilities */
     uint8_t  canChipType;               /* - CAN chip type */
     uint8_t  canChipSubType;            /* - CAN chip sub-type */
-    uint16_t _reserved;                 /* - (not used) */
 } KvaserUSB_InterfaceInfo_t;
 
 typedef struct kvaser_software_info_t_ {  /* software info: */
     uint32_t swOptions;                 /* - software options */
     uint32_t firmwareVersion;           /* - firmware version */
     uint16_t maxOutstandingTx;          /* - max. outstanding Tx */
-    uint16_t _reserved1;                /* - (not used, 2 byte) */
-    uint32_t _reserved[4];              /* - (not used, 4 * 4 byte) */
+    uint32_t swName;                    /* - software name (hydra only) */
+    uint8_t EAN[8];                     /* - EAN code (LSB first, hydra only) */
+    uint32_t maxBitrate;                /* - max. bit-rate (hydra only, otherwise 1Mbit/s)*/
 } KvaserUSB_SoftwareInfo_t;
 
 typedef struct kvaser_device_info_t_ {  /* device info: */

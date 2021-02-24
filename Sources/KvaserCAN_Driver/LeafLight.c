@@ -62,6 +62,7 @@
 #define LEN_RESET_STATISTICS            4U
 #define LEN_ERROR_EVENT                16U
 #define LEN_FLUSH_QUEUE                 8U
+#define LEN_FILO_FLUSH_QUEUE_RESP       8U
 #define LEN_RESET_ERROR_COUNTER         4U
 #define LEN_TX_ACKNOWLEDGE             12U
 #define LEN_CAN_ERROR_EVENT            16U
@@ -196,10 +197,11 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
             break;
     }
     /* get max. outstanding transmit messages */
-    if (device->deviceInfo.software.maxOutstandingTx > 0U)
-        device->recvData.txAck.maxMsg = device->deviceInfo.software.maxOutstandingTx;
+    if ((0U < device->deviceInfo.software.maxOutstandingTx) &&
+        (device->deviceInfo.software.maxOutstandingTx < MIN(LEAF_LIGHT_MAX_OUTSTANDING_TX, 255U)))
+        device->recvData.txAck.maxMsg = (uint8_t)device->deviceInfo.software.maxOutstandingTx;
     else
-        device->recvData.txAck.maxMsg = LEAF_LIGHT_MAX_OUTSTANDING_TX;
+        device->recvData.txAck.maxMsg = (uint8_t)MIN(LEAF_LIGHT_MAX_OUTSTANDING_TX, 255U);
     /* store demanded CAN operation mode*/
     device->recvData.opMode = opMode;
     retVal = CANUSB_SUCCESS;
@@ -325,7 +327,7 @@ CANUSB_Return_t LeafLight_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_Dr
     uint8_t resp;
 
     /* sanity check */
-    if (!device || mode)
+    if (!device || !mode)
         return CANUSB_ERROR_NULLPTR;
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
@@ -566,13 +568,13 @@ CANUSB_Return_t LeafLight_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags
     size = FillFlushQueueReq(buffer, KVASER_MAX_COMMAND_LENGTH, device->channelNo, flags);
     retVal = KvaserUSB_SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
-        size = LEN_FLUSH_QUEUE;
-        resp = CMD_FLUSH_QUEUE;
+        size = LEN_FILO_FLUSH_QUEUE_RESP;
+        resp = CMD_FILO_FLUSH_QUEUE_RESP;
         retVal = KvaserUSB_ReadResponse(device, buffer, size, resp, KVASER_USB_COMMAND_TIMEOUT);
         if (retVal == CANUSB_SUCCESS) {
             /* command response:
              * - byte 0..3: (header)
-             * - byte 4: flags
+             * - byte 4..7: flags
              * - byte 8..11: (not used)
              */
             flags = BUF2UINT32(buffer[4]);
@@ -749,7 +751,6 @@ CANUSB_Return_t LeafLight_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_Card
              */
             info->channelCount = BUF2UINT8(buffer[3]);
             info->serialNumber = BUF2UINT32(buffer[4]);
-            info->_reserved = BUF2UINT32(buffer[8]);
             info->clockResolution = BUF2UINT32(buffer[12]);
             info->mfgDate = BUF2UINT32(buffer[16]);
             info->EAN[0] = BUF2UINT8(buffer[20]);
@@ -794,17 +795,13 @@ CANUSB_Return_t LeafLight_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_
              * - byte 0..3: (header)
              * - byte 4..7: swOptions
              * - byte 8..11: firmwareVersion
-             * - byte 12+13: maxOutstandingTx
+             * - byte 12..13: maxOutstandingTx
              * - byte 14..31: (not used)
              */
             info->swOptions = BUF2UINT32(buffer[4]);
             info->firmwareVersion = BUF2UINT32(buffer[8]);
             info->maxOutstandingTx = BUF2UINT16(buffer[12]);
-            info->_reserved1 = BUF2UINT16(buffer[14]);
-            info->_reserved[0] = BUF2UINT32(buffer[16]);
-            info->_reserved[1] = BUF2UINT32(buffer[20]);
-            info->_reserved[2] = BUF2UINT32(buffer[24]);
-            info->_reserved[3] = BUF2UINT32(buffer[28]);
+            info->maxBitrate = 1000000U;  // CAN 2.0 max. 1Mbit/s
        }
     }
     return retVal;
@@ -843,7 +840,6 @@ CANUSB_Return_t LeafLight_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB
             info->channelCapabilities = BUF2UINT32(buffer[4]);
             info->canChipType = BUF2UINT8(buffer[8]);
             info->canChipSubType = BUF2UINT8(buffer[9]);
-            info->_reserved = BUF2UINT16(buffer[10]);
         }
     }
     return retVal;
@@ -889,9 +885,10 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_START_CHIP_RESP:
                 case CMD_STOP_CHIP_RESP:
                 case CMD_READ_CLOCK_RESP:
-                case CMD_GET_BUSLOAD_RESP:
                 case CMD_GET_CARD_INFO_RESP:
                 case CMD_GET_SOFTWARE_INFO_RESP:
+                case CMD_GET_BUSLOAD_RESP:
+                case CMD_FILO_FLUSH_QUEUE_RESP:
                     /* command response: write packet in the pipe */
                     (void)CANPIP_Write(context->msgPipe, &buffer[index], nbyte);
                     break;

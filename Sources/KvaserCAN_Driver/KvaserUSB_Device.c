@@ -146,7 +146,7 @@ CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device
         return retVal;;
     }
     /* create a message queue for received CAN frames */
-    device->recvData.msgQueue = CANQUE_Create(KVASER_USB_RCV_QUEUE_SIZE, sizeof(KvaserUSB_CanMessage_t));
+    device->recvData.msgQueue = CANQUE_Create(KVASER_RECEIVE_QUEUE_SIZE, sizeof(KvaserUSB_CanMessage_t));
     if (device->recvData.msgQueue == NULL) {
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: message queue could not be created (NULL)\n", device->name, device->channelNo+1);
         (void)CANPIP_Destroy(device->recvData.msgPipe);

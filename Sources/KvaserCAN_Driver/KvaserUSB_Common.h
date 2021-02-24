@@ -36,10 +36,11 @@
 
 #define KVASER_MIN_COMMAND_LENGTH  4U
 #define KVASER_MAX_COMMAND_LENGTH  32U
-#define KVASER_USB_COMMAND_TIMEOUT  800U
-#define KVASER_USB_REQUEST_DELAY  100U
+#define KVASER_USB_COMMAND_TIMEOUT 800U
+#define KVASER_USB_REQUEST_DELAY   100U
 
-#define KVASER_USB_RCV_QUEUE_SIZE  65536U
+#define KVASER_RECEIVE_QUEUE_SIZE  65536U
+
 
 /* ---  general CAN data types and defines  ---
  */
@@ -53,7 +54,7 @@
     // TODO: insert coin here
 #endif
 
-/* ---  CAN Leaf command codes  ---
+/* ---  general CAN command codes  ---
  */
 #define CMD_RX_STD_MESSAGE                  0x0CU
 #define CMD_TX_STD_MESSAGE                  0x0DU
@@ -244,12 +245,12 @@
 #define AUTOTXBUFFER_CMD_GENERATE_BURST        6U
 #define AUTOTXBUFFER_CMD_SET_MSG_COUNT         7U
 // CMD_SET_AUTO_TX_RESP bit values for automatic tx buffer capabilities
-#define AUTOTXBUFFER_CAP_TIMED_TX           0x01 // Periodic transmission
-#define AUTOTXBUFFER_CAP_AUTO_RESP_DATA     0x02 // Auto response to data frames
-#define AUTOTXBUFFER_CAP_AUTO_RESP_RTR      0x04 // Auto response to RTR
+#define AUTOTXBUFFER_CAP_TIMED_TX           0x01U
+#define AUTOTXBUFFER_CAP_AUTO_RESP_DATA     0x02U
+#define AUTOTXBUFFER_CAP_AUTO_RESP_RTR      0x04U
 // Use these message flags with cmdSetAutoTxBuffer.flags
-#define AUTOTXBUFFER_MSG_REMOTE_FRAME       0x10 // Msg is a remote frame
-#define AUTOTXBUFFER_MSG_EXT                0x80 // Extended identifier
+#define AUTOTXBUFFER_MSG_REMOTE_FRAME       0x10U
+#define AUTOTXBUFFER_MSG_EXT                0x80U
 
 /*  for CMD_SOFTSYNC_ONOFF: */
 #define SOFTSYNC_OFF                           0U
@@ -261,6 +262,7 @@
 #define CAN_TIME_STAMP_REF_SOF                 1U
 #define CAN_TIME_STAMP_REF_INTERRUPT           2U
 #define CAN_TIME_STAMP_REF_CANTIMER            3U
+
 
 /* ---  little endian (x86_64 architecture)  ---
  */
