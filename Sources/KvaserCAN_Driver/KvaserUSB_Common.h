@@ -39,6 +39,12 @@
 #define KVASER_USB_COMMAND_TIMEOUT 800U
 #define KVASER_USB_REQUEST_DELAY   100U
 
+#define KVASER_HYDRA_COMMAND_LENGTH  32U
+#define KVASER_HYDRA_EXT_COMMAND_LENGTH  96U
+#define KVASER_HYDRA_MIN_EXT_CMD_LENGTH  KVASER_HYDRA_COMMAND_LENGTH
+#define KVASER_HYDRA_MAX_EXT_CMD_LENGTH  KVASER_HYDRA_EXT_COMMAND_LENGTH
+#define KVASER_HYDRA_USB_COMMAND_TIMEOUT 5000U
+
 #define KVASER_RECEIVE_QUEUE_SIZE  65536U
 
 
@@ -145,6 +151,31 @@
 #define CMD_LOG_TRIG                        0x6BU
 #define CMD_LOG_RTC_TIME                    0x6CU
 
+/* ---  additional Hydra command codes  ---
+ */
+#define CMD_TX_CAN_MESSAGE                  0x21U
+#define CMD_FLUSH_QUEUE_RESP                0x42U
+#define CMD_SET_BUSPARAMS_FD_REQ            0x45U
+#define CMD_SET_BUSPARAMS_FD_RESP           0x46U
+#define CMD_SET_BUSPARAMS_RESP              0x55U
+#define CMD_MAP_CHANNEL_REQ                 0xC8U
+#define CMD_MAP_CHANNEL_RESP                0xC9U
+#define CMD_GET_SOFTWARE_DETAILS_REQ        0xCAU
+#define CMD_GET_SOFTWARE_DETAILS_RESP       0xCBU
+#define CMD_TX_CAN_MESSAGE_FD               0xE0U
+#define CMD_TX_ACKNOWLEDGE_FD               0xE1U
+#define CMD_RX_MESSAGE_FD                   0xE2U
+#define CMD_AUTOTX_MESSAGE_FD               0xE3U
+#define CMD_EXTENDED                        0xFFU
+
+/* ---  additional Hydra extended command codes  ---
+ */
+#define CMD_EXT_TX_MSG_FD   CMD_TX_CAN_MESSAGE_FD
+#define CMD_EXT_TX_ACK_FD   CMD_TX_ACKNOWLEDGE_FD
+#define CMD_EXT_RX_MSG_FD       CMD_RX_MESSAGE_FD
+#define CMD_EXT_AUTOTX_FD   CMD_AUTOTX_MESSAGE_FD
+
+
 /* ---  CAN message flags  ---
  */
 #define MSGFLAG_ERROR_FRAME                 0x01U
@@ -152,9 +183,19 @@
 #define MSGFLAG_NERR                        0x04U
 #define MSGFLAG_WAKEUP                      0x08U
 #define MSGFLAG_REMOTE_FRAME                0x10U
-#define MSGFLAG_RESERVED_1                  0x20U
+#define MSGFLAG_EXTENDED_ID                 0x20U
 #define MSGFLAG_TX                          0x40U
 #define MSGFLAG_TXRQ                        0x80U
+
+#define MSGFLAG_SSM_NACK                0x001000U
+#define MSGFLAG_ABL                     0x002000U
+#define MSGFLAG_FDF                     0x010000U
+#define MSGFLAG_BRS                     0x020000U
+#define MSGFLAG_ESI                     0x040000U
+
+#define MSGFLAG_EXT           MSGFLAG_EXTENDED_ID
+#define MSGFLAG_RTR          MSGFLAG_REMOTE_FRAME
+#define MSGFLAG_STS           MSGFLAG_ERROR_FRAME
 
 /* ---  Chip status flags  ---
  */
@@ -164,6 +205,12 @@
 #define BUSSTAT_ERROR_ACTIVE                0x08U
 #define BUSSTAT_BUSOFF_RECOVERY             0x10U
 #define BUSSTAT_IGNORING_ERRORS             0x20U
+
+#define BUSSTAT_FLAG_ERR_ACTIVE             0x00U
+#define BUSSTAT_FLAG_RESET                  0x01U
+#define BUSSTAT_FLAG_BUS_ERROR              0x10U
+#define BUSSTAT_FLAG_ERR_PASSIVE            0x20U
+#define BUSSTAT_FLAG_BUSOFF                 0x40U
 
 /* ---  Driver modes  ---
  */
@@ -195,10 +242,33 @@
 #define FILO_TRANSCEIVER_LINEMODE_SLEEP        8U
 #define FILO_TRANSCEIVER_LINEMODE_NORMAL       9U
 #define FILO_TRANSCEIVER_LINEMODE_STDBY       10U
-
-/* ---  Transceiver resnet modes ---
- */
+/* ---  Transceiver resnet modes  --- */
 #define FILO_TRANSCEIVER_RESNET_NA             0U
+
+/* ---  Transceiver (logical) types  ---
+ */
+#define HYDRA_TRANSCEIVER_TYPE_UNKNOWN         0U
+#define HYDRA_TRANSCEIVER_TYPE_251             1U
+#define HYDRA_TRANSCEIVER_TYPE_252             2U
+#define HYDRA_TRANSCEIVER_TYPE_SWC             6U
+#define HYDRA_TRANSCEIVER_TYPE_1054_OPTO      11U
+#define HYDRA_TRANSCEIVER_TYPE_SWC_OPTO       12U
+#define HYDRA_TRANSCEIVER_TYPE_1050           14U
+#define HYDRA_TRANSCEIVER_TYPE_1050_OPTO      15U
+#define HYDRA_TRANSCEIVER_TYPE_LIN            19U
+
+/* ---  Transceiver line modes  ---
+ */
+#define HYDRA_TRANSCEIVER_LINEMODE_NA          0U
+#define HYDRA_TRANSCEIVER_LINEMODE_SWC_SLEEP   4U
+#define HYDRA_TRANSCEIVER_LINEMODE_SWC_NORMAL  5U
+#define HYDRA_TRANSCEIVER_LINEMODE_SWC_FAST    6U
+#define HYDRA_TRANSCEIVER_LINEMODE_SWC_WAKEUP  7U
+#define HYDRA_TRANSCEIVER_LINEMODE_SLEEP       8U
+#define HYDRA_TRANSCEIVER_LINEMODE_NORMAL      9U
+#define HYDRA_TRANSCEIVER_LINEMODE_STDBY      10U
+/* ---  Transceiver resnet modes (not supported)  --- */
+#define HYDRA_TRANSCEIVER_RESNET_NA            0U
 
 /* ---  Error codes  ---
  */
@@ -235,6 +305,12 @@
 #define SWOPTION_XX_MHZ_CLK                 0x60L
 #define SWOPTION_TIMEOFFSET_VALID           0x80L
 #define SWOPTION_CAP_REQ                  0x1000L
+// Hydra devices:
+#define SWOPTION_80_MHZ_CLK                 0x20L
+#define SWOPTION_DELAY_MSGS                0x100L
+#define SWOPTION_USE_HYDRA_EXT             0x200L
+#define SWOPTION_CANFD_CAP                 0x400L
+#define SWOPTION_NONISO_CAP                0x800L
 
 /*  for CMD_SET_AUTO_TX_REQ and _RESP: */
 #define AUTOTXBUFFER_CMD_GET_INFO              1U
@@ -269,6 +345,7 @@
 #define BUF2UINT8(buf)   (uint8_t)(buf)
 #define BUF2UINT16(buf)  (uint16_t)*((uint16_t*)&(buf))
 #define BUF2UINT32(buf)  (uint32_t)*((uint32_t*)&(buf))
+#define BUF2UINT64(buf)  (uint64_t)*((uint64_t*)&(buf))
 
 #define UINT8BYTE(var)   (uint8_t)(var)
 #define UINT16LSB(var)   (uint8_t)*((uint8_t*)&(var))

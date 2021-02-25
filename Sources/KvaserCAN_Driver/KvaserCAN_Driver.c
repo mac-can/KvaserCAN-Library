@@ -22,12 +22,14 @@
 
 #include "MacCAN_Devices.h"
 #include "LeafLight.h"
+#include "LeafPro.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
 const CANDEV_Device_t CANDEV_Devices[] = {
+    {KVASER_VENDOR_ID, LEAF_PRO_PRODUCT_ID, LEAF_PRO_NUM_CHANNELS},
     {KVASER_VENDOR_ID, LEAF_LIGHT_PRODUCT_ID, LEAF_LIGHT_NUM_CHANNELS},
     CANDEV_LAST_ENTRY_IN_DEVICE_LIST
 };
@@ -50,6 +52,9 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
     }
     /* get operation capability of the appropriate CAN controller */
     switch (productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            LeafPro_GetOperationCapability(&opCapa);
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             LeafLight_GetOperationCapability(&opCapa);
             break;
@@ -71,6 +76,14 @@ CANUSB_Return_t KvaserCAN_InitializeChannel(KvaserUSB_Channel_t channel, const K
         return retVal;;
     }
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            /* configure and confirm device context for Leaf Pro HS v2 and
+             * initialize the CAN channel (CAN controller is in INIT state) */
+            if (LeafPro_ConfigureChannel(device))
+                retVal = LeafPro_InitializeChannel(device, opMode);
+            else
+                retVal = CANUSB_ERROR_NOTINIT;
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             /* configure and confirm device context for Leaf Light v2 and
              * initialize the CAN channel (CAN controller is in INIT state) */
@@ -101,6 +114,9 @@ CANUSB_Return_t KvaserCAN_TeardownChannel(KvaserUSB_Device_t *device) {
 
     /* teardown the whole ... */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_TeardownChannel(device);
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_TeardownChannel(device);
             break;
@@ -123,6 +139,7 @@ CANUSB_Return_t KvaserCAN_SignalChannel(KvaserUSB_Device_t *device) {
 
     /* signal wait condition */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = CANQUE_Signal(device->recvData.msgQueue);
             break;
@@ -141,6 +158,9 @@ CANUSB_Return_t KvaserCAN_SetBusParams(KvaserUSB_Device_t *device, const KvaserU
 
     /* set bus parameters */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_SetBusParams(device, params);
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_SetBusParams(device, params);
             break;
@@ -159,6 +179,9 @@ CANUSB_Return_t KvaserCAN_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_Bus
 
     /* get bus parameters */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_GetBusParams(device, params);
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_GetBusParams(device, params);
             break;
@@ -180,6 +203,13 @@ CANUSB_Return_t KvaserCAN_CanBusOn(KvaserUSB_Device_t *device, bool silent) {
 
     /* start CAN controller */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            // TODO: (void)LeafPro_ResetStatistics(device, KVASER_USB_REQUEST_DELAY);
+            // TODO: (void)LeafPro_ResetErrorCounter(device, KVASER_USB_REQUEST_DELAY);
+            retVal = LeafPro_SetDriverMode(device, silent ? DRIVERMODE_SILENT : DRIVERMODE_NORMAL);
+            if (retVal == CANERR_NOERROR)
+                retVal = LeafPro_StartChip(device, KVASER_USB_COMMAND_TIMEOUT);
+           break;
         case LEAF_LIGHT_PRODUCT_ID:
             (void)LeafLight_ResetStatistics(device, KVASER_USB_REQUEST_DELAY);
             (void)LeafLight_ResetErrorCounter(device, KVASER_USB_REQUEST_DELAY);
@@ -202,6 +232,11 @@ CANUSB_Return_t KvaserCAN_CanBusOff(KvaserUSB_Device_t *device) {
 
     /* reset CAN controller */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_StopChip(device, KVASER_USB_COMMAND_TIMEOUT);
+            if (retVal == CANERR_NOERROR)
+                retVal = LeafPro_SetDriverMode(device, DRIVERMODE_NORMAL/*_OFF*/);  // OFF doesn't work
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_StopChip(device, KVASER_USB_COMMAND_TIMEOUT);
             if (retVal == CANERR_NOERROR)
@@ -222,9 +257,13 @@ CANUSB_Return_t KvaserCAN_WriteMessage(KvaserUSB_Device_t *device, const KvaserU
 
     /* send a CAN message */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_SendMessage(device, message, timeout);
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_SendMessage(device, message, timeout);
             break;
+            
     }
     return retVal;
 }
@@ -240,6 +279,9 @@ CANUSB_Return_t KvaserCAN_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanM
 
     /* read a CAN message from message queue, if any */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_ReadMessage(device, message, timeout);
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_ReadMessage(device, message, timeout);
             break;
@@ -258,13 +300,18 @@ CANUSB_Return_t KvaserCAN_GetBusStatus(KvaserUSB_Device_t *device, KvaserUSB_Bus
 
     /* get CAN bus status */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_RequestChipState(device, KVASER_USB_REQUEST_DELAY);
+            if (status) {
+                *status = device->recvData.evData.chipState.busStatus;
+            }
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_RequestChipState(device, KVASER_USB_REQUEST_DELAY);
             if (status) {
                 *status = device->recvData.evData.chipState.busStatus;
             }
-            break;
-    }
+            break;    }
     return retVal;
 }
 
@@ -279,6 +326,9 @@ CANUSB_Return_t KvaserCAN_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLo
 
     /* call device specific function */
     switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_GetBusLoad(device, load);
+            break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_GetBusLoad(device, load);
             break;

@@ -34,7 +34,7 @@ KVASER_DIR = $(HOME_DIR)/Sources/KvaserCAN_Driver
 OBJECTS = $(OUTDIR)/MacCAN.o $(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
 	$(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
 	$(OUTDIR)/KvaserCAN.o $(OUTDIR)/KvaserCAN_Driver.o $(OUTDIR)/KvaserUSB_Device.o \
-	$(OUTDIR)/LeafLight.o \
+	$(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
 	$(OUTDIR)/main.o $(OUTDIR)/can_btr.o
 
 ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
@@ -141,6 +141,9 @@ $(OUTDIR)/KvaserUSB_Device.o: $(KVASER_DIR)/KvaserUSB_Device.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/LeafLight.o: $(KVASER_DIR)/LeafLight.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
+$(OUTDIR)/LeafPro.o: $(KVASER_DIR)/LeafPro.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c

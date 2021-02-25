@@ -45,7 +45,7 @@ typedef struct kvaser_interface_info_t_ { /* channel info: */
     uint8_t  canChipSubType;            /* - CAN chip sub-type */
 } KvaserUSB_InterfaceInfo_t;
 
-typedef struct kvaser_software_info_t_ {  /* software info: */
+typedef struct kvaser_software_info_t_ {  /* software info/details: */
     uint32_t swOptions;                 /* - software options */
     uint32_t firmwareVersion;           /* - firmware version */
     uint16_t maxOutstandingTx;          /* - max. outstanding Tx */
@@ -67,6 +67,12 @@ typedef struct kvaser_bus_params_t_ {   /* bus parameter: */
     uint8_t  sjw;                       /* - synchronization jump width */
     uint8_t  noSamp;                    /* - number of sample points */
 } KvaserUSB_BusParams_t;
+
+typedef struct kvaser_bus_params_fd_t_ {/* bus parameter for CAN FD: */
+    KvaserUSB_BusParams_t nominal;      /* - nominal bit-rate settings */
+    KvaserUSB_BusParams_t data;         /* - data phase bit-rate settings */
+    bool canFd;                         /* - flag: open as CAN FD */
+} KvaserUSB_BusParamsFd_t;
 
 typedef uint8_t KvaserUSB_OpMode_t;     /* operation mode (CAN API V1 compatible) */
 
@@ -143,6 +149,11 @@ typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
 
 typedef uint8_t KvaserUSB_CanChannel_t; /* CAN channel on a device (range 0,..n) */
 
+typedef struct kavser_hydra_t_ {        /* USB Hydra device data (Leaf Pro): */
+    uint8_t channel2he;                 /* - to map a channel no. to HE (6-bit) */
+    uint8_t he2channel;                 /* - to map 6-bit HE to a channel number */
+} KvaserUSB_HydraData_t;
+
 typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     uint16_t productId;                 /* - USB product id. */
     uint16_t releaseNo;                 /* - USB release no. */
@@ -152,6 +163,7 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     KvaserUSB_RecvData_t recvData;      /* - pipe w/ CAN message queue */
     KvaserUSB_CanChannel_t numChannels; /* - number of CAN channels */
     KvaserUSB_CanChannel_t channelNo;   /* - active CAN channel on device */
+    KvaserUSB_HydraData_t hydraData;    /* - USB Hydra device (Leaf Pro) */
     KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capability */
     KvaserUSB_DeviceInfo_t deviceInfo;  /* - device information (hw, sw, etc.) */
     char name[KVASER_MAX_NAME_LENGTH+1];  /* - device name (zero-terminated string) */
