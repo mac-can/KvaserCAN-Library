@@ -298,7 +298,7 @@ uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB
      *  param[in]   cpuTicks   - 48-bit timer value from device
      *  param[in]   cpuFreq    - CPU frequency in [MHz]
      */
-    assert(cpuFreq);
+    if (cpuFreq == 0) cpuFreq = 1;  // to avoid devide-by-zero!
     
     return ((uint64_t)cpuTicks * (uint64_t)1000) / (uint64_t)cpuFreq;
 }

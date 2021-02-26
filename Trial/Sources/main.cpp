@@ -17,7 +17,7 @@
 #include "MacCAN_Debug.h"
 
 //#define SECOND_CHANNEL
-#define ISSUE_198   (1)
+#define ISSUE_198   (0)
 
 #define OPTION_NO   (0)
 #define OPTION_YES  (1)

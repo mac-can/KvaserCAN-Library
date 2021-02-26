@@ -71,8 +71,8 @@
 #define MIN(x,y)  (((x) < (y)) ? (x) : (y))
 
 static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size);
-static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte);
-static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte);
+static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq);
+static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq);
 
 static uint32_t FillSetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel, const KvaserUSB_BusParams_t *params);
 static uint32_t FillGetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
@@ -124,6 +124,8 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
 
     /* set CAN channel properties and defaults */
     device->channelNo = 0U;  /* note: only one CAN channel */
+    device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
+    device->recvData.txAck.maxMsg = LEAF_LIGHT_MAX_OUTSTANDING_TX;
     LeafLight_GetOperationCapability(&device->opCapability);
 
     /* Gotcha! */
@@ -193,7 +195,7 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
         case SWOPTION_32_MHZ_CLK: device->recvData.cpuFreq = 32U; break;
         case SWOPTION_24_MHZ_CLK: device->recvData.cpuFreq = 24U; break;
         default:
-            device->recvData.cpuFreq = 1U;  // to avoid devide-by-zero
+            device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
             break;
     }
     /* get max. outstanding transmit messages */
@@ -878,7 +880,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_ERROR_EVENT:
                 case CMD_CAN_ERROR_EVENT:
                     /* event message: update event status */
-                    (void)UpdateEventData(&context->evData, &buffer[index], nbyte);
+                    (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->cpuFreq);
                     break;
                 case CMD_GET_BUSPARAMS_RESP:
                 case CMD_GET_DRIVERMODE_RESP:
@@ -894,7 +896,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                     break;
                 case CMD_LOG_MESSAGE:
                     /* logged CAN message: decode and enqueue */
-                    if (DecodeMessage(&message, &buffer[index], nbyte)) {
+                    if (DecodeMessage(&message, &buffer[index], nbyte, context->cpuFreq)) {
                         /* suppress certain CAN messages depending on the operation mode */
                         if (message.xtd && (context->opMode & CANMODE_NXTD))
                             break;
@@ -905,7 +907,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                         (void)CANQUE_Enqueue(context->msgQueue, (void*)&message);
                     } else {
                         /* there are flags that do not belong to a received CAN message */
-                        (void)UpdateEventData(&context->evData, &buffer[index], nbyte);
+                        (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->cpuFreq);
                     }
                     break;
                 case CMD_TX_ACKNOWLEDGE:
@@ -928,13 +930,15 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
     }
 }
 
-static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte) {
+static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
     bool result = false;
     
     if (!event || !buffer)
         return false;
     if (nbyte < KVASER_MIN_COMMAND_LENGTH)
         return false;
+    
+    (void)cpuFreq;  // currently not used
     
     switch (buffer[1]) {
         case CMD_ERROR_EVENT:
@@ -1035,7 +1039,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
     return result;
 }
 
-static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte) {
+static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
     uint64_t ticks = 0ULL;
     bool result = false;
     
@@ -1069,7 +1073,7 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     ticks |= (uint64_t)BUF2UINT16(buffer[4]) << 0;
     ticks |= (uint64_t)BUF2UINT16(buffer[6]) << 16;
     ticks |= (uint64_t)BUF2UINT16(buffer[8]) << 32;
-    KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, 24);
+    KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, cpuFreq);
     /* note: we only enqueue ordinary CAN messages and error frames.
      *       The flags MSGFLAG_OVERRUN, MSGFLAG_NERR, MSGFLAG_WAKEUP,
      *       MSGFLAG_TX and MSGFLAG_TXRQ are handled by UpdateEventData
