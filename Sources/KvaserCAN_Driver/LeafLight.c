@@ -68,7 +68,7 @@
 #define LEN_CAN_ERROR_EVENT            16U
 #define LEN_LOG_MESSAGE                24U
 
-#define MIN(x,y)  ((x) < (y)) ? (x) : (y)
+#define MIN(x,y)  (((x) < (y)) ? (x) : (y))
 
 static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size);
 static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte);
@@ -1298,8 +1298,8 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t c
         buffer[4] = UINT8BYTE((message->id >>  6) & 0x1F);
         buffer[5] = UINT8BYTE((message->id      ) & 0x3F);
     }
-    buffer[9] = UINT8BYTE(message->dlc);
-    memcpy(&buffer[10], message->data, 8);
+    buffer[9] = (uint8_t)MIN(message->dlc, CAN_MAX_DLC);
+    memcpy(&buffer[10], message->data, CAN_MAX_LEN);
     uint8_t flags = MSGFLAG_TX;
     flags |= message->rtr ? MSGFLAG_REMOTE_FRAME : 0x00U;
     buffer[18] = UINT8BYTE(0x00);

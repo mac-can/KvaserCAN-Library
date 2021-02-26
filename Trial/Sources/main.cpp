@@ -17,6 +17,7 @@
 #include "MacCAN_Debug.h"
 
 //#define SECOND_CHANNEL
+#define ISSUE_198   (1)
 
 #define OPTION_NO   (0)
 #define OPTION_YES  (1)
@@ -75,22 +76,24 @@ int main(int argc, const char * argv[]) {
     int option_test = OPTION_NO;
     int option_exit = OPTION_NO;
     int option_echo = OPTION_YES;
-//    int option_stop = OPTION_NO;
-//    int option_check = OPTION_NO;
+    int option_stop = OPTION_NO;
+    int option_check = ISSUE_198;
     int option_retry = OPTION_NO;
     int option_repeat = OPTION_NO;
     int option_transmit = OPTION_NO;
+    uint64_t received = 0ULL;
+    uint64_t expected = 0ULL;
 
     for (int i = 1, opt = 0; i < argc; i++) {
-        /* TouCAN-USB channel */
-        if(!strcmp(argv[i], "Kcaser CAN Channel 0") || !strcmp(argv[i], "CH:0")) channel = KVASER_CAN_CHANNEL0;
-        if(!strcmp(argv[i], "Kcaser CAN Channel 1") || !strcmp(argv[i], "CH:1")) channel = KVASER_CAN_CHANNEL1;
-        if(!strcmp(argv[i], "Kcaser CAN Channel 2") || !strcmp(argv[i], "CH:2")) channel = KVASER_CAN_CHANNEL2;
-        if(!strcmp(argv[i], "Kcaser CAN Channel 3") || !strcmp(argv[i], "CH:3")) channel = KVASER_CAN_CHANNEL3;
-        if(!strcmp(argv[i], "Kcaser CAN Channel 4") || !strcmp(argv[i], "CH:4")) channel = KVASER_CAN_CHANNEL4;
-        if(!strcmp(argv[i], "Kcaser CAN Channel 5") || !strcmp(argv[i], "CH:5")) channel = KVASER_CAN_CHANNEL5;
-        if(!strcmp(argv[i], "Kcaser CAN Channel 6") || !strcmp(argv[i], "CH:6")) channel = KVASER_CAN_CHANNEL6;
-        if(!strcmp(argv[i], "Kcaser CAN Channel 7") || !strcmp(argv[i], "CH:7")) channel = KVASER_CAN_CHANNEL7;
+        /* Kvaser CAN channel */
+        if(!strcmp(argv[i], "Kvaser CAN Channel 0") || !strcmp(argv[i], "CH:0")) channel = KVASER_CAN_CHANNEL0;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 1") || !strcmp(argv[i], "CH:1")) channel = KVASER_CAN_CHANNEL1;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 2") || !strcmp(argv[i], "CH:2")) channel = KVASER_CAN_CHANNEL2;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 3") || !strcmp(argv[i], "CH:3")) channel = KVASER_CAN_CHANNEL3;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 4") || !strcmp(argv[i], "CH:4")) channel = KVASER_CAN_CHANNEL4;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 5") || !strcmp(argv[i], "CH:5")) channel = KVASER_CAN_CHANNEL5;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 6") || !strcmp(argv[i], "CH:6")) channel = KVASER_CAN_CHANNEL6;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 7") || !strcmp(argv[i], "CH:7")) channel = KVASER_CAN_CHANNEL7;
         /* baud rate (CAN 2.0) */
         if (!strcmp(argv[i], "BD:0") || !strcmp(argv[i], "BD:1000")) bitrate.index = CANBTR_INDEX_1M;
         if (!strcmp(argv[i], "BD:1") || !strcmp(argv[i], "BD:800")) bitrate.index = CANBTR_INDEX_800K;
@@ -109,8 +112,12 @@ int main(int argc, const char * argv[]) {
         if (!strncmp(argv[i], "C:", 2) && sscanf(argv[i], "C:%i", &opt) == 1) delay = (useconds_t)opt * 1000U;
         if (!strncmp(argv[i], "U:", 2) && sscanf(argv[i], "U:%i", &opt) == 1) delay = (useconds_t)opt;
         /* receive messages */
-//        if (!strcmp(argv[i], "STOP")) option_stop = OPTION_YES;
-//        if (!strcmp(argv[i], "CHECK")) option_check = OPTION_YES;
+        if (!strcmp(argv[i], "STOP")) option_stop = OPTION_YES;
+#if (ISSUE_198 == 0)
+        if (!strcmp(argv[i], "CHECK")) option_check = OPTION_YES;
+#else
+        if (!strcmp(argv[i], "IGNORE")) option_check = OPTION_NO;
+#endif
         if (!strcmp(argv[i], "RETRY")) option_retry = OPTION_YES;
         if (!strcmp(argv[i], "REPEAT")) option_repeat = OPTION_YES;
         if (!strcmp(argv[i], "SILENT")) option_echo = OPTION_NO;
@@ -299,8 +306,8 @@ retry:
     while (running) {
         if ((retVal = myDriver.ReadMessage(message, timeout)) == CMacCAN::NoError) {
             if (option_echo) {
-                fprintf(stdout, ">>> %i\t", frames++);
-                fprintf(stdout, "%7li.%04li\t%03x\t%c%c [%i]",
+                fprintf(stdout, ">>> %-6i  ", frames++);
+                fprintf(stdout, "%7li.%04li  %03x %c%c [%i]",
                                  message.timestamp.tv_sec, message.timestamp.tv_nsec / 100000,
                                  message.id, message.xtd? 'X' : 'S', message.rtr? 'R' : ' ', message.dlc);
                 for (int i = 0; i < message.dlc; i++)
@@ -321,6 +328,25 @@ retry:
                     fflush(stdout);
                 }
             }
+            if (option_check && !message.sts) {
+                received = 0;
+                if(message.dlc > 0) received |= (uint64_t)message.data[0] << 0;
+                if(message.dlc > 1) received |= (uint64_t)message.data[1] << 8;
+                if(message.dlc > 2) received |= (uint64_t)message.data[2] << 16;
+                if(message.dlc > 3) received |= (uint64_t)message.data[3] << 24;
+                if(message.dlc > 4) received |= (uint64_t)message.data[4] << 32;
+                if(message.dlc > 5) received |= (uint64_t)message.data[5] << 40;
+                if(message.dlc > 6) received |= (uint64_t)message.data[6] << 48;
+                if(message.dlc > 7) received |= (uint64_t)message.data[7] << 56;
+                if(received != expected) {
+                    fprintf(stderr, "+++ error: received data is not equal to expected data (%" PRIu64 " : %" PRIu64 ")\n", received, expected);
+                    if(expected > received)
+                        fprintf(stderr, "           issue #198: old messages read again (offset -%" PRIu64 ")\a\n", expected - received);
+                    if(option_stop)
+                        goto teardown;
+                }
+                expected = received + 1;
+            }
         }
         else if (retVal != CMacCAN::ReceiverEmpty) {
             goto teardown;
@@ -328,8 +354,8 @@ retry:
 #ifdef SECOND_CHANNEL
         if ((retVal = mySecond.ReadMessage(message, 0U)) == CMacCAN::NoError) {
             if (option_echo) {
-                fprintf(stdout, ">2> %i\t", frames++);
-                fprintf(stdout, "%7li.%04li\t%03x\t%c%c [%i]",
+                fprintf(stdout, ">2> %-6i  ", frames++);
+                fprintf(stdout, "%7li.%04li  %03x %c%c [%i]",
                                  message.timestamp.tv_sec, message.timestamp.tv_nsec / 100000,
                                  message.id, message.xtd? 'X' : 'S', message.rtr? 'R' : ' ', message.dlc);
                 for (int i = 0; i < message.dlc; i++)
