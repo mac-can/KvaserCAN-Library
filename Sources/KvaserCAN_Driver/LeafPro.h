@@ -29,7 +29,8 @@
 
 #define LEAF_PRO_NUM_CHANNELS  1U
 #define LEAF_PRO_NUM_ENDPOINTS  4U
-#define LEAF_PRO_MAX_OUTSTANDING_TX  64U
+#define LEAF_PRO_CPU_FREQUENCY  80U
+#define LEAF_PRO_MAX_OUTSTANDING_TX  200U
 
 #define LEAF_PRO_MODE_FDOE  0 /* CAN FD operation enable/disable */
 #define LEAF_PRO_MODE_BRSE  0 /* bit-rate switch enable/disable */
