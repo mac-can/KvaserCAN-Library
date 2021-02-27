@@ -233,7 +233,13 @@ MacCAN_Return_t CKvaserCAN::ResetController() {
             retVal = KvaserCAN_CanBusOff(&m_pCAN->m_Device);
             m_Status.can_stopped = (retVal == CANUSB_SUCCESS) ? 1 : 0;
         } else
+#ifndef OPTION_CANAPI_RETVALS
             retVal = CANERR_OFFLINE;
+#else
+            // note: CAN API `can_reset' returns CANERR_NOERROR even
+            //       when the CAN controller has not been started
+            retVal = CANERR_NOERROR;
+#endif
     }
     return (MacCAN_Return_t)retVal;
 }
@@ -245,13 +251,17 @@ MacCAN_Return_t CKvaserCAN::WriteMessage(MacCAN_Message_t message, uint16_t time
     // (§) must be initialized
     if (m_pCAN->m_Device.configured) {
         // (a) check identifier range
-        // TODO: ...
+        if (message.id > (message.xtd ? CAN_MAX_XTD_ID : CAN_MAX_STD_ID))
+            return CMacCAN::IllegalParameter;
         // (b) check data length code
-        // TODO: ...
+        if (message.dlc > CAN_MAX_DLC)
+            return CMacCAN::IllegalParameter;
         // (c) ckeck extended frames allowed
-        // TODO: ...
+        if (message.xtd && m_OpMode.nxtd)
+            return CMacCAN::IllegalParameter;
         // (d) ckeck remote frames allowed
-        // TODO: ...
+        if (message.rtr && m_OpMode.nrtr)
+            return CMacCAN::IllegalParameter;
         // (§) must be running
         if (!m_Status.can_stopped) {
             // transmit the given CAN message (w/ or w/o acknowledgment)
@@ -297,8 +307,8 @@ MacCAN_Return_t CKvaserCAN::GetStatus(MacCAN_Status_t &status) {
             m_Status.bus_off = (busStatus & BUSSTAT_BUSOFF)? 1 : 0;
             m_Status.bus_error = (busStatus & BUSSTAT_ERROR_PASSIVE)? 1 : 0;
             m_Status.warning_level = (busStatus & BUSSTAT_ERROR_WARNING)? 1 : 0;
-//            m_Status.message_lost |= (busStatus & canSTAT_RXERR)? 1 : 0;
-//            m_Status.transmitter_busy |= (busStatus & canSTAT_TX_PENDING)? 1 : 0;
+            // TODO: m_Status.message_lost |= (busStatus & canSTAT_RXERR)? 1 : 0;
+            // TODO: m_Status.transmitter_busy |= (busStatus & canSTAT_TX_PENDING)? 1 : 0;
         }
         // return updated status register
         status = m_Status;
@@ -338,6 +348,12 @@ MacCAN_Return_t CKvaserCAN::GetBitrate(MacCAN_Bitrate_t &bitrate) {
                                                       (unsigned int)busParams.noSamp,
                                                       (unsigned int)0, bitrate);
         }
+#ifdef OPTION_CANAPI_RETVALS
+        // note: CAN API `can_bitrate' returns CANERR_OFFLINE
+        //       when the CAN controller has not been started
+        if (m_Status.can_stopped)
+            retVal = CANERR_OFFLINE;
+#endif
     }
     return (MacCAN_Return_t)retVal;
 }

@@ -675,7 +675,7 @@ CANUSB_Return_t LeafLight_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLo
     uint8_t resp;
 
     /* sanity check */
-    if (!device || load)
+    if (!device || !load)
         return CANUSB_ERROR_NULLPTR;
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
@@ -895,7 +895,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_GET_SOFTWARE_INFO_RESP:
                 case CMD_GET_BUSLOAD_RESP:
                 case CMD_FILO_FLUSH_QUEUE_RESP:
-                    /* command response: write packet in the pipe */
+                    /* command response: write packet into the pipe */
                     (void)CANPIP_Write(context->msgPipe, &buffer[index], nbyte);
                     break;
                 case CMD_LOG_MESSAGE:
@@ -915,7 +915,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                     }
                     break;
                 case CMD_TX_ACKNOWLEDGE:
-                    // TODO: ...
+                    /* transmit message ackowledgement: write packet into the pipe only when requested */
                     if (!context->txAck.noAck && (buffer[index+3] == context->txAck.transId))
                         (void)CANPIP_Write(context->msgPipe, &buffer[index], nbyte);
                     if (context->txAck.cntMsg > 0)
