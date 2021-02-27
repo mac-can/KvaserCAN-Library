@@ -869,6 +869,10 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
             /* get the command length */
             nbyte = (UInt32)buffer[index];
             MACCAN_LOG_WRITE(&buffer[index], nbyte, index ? "+" : "<");
+            if ((index + nbyte) > size) {
+                MACCAN_LOG_PRINTF("! URB error: expected=%lu vs. received=%lu\n", (index + nbyte), size);
+                break;
+            }
             /* interpret the command code */
             switch (buffer[index+1]) {
                 case CMD_RX_STD_MESSAGE:
