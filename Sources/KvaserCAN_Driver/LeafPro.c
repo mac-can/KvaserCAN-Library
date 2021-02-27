@@ -110,7 +110,7 @@ bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.txAck.maxMsg = LEAF_PRO_MAX_OUTSTANDING_TX;
     LeafPro_GetOperationCapability(&device->opCapability);
 
-    // TODO: ...
+    // initialize Hydra HE address and channel no. */
     device->hydraData.channel2he = ILLEGAL_HE;
     device->hydraData.he2channel = 0xFFU;
     
@@ -932,7 +932,9 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
      * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
      * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
      * - byte 4..31: (a hydra command is at least 32 bytes long)
-     * - byte 32...: (extended command are longer, max. 96 bytes)
+     * - byte 32...: (extended commands are longer, max. 96 bytes)
+     * note: the total length of an extended command respones is encoded in
+     * - byte 4..5: command length (32..max. 96 bytes)
      */
     if (size >= HYDRA_CMD_SIZE) {
         /* the "command/message pump" */
@@ -943,6 +945,10 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
             else
                 nbyte = (UInt32)BUF2UINT16(buffer[4]);
             MACCAN_LOG_WRITE(&buffer[index], nbyte, index ? "+" : "<");
+            if ((index + nbyte) > size) {
+                MACCAN_LOG_PRINTF("! URB error: expected=%lu vs. received=%lu\n", (index + nbyte), size);
+                break;
+            }
             /* interpret the command code */
             switch (buffer[index]) {
                 case CMD_CHIP_STATE_EVENT:
@@ -986,7 +992,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                             }
                             break;
                         case CMD_EXT_TX_ACK_FD:
-                            // TODO:
+                            /* transmit ackowledgement: write packet into the pipe only when requested */
                             if (!context->txAck.noAck && (buffer[index+2] == context->txAck.transId))
                                 (void)CANPIP_Write(context->msgPipe, &buffer[index], nbyte);
                             if (context->txAck.cntMsg > 0)
@@ -1026,7 +1032,9 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
      * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
      * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
      * - byte 4..31: (a hydra command is at least 32 bytes long)
-     * - byte 32...: (extended command are longer, max. 96 bytes)
+     * - byte 32...: (extended commands are longer, max. 96 bytes)
+     * note: the total length of an extended command respones is encoded in
+     * - byte 4..5: command length (32..max. 96 bytes)
      */
     switch (buffer[0]) {
         case CMD_ERROR_EVENT:
