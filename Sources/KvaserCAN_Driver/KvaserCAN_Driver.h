@@ -47,8 +47,8 @@ extern CANUSB_Return_t KvaserCAN_GetBusParams(KvaserUSB_Device_t *device, Kvaser
 extern CANUSB_Return_t KvaserCAN_CanBusOn(KvaserUSB_Device_t *device, bool silent);
 extern CANUSB_Return_t KvaserCAN_CanBusOff(KvaserUSB_Device_t *device);
 
-extern CANUSB_Return_t KvaserCAN_WriteMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint8_t timeout);
-extern CANUSB_Return_t KvaserCAN_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint8_t timeout);
+extern CANUSB_Return_t KvaserCAN_WriteMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout);
+extern CANUSB_Return_t KvaserCAN_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout);
 
 extern CANUSB_Return_t KvaserCAN_GetBusStatus(KvaserUSB_Device_t *device, KvaserUSB_BusStatus_t *status);
 extern CANUSB_Return_t KvaserCAN_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load);

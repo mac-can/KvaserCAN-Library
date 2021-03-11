@@ -211,7 +211,7 @@ CANUSB_Return_t KvaserCAN_CanBusOff(KvaserUSB_Device_t *device) {
     return retVal;
 }
 
-CANUSB_Return_t KvaserCAN_WriteMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint8_t timeout) {
+CANUSB_Return_t KvaserCAN_WriteMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -229,7 +229,7 @@ CANUSB_Return_t KvaserCAN_WriteMessage(KvaserUSB_Device_t *device, const KvaserU
     return retVal;
 }
 
-CANUSB_Return_t KvaserCAN_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint8_t timeout) {
+CANUSB_Return_t KvaserCAN_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
