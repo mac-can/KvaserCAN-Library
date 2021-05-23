@@ -175,7 +175,7 @@ CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device) {
         return CANUSB_ERROR_NULLPTR;
 
     /* abort asynchronous pipe */
-    retVal = CANUSB_ReadPipeAsyncAbort(device->recvPipe);
+    /*retVal =*/ CANUSB_ReadPipeAsyncAbort(device->recvPipe);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: asynchronous pipe could not be stopped (%i)\n", device->name, device->channelNo+1, retVal);
     /* close the USB device */
@@ -183,15 +183,15 @@ CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device) {
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: device could not be closed (%i)\n", device->name, device->channelNo+1, retVal);
     /* destroy the pipe context */
-    retVal = CANUSB_DestroyPipeAsync(device->recvPipe);
+    /*retVal =*/ CANUSB_DestroyPipeAsync(device->recvPipe);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: asynchronous pipe context could not be released (%i)\n", device->name, device->channelNo+1, retVal);
     /* destroy the message queue */
-    retVal = CANQUE_Destroy(device->recvData.msgQueue);
+    /*retVal =*/ CANQUE_Destroy(device->recvData.msgQueue);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: message queue could not be released (%i)\n", device->name, device->channelNo+1, retVal);
     /* destroy the pipe */
-    retVal = CANPIP_Destroy(device->recvData.msgPipe);
+    /*retVal =*/ CANPIP_Destroy(device->recvData.msgPipe);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: pipe could not be released (%i)\n", device->name, device->channelNo+1, retVal);
     /* Live long and prosper! */

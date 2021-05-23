@@ -180,12 +180,10 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
     retVal = LeafLight_GetCardInfo(device, &device->deviceInfo.card);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): card information could not be read (%i)\n", device->name, device->handle, retVal);
-        retVal = CANUSB_SUCCESS;
     }
     retVal = LeafLight_GetSoftwareInfo(device, &device->deviceInfo.software);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
-        retVal = CANUSB_SUCCESS;
     }
     /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
     (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
@@ -579,7 +577,7 @@ CANUSB_Return_t LeafLight_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags
              * - byte 4..7: flags
              * - byte 8..11: (not used)
              */
-            flags = BUF2UINT32(buffer[4]);
+            /* flags = BUF2UINT32(buffer[4]); */
             // TODO: what to do with them
         }
     }
@@ -635,7 +633,7 @@ CANUSB_Return_t LeafLight_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) 
     uint8_t resp;
 
     /* sanity check */
-    if (!device || nsec)
+    if (!device || !nsec)
         return CANUSB_ERROR_NULLPTR;
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;

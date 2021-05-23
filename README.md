@@ -116,9 +116,9 @@ Type `can_test --help` to display all program options.
 
 #### macOS Big Sur
 
-- macOS Big Sur (11.2) on a MacBook Pro (2019)
-- Apple clang version 12.0.0 (clang-1200.0.32.29)
-- Xcode Version 12.4 (12D4e)
+- macOS Big Sur (11.3.1) on a MacBook Pro (2019)
+- Apple clang version 12.0.5 (clang-1205.0.22.9)
+- Xcode Version 12.5 (12E262)
 
 #### macOS High Sierra
 
@@ -132,7 +132,7 @@ Type `can_test --help` to display all program options.
 
 ## Known Bugs and Caveats
 
-- For a list of known bugs and caveats see [issues](https://github.com/mac-can/MacCAN-KvaserCAN/issues) tracked in the GitHub repo.
+- For a list of known bugs and caveats see tab [Issues](https://github.com/mac-can/MacCAN-KvaserCAN/issues) in the GitHub repo.
 
 ## This and That
 
