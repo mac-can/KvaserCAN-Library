@@ -47,7 +47,7 @@
  *
  *  @author    $Author: eris $
  *
- *  @version   $Rev: 979 $
+ *  @version   $Rev: 986 $
  *
  *  @defgroup  mac_can  macOS User-Space Driver for CAN to USB Interfaces
  *  @{
@@ -327,7 +327,7 @@ public:
 /// \brief  Methods for DLC conversion.
 /// \{
 public:
-    static uint8_t DLc2Len(uint8_t dlc);
+    static uint8_t Dlc2Len(uint8_t dlc);
     static uint8_t Len2Dlc(uint8_t len);
 /// \}
 
@@ -382,5 +382,5 @@ extern char *MacCAN_GetVersion(void);  /**< retrieves version information. */
  */
 #endif /* MACCAN_H_INCLUDED */
 
-/* * $Id: MacCAN.h 979 2021-01-04 20:16:55Z eris $ *** (C) UV Software, Berlin ***
+/* * $Id: MacCAN.h 986 2021-02-25 21:17:24Z eris $ *** (C) UV Software, Berlin ***
  */

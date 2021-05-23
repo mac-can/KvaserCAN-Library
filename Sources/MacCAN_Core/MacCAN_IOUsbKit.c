@@ -50,7 +50,7 @@
 
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     2
-#define VERSION_PATCH     0
+#define VERSION_PATCH     1
 
 /*#define OPTION_MACCAN_MULTICHANNEL  0  !* set globally: 0 = only one channel on multi-channel devices */
 /*#define OPTION_MACCAN_PIPE_TIMEOUT  0  !* set globally: 0 = do not use xxxPipeTO variant (e.g. macOS < 10.15) */
@@ -128,19 +128,19 @@ CANUSB_Return_t CANUSB_Initialize(void){
         bzero(&usbDevice[index], sizeof(USBDevice_t));
         usbDevice[index].fPresent = false;
         /* create a mutex for each device */
-        if((rc = pthread_mutex_init(&usbDevice[index].ptMutex, NULL)) < 0)
+        if(pthread_mutex_init(&usbDevice[index].ptMutex, NULL) < 0)
             goto error_initialize;
     }
     /* create a mutex and a thread for the driver */
-    if ((rc = pthread_mutex_init(&usbDriver.ptMutex, NULL)) < 0)
+    if (pthread_mutex_init(&usbDriver.ptMutex, NULL) < 0)
         goto error_initialize;
-    if ((rc = pthread_attr_init(&attr)) != 0)
+    if (pthread_attr_init(&attr) != 0)
         goto error_initialize;
-    if ((rc = pthread_attr_setstacksize(&attr, 64*1024)) != 0)
+    if (pthread_attr_setstacksize(&attr, 64*1024) != 0)
         goto error_initialize;
-    if ((rc = pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED)) != 0)
+    if (pthread_attr_setinheritsched(&attr, PTHREAD_INHERIT_SCHED) != 0)
         goto error_initialize;
-    if ((rc = pthread_attr_setschedpolicy(&attr, SCHED_RR)) != 0)
+    if (pthread_attr_setschedpolicy(&attr, SCHED_RR) != 0)
         goto error_initialize;
     rc = pthread_create(&usbDriver.ptThread, &attr, WorkerThread, NULL);
     assert(pthread_attr_destroy(&attr) == 0);
@@ -155,7 +155,7 @@ CANUSB_Return_t CANUSB_Initialize(void){
         assert(0 == pthread_mutex_lock(&usbDriver.ptMutex));
         fInitialized = usbDriver.fRunning;
         assert(0 == pthread_mutex_unlock(&usbDriver.ptMutex));
-    } while (!fInitialized && (time(NULL) < now+5));
+    } while (!fInitialized && (time(NULL) < (now + 5/*seconds*/)));
     return (fInitialized ? 0 : CANUSB_ERROR_NOTINIT);
 
 error_initialize:
@@ -630,7 +630,7 @@ static void ReadPipeCallback(void *refCon, IOReturn result, void *arg0)
 {
     CANUSB_AsyncPipe_t asyncPipe = (CANUSB_AsyncPipe_t)refCon;
     UInt8 *buffer, index;
-    UInt32 length = (UInt32)arg0;
+    UInt64 length = (UInt64)arg0;
     IOReturn kr;
     
     switch(result)
@@ -661,7 +661,7 @@ static void ReadPipeCallback(void *refCon, IOReturn result, void *arg0)
             }
             /* call the CALLBACK routine with the referenced pipe context */
             if (asyncPipe->callback && length) {
-                asyncPipe->callback(asyncPipe->context, buffer, length);
+                asyncPipe->callback(asyncPipe->context, buffer, (UInt32)length);
             }
         }
         break;
@@ -1830,5 +1830,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 981 2021-02-02 12:11:29Z eris $ *** (C) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 998 2021-05-23 11:49:04Z eris $ *** (C) UV Software, Berlin ***
  */

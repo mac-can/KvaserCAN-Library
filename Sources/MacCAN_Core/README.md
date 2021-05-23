@@ -2,7 +2,7 @@
 
 _Copyright &copy; 2012-2021   Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
-Version $Rev: 985 $
+Version $Rev: 988 $
 
 # Running CAN and CAN FD on a Mac&reg;
 
@@ -291,7 +291,7 @@ public:
 /// \brief  Methods for DLC conversion.
 /// \{
 public:
-    static uint8_t DLc2Len(uint8_t dlc);
+    static uint8_t Dlc2Len(uint8_t dlc);
     static uint8_t Len2Dlc(uint8_t len);
 /// \}
 };

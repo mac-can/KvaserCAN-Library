@@ -28,9 +28,9 @@
  *               |  SJW  |          BRP          |SAM|   TSEG2   |     TSEG1     |<br>
  *               +-7-+-6-+-5-+---+---+---+---+-0-+-7-+-6-+---+-4-+-3-+---+---+-0-+<br>
  *
- *  @author      $Author: haumea $
+ *  @author      $Author: eris $
  *
- *  @version     $Rev: 951 $
+ *  @version     $Rev: 992 $
  *
  *  @addtogroup  can_btr
  *  @{
@@ -453,10 +453,6 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
     ptr = str;
 
     while(*ptr != '\0') {               // lexical analysis:
-        tmp = 0;
-#if (0)
-        tmp_float = 0.0;
-#endif
         // skip blanks and scan: <key> '='
         if(!(key = skip_blanks(ptr)))
             return BTRERR_BAUDRATE;
