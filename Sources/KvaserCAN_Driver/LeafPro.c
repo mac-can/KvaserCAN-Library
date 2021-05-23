@@ -172,12 +172,10 @@ CANUSB_Return_t LeafPro_InitializeChannel(KvaserUSB_Device_t *device, const Kvas
     retVal = LeafPro_GetCardInfo(device, &device->deviceInfo.card);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): card information could not be read (%i)\n", device->name, device->handle, retVal);
-        retVal = CANUSB_SUCCESS;
     }
     retVal = LeafPro_GetSoftwareInfo(device, &device->deviceInfo.software);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
-        retVal = CANUSB_SUCCESS;
     }
     /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
     (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
@@ -688,7 +686,7 @@ CANUSB_Return_t LeafPro_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/
              * - byte 8..31: (not used)
              */
             // TODO: error handling
-            flags = BUF2UINT32(buffer[4]);
+            /* flags = BUF2UINT32(buffer[4]); */
             // TODO: what to do with them
         }
     }
@@ -1055,6 +1053,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
             event->errorEvent.addInfo2 = BUF2UINT16(buffer[14]);
             MACCAN_LOG_PRINTF("! error code: %02X\n", event->errorEvent.errorCode);
             result = true;
+            break;
         case CMD_CAN_ERROR_EVENT:
             /* command response:
              * - byte 0..3: (Hydra's head)
@@ -1078,6 +1077,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
             event->canError.errorFactor = BUF2UINT8(buffer[15]);
             MACCAN_LOG_PRINTF("! CAN error: %02X (flags=%02X)\n", event->canError.busStatus, event->canError.flags);
             result = true;
+            break;
         case CMD_CHIP_STATE_EVENT:
             /* command response:
              * - byte 0..3: (Hydra's head)
@@ -1097,6 +1097,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
             event->chipState._reserved2 = BUF2UINT16(buffer[14]);
             MACCAN_LOG_PRINTF("! chip state: %02X\n", event->chipState.busStatus);
             result = true;
+            break;
         case CMD_EXTENDED:
             /* command response:
              * - byte 0..3: (Hydra's head)
