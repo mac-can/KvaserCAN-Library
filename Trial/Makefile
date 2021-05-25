@@ -1,22 +1,7 @@
 #
-#	KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
-#
-#	Copyright (C) 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
-#
-#	This file is part of MacCAN-KvaserCAN.
-#
-#	MacCAN-KvaserCAN is free software: you can redistribute it and/or modify
-#	it under the terms of the GNU Lesser General Public License as published by
-#	the Free Software Foundation, either version 3 of the License, or
-#	(at your option) any later version.
-#
-#	MacCAN-KvaserCAN is distributed in the hope that it will be useful,
-#	but WITHOUT ANY WARRANTY; without even the implied warranty of
-#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#	GNU Lesser General Public License for more details.
-#
-#	You should have received a copy of the GNU Lesser General Public License
-#	along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
+#	Trial Program
+#	MacCAN-KvaserCAN
+#	Bart Simpson didn´t do it
 #
 current_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown OS')
 current_OS := $(patsubst CYGWIN%,Cygwin,$(current_OS))
@@ -49,9 +34,10 @@ DEFINES = -DOPTION_CAN_2_0_ONLY=0 \
 	-DOPTION_CANAPI_DRIVER=1 \
 	-DOPTION_CANAPI_RETVALS=1 \
 	-DOPTION_CANAPI_COMPANIONS=1 \
-	-DOPTION_MACCAN_LOGGER=1 \
-	-DOPTION_MACCAN_MULTICHANNEL=0 \
+	-DOPTION_MACCAN_PIPE_INFO=0 \
 	-DOPTION_MACCAN_PIPE_TIMEOUT=0 \
+	-DOPTION_MACCAN_MULTICHANNEL=0 \
+	-DOPTION_MACCAN_LOGGER=1 \
 	-DOPTION_MACCAN_DEBUG_LEVEL=4 \
 	-DOPTION_MACCAN_INSTRUMENTATION=0
 

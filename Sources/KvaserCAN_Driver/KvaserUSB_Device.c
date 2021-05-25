@@ -1,22 +1,49 @@
+/*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (C) 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
  *
+ *  MacCAN-KvaserCAN is dual-licensed under the BSD 2-Clause "Simplified" License
+ *  and under the GNU General Public License v3.0 (or any later version). You can
+ *  choose between one of them if you use MacCAN-KvaserCAN in whole or in part.
+ *
+ *  BSD 2-Clause Simplified License:
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *  1. Redistributions of source code must retain the above copyright notice, this
+ *     list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the documentation
+ *     and/or other materials provided with the distribution.
+ *
+ *  MacCAN-KvaserCAN IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+ *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ *  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ *  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ *  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ *  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *  OF MacCAN-KvaserCAN, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *  GNU General Public License v3.0 or later:
  *  MacCAN-KvaserCAN is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
+ *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
  *  MacCAN-KvaserCAN is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
+ *  GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with MacCAN-KvaserCAN.  If not, see <https://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU General Public License
+ *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "KvaserUSB_Device.h"
 #include "MacCAN_Debug.h"
@@ -84,7 +111,7 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
         strncpy(device->name, "(unkown)", KVASER_MAX_NAME_LENGTH);
     strncpy(device->vendor, KVASER_NAME, KVASER_MAX_NAME_LENGTH);
     strncpy(device->website, KVASER_WEBSITE, KVASER_MAX_NAME_LENGTH);
-    
+
     /* the USB handle and the CAN channel number are valid now,
      * but the configuration must be confirmed for the device! */
     device->handle = handle;
@@ -110,7 +137,7 @@ CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, uint16_t *produ
     }
     /* get the product ID of the USB device (NULL pointer is checked there) */
     (void)CANUSB_GetDeviceProductId(index, productId);
-    
+
     return retVal;
 }
 
@@ -200,19 +227,19 @@ CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device) {
     device->recvData.msgPipe = NULL;
     device->recvPipe = NULL;
     device->configured = false;
-    
+
     return retVal;
 }
 
 CANUSB_Return_t KvaserUSB_SendRequest(KvaserUSB_Device_t *device, const uint8_t *buffer, uint32_t nbyte) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
-    
+
     /* sanity check */
     if (!device || !buffer)
         return CANUSB_ERROR_NULLPTR;
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
-    
+
     retVal = CANUSB_WritePipe(device->handle, device->endpoints.bulkOut.pipeRef, buffer, nbyte, 0U);  // FIXME: time-out
     if (retVal == CANUSB_SUCCESS)
         MACCAN_LOG_WRITE((uint8_t*)buffer, nbyte, ">");
@@ -272,7 +299,7 @@ CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_Call
     retVal = CANUSB_ReadPipeAsyncStart(device->recvPipe, callback, (void*)&device->recvData);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s #%u: reception loop could not be started (%i)\n", device->name, device->channelNo, retVal);
-    
+
     return retVal;
 }
 
@@ -289,7 +316,7 @@ CANUSB_Return_t KvaserUSB_AbortReception(KvaserUSB_Device_t *device) {
     retVal = CANUSB_ReadPipeAsyncAbort(device->recvPipe);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s #%u: reception loop could not be stopped (%i)\n", device->name, device->channelNo, retVal);
-    
+
     return retVal;
 }
 
@@ -299,7 +326,7 @@ uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB
      *  param[in]   cpuFreq    - CPU frequency in [MHz]
      */
     if (cpuFreq == 0) cpuFreq = 1;  // to avoid devide-by-zero!
-    
+
     return ((uint64_t)cpuTicks * (uint64_t)1000) / (uint64_t)cpuFreq;
 }
 
@@ -310,9 +337,9 @@ void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_Cp
      *  param[in]   cpuFreq    - CPU frequency in [MHz]
      */
     assert(timeStamp);
-    
+
     uint64_t nsec = KvaserUSB_NanosecondsFromTicks(cpuTicks, cpuFreq);
-    
+
     timeStamp->tv_sec = (time_t)(nsec / 1000000000ULL);
     timeStamp->tv_nsec =  (long)(nsec % 1000000000ULL);
 }
