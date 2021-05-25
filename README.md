@@ -131,6 +131,8 @@ Type `can_test --help` to display all program options.
 - Kvaser Leaf Light v2 (EAN: 73-30130-00685-0)
 - Kvaser Leaf Pro HS v2 (EAN: 73-30130-00843-4)
 
+Note: _**Leaf Pro HS v2** devices can currently only be operated in **CAN 2.0 mode**!_
+
 ## Known Bugs and Caveats
 
 - For a list of known bugs and caveats see tab [Issues](https://github.com/mac-can/MacCAN-KvaserCAN/issues) in the GitHub repo.
