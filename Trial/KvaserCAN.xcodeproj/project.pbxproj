@@ -19,6 +19,7 @@
 		0FDA0A7525D2F67700E50E4B /* LeafLight.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7325D2F67700E50E4B /* LeafLight.c */; };
 		0FDA0A7A25D3200A00E50E4B /* KvaserCAN_Driver.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */; };
 		0FDA0A7F25D33EF700E50E4B /* KvaserCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */; };
+		0FEABC1125E8340400DD9ADB /* LeafPro.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FEABC0F25E8340400DD9ADB /* LeafPro.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -64,6 +65,8 @@
 		0FDA0A7925D3200A00E50E4B /* KvaserCAN_Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Driver.h; path = ../Sources/KvaserCAN_Driver/KvaserCAN_Driver.h; sourceTree = "<group>"; };
 		0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KvaserCAN.cpp; path = ../Sources/KvaserCAN.cpp; sourceTree = "<group>"; };
 		0FDA0A7E25D33EF700E50E4B /* KvaserCAN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN.h; path = ../Sources/KvaserCAN.h; sourceTree = "<group>"; };
+		0FEABC0F25E8340400DD9ADB /* LeafPro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafPro.c; path = ../Sources/KvaserCAN_Driver/LeafPro.c; sourceTree = "<group>"; };
+		0FEABC1025E8340400DD9ADB /* LeafPro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafPro.h; path = ../Sources/KvaserCAN_Driver/LeafPro.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +121,8 @@
 				0FD97E3125D1C06400C8A7C7 /* KvaserUSB_Device.h */,
 				0FDA0A7325D2F67700E50E4B /* LeafLight.c */,
 				0FDA0A7425D2F67700E50E4B /* LeafLight.h */,
+				0FEABC0F25E8340400DD9ADB /* LeafPro.c */,
+				0FEABC1025E8340400DD9ADB /* LeafPro.h */,
 				0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */,
 				0FDA0A7925D3200A00E50E4B /* KvaserCAN_Driver.h */,
 				0F9FFFBC25D3BCDB00497D0A /* KvaserCAN_Defines.h */,
@@ -198,6 +203,7 @@
 				0FD97E3425D1C06400C8A7C7 /* KvaserUSB_Device.c in Sources */,
 				0FDA0A7525D2F67700E50E4B /* LeafLight.c in Sources */,
 				0F1CB25624BCEF2400171203 /* main.cpp in Sources */,
+				0FEABC1125E8340400DD9ADB /* LeafPro.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

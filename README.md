@@ -129,6 +129,9 @@ Type `can_test --help` to display all program options.
 ### CAN Hardware
 
 - Kvaser Leaf Light v2 (EAN: 73-30130-00685-0)
+- Kvaser Leaf Pro HS v2 (EAN: 73-30130-00843-4)
+
+Note: _**Leaf Pro HS v2** devices can currently only be operated in **CAN 2.0 mode**!_
 
 ## Known Bugs and Caveats
 
