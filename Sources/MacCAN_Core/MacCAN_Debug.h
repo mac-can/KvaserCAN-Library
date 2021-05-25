@@ -1,7 +1,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (C) 2012-2020  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (C) 2012-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *
  *  This file is part of MacCAN-Core.
  *
@@ -86,7 +86,12 @@
 
 /* Write log message into a file
  */
+    #ifndef MACCAN_LOG_FILE
     #define MACCAN_LOG_FILE  "mac-can.log"
+    #endif
+    #ifndef MACCAN_LOG_MODE
+    #define MACCAN_LOG_MODE  "w"  /* "w" or "a" */
+    #endif
 #if (OPTION_MACCAN_LOGGER > 0)
     #define MACCAN_LOG_OPEN()  can_log_open(NULL)
     #define MACCAN_LOG_CLOSE()  can_log_close()
@@ -117,5 +122,5 @@ extern int can_log_write(unsigned char *buffer, size_t nbyte, const char *prefix
 #endif
 #endif /* MACCAN_DEBUG_H_INCLUDED */
 
-/* * $Id: MacCAN_Debug.h 969 2020-12-27 15:56:48Z eris $ *** (C) UV Software, Berlin ***
+/* * $Id: MacCAN_Debug.h 1000 2021-05-25 11:38:53Z eris $ *** (C) UV Software, Berlin ***
  */

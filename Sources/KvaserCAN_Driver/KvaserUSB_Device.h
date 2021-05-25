@@ -131,6 +131,11 @@ typedef uint8_t KvaserUSB_CpuClock_t;
 
 typedef uint64_t KvaserUSB_CpuTicks_t;
 
+typedef struct kavser_hydra_buffer_t_ { /* USB Hydra retention buffer (Leaf Pro): */
+    uint32_t length;                    /* - number of bytes in the retention buffer */
+    uint8_t buffer[KVASER_HYDRA_RETENTION_SIZE];
+} KvaserUSB_HydraBuffer_t;
+
 typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
     CANPIP_MsgPipe_t msgPipe;           /* - message pipe for data exchange */
     CANQUE_MsgQueue_t msgQueue;         /* - message queue for received CAN frames */
@@ -144,12 +149,13 @@ typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
         uint8_t transId;                /*   - transaction ID (0..maxMsg-1) */
         bool noAck;                     /*   - flag to skip CMD_TX_ACKNOWLEDGE */
     } txAck;
+    KvaserUSB_HydraBuffer_t hydraBuf;
     // TODO: do we need a mutex?
 } KvaserUSB_RecvData_t;
 
 typedef uint8_t KvaserUSB_CanChannel_t; /* CAN channel on a device (range 0,..n) */
 
-typedef struct kavser_hydra_t_ {        /* USB Hydra device data (Leaf Pro): */
+typedef struct kavser_hydra_channel_t_ {/* USB Hydra device data (Leaf Pro): */
     uint8_t channel2he;                 /* - to map a channel no. to HE (6-bit) */
     uint8_t he2channel;                 /* - to map 6-bit HE to a channel number */
 } KvaserUSB_HydraData_t;

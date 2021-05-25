@@ -925,6 +925,13 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
     assert(refCon);
     assert(buffer);
 
+    /* note: Hydra devices sometimes split a response into two URB packets.
+     *       We store the remainder of the first one in a retention buffer.
+     */
+    KvaserUSB_HydraBuffer_t *hydra = &context->hydraBuf;
+    memcpy(&hydra->buffer[hydra->length], buffer, (size_t)size);  // TODO: array boundaries
+    hydra->length += size;
+    
     /* Hydra USB response:
      * - byte 0: command code
      * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
@@ -934,26 +941,27 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
      * note: the total length of an extended command respones is encoded in
      * - byte 4..5: command length (32..max. 96 bytes)
      */
-    if (size >= HYDRA_CMD_SIZE) {
+    if (hydra->length >= HYDRA_CMD_SIZE) {
         /* the "command/message pump" */
-        while (index < size) {
+        while (index < hydra->length) {
             /* get the command length */
-            if (buffer[index] != CMD_EXTENDED)
+            if (hydra->buffer[index] != CMD_EXTENDED)
                 nbyte = (UInt32)HYDRA_CMD_SIZE;
             else
-                nbyte = (UInt32)BUF2UINT16(buffer[4]);
-            MACCAN_LOG_WRITE(&buffer[index], nbyte, index ? "+" : "<");
-            if ((index + nbyte) > size) {
-                MACCAN_LOG_PRINTF("! URB error: expected=%lu vs. received=%lu\n", (index + nbyte), size);
+                nbyte = (UInt32)BUF2UINT16(hydra->buffer[4]);
+            if ((index + nbyte) > hydra->length) {
+                /* not enough bytes received (splitted response) */
+                MACCAN_LOG_WRITE(&hydra->buffer[index], hydra->length - index, "%");
                 break;
             }
+            MACCAN_LOG_WRITE(&hydra->buffer[index], nbyte, index ? "+" : "<");
             /* interpret the command code */
-            switch (buffer[index]) {
+            switch (hydra->buffer[index]) {
                 case CMD_CHIP_STATE_EVENT:
                 case CMD_ERROR_EVENT:
                 case CMD_CAN_ERROR_EVENT:
                     /* event message: update event status */
-                    (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->cpuFreq);
+                    (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->cpuFreq);
                     break;
                 case CMD_GET_BUSPARAMS_RESP:
                 case CMD_GET_DRIVERMODE_RESP:
@@ -969,13 +977,13 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_MAP_CHANNEL_RESP:
                 case CMD_GET_SOFTWARE_DETAILS_RESP:
                     /* command response: write packet in the pipe */
-                    (void)CANPIP_Write(context->msgPipe, &buffer[index], nbyte);
+                    (void)CANPIP_Write(context->msgPipe, &hydra->buffer[index], nbyte);
                     break;
                 case CMD_EXTENDED:
-                    switch (buffer[6]) {
+                    switch (hydra->buffer[6]) {
                         case CMD_EXT_RX_MSG_FD:
                             /* received CAN message: decode and enqueue */
-                            if (DecodeMessage(&message, &buffer[index], nbyte, context->cpuFreq)) {
+                            if (DecodeMessage(&message, &hydra->buffer[index], nbyte, context->cpuFreq)) {
                                 /* suppress certain CAN messages depending on the operation mode */
                                 if (message.xtd && (context->opMode & CANMODE_NXTD))
                                     break;
@@ -986,13 +994,13 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                                 (void)CANQUE_Enqueue(context->msgQueue, (void*)&message);
                             } else {
                                 /* there are flags that do not belong to a received CAN message */
-                                (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->cpuFreq);
+                                (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->cpuFreq);
                             }
                             break;
                         case CMD_EXT_TX_ACK_FD:
                             /* transmit ackowledgement: write packet into the pipe only when requested */
-                            if (!context->txAck.noAck && (buffer[index+2] == context->txAck.transId))
-                                (void)CANPIP_Write(context->msgPipe, &buffer[index], nbyte);
+                            if (!context->txAck.noAck && (hydra->buffer[index+2] == context->txAck.transId))
+                                (void)CANPIP_Write(context->msgPipe, &hydra->buffer[index], nbyte);
                             if (context->txAck.cntMsg > 0)
                                 context->txAck.cntMsg--;
                             break;
@@ -1010,8 +1018,14 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
         }
     } else {
         /* something went wrong on the USB line */
-        MACCAN_LOG_WRITE(buffer, size, "?");
+        MACCAN_LOG_WRITE(hydra->buffer, hydra->length, "?");
     }
+    /* move remaining bytes to the beginning of the retention buffer */
+    if (index < hydra->length) {
+        memmove(&hydra->buffer[0], &hydra->buffer[index], (size_t)(hydra->length - index));  // TODO: array boundaries
+        hydra->length -= index;
+    } else
+        hydra->length = 0U;
 }
 
 static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
