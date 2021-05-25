@@ -1,7 +1,8 @@
+//  SPDX-License-Identifier: GPL-3.0-or-later
 //
 //  CAN Monitor for Kvaser CAN Leaf Interfaces
 //
-//  Copyright (C) 2007,2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2007,2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -34,7 +35,7 @@
 #error Unsupported architecture
 #endif
 static const char APPLICATION[] = "CAN Monitor for Kvaser CAN Leaf Interfaces, Version " VERSION_STRING;
-static const char COPYRIGHT[]   = "Copyright (C) 2007,2020-2021 by Uwe Vogt, UV Software, Berlin";
+static const char COPYRIGHT[]   = "Copyright (c) 2007,2020-2021 by Uwe Vogt, UV Software, Berlin";
 static const char WARRANTY[]    = "This program comes with ABSOLUTELY NO WARRANTY!\n\n" \
                                   "This is free software, and you are welcome to redistribute it\n" \
                                   "under certain conditions; type `--version' for details.";
