@@ -12,7 +12,7 @@ echo " *  MacCAN-KvaserCAN is dual-licensed under the BSD 2-Clause \"Simplified\
 echo " *  and under the GNU General Public License v3.0 (or any later version). You can" >> Sources/build_no.h
 echo " *  choose between one of them if you use MacCAN-KvaserCAN in whole or in part." >> Sources/build_no.h
 echo " *" >> Sources/build_no.h
-echo " *  BSD 2-Clause "Simplified" License:" >> Sources/build_no.h
+echo " *  BSD 2-Clause \"Simplified\" License:" >> Sources/build_no.h
 echo " *  Redistribution and use in source and binary forms, with or without" >> Sources/build_no.h
 echo " *  modification, are permitted provided that the following conditions are met:" >> Sources/build_no.h
 echo " *  1. Redistributions of source code must retain the above copyright notice, this" >> Sources/build_no.h
@@ -21,7 +21,7 @@ echo " *  2. Redistributions in binary form must reproduce the above copyright n
 echo " *     this list of conditions and the following disclaimer in the documentation" >> Sources/build_no.h
 echo " *     and/or other materials provided with the distribution." >> Sources/build_no.h
 echo " *" >> Sources/build_no.h
-echo " *  MacCAN-KvaserCAN IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"" >> Sources/build_no.h
+echo " *  MacCAN-KvaserCAN IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"" >> Sources/build_no.h
 echo " *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE" >> Sources/build_no.h
 echo " *  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE" >> Sources/build_no.h
 echo " *  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE" >> Sources/build_no.h
