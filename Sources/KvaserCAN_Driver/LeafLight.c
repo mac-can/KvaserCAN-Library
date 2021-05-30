@@ -173,7 +173,7 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
     /* check requested operation mode */
     if ((opMode & ~device->opCapability)) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): unsupported operation mode (%02x)\n", device->name, device->handle, (opMode & ~device->opCapability));
-        return CANUSB_ERROR_NOTSUPP;
+        return CANUSB_ERROR_ILLPARA;  /* [2021-05-30]: cf. CAN API V3 function 'can_test' */
     }
     MACCAN_DEBUG_DRIVER("    Initializing %s driver...\n", device->name);
     /* stop chip (go bus OFF) */
