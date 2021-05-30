@@ -51,7 +51,7 @@
  *
  *  @author      $Author: eris $
  *
- *  @version     $Rev: 993 $
+ *  @version     $Rev: 995 $
  *
  *  @defgroup    can_btr CAN Bit-rate Conversion
  *  @{
@@ -429,7 +429,19 @@ int btr_bitrate2sja1000(const btr_bitrate_t *bitrate, btr_sja1000_t *btr0btr1);
 
 /** @brief       ...
  *
- *  @param[in]   index    -
+ *  @note        Parameter 'index' must be a negative value in the ragne of -9 to 0,
+ *               where 0 = 1000 kbit/s with sample-point at 75.0% (SJW=1)
+ *                    -1 =  800 kbit/s with sample-point at 80.0% (SJW=1)
+ *                    -2 =  500 kbit/s with sample-point at 87.5% (SJW=1)
+ *                    -3 =  250 kbit/s with sample-point at 87.5% (SJW=1)
+ *                    -4 =  125 kbit/s with sample-point at 87.5% (SJW=1)
+ *                    -5 =  100 kbit/s with sample-point at 87.5% (SJW=2)
+ *                    -6 =   50 kbit/s with sample-point at 87.5% (SJW=2)
+ *                    -7 =   20 kbit/s with sample-point at 87.5% (SJW=2)
+ *                    -8 =   10 kbit/s with sample-point at 87.5% (SJW=2)
+ *                    -9 =    5 kbit/s with sample-point at 68.0% (SJW=2)
+ *
+ *  @param[in]   index    - index of pre-defined BTR0BTR1 bit-timing settings
  *  @param[out]  btr0btr1 -
  *
  *  @returns     0 if successful, or a negative value on error.

@@ -57,7 +57,7 @@
  *
  *  @author      $Author: eris $
  *
- *  @version     $Rev: 993 $
+ *  @version     $Rev: 995 $
  *
  *  @addtogroup  can_btr
  *  @{
@@ -96,8 +96,6 @@
 
 /*  - - - - - -  helper macros   - - - - - - - - - - - - - - - - - - - - -
  */
-#define BTR_INDEX(index)        (((index) < 0) ? ((index) * (-1)) : (index))
-
 #define BTR_SJW(btr0btr1)       (((uint16_t)(btr0btr1) & 0xC000u) >> 14)
 #define BTR_BRP(btr0btr1)       (((uint16_t)(btr0btr1) & 0x3F00u) >> 8)
 #define BTR_SAM(btr0btr1)       (((uint16_t)(btr0btr1) & 0x0080u) >> 7)
@@ -134,16 +132,16 @@ static char *skip_blanks(char *str);
  */
 
 static const btr_sja1000_t sja1000_btr0btr1[BTR_SJA1000_MAX_INDEX] = {
-    0x0014U,  // 1000 kbps (SP=75,0%, SJW=1)
-    0x0016U,  //  800 kbps (SP=80,0%, SJW=1)
-    0x001CU,  //  500 kbps (SP=87,5%, SJW=1)
-    0x011CU,  //  250 kbps (SP=87,5%, SJW=1)
-    0x031CU,  //  125 kbps (SP=87,5%, SJW=1)
-    0x441CU,  //  100 kbps (SP=87,5%, SJW=2)
-    0x491CU,  //   50 kbps (SP=87,5%, SJW=2)
-    0x581CU,  //   20 kbps (SP=87,5%, SJW=2)
-    0x711CU,  //   10 kbps (SP=87,5%, SJW=2)
-    0x7F7FU   //    5 kbps (SP=68,0%, SJW=2)
+    0x0014U,  // 1000 kbps (SP=75.0%, SJW=1)
+    0x0016U,  //  800 kbps (SP=80.0%, SJW=1)
+    0x001CU,  //  500 kbps (SP=87.5%, SJW=1)
+    0x011CU,  //  250 kbps (SP=87.5%, SJW=1)
+    0x031CU,  //  125 kbps (SP=87.5%, SJW=1)
+    0x441CU,  //  100 kbps (SP=87.5%, SJW=2)
+    0x491CU,  //   50 kbps (SP=87.5%, SJW=2)
+    0x581CU,  //   20 kbps (SP=87.5%, SJW=2)
+    0x711CU,  //   10 kbps (SP=87.5%, SJW=2)
+    0x7F7FU   //    5 kbps (SP=68.0%, SJW=2)
 };
 
 /*  -----------  functions  ----------------------------------------------
@@ -386,10 +384,12 @@ int btr_index2sja1000(const btr_index_t index, btr_sja1000_t *btr0btr1)
 
     if(!btr0btr1)                       // check for null-pointer
         return BTRERR_NULLPTR;
+    if(index > 0)                       // must be negative value
+        return BTRERR_FATAL;
 
     /* get SJA1000 register BTR0 and BTR1 from table */
-    if(BTR_INDEX(index) < BTR_SJA1000_MAX_INDEX) {
-        *btr0btr1 = sja1000_btr0btr1[BTR_INDEX(index)];
+    if(-BTR_SJA1000_MAX_INDEX < index) {
+        *btr0btr1 = sja1000_btr0btr1[-index];
         rc = BTRERR_NOERROR;
     }
     else
