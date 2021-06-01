@@ -71,7 +71,7 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
     if (retVal < 0) {
         if (state)
             *state = CANBRD_NOT_PRESENT;
-        return retVal;
+        return CANERR_NOERROR;
     } else {
         if (state)
             *state = retVal > 0 ? CANBRD_OCCUPIED : CANBRD_PRESENT;

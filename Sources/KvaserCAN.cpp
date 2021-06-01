@@ -127,29 +127,21 @@ MacCAN_Return_t CKvaserCAN::ProbeChannel(int32_t channel, MacCAN_OpMode_t opMode
 
     state = CMacCAN::ChannelNotTestable;
 
-    if (channel < 0)
-        return CMacCAN::IllegalParameter;
-    if (param != NULL)
-        return CMacCAN::IllegalParameter;
-
     // probe the CAN channel and check it given operation mode is supported by the CAN controller
     retVal = KvaserCAN_ProbeChannel((KvaserUSB_Channel_t)channel, opMode.byte, &result);
     switch (result) {
         case CANBRD_OCCUPIED: state = CMacCAN::ChannelOccupied; break;
         case CANBRD_PRESENT: state = CMacCAN::ChannelAvailable; break;
         case CANBRD_NOT_PRESENT: state = CMacCAN::ChannelNotAvailable; break;
+        default: state = CMacCAN::ChannelNotTestable; break;
     }
+    (void)param;
     return (MacCAN_Return_t)retVal;
 }
 
 EXPORT
 MacCAN_Return_t CKvaserCAN::InitializeChannel(int32_t channel, MacCAN_OpMode_t opMode, const void *param) {
     CANUSB_Return_t retVal = CANUSB_ERROR_YETINIT;
-
-    if (channel < 0)
-        return CMacCAN::IllegalParameter;
-    if (param != NULL)
-        return CMacCAN::IllegalParameter;
 
     // (§) must not be initialized
     if (!m_pCAN->m_Device.configured) {
@@ -163,6 +155,7 @@ MacCAN_Return_t CKvaserCAN::InitializeChannel(int32_t channel, MacCAN_OpMode_t o
             m_Status.byte = CANSTAT_RESET;
         }
     }
+    (void)param;
     return (MacCAN_Return_t)retVal;
 }
 
