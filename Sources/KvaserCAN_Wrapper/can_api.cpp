@@ -163,7 +163,7 @@ int can_init(int32_t channel, uint8_t mode, const void *param)
     if (!init)
         return CANERR_FATAL;
     if (!IS_HANDLE_VALID(channel))
-        return CANERR_HANDLE;
+        return /*CANERR_HANDLE*/CANERR_NOTINIT;  // note: can_init shall return vendor-specific error code in this case
 
     // initialize the CAN interface (hardware and driver)
     retVal = canDevices[channel].InitializeChannel(channel, opMode, param);
