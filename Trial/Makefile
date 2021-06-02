@@ -95,6 +95,9 @@ pristine:
 install:
 	$(CP) $(TARGET) $(INSTALL)
 
+test: info outdir $(TARGET)
+	./$(TARGET) INFO EXIT
+
 
 $(OUTDIR)/main.o: $(MAIN_DIR)/main.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
