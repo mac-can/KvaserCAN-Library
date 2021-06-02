@@ -51,6 +51,9 @@ _All rights reserved._
 5. Try out the utilities with different options.
   - _**There should be no crash, hangup, or any other error.**_
   - _If there is an error then fix it or create an issue in the repo._
+6. Build and try out the examples (repair them if necessary);
+  - `$(PROJROOT)/Examples/C++`
+  - `$(PROJROOT)/Examples/Python`
 
 ### Pull Request
 
