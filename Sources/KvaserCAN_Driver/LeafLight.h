@@ -66,7 +66,7 @@
 #define LEAF_LIGHT_MODE_NXTD  1 /* extended format disable/enable */
 #define LEAF_LIGHT_MODE_NRTR  1 /* remote frames disable/enable */
 #define LEAF_LIGHT_MODE_ERR   1 /* error frames enable/disable */
-#define LEAF_LIGHT_MODE_MON   1 /* monitor mode enable/disable */
+#define LEAF_LIGHT_MODE_MON   0 /* monitor mode enable/disable */  /* note: why not? */
 
 #ifdef __cplusplus
 extern "C" {
