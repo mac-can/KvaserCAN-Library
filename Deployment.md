@@ -13,15 +13,15 @@ _All rights reserved._
 
 ### Preparation
 
-1. Update CAN API V3 sources in `$(PROJROOT)/Sources/CANAPI` from SVN
+1. Update CAN API V3 sources in `$(PROJROOT)/Sources/CANAPI` from SVN repo
    when required and commit them with commit comment:
   - `Update CAN API V3 sources to rev. `_nnn_ \
     `- `_list of major changes_
-2. Update MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN_Core` from SVN
+2. Update MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN_Core` from SVN repo
    when required and commit them with commit comment:
   - `Update MacCAN-Core sources to rev. `_nnn_ \
     `- `_list of major changes_
-3. Check or update the version and date information in the following files:
+3. Check and update the version and date information in the following files:
   - `$(PROJROOT)/Sources/KvaserCAN.h`
   - `$(PROJROOT)/Sources/KvaserCAN.cpp`
   - `$(PROJROOT)/Sources/KvaserCAN_Wrapper/can_api.cpp`
@@ -38,7 +38,7 @@ _All rights reserved._
 
 1. Check the working directory for uncommitted changes.
   - _**There should not be any uncommitted change.**_
-  - _If there are uncommitted changes the commit then or revert them._
+  - _If there are uncommitted changes then commit them or revert them._
 2. Open the trial program with Xcode and run a code analysis.
   - _**There should not be any serious finding.**_
   - _If there are findings then fix them or create an issue in the repo._
@@ -88,7 +88,7 @@ _All rights reserved._
 8. Pack the artifacts into a .zip-archive, e.g. `artifacts.zip`:
   - `$(PROJROOT)/Binaries/*.*`
   - `$(PROJROOT)/Includes/*.*`
-9. Double check and update the [`README.md`](https://github.com/mac-can/MacCAN-KvaserCAN/blob/main/README.md) on GitHub (e.g. insert just a blank).
+9. Double check and update the [`README.md`](https://github.com/mac-can/MacCAN-KvaserCAN/blob/main/README.md) on GitHub (or insert just a blank).
 
 ### Procedure
 
