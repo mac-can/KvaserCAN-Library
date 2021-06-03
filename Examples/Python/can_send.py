@@ -23,7 +23,15 @@ def sigterm(signo, frame):
 
 
 # CAN API V3 driver library
-lib = 'libUVCANKVL.dylib'
+if platform.system() == 'Darwin':
+    # macOS dynamic library
+    lib = 'libUVCANKVL.dylib'
+elif platform.system() != 'Windows':
+    # shared object library
+    lib = 'libuvcankvl.so.1'
+else:
+    # Windows DLL
+    lib = 'u3cankvl.dll'
 chn = 1
 num = 1 + CAN_MAX_STD_ID
 

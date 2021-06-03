@@ -674,7 +674,15 @@ if __name__ == '__main__':
     #
     # Simple testing of the wrapper
     #
-    lib = 'libUVCANKVL.dylib'
+    if platform.system() == 'Darwin':
+        # macOS dynamic library
+        lib = 'libUVCANKVL.dylib'
+    elif platform.system() != 'Windows':
+        # shared object library
+        lib = 'libuvcankvl.so.1'
+    else:
+        # Windows DLL
+        lib = 'u3cankvl.dll'
     chn = 0
 
     # parse the command line

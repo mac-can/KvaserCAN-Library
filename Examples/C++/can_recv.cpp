@@ -14,8 +14,9 @@
 static void sigterm(int signo);
 static volatile int running = 1;
 
+static CKvaserCAN myDriver = CKvaserCAN();
+
 int main(int argc, const char * argv[]) {
-    CKvaserCAN myDriver = CKvaserCAN();
     MacCAN_OpMode_t opMode = {};
     opMode.byte = CANMODE_DEFAULT;
     MacCAN_Bitrate_t bitrate = {};
@@ -46,27 +47,32 @@ int main(int argc, const char * argv[]) {
         if ((retVal = myDriver.ReadMessage(message, CANREAD_INFINITE)) == CMacCAN::NoError) {
             fprintf(stdout, "%i\t", frames++);
             fprintf(stdout, "%7li.%04li\t", (long)message.timestamp.tv_sec, message.timestamp.tv_nsec / 100000);
-            fprintf(stdout, "%03x\t%c%c [%u] ", message.id, message.xtd ? 'X' : 'S', message.rtr ? 'R' : ' ', message.dlc);
-            for (uint8_t i = 0; i < message.dlc; i++)
+            if (!opMode.fdoe)
+                fprintf(stdout, "%03X\t%c%c [%u] ", message.id, message.xtd ? 'X' : 'S', message.rtr ? 'R' : ' ', message.dlc);
+            else
+                fprintf(stdout, "%03X\t%c%c%c%c%c [%u] ", message.id, message.xtd ? 'X' : 'S', message.rtr ? 'R' : ' ',
+                        message.fdf ? 'F' : ' ', message.brs ? 'B' : ' ', message.esi ? 'E' :' ', CMacCAN::Dlc2Len(message.dlc));
+            for (uint8_t i = 0; i < CMacCAN::Dlc2Len(message.dlc); i++)
                 fprintf(stdout, " %02X", message.data[i]);
             if (message.sts)
                 fprintf(stdout, " <<< status frame");
             fprintf(stdout, "\n");
         }
         else if (retVal != CMacCAN::ReceiverEmpty) {
-            fprintf(stderr, "+++ error: read message returned %i", retVal);
+            fprintf(stderr, "+++ error: read message returned %i\n", retVal);
             running = 0;
         }
     }
-    std::cout << std::endl;
 teardown:
     if ((retVal = myDriver.TeardownChannel()) != CMacCAN::NoError)
         std::cerr << "+++ error: interface could not be shutdown" << std::endl;
+    std::cerr << "Cheers!" << std::endl;
     return retVal;
 }
 
 static void sigterm(int signo) {
-     //fprintf(stderr, "%s: got signal %d\n", __FILE__, signo);
-     running = 0;
-     (void)signo;
+    //fprintf(stderr, "%s: got signal %d\n", __FILE__, signo);
+    myDriver.SignalChannel();
+    running = 0;
+    (void)signo;
 }

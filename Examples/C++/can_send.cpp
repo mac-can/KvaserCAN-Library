@@ -1,6 +1,9 @@
 #include <iostream>
+#if !defined(_WIN32) && !defined(_WIN64)
 #include <unistd.h>
-
+#else
+#include <windows.h>
+#endif
 #define OPTION_CANAPI_DRIVER  1
 #include "can_api.h"
 
@@ -29,6 +32,7 @@ int main(int argc, const char * argv[]) {
     }
     std::cout << ">>> Be patient..." << std::flush;
     message.xtd = message.rtr = message.sts = 0;
+    message.fdf = message.brs = message.esi = 0;
     for (i = 0; i < FRAMES; i++) {
         message.id = (uint32_t)i & CAN_MAX_STD_ID;
         message.dlc = 8U;
@@ -44,11 +48,15 @@ int main(int argc, const char * argv[]) {
             result = can_write(handle, &message, 0U);
         } while (result == CANERR_TX_BUSY);
         if (result < CANERR_NOERROR) {
-            std::cerr << "+++ error: interface could not be stopped" << std::endl;
+            std::cerr << "\n+++ error: message could not be sent" << std::endl;
             goto reset;;
         }
     }
+#if !defined(_WIN32) && !defined(_WIN64)
     usleep(1000000);  // afterburner
+#else
+    Sleep(1000);    // wait a minute
+#endif
 reset:
     std::cout << i << " frame(s) sent" << std::endl;
     if ((result = can_reset(handle)) < CANERR_NOERROR)
@@ -56,5 +64,6 @@ reset:
 end:
     if ((result = can_exit(handle)) < CANERR_NOERROR)
         std::cerr << "+++ error: interface could not be shutdown" << std::endl;
+    std::cerr << "Cheers!" << std::endl;
     return result;
 }
