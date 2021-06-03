@@ -2,6 +2,8 @@
 
 _Copyright &copy; 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
+[![Build Status](https://travis-ci.com/mac-can/MacCAN-KvaserCAN.svg?branch=main)](https://travis-ci.com/mac-can/MacCAN-KvaserCAN)
+
 # Running CAN on a Mac&reg;
 
 _Running CAN on a Mac_ is the mission of the MacCAN project.
