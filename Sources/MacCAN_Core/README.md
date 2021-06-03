@@ -1,6 +1,6 @@
 ### Creation of USB User-Space Drivers for CAN Interfaces under macOS&reg;
 
-_Copyright &copy; 2012-2021   Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
+_Copyright &copy; 2012-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
 Version $Rev: 1003 $
 
@@ -13,7 +13,7 @@ It provides the source code of an abstraction (or rather of a wrapper) of AppleÂ
 ## A Stupid Question
 
 IÂ´m working with the CAN bus since the late 1990th, mainly on microcontrollers
- (CANopen, SAE J1939, ISO-TP, UDS, etc.), but also on PC. See my [blog](https://www.uv-software.com/wordpress/) for the things I did.
+(CANopen, SAE J1939, ISO-TP, UDS, etc.), but also on PC. See my [blog](https://www.uv-software.com/wordpress/) for the things I did.
 
 Sometimes I tend to ask myself some stupid questions like _"Is it possible to ...?"_.
 In 2010 I asked a well known search engine if it is possible to run CAN on a Mac.
