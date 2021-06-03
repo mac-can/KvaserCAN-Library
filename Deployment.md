@@ -13,11 +13,11 @@ _All rights reserved._
 
 ### Preparation
 
-1. Update CAN API V3 sources in `$(PROJROOT)/Sources/CANAPI` from SVN repo
+1. Update the CAN API V3 sources in `$(PROJROOT)/Sources/CANAPI` from SVN repo
    when required and commit them with commit comment:
   - `Update CAN API V3 sources to rev. `_nnn_ \
     `- `_list of major changes_
-2. Update MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN_Core` from SVN repo
+2. Update the MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN_Core` from SVN repo
    when required and commit them with commit comment:
   - `Update MacCAN-Core sources to rev. `_nnn_ \
     `- `_list of major changes_
@@ -51,7 +51,7 @@ _All rights reserved._
 5. Try out the utilities with different options.
   - _**There should be no crash, hangup, or any other error.**_
   - _If there is an error then fix it or create an issue in the repo._
-6. Build and try out the examples (repair them if necessary);
+6. Build and try out the examples (repair them when necessary);
   - `$(PROJROOT)/Examples/C++`
   - `$(PROJROOT)/Examples/Python`
 
@@ -81,11 +81,11 @@ _All rights reserved._
   - `uv-pc013mac:macOS eris$ make clean`
   - `uv-pc013mac:macOS eris$ make all`
 6. Run the CAN API V3 GoogleTest with the CAN Leaf Pro device:
-  - `uv-pc013mac:macOS eris$ ./can_testing --can_path=/Users/eris/Projects/CAN/DRV/API/json/ --can_dut1="Kvaser CAN Channel 0" --can_dut2="Kvaser CAN Channel 1"  --gtest_output=xml:TestReport_LeafPro.xml --gtest_filter=-SmokeTest.* --sunnyday_traffic=2048` [...]
+  - `uv-pc013mac:macOS eris$ ./can_testing --can_path=/Users/eris/Projects/CAN/API/json/ --can_dut1="Kvaser CAN Channel 0" --can_dut2="Kvaser CAN Channel 1"  --gtest_output=xml:TestReport_LeafPro.xml --gtest_filter=-SmokeTest.* --sunnyday_traffic=2048` [...]
   - _If there is any error then **stop** here or create an issue for each error in the repo._
   - Copy the test report into the binaries directory `$(PROJROOT)/Binaries`.
 7. Run the CAN API V3 GoogleTest with the CAN Leaf Light device:
-  - `uv-pc013mac:macOS eris$ ./can_testing --can_path=/Users/eris/Projects/CAN/DRV/API/json/ --can_dut1="Kvaser CAN Channel 1" --can_dut2="Kvaser CAN Channel 0"  --gtest_output=xml:TestReport_LeafLight.xml --gtest_filter=-SmokeTest.* --sunnyday_traffic=2048` [...]
+  - `uv-pc013mac:macOS eris$ ./can_testing --can_path=/Users/eris/Projects/CAN/API/json/ --can_dut1="Kvaser CAN Channel 1" --can_dut2="Kvaser CAN Channel 0"  --gtest_output=xml:TestReport_LeafLight.xml --gtest_filter=-SmokeTest.* --sunnyday_traffic=2048` [...]
   - _If there is any error then **stop** here or create an issue for each error in the repo._
   - Copy the test report into the binaries directory `$(PROJROOT)/Binaries`.
 8. Pack the artifacts into a .zip-archive, e.g. `artifacts.zip`:
