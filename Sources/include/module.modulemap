@@ -1,0 +1,4 @@
+module CCanApi {
+    header "../CANAPI/can_api.h"
+    export *
+}
