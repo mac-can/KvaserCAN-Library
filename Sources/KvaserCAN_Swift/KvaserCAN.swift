@@ -47,13 +47,13 @@
 //
 import Foundation
 
-enum KvaserCanChannel: Int32, CaseIterable {
+public enum KvaserCanChannel: Int32, CaseIterable {
     case Channel0 = 0
     case Channel1, Channel2, Channel3,
          Channel4, Channel5, Channel6,
          Channel7
-    func ChannelName() -> String {
-        return "Kvaser CAN Channel \(self.rawValue)"
+    public var description: String {
+        return "\"Kvaser CAN Channel \(self.rawValue)\""
     }
 }
 
