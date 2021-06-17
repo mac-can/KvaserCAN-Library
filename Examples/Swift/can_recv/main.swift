@@ -18,7 +18,7 @@ var n = 0
 print("\(try CanApi.GetVersion())")
 //for x in KvaserCanChannel.allCases {
 //    let state = try KvaserCAN.ProbeChannel(channel: x.rawValue, mode: mode)
-//    print("Channel \(x.rawValue): \(x.ChannelName()) -> (\(state))")
+//    print(">>> ProbeChannel(\(x.rawValue)): \(x.description) -> (\(state.description))")
 //}
 do {
     step = "InitializeChannel)"

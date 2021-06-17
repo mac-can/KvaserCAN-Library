@@ -21,7 +21,7 @@ let frames = 2048
 print("\(try CanApi.GetVersion())")
 //for x in KvaserCanChannel.allCases {
 //    let state = try KvaserCAN.ProbeChannel(channel: x.rawValue, mode: mode)
-//    print("Channel \(x.rawValue): \(x.ChannelName()) -> (\(state))")
+//    print(">>> ProbeChannel(\(x.rawValue)): \(x.description) -> (\(state.description))")
 //}
 do {
     step = "InitializeChannel)"
@@ -61,9 +61,7 @@ for i in 0..<frames {
         break;
     }
 }
-DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-    // Put your code which should be executed with a delay here
-}
+sleep(1)  // afterburner
 if let statistics = can.statistics {
     print(">>> \(statistics.transmitted) frame(s) sent")
 }
