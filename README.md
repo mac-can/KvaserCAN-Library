@@ -14,9 +14,8 @@ The macOS driver for CAN Leaf interfaces from [Kvaser](https://www.kvaser.com) i
 This repo contains the source code for the _MacCAN-KvaserCAN_ driver and several alternatives to build dynamic libraries for macOS,
 either as a C++ class library ([_libKvaserCAN_](#libKvaserCAN)),
 or as a _CAN API V3_ driver library ([_libUVCANKVL_](#libUVCANKVL)),
-as well as some C/C++ example programs
-and my beloved CAN utilities [`can_moni`](can_moni-for-maccan-kvasercan)
-and [`can_test`](can_test-for-maccan-kvasercan).
+as well as my beloved CAN utilities [`can_moni`](#can_moni) and [`can_test`](#can_test),
+and some C/C++, Swift, and Python example programs.
 
 _CAN API V3_ is a wrapper specification to have a uniform CAN Interface API for various CAN interfaces from different vendors running under multiple operating systems.
 See header file `CANAPI.h` for the CAN API V3 wrapper specification.
