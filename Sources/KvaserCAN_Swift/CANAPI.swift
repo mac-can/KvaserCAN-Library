@@ -54,7 +54,7 @@
 
     @author   $Author: eris $
 
-    @version  $Rev: 1002 $
+    @version  $Rev: 1004 $
  */
 import Foundation
 import CCanApi
@@ -179,6 +179,12 @@ public class CanApi {
         public var frequency: Int32
         public var nominal: Nominal
         public var data: DataPhase
+        // default initializer (250kbps @ 87.5%)
+        public init() {
+            frequency = 8000000
+            nominal = Nominal(brp: 20, tseg1: 13, tseg2: 2, sjw: 1, sam: 0)
+            data =  DataPhase(brp: 20, tseg1: 13, tseg2: 2, sjw: 0)
+        }
         // bit-rate settinsg from C interface
         public init(from bitrate: can_bitrate_t) {
             precondition(bitrate.index > 0)
@@ -955,4 +961,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1002 2021-06-16 20:28:39Z eris $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1004 2021-06-20 16:36:41Z eris $  Copyright (c) UV Software, Berlin //
