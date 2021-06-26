@@ -54,7 +54,7 @@
 
     @author   $Author: eris $
 
-    @version  $Rev: 1004 $
+    @version  $Rev: 1005 $
  */
 import Foundation
 import CCanApi
@@ -71,9 +71,9 @@ public class CanApi {
         guard self.handle >= 0 else { return }
         let _ = can_exit(self.handle)
     }
-    
+
     // MARK: - types
-    
+
     /*!
         @brief  CAN status register:
                 - bit 7: controller stopped
@@ -182,8 +182,8 @@ public class CanApi {
         // default initializer (250kbps @ 87.5%)
         public init() {
             frequency = 8000000
-            nominal = Nominal(brp: 20, tseg1: 13, tseg2: 2, sjw: 1, sam: 0)
-            data =  DataPhase(brp: 20, tseg1: 13, tseg2: 2, sjw: 0)
+            nominal = Nominal(brp: 2, tseg1: 13, tseg2: 2, sjw: 1, sam: 0)
+            data =  DataPhase(brp: 2, tseg1: 13, tseg2: 2, sjw: 0)
         }
         // bit-rate settinsg from C interface
         public init(from bitrate: can_bitrate_t) {
@@ -338,6 +338,7 @@ public class CanApi {
         public var flags: Flags
         public var data: [UInt8]
         public var time: TimeInterval
+        public var length: UInt8 { get { return UInt8(data.count) }}
         // overloaded initializer
         public init(canId: UInt32, flags: Flags = [.StandardFrame], data: [UInt8]) {
             self.canId = canId
@@ -550,7 +551,7 @@ public class CanApi {
     }
 
     // MARK: - constants
-    
+
     /*!
         @brief  constant:  polling (return immediately)
      */
@@ -559,9 +560,9 @@ public class CanApi {
         @brief  constant:  blocking read (wait infinitely)
      */
     public static let blocking = UInt16(CANREAD_INFINITE)
-    
+
     // MARK: - properties
-    
+
     /*!
         @brief  property:  CAN status-register (read-only)
      */
@@ -720,7 +721,7 @@ public class CanApi {
     }
 
     // MARK: - methods
-    
+
     /*!
         @brief       probes if the CAN interface (hardware and driver) given by
                      the argument 'channel' is present, and if the requested
@@ -826,7 +827,7 @@ public class CanApi {
     /*!
         @brief       transmits one message over the CAN bus. The CAN controller must
                      be in operation state 'running'.
-        
+
         @param[in]   message - the message to be sent
         @param[in]   timeout - time to wait for the transmission of the message:
                                     0 means the function returns immediately,
@@ -842,7 +843,7 @@ public class CanApi {
         @brief       reads one message from the message queue of the CAN interface, if
                      any message was received. The CAN controller must be in operation
                      state 'running'.
-        
+
         @param[in]   timeout - time to wait for the reception of a message:
                                     0 means the function returns immediately,
                                     65535 means blocking read, and any other
@@ -961,4 +962,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1004 2021-06-20 16:36:41Z eris $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1005 2021-06-21 17:42:49Z eris $  Copyright (c) UV Software, Berlin //

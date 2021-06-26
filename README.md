@@ -2,11 +2,9 @@
 
 _Copyright &copy; 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
-[![Build Status](https://travis-ci.com/mac-can/MacCAN-KvaserCAN.svg?branch=main)](https://travis-ci.com/mac-can/MacCAN-KvaserCAN)
+# Running CAN on Mac&reg;
 
-# Running CAN on a Mac&reg;
-
-_Running CAN on a Mac_ is the mission of the MacCAN project.
+_Running CAN on Mac_ is the mission of the MacCAN project.
 The macOS driver for CAN Leaf interfaces from [Kvaser](https://www.kvaser.com) is based on _MacCAN-Core_ which is an abstraction (or rather a wrapper) of Apple´s IOUsbKit to create USB user-space drivers for CAN interfaces from various vendors under macOS.
 
 ## MacCAN-KvaserCAN
@@ -161,6 +159,7 @@ You can choose between one of them if you use this work in whole or in part.
 
 Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. \
 Windows is a registered trademark of Microsoft Corporation in the United States and/or other countries. \
+Linux is a registered trademark of Linus Torvalds. \
 All other company, product and service names mentioned herein are trademarks, registered trademarks or service marks of their respective owners.
 
 ### Hazard Note
