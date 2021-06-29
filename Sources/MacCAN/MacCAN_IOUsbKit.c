@@ -77,7 +77,7 @@
 
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     2
-#define VERSION_PATCH     1
+#define VERSION_PATCH     2
 
 /*#define OPTION_MACCAN_MULTICHANNEL  0  !* set globally: 0 = only one channel on multi-channel devices */
 /*#define OPTION_MACCAN_PIPE_TIMEOUT  0  !* set globally: 0 = do not use xxxPipeTO variant (e.g. macOS < 10.15) */
@@ -1857,5 +1857,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1001 2021-05-25 17:57:49Z eris $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1006 2021-06-10 20:12:03Z haumea $ *** (c) UV Software, Berlin ***
  */

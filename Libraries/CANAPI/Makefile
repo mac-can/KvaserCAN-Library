@@ -57,9 +57,9 @@ MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
 KVASER_DIR = $(HOME_DIR)/Sources/Driver
 WRAPPER_DIR = $(HOME_DIR)/Sources/Wrapper
 
-OBJECTS = $(OUTDIR)/KvaserCAN.o $(OUTDIR)/KvaserCAN_Driver.o \
-	$(OUTDIR)/KvaserUSB_Device.o $(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
-	$(OUTDIR)/MacCAN.o $(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
+OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o $(OUTDIR)/KvaserUSB_Device.o \
+	$(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
+	$(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
 	$(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
 	$(OUTDIR)/can_btr.o $(OUTDIR)/can_api.o
 
@@ -144,7 +144,7 @@ INCDIR = $(HOME_DIR)/Includes
 all: info outdir bindir incdir $(STATIC) $(TARGET)
 
 info:
-	@echo $(CXX)" on "$(current_OS)
+	@echo $(CC)" on "$(current_OS)
 	@echo "target: "$(TARGET)
 	@echo "install: "$(INSTALL)
 
@@ -177,9 +177,6 @@ ifeq ($(current_OS),Darwin)
 endif
 
 
-$(OUTDIR)/KvaserCAN.o: $(SOURCE_DIR)/KvaserCAN.cpp
-	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
-
 $(OUTDIR)/KvaserCAN_Driver.o: $(KVASER_DIR)/KvaserCAN_Driver.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
@@ -191,9 +188,6 @@ $(OUTDIR)/LeafLight.o: $(KVASER_DIR)/LeafLight.c
 
 $(OUTDIR)/LeafPro.o: $(KVASER_DIR)/LeafPro.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
-
-$(OUTDIR)/MacCAN.o: $(MACCAN_DIR)/MacCAN.cpp
-	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/MacCAN_Debug.o: $(MACCAN_DIR)/MacCAN_Debug.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
@@ -210,11 +204,11 @@ $(OUTDIR)/MacCAN_MsgQueue.o: $(MACCAN_DIR)/MacCAN_MsgQueue.c
 $(OUTDIR)/MacCAN_MsgPipe.o: $(MACCAN_DIR)/MacCAN_MsgPipe.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
+$(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.cpp
-	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
+$(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 
 $(STATIC): $(OBJECTS)

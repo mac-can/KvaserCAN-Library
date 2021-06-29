@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later
 //
-//  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
+//  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 //
 //  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
@@ -48,7 +48,7 @@
 #ifndef KVASERCAN_H_INCLUDED
 #define KVASERCAN_H_INCLUDED
 
-#include "MacCAN.h"
+#include "CANAPI.h"
 
 /// \name   KvaserCAN
 /// \brief  KvaserCAN dynamic library
@@ -66,22 +66,21 @@
                                        "you might damage your application."
 /// \}
 
+
 /// \name   KvaserCAN API
-/// \brief  MacCAN driver for Kvaser CAN Leaf  interfaces
-/// \note   See CMacCAN for a description of the overridden methods
+/// \brief  CAN API V3 driver for Kvaser CAN interfaces
+/// \note   See CCanApi for a description of the overridden methods
 /// \{
-class CKvaserCAN : public CMacCAN {
+class CANCPP CKvaserCAN : public CCanApi {
 private:
-    MacCAN_OpMode_t m_OpMode;  ///< CAN operation mode
-    MacCAN_Status_t m_Status;  ///< CAN status register
+    CANAPI_Handle_t m_Handle;  ///< CAN interface handle
+    CANAPI_OpMode_t m_OpMode;  ///< CAN operation mode
+    CANAPI_Bitrate_t m_Bitrate;  ///< CAN bitrate settings
     struct {
-        uint64_t m_u64TxMessages;  ///< number of transmitted CAN messages
-        uint64_t m_u64RxMessages;  ///< number of received CAN messages
-        uint64_t m_u64ErrorFrames;  ///< number of received status messages
+        uint64_t u64TxMessages;  ///< number of transmitted CAN messages
+        uint64_t u64RxMessages;  ///< number of received CAN messages
+        uint64_t u64ErrorFrames;  ///< number of received status messages
     } m_Counter;
-    // opaque data type
-    struct SCAN;  ///< C++ forward declaration
-    SCAN *m_pCAN;  ///< KvaserCAN USB device interface
 public:
     // constructor / destructor
     CKvaserCAN();
@@ -91,47 +90,43 @@ public:
         // note: range 0...-99 is reserved by CAN API V3
         GeneralError = VendorSpecific
     };
-    // CMacCAN overrides
-    static MacCAN_Return_t ProbeChannel(int32_t channel, MacCAN_OpMode_t opMode, const void *param, EChannelState &state);
-    static MacCAN_Return_t ProbeChannel(int32_t channel, MacCAN_OpMode_t opMode, EChannelState &state);
+    // CCANAPI overrides
+    static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, const void *param, EChannelState &state);
+    static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, EChannelState &state);
 
-    MacCAN_Return_t InitializeChannel(int32_t channel, MacCAN_OpMode_t opMode, const void *param = NULL);
-    MacCAN_Return_t TeardownChannel();
-    MacCAN_Return_t SignalChannel();
+    CANAPI_Return_t InitializeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, const void *param = NULL);
+    CANAPI_Return_t TeardownChannel();
+    CANAPI_Return_t SignalChannel();
 
-    MacCAN_Return_t StartController(MacCAN_Bitrate_t bitrate);
-    MacCAN_Return_t ResetController();
+    CANAPI_Return_t StartController(CANAPI_Bitrate_t bitrate);
+    CANAPI_Return_t ResetController();
 
-    MacCAN_Return_t WriteMessage(MacCAN_Message_t message, uint16_t timeout = 0U);
-    MacCAN_Return_t ReadMessage(MacCAN_Message_t &message, uint16_t timeout = CANREAD_INFINITE);
+    CANAPI_Return_t WriteMessage(CANAPI_Message_t message, uint16_t timeout = 0U);
+    CANAPI_Return_t ReadMessage(CANAPI_Message_t &message, uint16_t timeout = CANREAD_INFINITE);
 
-    MacCAN_Return_t GetStatus(MacCAN_Status_t &status);
-    MacCAN_Return_t GetBusLoad(uint8_t &load);
+    CANAPI_Return_t GetStatus(CANAPI_Status_t &status);
+    CANAPI_Return_t GetBusLoad(uint8_t &load);
 
-    MacCAN_Return_t GetBitrate(MacCAN_Bitrate_t &bitrate);
-    MacCAN_Return_t GetBusSpeed(MacCAN_BusSpeed_t &speed);
+    CANAPI_Return_t GetBitrate(CANAPI_Bitrate_t &bitrate);
+    CANAPI_Return_t GetBusSpeed(CANAPI_BusSpeed_t &speed);
 
-    MacCAN_Return_t GetProperty(uint16_t param, void *value, uint32_t nbyte);
-    MacCAN_Return_t SetProperty(uint16_t param, const void *value, uint32_t nbyte);
+    CANAPI_Return_t GetProperty(uint16_t param, void *value, uint32_t nbyte);
+    CANAPI_Return_t SetProperty(uint16_t param, const void *value, uint32_t nbyte);
 
     char *GetHardwareVersion();  // (for compatibility reasons)
     char *GetFirmwareVersion();  // (for compatibility reasons)
     static char *GetVersion();  // (for compatibility reasons)
+
+    static CANAPI_Return_t MapIndex2Bitrate(int32_t index, CANAPI_Bitrate_t &bitrate);
+    static CANAPI_Return_t MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate);
+    static CANAPI_Return_t MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length);
+    static CANAPI_Return_t MapBitrate2Speed(CANAPI_Bitrate_t bitrate, CANAPI_BusSpeed_t &speed);
 private:
-    MacCAN_Return_t MapBitrate2BusParams(MacCAN_Bitrate_t bitrate,
-                                         long &freq,
-                                         unsigned int &tseg1,
-                                         unsigned int &tseg2,
-                                         unsigned int &sjw,
-                                         unsigned int &noSamp,
-                                         unsigned int &syncmode);
-    MacCAN_Return_t MapBusParams2Bitrate(long freq,
-                                         unsigned int tseg1,
-                                         unsigned int tseg2,
-                                         unsigned int sjw,
-                                         unsigned int noSamp,
-                                         unsigned int syncmode,
-                                         MacCAN_Bitrate_t &bitrate);
+    CANAPI_Return_t MapBitrate2Sja1000(CANAPI_Bitrate_t bitrate, uint16_t &btr0btr1);
+    CANAPI_Return_t MapSja10002Bitrate(uint16_t btr0btr1, CANAPI_Bitrate_t &bitrate);
+public:
+    static uint8_t Dlc2Len(uint8_t dlc) { return CCanApi::Dlc2Len(dlc); }
+    static uint8_t Len2Dlc(uint8_t len) { return CCanApi::Len2Dlc(len); }
 };
 /// \}
 
@@ -159,5 +154,4 @@ private:
 #define KVASERCAN_PROPERTY_RX_COUNTER     (CANPROP_GET_RX_COUNTER)
 #define KVASERCAN_PROPERTY_ERR_COUNTER    (CANPROP_GET_ERR_COUNTER)
 /// \}
-
-#endif /* KVASERCAN_H_INCLUDED */
+#endif // KVASERCAN_H_INCLUDED

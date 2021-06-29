@@ -56,13 +56,13 @@ static CKvaserCAN myDriver = CKvaserCAN();
 #endif
 
 int main(int argc, const char * argv[]) {
-    MacCAN_OpMode_t opMode = {};
+    CANAPI_OpMode_t opMode = {};
     opMode.byte = CANMODE_DEFAULT;
-    MacCAN_Status_t status = {};
+    CANAPI_Status_t status = {};
     status.byte = CANSTAT_RESET;
-    MacCAN_Bitrate_t bitrate = {};
+    CANAPI_Bitrate_t bitrate = {};
     bitrate.index = CANBTR_INDEX_250K;
-    MacCAN_Message_t message = {};
+    CANAPI_Message_t message = {};
     message.id = 0x55AU;
     message.xtd = 0;
     message.rtr = 0;
@@ -77,11 +77,11 @@ int main(int argc, const char * argv[]) {
     message.data[7] = 0x88;
     message.timestamp.tv_sec = 0;
     message.timestamp.tv_nsec = 0;
-    MacCAN_Return_t retVal = 0;
+    CANAPI_Return_t retVal = 0;
     int32_t channel = (int32_t)KVASER_CAN_CHANNEL0;
     uint16_t timeout = CANREAD_INFINITE;
     useconds_t delay = 0U;
-    CMacCAN::EChannelState state;
+    CCanApi::EChannelState state;
     char szVal[CANPROP_MAX_BUFFER_SIZE];
     uint16_t u16Val;
     uint32_t u32Val;
@@ -172,7 +172,6 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "XTD:OFF")) opMode.nxtd = 1;
         if (!strcmp(argv[i], "RTR:OFF")) opMode.nrtr = 1;
     }
-    fprintf(stdout, ">>> %s\n", CMacCAN::GetVersion());
     fprintf(stdout, ">>> %s\n", CKvaserCAN::GetVersion());
 
     if((signal(SIGINT, sigterm) == SIG_ERR) ||
@@ -185,44 +184,39 @@ int main(int argc, const char * argv[]) {
     }
     MACCAN_LOG_OPEN();
     MACCAN_LOG_PRINTF("# MacCAN-KvaserCAN - %s", ctime(&now));
-    retVal = CMacCAN::Initializer();
-    if (retVal != CMacCAN::NoError) {
-        fprintf(stderr, "+++ error: CMacCAN::Initializer returned %i\n", retVal);
-        return retVal;
-    }
     if (option_info) {
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_CANAPI, (void *)&u16Val, sizeof(uint16_t));
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_CANAPI): value = %u.%u\n", (uint8_t)(u16Val >> 8), (uint8_t)u16Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_CANAPI) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_VERSION, (void *)&u16Val, sizeof(uint16_t));
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_VERSION): value = %u.%u\n", (uint8_t)(u16Val >> 8), (uint8_t)u16Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_VERSION) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_PATCH_NO, (void *)&u8Val, sizeof(uint8_t));
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_PATCH_NO): value = %u\n", (uint8_t)u8Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_PATCH_NO) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_BUILD_NO, (void *)&u32Val, sizeof(uint32_t));
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_BUILD_NO): value = 0x%" PRIx32 "\n", (uint32_t)u32Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_BUILD_NO) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_ID, (void *)&i32Val, sizeof(int32_t));
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_ID): value = %d\n", i32Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_ID) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_NAME, (void *)szVal, CANPROP_MAX_BUFFER_SIZE);
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_NAME): value = '%s'\n", szVal);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_NAME) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_VENDOR, (void *)szVal, CANPROP_MAX_BUFFER_SIZE);
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_VENDOR): value = '%s'\n", szVal);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_LIBRARY_VENDOR) returned %i\n", retVal);
@@ -233,90 +227,90 @@ int main(int argc, const char * argv[]) {
         for (int32_t ch = 0; ch < 8; ch++) {
             retVal = CKvaserCAN::ProbeChannel(ch, opMode, state);
             fprintf(stdout, ">>> myDriver.ProbeChannel(%i): state = %s", ch,
-                            (state == CMacCAN::ChannelOccupied) ? "occupied" :
-                            (state == CMacCAN::ChannelAvailable) ? "available" :
-                            (state == CMacCAN::ChannelNotAvailable) ? "not available" : "not testable");
-            fprintf(stdout, "%s", (retVal == CMacCAN::IllegalParameter) ? " (waring: Op.-Mode not supported)\n" : "\n");
+                            (state == CCanApi::ChannelOccupied) ? "occupied" :
+                            (state == CCanApi::ChannelAvailable) ? "available" :
+                            (state == CCanApi::ChannelNotAvailable) ? "not available" : "not testable");
+            fprintf(stdout, "%s", (retVal == CCanApi::IllegalParameter) ? " (waring: Op.-Mode not supported)\n" : "\n");
         }
         if (option_exit)
             return 0;
     }
     retVal = myDriver.InitializeChannel(channel, opMode);
-    if (retVal != CMacCAN::NoError) {
+    if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ error: myDriver.InitializeChannel(%i) returned %i\n", channel, retVal);
         goto end;
     }
-    else if (myDriver.GetStatus(status) == CMacCAN::NoError) {
+    else if (myDriver.GetStatus(status) == CCanApi::NoError) {
         fprintf(stdout, ">>> myDriver.InitializeChannel(%i): status = 0x%02X\n", channel, status.byte);
     }
     if (option_test) {
         retVal = myDriver.ProbeChannel(channel, opMode, state);
         fprintf(stdout, ">>> myDriver.ProbeChannel(%i): state = %s", channel,
-                        (state == CMacCAN::ChannelOccupied) ? "now occupied" :
-                        (state == CMacCAN::ChannelAvailable) ? "available" :
-                        (state == CMacCAN::ChannelNotAvailable) ? "not available" : "not testable");
-        fprintf(stdout, "%s", (retVal == CMacCAN::IllegalParameter) ? " (waring: Op.-Mode not supported)\n" : "\n");
+                        (state == CCanApi::ChannelOccupied) ? "now occupied" :
+                        (state == CCanApi::ChannelAvailable) ? "available" :
+                        (state == CCanApi::ChannelNotAvailable) ? "not available" : "not testable");
+        fprintf(stdout, "%s", (retVal == CCanApi::IllegalParameter) ? " (waring: Op.-Mode not supported)\n" : "\n");
     }
     if (option_info) {
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_TYPE, (void *)&i32Val, sizeof(int32_t));
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_TYPE): value = %d\n", i32Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_TYPE) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_NAME, (void *)szVal, CANPROP_MAX_BUFFER_SIZE);
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_NAME): value = '%s'\n", szVal);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_NAME) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_DRIVER, (void *)szVal, CANPROP_MAX_BUFFER_SIZE);
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_DRIVER): value = '%s'\n", szVal);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_DRIVER) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_VENDOR, (void *)szVal, CANPROP_MAX_BUFFER_SIZE);
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_VENDOR): value = '%s'\n", szVal);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_DEVICE_VENDOR) returned %i\n", retVal);
         // vendor-specific properties
 //        retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_CLOCK_DOMAIN, (void *)&i32Val, sizeof(int32_t));
-//        if (retVal == CMacCAN::NoError)
+//        if (retVal == CCanApi::NoError)
 //            fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_CLOCK_DOMAIN): value = %d\n", i32Val);
 //        else
 //            fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_CLOCK_DOMAIN) returned %i\n", retVal);
         retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_OP_CAPABILITY, (void *)&u8Val, sizeof(uint8_t));
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_OP_CAPABILITY): value = 0x%02X\n", (uint8_t)u8Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_OP_CAPABILITY) returned %i\n", retVal);
-        if (myDriver.GetProperty(KVASERCAN_PROPERTY_OP_MODE, (void *)&opMode.byte, sizeof(uint8_t)) == CMacCAN::NoError)
+        if (myDriver.GetProperty(KVASERCAN_PROPERTY_OP_MODE, (void *)&opMode.byte, sizeof(uint8_t)) == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_OP_MODE): value = 0x%02X\n", (uint8_t)opMode.byte);
-        if (myDriver.GetProperty(KVASERCAN_PROPERTY_STATUS, (void *)&status.byte, sizeof(uint8_t)) == CMacCAN::NoError)
+        if (myDriver.GetProperty(KVASERCAN_PROPERTY_STATUS, (void *)&status.byte, sizeof(uint8_t)) == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_STATUS): value = 0x%02X\n", (uint8_t)status.byte);
     }
     retVal = myDriver.StartController(bitrate);
-    if (retVal != CMacCAN::NoError) {
+    if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ error: myDriver.StartController returned %i\n", retVal);
         goto teardown;
     }
-    else if (myDriver.GetStatus(status) == CMacCAN::NoError) {
+    else if (myDriver.GetStatus(status) == CCanApi::NoError) {
         fprintf(stdout, ">>> myDriver.StartController: status = 0x%02X\n", status.byte);
     }
     if (option_info) {
-        MacCAN_BusSpeed_t speed;
-        if ((myDriver.GetBitrate(bitrate) == CMacCAN::NoError) &&
-            (myDriver.GetBusSpeed(speed) == CMacCAN::NoError))
+        CANAPI_BusSpeed_t speed;
+        if ((myDriver.GetBitrate(bitrate) == CCanApi::NoError) &&
+            (myDriver.GetBusSpeed(speed) == CCanApi::NoError))
             verbose(opMode, bitrate, speed);
     }
 #ifdef SECOND_CHANNEL
     retVal = mySecond.InitializeChannel(channel+1U, opMode);
-    if (retVal != CMacCAN::NoError)
+    if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.InitializeChannel(%i) returned %i\n", channel+1U, retVal);
     retVal = mySecond.StartController(bitrate);
-    if (retVal != CMacCAN::NoError)
+    if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.StartController returned %i\n", retVal);
     retVal = mySecond.WriteMessage(message);
-    if (retVal != CMacCAN::NoError)
+    if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.WriteMessage returned %i\n", retVal);
 #endif
     if ((option_transmit > 0) && !option_retry)
@@ -335,9 +329,9 @@ int main(int argc, const char * argv[]) {
         }
 retry:
         retVal = myDriver.WriteMessage(message);
-        if ((retVal == CMacCAN::TransmitterBusy) && option_retry)
+        if ((retVal == CCanApi::TransmitterBusy) && option_retry)
             goto retry;
-        else if (retVal != CMacCAN::NoError) {
+        else if (retVal != CCanApi::NoError) {
             fprintf(stderr, "+++ error: myDriver.WriteMessage returned %i\n", retVal);
             goto teardown;
         }
@@ -345,7 +339,7 @@ retry:
             usleep(delay);
     }
     while (running) {
-        if ((retVal = myDriver.ReadMessage(message, timeout)) == CMacCAN::NoError) {
+        if ((retVal = myDriver.ReadMessage(message, timeout)) == CCanApi::NoError) {
             if (option_echo) {
                 fprintf(stdout, ">>> %i\t", frames++);
                 fprintf(stdout, "%7li.%04li\t", (long)message.timestamp.tv_sec, message.timestamp.tv_nsec / 100000);
@@ -353,14 +347,14 @@ retry:
                     fprintf(stdout, "%03x\t%c%c [%i]", message.id, message.xtd ? 'X' : 'S', message.rtr ? 'R' : ' ', message.dlc);
                 else
                     fprintf(stdout, "%03x\t%c%c%c%c%c [%i]", message.id, message.xtd ? 'X' : 'S', message.rtr ? 'R' : ' ',
-                            message.fdf ? 'F' : ' ', message.brs ? 'B' : ' ', message.esi ? 'E' :' ', CMacCAN::Dlc2Len(message.dlc));
-                for (uint8_t i = 0; i < CMacCAN::Dlc2Len(message.dlc); i++)
+                            message.fdf ? 'F' : ' ', message.brs ? 'B' : ' ', message.esi ? 'E' :' ', CCanApi::Dlc2Len(message.dlc));
+                for (uint8_t i = 0; i < CCanApi::Dlc2Len(message.dlc); i++)
                     fprintf(stdout, " %02x", message.data[i]);
                 if (message.sts)
                     fprintf(stdout, " <<< status frame");
                 else if (option_repeat) {
                     retVal = myDriver.WriteMessage(message);
-                    if (retVal != CMacCAN::NoError) {
+                    if (retVal != CCanApi::NoError) {
                         fprintf(stderr, "+++ error: myDriver.WriteMessage returned %i\n", retVal);
                         goto teardown;
                     }
@@ -392,11 +386,11 @@ retry:
                 expected = received + 1;
             }
         }
-        else if (retVal != CMacCAN::ReceiverEmpty) {
+        else if (retVal != CCanApi::ReceiverEmpty) {
             goto teardown;
         }
 #ifdef SECOND_CHANNEL
-        if ((retVal = mySecond.ReadMessage(message, 0U)) == CMacCAN::NoError) {
+        if ((retVal = mySecond.ReadMessage(message, 0U)) == CCanApi::NoError) {
             if (option_echo) {
                 fprintf(stdout, ">2> %i\t", frames++);
                 fprintf(stdout, "%7li.%04li\t", (long)message.timestamp.tv_sec, message.timestamp.tv_nsec / 100000);
@@ -404,14 +398,14 @@ retry:
                     fprintf(stdout, "%03x\t%c%c [%i]", message.id, message.xtd ? 'X' : 'S', message.rtr ? 'R' : ' ', message.dlc);
                 else
                     fprintf(stdout, "%03x\t%c%c%c%c%c [%i]", message.id, message.xtd ? 'X' : 'S', message.rtr ? 'R' : ' ',
-                        message.fdf ? 'F' : ' ', message.brs ? 'B' : ' ', message.esi ? 'E' : ' ', CMacCAN::Dlc2Len(message.dlc));
-                for (uint8_t i = 0; i < CMacCAN::Dlc2Len(message.dlc); i++)
+                        message.fdf ? 'F' : ' ', message.brs ? 'B' : ' ', message.esi ? 'E' : ' ', CCanApi::Dlc2Len(message.dlc));
+                for (uint8_t i = 0; i < CCanApi::Dlc2Len(message.dlc); i++)
                     fprintf(stdout, " %02x", message.data[i]);
                 if (message.sts)
                     fprintf(stdout, " <<< status frame");
                 else if (option_repeat) {
                     retVal = myDriver.WriteMessage(message);
-                    if (retVal != CMacCAN::NoError) {
+                    if (retVal != CCanApi::NoError) {
                         fprintf(stderr, "+++ error: mySecond.WriteMessage returned %i\n", retVal);
                         goto teardown;
                     }
@@ -425,20 +419,20 @@ retry:
                 }
             }
         }
-        else if (retVal != CMacCAN::ReceiverEmpty) {
+        else if (retVal != CCanApi::ReceiverEmpty) {
             fprintf(stderr, "+++ error: mySecond.ReadMessage returned %i\n", retVal);
             goto teardown;
         }
 #endif
     }
-    if (myDriver.GetStatus(status) == CMacCAN::NoError) {
+    if (myDriver.GetStatus(status) == CCanApi::NoError) {
         fprintf(stdout, "\n>>> myDriver.ReadMessage: status = 0x%02X\n", status.byte);
     }
     if (option_stat || option_info) {
         uint64_t u64TxCnt, u64RxCnt, u64ErrCnt;
-        if ((myDriver.GetProperty(KVASERCAN_PROPERTY_TX_COUNTER, (void *)&u64TxCnt, sizeof(uint64_t)) == CMacCAN::NoError) &&
-            (myDriver.GetProperty(KVASERCAN_PROPERTY_RX_COUNTER, (void *)&u64RxCnt, sizeof(uint64_t)) == CMacCAN::NoError) &&
-            (myDriver.GetProperty(KVASERCAN_PROPERTY_ERR_COUNTER, (void *)&u64ErrCnt, sizeof(uint64_t)) == CMacCAN::NoError))
+        if ((myDriver.GetProperty(KVASERCAN_PROPERTY_TX_COUNTER, (void *)&u64TxCnt, sizeof(uint64_t)) == CCanApi::NoError) &&
+            (myDriver.GetProperty(KVASERCAN_PROPERTY_RX_COUNTER, (void *)&u64RxCnt, sizeof(uint64_t)) == CCanApi::NoError) &&
+            (myDriver.GetProperty(KVASERCAN_PROPERTY_ERR_COUNTER, (void *)&u64ErrCnt, sizeof(uint64_t)) == CCanApi::NoError))
             fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_*_COUNTER): TX = %" PRIi64 " RX = %" PRIi64 " ERR = %" PRIi64 "\n", u64TxCnt, u64RxCnt, u64ErrCnt);
     }
     if (option_info) {
@@ -452,29 +446,24 @@ retry:
 teardown:
 #ifdef SECOND_CHANNEL
     retVal = mySecond.ResetController();
-    if (retVal != CMacCAN::NoError)
+    if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.ResetController returned %i\n", retVal);
     retVal = mySecond.TeardownChannel();
-    if (retVal != CMacCAN::NoError)
+    if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.TeardownChannel returned %i\n", retVal);
 #endif
     retVal = myDriver.TeardownChannel();
-    if (retVal != CMacCAN::NoError) {
+    if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ error: myDriver.TeardownChannel returned %i\n", retVal);
         goto end;
     }
-    else if (myDriver.GetStatus(status) == CMacCAN::NoError) {
+    else if (myDriver.GetStatus(status) == CCanApi::NoError) {
         fprintf(stdout, ">>> myDriver.TeardownChannel: status = 0x%02X\n", status.byte);
     }
     else {
         fprintf(stdout, "@@@ Resistance is futile!\n");
     }
 end:
-    retVal = CMacCAN::Finalizer();
-    if (retVal != CMacCAN::NoError) {
-        fprintf(stderr, "+++ error: CMacCAN::Finalizer returned %i\n", retVal);
-        return retVal;
-    }
     now = time(NULL);
     MACCAN_LOG_PRINTF("# MacCAN-KvaserCAN - %s", ctime(&now));
     MACCAN_LOG_CLOSE();
