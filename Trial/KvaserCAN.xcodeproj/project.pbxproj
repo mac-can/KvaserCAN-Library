@@ -39,34 +39,34 @@
 		0F1CB25524BCEF2400171203 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
 		0F1CB25824BCF00800171203 /* build_no.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build_no.h; path = ../Sources/build_no.h; sourceTree = "<group>"; };
 		0F9FFFBC25D3BCDB00497D0A /* KvaserCAN_Defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Defines.h; path = ../Sources/KvaserCAN_Defines.h; sourceTree = "<group>"; };
-		0FD97E1B25D1BB3C00C8A7C7 /* MacCAN_Devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Devices.h; path = ../Sources/MacCAN_Core/MacCAN_Devices.h; sourceTree = "<group>"; };
-		0FD97E1C25D1BB3C00C8A7C7 /* MacCAN_Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Common.h; path = ../Sources/MacCAN_Core/MacCAN_Common.h; sourceTree = "<group>"; };
-		0FD97E1D25D1BB3C00C8A7C7 /* MacCAN_Debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Debug.h; path = ../Sources/MacCAN_Core/MacCAN_Debug.h; sourceTree = "<group>"; };
-		0FD97E1E25D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_IOUsbKit.h; path = ../Sources/MacCAN_Core/MacCAN_IOUsbKit.h; sourceTree = "<group>"; };
-		0FD97E1F25D1BB3C00C8A7C7 /* MacCAN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN.h; path = ../Sources/MacCAN_Core/MacCAN.h; sourceTree = "<group>"; };
-		0FD97E2025D1BB3C00C8A7C7 /* MacCAN_Debug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_Debug.c; path = ../Sources/MacCAN_Core/MacCAN_Debug.c; sourceTree = "<group>"; };
-		0FD97E2125D1BB3C00C8A7C7 /* MacCAN_Devices.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_Devices.c; path = ../Sources/MacCAN_Core/MacCAN_Devices.c; sourceTree = "<group>"; };
-		0FD97E2225D1BB3C00C8A7C7 /* MacCAN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacCAN.cpp; path = ../Sources/MacCAN_Core/MacCAN.cpp; sourceTree = "<group>"; };
-		0FD97E2325D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_IOUsbKit.c; path = ../Sources/MacCAN_Core/MacCAN_IOUsbKit.c; sourceTree = "<group>"; };
+		0FD97E1B25D1BB3C00C8A7C7 /* MacCAN_Devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Devices.h; path = ../Sources/MacCAN/MacCAN_Devices.h; sourceTree = "<group>"; };
+		0FD97E1C25D1BB3C00C8A7C7 /* MacCAN_Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Common.h; path = ../Sources/MacCAN/MacCAN_Common.h; sourceTree = "<group>"; };
+		0FD97E1D25D1BB3C00C8A7C7 /* MacCAN_Debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Debug.h; path = ../Sources/MacCAN/MacCAN_Debug.h; sourceTree = "<group>"; };
+		0FD97E1E25D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_IOUsbKit.h; path = ../Sources/MacCAN/MacCAN_IOUsbKit.h; sourceTree = "<group>"; };
+		0FD97E1F25D1BB3C00C8A7C7 /* MacCAN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN.h; path = ../Sources/MacCAN/MacCAN.h; sourceTree = "<group>"; };
+		0FD97E2025D1BB3C00C8A7C7 /* MacCAN_Debug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_Debug.c; path = ../Sources/MacCAN/MacCAN_Debug.c; sourceTree = "<group>"; };
+		0FD97E2125D1BB3C00C8A7C7 /* MacCAN_Devices.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_Devices.c; path = ../Sources/MacCAN/MacCAN_Devices.c; sourceTree = "<group>"; };
+		0FD97E2225D1BB3C00C8A7C7 /* MacCAN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MacCAN.cpp; path = ../Sources/MacCAN/MacCAN.cpp; sourceTree = "<group>"; };
+		0FD97E2325D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_IOUsbKit.c; path = ../Sources/MacCAN/MacCAN_IOUsbKit.c; sourceTree = "<group>"; };
 		0FD97E2925D1BB7500C8A7C7 /* CANAPI_Defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CANAPI_Defines.h; path = ../Sources/CANAPI/CANAPI_Defines.h; sourceTree = "<group>"; };
 		0FD97E2A25D1BB7500C8A7C7 /* CANAPI_Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CANAPI_Types.h; path = ../Sources/CANAPI/CANAPI_Types.h; sourceTree = "<group>"; };
 		0FD97E2C25D1BB9E00C8A7C7 /* can_btr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = can_btr.h; path = ../Sources/CANAPI/can_btr.h; sourceTree = "<group>"; };
 		0FD97E2D25D1BB9E00C8A7C7 /* can_btr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = can_btr.c; path = ../Sources/CANAPI/can_btr.c; sourceTree = "<group>"; };
-		0FD97E3125D1C06400C8A7C7 /* KvaserUSB_Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserUSB_Device.h; path = ../Sources/KvaserCAN_Driver/KvaserUSB_Device.h; sourceTree = "<group>"; };
-		0FD97E3225D1C06400C8A7C7 /* KvaserUSB_Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserUSB_Common.h; path = ../Sources/KvaserCAN_Driver/KvaserUSB_Common.h; sourceTree = "<group>"; };
-		0FD97E3325D1C06400C8A7C7 /* KvaserUSB_Device.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserUSB_Device.c; path = ../Sources/KvaserCAN_Driver/KvaserUSB_Device.c; sourceTree = "<group>"; };
-		0FD97E3725D1EA1300C8A7C7 /* MacCAN_MsgPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_MsgPipe.h; path = ../Sources/MacCAN_Core/MacCAN_MsgPipe.h; sourceTree = "<group>"; };
-		0FD97E3825D1EA1300C8A7C7 /* MacCAN_MsgQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_MsgQueue.h; path = ../Sources/MacCAN_Core/MacCAN_MsgQueue.h; sourceTree = "<group>"; };
-		0FD97E3925D1EA1300C8A7C7 /* MacCAN_MsgQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_MsgQueue.c; path = ../Sources/MacCAN_Core/MacCAN_MsgQueue.c; sourceTree = "<group>"; };
-		0FD97E3A25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_MsgPipe.c; path = ../Sources/MacCAN_Core/MacCAN_MsgPipe.c; sourceTree = "<group>"; };
-		0FDA0A7325D2F67700E50E4B /* LeafLight.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafLight.c; path = ../Sources/KvaserCAN_Driver/LeafLight.c; sourceTree = "<group>"; };
-		0FDA0A7425D2F67700E50E4B /* LeafLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafLight.h; path = ../Sources/KvaserCAN_Driver/LeafLight.h; sourceTree = "<group>"; };
-		0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserCAN_Driver.c; path = ../Sources/KvaserCAN_Driver/KvaserCAN_Driver.c; sourceTree = "<group>"; };
-		0FDA0A7925D3200A00E50E4B /* KvaserCAN_Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Driver.h; path = ../Sources/KvaserCAN_Driver/KvaserCAN_Driver.h; sourceTree = "<group>"; };
+		0FD97E3125D1C06400C8A7C7 /* KvaserUSB_Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserUSB_Device.h; path = ../Sources/Driver/KvaserUSB_Device.h; sourceTree = "<group>"; };
+		0FD97E3225D1C06400C8A7C7 /* KvaserUSB_Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserUSB_Common.h; path = ../Sources/Driver/KvaserUSB_Common.h; sourceTree = "<group>"; };
+		0FD97E3325D1C06400C8A7C7 /* KvaserUSB_Device.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserUSB_Device.c; path = ../Sources/Driver/KvaserUSB_Device.c; sourceTree = "<group>"; };
+		0FD97E3725D1EA1300C8A7C7 /* MacCAN_MsgPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_MsgPipe.h; path = ../Sources/MacCAN/MacCAN_MsgPipe.h; sourceTree = "<group>"; };
+		0FD97E3825D1EA1300C8A7C7 /* MacCAN_MsgQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_MsgQueue.h; path = ../Sources/MacCAN/MacCAN_MsgQueue.h; sourceTree = "<group>"; };
+		0FD97E3925D1EA1300C8A7C7 /* MacCAN_MsgQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_MsgQueue.c; path = ../Sources/MacCAN/MacCAN_MsgQueue.c; sourceTree = "<group>"; };
+		0FD97E3A25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_MsgPipe.c; path = ../Sources/MacCAN/MacCAN_MsgPipe.c; sourceTree = "<group>"; };
+		0FDA0A7325D2F67700E50E4B /* LeafLight.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafLight.c; path = ../Sources/Driver/LeafLight.c; sourceTree = "<group>"; };
+		0FDA0A7425D2F67700E50E4B /* LeafLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafLight.h; path = ../Sources/Driver/LeafLight.h; sourceTree = "<group>"; };
+		0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserCAN_Driver.c; path = ../Sources/Driver/KvaserCAN_Driver.c; sourceTree = "<group>"; };
+		0FDA0A7925D3200A00E50E4B /* KvaserCAN_Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Driver.h; path = ../Sources/Driver/KvaserCAN_Driver.h; sourceTree = "<group>"; };
 		0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KvaserCAN.cpp; path = ../Sources/KvaserCAN.cpp; sourceTree = "<group>"; };
 		0FDA0A7E25D33EF700E50E4B /* KvaserCAN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN.h; path = ../Sources/KvaserCAN.h; sourceTree = "<group>"; };
-		0FEABC0F25E8340400DD9ADB /* LeafPro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafPro.c; path = ../Sources/KvaserCAN_Driver/LeafPro.c; sourceTree = "<group>"; };
-		0FEABC1025E8340400DD9ADB /* LeafPro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafPro.h; path = ../Sources/KvaserCAN_Driver/LeafPro.h; sourceTree = "<group>"; };
+		0FEABC0F25E8340400DD9ADB /* LeafPro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafPro.c; path = ../Sources/Driver/LeafPro.c; sourceTree = "<group>"; };
+		0FEABC1025E8340400DD9ADB /* LeafPro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafPro.h; path = ../Sources/Driver/LeafPro.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -276,8 +276,8 @@
 				USER_HEADER_SEARCH_PATHS = (
 					../Sources,
 					../Sources/CANAPI,
-					../Sources/MacCAN_Core,
-					../Sources/KvaserCAN_Driver,
+					../Sources/MacCAN,
+					../Sources/Driver,
 				);
 			};
 			name = Debug;
@@ -343,8 +343,8 @@
 				USER_HEADER_SEARCH_PATHS = (
 					../Sources,
 					../Sources/CANAPI,
-					../Sources/MacCAN_Core,
-					../Sources/KvaserCAN_Driver,
+					../Sources/MacCAN,
+					../Sources/Driver,
 				);
 			};
 			name = Release;

@@ -29,8 +29,8 @@
 		0F975CBE2673A4F600339DBF /* can_recv */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = can_recv; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F975CCD2673A6A400339DBF /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = main.swift; path = can_recv/main.swift; sourceTree = "<group>"; };
 		0F975CCF2673A82F00339DBF /* libUVCANKVL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libUVCANKVL.a; path = ../../Binaries/libUVCANKVL.a; sourceTree = "<group>"; };
-		0FBD2B19267675BB008DA17E /* KvaserCAN.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KvaserCAN.swift; path = ../../Sources/KvaserCAN_Swift/KvaserCAN.swift; sourceTree = "<group>"; };
-		0FBD2B1A267675BB008DA17E /* CANAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CANAPI.swift; path = ../../Sources/KvaserCAN_Swift/CANAPI.swift; sourceTree = "<group>"; };
+		0FBD2B19267675BB008DA17E /* KvaserCAN.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KvaserCAN.swift; path = ../../Sources/Swift/KvaserCAN.swift; sourceTree = "<group>"; };
+		0FBD2B1A267675BB008DA17E /* CANAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CANAPI.swift; path = ../../Sources/Swift/CANAPI.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

@@ -13,8 +13,8 @@ MAIN_DIR = ./Sources
 
 SOURCE_DIR = $(HOME_DIR)/Sources
 CANAPI_DIR = $(HOME_DIR)/Sources/CANAPI
-MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN_Core
-KVASER_DIR = $(HOME_DIR)/Sources/KvaserCAN_Driver
+MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
+KVASER_DIR = $(HOME_DIR)/Sources/Driver
 
 OBJECTS = $(OUTDIR)/MacCAN.o $(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
 	$(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
@@ -64,9 +64,9 @@ LDFLAGS  += -lpthread \
 endif
 
 
-CXX = g++
-CC = gcc
-LD = g++
+CXX = clang++
+CXX = clang
+LD = clang++
 RM = rm -f
 CP = cp -f
 

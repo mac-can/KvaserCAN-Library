@@ -25,7 +25,7 @@ let package = Package(
         .target(
             name: "KvaserCAN",
             dependencies: ["CKvaserCAN"],
-            path: "Sources/KvaserCAN_Swift"
+            path: "Sources/Swift"
         ),
         .target(
             name: "CKvaserCAN",

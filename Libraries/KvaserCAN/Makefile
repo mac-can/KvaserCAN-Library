@@ -53,8 +53,8 @@ HOME_DIR = ../..
 
 SOURCE_DIR = $(HOME_DIR)/Sources
 CANAPI_DIR = $(HOME_DIR)/Sources/CANAPI
-MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN_Core
-KVASER_DIR = $(HOME_DIR)/Sources/KvaserCAN_Driver
+MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
+KVASER_DIR = $(HOME_DIR)/Sources/Driver
 
 OBJECTS = $(OUTDIR)/KvaserCAN.o $(OUTDIR)/KvaserCAN_Driver.o \
 	$(OUTDIR)/KvaserUSB_Device.o $(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
@@ -125,9 +125,9 @@ ARFLAGS = r
 endif
 
 
-CXX = g++
-CC = gcc
-LD = g++
+CXX = clang++
+CXX = clang
+LD = clang++
 AR = ar
 RM = rm -f
 CP = cp -f
