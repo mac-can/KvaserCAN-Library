@@ -59,7 +59,7 @@
 import Foundation
 import CCanApi
 
-private let version = (major: 0, minor: 1, patch: 0)
+private let version = (major: 0, minor: 1, patch: 1)
 
 public class CanApi {
     private lazy var handle: CInt = -1  // CAN interface handle
@@ -674,11 +674,11 @@ public class CanApi {
             var name = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
             var vendor = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
             var result: CInt
-            result = can_property(self.handle, UInt16(CANPROP_GET_LIBRARY_ID), &id, UInt32(MemoryLayout<Int32>.size))  // FIXME: -1 = library property
+            result = can_property(-1, UInt16(CANPROP_GET_LIBRARY_ID), &id, UInt32(MemoryLayout<Int32>.size))
             guard result == CANERR_NOERROR else { return nil }
-            result = can_property(self.handle, UInt16(CANPROP_GET_LIBRARY_DLLNAME), &name, UInt32(CANPROP_MAX_BUFFER_SIZE))  // FIXME: -1 = library property
+            result = can_property(-1, UInt16(CANPROP_GET_LIBRARY_DLLNAME), &name, UInt32(CANPROP_MAX_BUFFER_SIZE))
             guard result == CANERR_NOERROR else { return nil }
-            result = can_property(self.handle, UInt16(CANPROP_GET_LIBRARY_VENDOR), &vendor, UInt32(CANPROP_MAX_BUFFER_SIZE))  // FIXME: -1 = library property
+            result = can_property(-1, UInt16(CANPROP_GET_LIBRARY_VENDOR), &vendor, UInt32(CANPROP_MAX_BUFFER_SIZE))
             guard result == CANERR_NOERROR else { return nil }
             return (id: id, name: String(cString: &name), vendor: String(cString: &vendor))
         }
@@ -691,9 +691,9 @@ public class CanApi {
             var version: UInt16 = 0
             var patch: UInt8 = 0
             var result: CInt
-            result = can_property(self.handle, UInt16(CANPROP_GET_VERSION), &version, UInt32(MemoryLayout<UInt16>.size))  // FIXME: -1 = library property
+            result = can_property(-1, UInt16(CANPROP_GET_VERSION), &version, UInt32(MemoryLayout<UInt16>.size))
             guard result == CANERR_NOERROR else { return nil }
-            result = can_property(self.handle, UInt16(CANPROP_GET_PATCH_NO), &patch, UInt32(MemoryLayout<UInt8>.size))  // FIXME: -1 = library property
+            result = can_property(-1, UInt16(CANPROP_GET_PATCH_NO), &patch, UInt32(MemoryLayout<UInt8>.size))
             guard result == CANERR_NOERROR else { return nil }
             return (major: UInt(version >> 8), minor: UInt(version & 0xFF), patch: UInt(patch))
         }
@@ -706,7 +706,7 @@ public class CanApi {
             var version: UInt16 = 0
             let patch: UInt8 = 0
             var result: CInt
-            result = can_property(self.handle, UInt16(CANPROP_GET_SPEC), &version, UInt32(MemoryLayout<UInt16>.size))  // FIXME: -1 = library property
+            result = can_property(-1, UInt16(CANPROP_GET_SPEC), &version, UInt32(MemoryLayout<UInt16>.size))
             guard result == CANERR_NOERROR else { return nil }
             return (major: UInt(version >> 8), minor: UInt(version & 0xFF), patch: UInt(patch))
         }
