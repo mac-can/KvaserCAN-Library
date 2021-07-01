@@ -54,12 +54,12 @@
 
     @author   $Author: eris $
 
-    @version  $Rev: 1005 $
+    @version  $Rev: 1009 $
  */
 import Foundation
 import CCanApi
 
-private let version = (major: 0, minor: 1, patch: 1)
+private let version = (major: 0, minor: 2, patch: 0)
 
 public class CanApi {
     private lazy var handle: CInt = -1  // CAN interface handle
