@@ -1815,7 +1815,7 @@ static IOReturn FindInterface(IOUSBDeviceInterface **device, int index)
         {
             (void)(*interface)->USBInterfaceClose(interface);
             (void)(*interface)->Release(interface);
-            kr = kIOReturnError;
+            kr = kIOReturnInvalid;  // iokit_common_err(0x1) = should never be seen
         }
         break;
     }
