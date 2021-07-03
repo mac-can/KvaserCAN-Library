@@ -124,8 +124,8 @@ Type `can_test --help` to display all program options.
 #### macOS Big Sur
 
 - macOS Big Sur (11.4) on a MacBook Pro (2019)
-- Apple clang version 12.0.5 (clang-1205.0.22.9)
-- Xcode Version 12.5 (12E262)
+- Apple clang version 12.0.5 (clang-1205.0.22.11)
+- Xcode Version 12.5.1 (12E507)
 
 #### macOS High Sierra
 
