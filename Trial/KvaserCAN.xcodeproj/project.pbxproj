@@ -9,6 +9,22 @@
 /* Begin PBXBuildFile section */
 		0F1CB25624BCEF2400171203 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F1CB25524BCEF2400171203 /* main.cpp */; };
 		0F84AA45268BA44F00DA70C3 /* can_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F84AA44268BA44F00DA70C3 /* can_api.c */; };
+		0F8F0ACF26908D9F00C2D974 /* Testing.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F8F0ACE26908D9F00C2D974 /* Testing.m */; };
+		0F8F0AD626908F6800C2D974 /* can_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F84AA44268BA44F00DA70C3 /* can_api.c */; };
+		0F8F0AD726908F6D00C2D974 /* can_btr.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E2D25D1BB9E00C8A7C7 /* can_btr.c */; };
+		0F8F0AD826908F7300C2D974 /* MacCAN_Debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E2025D1BB3C00C8A7C7 /* MacCAN_Debug.c */; };
+		0F8F0AD926908F7800C2D974 /* MacCAN_Devices.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E2125D1BB3C00C8A7C7 /* MacCAN_Devices.c */; };
+		0F8F0ADA26908F7B00C2D974 /* MacCAN_IOUsbKit.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E2325D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.c */; };
+		0F8F0ADB26908F7F00C2D974 /* MacCAN_MsgPipe.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3A25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c */; };
+		0F8F0ADC26908F8400C2D974 /* MacCAN_MsgQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3925D1EA1300C8A7C7 /* MacCAN_MsgQueue.c */; };
+		0F8F0ADD26908F8A00C2D974 /* KvaserUSB_Device.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3325D1C06400C8A7C7 /* KvaserUSB_Device.c */; };
+		0F8F0ADE26908F8F00C2D974 /* LeafLight.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7325D2F67700E50E4B /* LeafLight.c */; };
+		0F8F0ADF26908F9300C2D974 /* LeafPro.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FEABC0F25E8340400DD9ADB /* LeafPro.c */; };
+		0F8F0AE026908F9800C2D974 /* KvaserCAN_Driver.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */; };
+		0F8F0AE126908F9F00C2D974 /* KvaserCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */; };
+		0F8F0AE32690911900C2D974 /* test_can_init.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F8F0AE22690911900C2D974 /* test_can_init.m */; };
+		0F8F0AE62690DD0600C2D974 /* test_can_test.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F8F0AE52690DD0600C2D974 /* test_can_test.m */; };
+		0F8F0AE82690ECCE00C2D974 /* test_can_start.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F8F0AE72690ECCE00C2D974 /* test_can_start.m */; };
 		0FD97E2425D1BB3C00C8A7C7 /* MacCAN_Debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E2025D1BB3C00C8A7C7 /* MacCAN_Debug.c */; };
 		0FD97E2525D1BB3C00C8A7C7 /* MacCAN_Devices.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E2125D1BB3C00C8A7C7 /* MacCAN_Devices.c */; };
 		0FD97E2725D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E2325D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.c */; };
@@ -42,6 +58,13 @@
 		0F84AA44268BA44F00DA70C3 /* can_api.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = can_api.c; path = ../Sources/Wrapper/can_api.c; sourceTree = "<group>"; };
 		0F84AA47268BA48D00DA70C3 /* can_api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = can_api.h; path = ../Sources/CANAPI/can_api.h; sourceTree = "<group>"; };
 		0F84AA49268BA48D00DA70C3 /* CANAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CANAPI.h; path = ../Sources/CANAPI/CANAPI.h; sourceTree = "<group>"; };
+		0F8F0ACC26908D9F00C2D974 /* Testing.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Testing.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0F8F0ACE26908D9F00C2D974 /* Testing.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Testing.m; sourceTree = "<group>"; };
+		0F8F0AD026908D9F00C2D974 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0F8F0AE22690911900C2D974 /* test_can_init.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = test_can_init.m; sourceTree = "<group>"; };
+		0F8F0AE42690916300C2D974 /* Settings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Settings.h; sourceTree = "<group>"; };
+		0F8F0AE52690DD0600C2D974 /* test_can_test.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = test_can_test.m; sourceTree = "<group>"; };
+		0F8F0AE72690ECCE00C2D974 /* test_can_start.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = test_can_start.m; sourceTree = "<group>"; };
 		0F9FFFBC25D3BCDB00497D0A /* KvaserCAN_Defines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Defines.h; path = ../Sources/KvaserCAN_Defines.h; sourceTree = "<group>"; };
 		0FD97E1B25D1BB3C00C8A7C7 /* MacCAN_Devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Devices.h; path = ../Sources/MacCAN/MacCAN_Devices.h; sourceTree = "<group>"; };
 		0FD97E1C25D1BB3C00C8A7C7 /* MacCAN_Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Common.h; path = ../Sources/MacCAN/MacCAN_Common.h; sourceTree = "<group>"; };
@@ -79,6 +102,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0F8F0AC926908D9F00C2D974 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -86,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				0F1CB25424BCEF0300171203 /* Sources */,
+				0F8F0ACD26908D9F00C2D974 /* Testing */,
 				0F1CB24B24BCEC5B00171203 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -94,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				0F1CB24A24BCEC5B00171203 /* KvaserCAN */,
+				0F8F0ACC26908D9F00C2D974 /* Testing.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,6 +170,19 @@
 			name = Sources;
 			sourceTree = "<group>";
 		};
+		0F8F0ACD26908D9F00C2D974 /* Testing */ = {
+			isa = PBXGroup;
+			children = (
+				0F8F0AD026908D9F00C2D974 /* Info.plist */,
+				0F8F0AE42690916300C2D974 /* Settings.h */,
+				0F8F0ACE26908D9F00C2D974 /* Testing.m */,
+				0F8F0AE52690DD0600C2D974 /* test_can_test.m */,
+				0F8F0AE22690911900C2D974 /* test_can_init.m */,
+				0F8F0AE72690ECCE00C2D974 /* test_can_start.m */,
+			);
+			path = Testing;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -158,6 +203,23 @@
 			productReference = 0F1CB24A24BCEC5B00171203 /* KvaserCAN */;
 			productType = "com.apple.product-type.tool";
 		};
+		0F8F0ACB26908D9F00C2D974 /* Testing */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0F8F0AD326908D9F00C2D974 /* Build configuration list for PBXNativeTarget "Testing" */;
+			buildPhases = (
+				0F8F0AC826908D9F00C2D974 /* Sources */,
+				0F8F0AC926908D9F00C2D974 /* Frameworks */,
+				0F8F0ACA26908D9F00C2D974 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Testing;
+			productName = Testing;
+			productReference = 0F8F0ACC26908D9F00C2D974 /* Testing.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -169,6 +231,9 @@
 				TargetAttributes = {
 					0F1CB24924BCEC5B00171203 = {
 						CreatedOnToolsVersion = 11.5;
+					};
+					0F8F0ACB26908D9F00C2D974 = {
+						CreatedOnToolsVersion = 12.5.1;
 					};
 				};
 			};
@@ -186,9 +251,20 @@
 			projectRoot = "";
 			targets = (
 				0F1CB24924BCEC5B00171203 /* KvaserCAN */,
+				0F8F0ACB26908D9F00C2D974 /* Testing */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0F8F0ACA26908D9F00C2D974 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0F1CB24624BCEC5B00171203 /* Sources */ = {
@@ -208,6 +284,29 @@
 				0FDA0A7525D2F67700E50E4B /* LeafLight.c in Sources */,
 				0F1CB25624BCEF2400171203 /* main.cpp in Sources */,
 				0FEABC1125E8340400DD9ADB /* LeafPro.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0F8F0AC826908D9F00C2D974 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F8F0ADC26908F8400C2D974 /* MacCAN_MsgQueue.c in Sources */,
+				0F8F0ADD26908F8A00C2D974 /* KvaserUSB_Device.c in Sources */,
+				0F8F0AD826908F7300C2D974 /* MacCAN_Debug.c in Sources */,
+				0F8F0ADB26908F7F00C2D974 /* MacCAN_MsgPipe.c in Sources */,
+				0F8F0AE026908F9800C2D974 /* KvaserCAN_Driver.c in Sources */,
+				0F8F0AD926908F7800C2D974 /* MacCAN_Devices.c in Sources */,
+				0F8F0AE32690911900C2D974 /* test_can_init.m in Sources */,
+				0F8F0ACF26908D9F00C2D974 /* Testing.m in Sources */,
+				0F8F0AD726908F6D00C2D974 /* can_btr.c in Sources */,
+				0F8F0AE82690ECCE00C2D974 /* test_can_start.m in Sources */,
+				0F8F0ADA26908F7B00C2D974 /* MacCAN_IOUsbKit.c in Sources */,
+				0F8F0AE126908F9F00C2D974 /* KvaserCAN.cpp in Sources */,
+				0F8F0ADF26908F9300C2D974 /* LeafPro.c in Sources */,
+				0F8F0ADE26908F8F00C2D974 /* LeafLight.c in Sources */,
+				0F8F0AE62690DD0600C2D974 /* test_can_test.m in Sources */,
+				0F8F0AD626908F6800C2D974 /* can_api.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -373,6 +472,44 @@
 			};
 			name = Release;
 		};
+		0F8F0AD126908D9F00C2D974 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Testing/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = "uv-software.Testing";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0F8F0AD226908D9F00C2D974 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Testing/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = "uv-software.Testing";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -390,6 +527,15 @@
 			buildConfigurations = (
 				0F1CB25224BCEC5B00171203 /* Debug */,
 				0F1CB25324BCEC5B00171203 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0F8F0AD326908D9F00C2D974 /* Build configuration list for PBXNativeTarget "Testing" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0F8F0AD126908D9F00C2D974 /* Debug */,
+				0F8F0AD226908D9F00C2D974 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

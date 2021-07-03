@@ -13,7 +13,6 @@ Utilities/can_test/.objects
 Utilities/can_test/can_test
 Binaries
 Includes
-Testing
 .vscode
 null.d
 *.log
