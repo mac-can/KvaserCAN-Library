@@ -131,6 +131,13 @@
     XCTAssertEqual(CANBRD_PRESENT, state);
 }
 
+- (void)testWhenInterfaceOccupiedByAnotherProcess {
+    // @note: this scenario is not testable:
+    //        1) up to now I didn´t found an I/O service to detect this
+    //        2) the other process must be started manually (or forked)
+    XCTAssertTrue(true);
+}
+
 - (void)testWithValidChannelNo {
     SInt32 channel = INVALID_HANDLE;
     int rc = CANERR_FATAL;
