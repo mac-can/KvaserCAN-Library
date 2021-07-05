@@ -45,23 +45,23 @@
 //  You should have received a copy of the GNU General Public License
 //  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef SETTINGS_H_INCLUDED
-#define SETTINGS_H_INCLUDED
+#ifndef TESTER_H_INCLUDED
+#define TESTER_H_INCLUDED
 
-#import "Tester.h"
+#include "KvaserCAN.h"
 
-#define DUT1  (SInt32)0
-#define DUT2  (SInt32)1
+class CTester : CKvaserCAN {
+public:
+    // constructor / destructor
+    CTester() {};
+    virtual ~CTester() {};
+    // methods
+    int SendSomeFrames(int handle, int32_t channel, int frames = 1);
+    int ReceiveSomeFrames(int handle, int32_t channel, int frames = 1);
+private:
+    int CheckReceivedId(const CANAPI_Message_t &message, int32_t canId);
+    int CheckReceivedDlc(const CANAPI_Message_t &message, uint8_t canDlc);
+    int CheckReceivedData(const CANAPI_Message_t &message, uint64_t &expected);
+};
 
-#define TEST_CANMODE  CANMODE_DEFAULT
-#define TEST_BTRINDEX  CANBTR_INDEX_250K
-
-#define TEST_FRAMES  8
-#define TEST_TRAFFIC  2048
-
-#define INVALID_HANDLE  (-1)
-
-#define OPTION_SEND_TEST_FRAMES  1
-#define OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE  0
-
-#endif /* SETTINGS_H_INCLUDED */
+#endif /* TESTER_H_INCLUDED */

@@ -65,12 +65,45 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
-    int handle = can_init(0, CANMODE_DEFAULT, NULL);
+- (void)testSmokeTest {
+    can_bitrate_t bitrate = { TEST_BTRINDEX };
+    can_status_t status = { CANSTAT_RESET };
+    int handle = INVALID_HANDLE;
+    int rc = CANERR_FATAL;
+    
+    // @test:
+    // @- initialize DUT1 with configured settings
+    handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertGreaterThanOrEqual(0, handle);
-    XCTAssertEqual(CANERR_NOERROR, can_exit(handle));
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- start DUT1 with configured bit-rate settings
+    rc = can_start(handle, &bitrate);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    // @- send some frames to DUT2 and receive some frames from DUT2
+    CTester tester;
+    XCTAssertEqual(TEST_TRAFFIC, tester.SendSomeFrames(handle, DUT2, TEST_TRAFFIC));
+    XCTAssertEqual(TEST_TRAFFIC, tester.ReceiveSomeFrames(handle, DUT2, TEST_TRAFFIC));
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    // @- stop/reset DUT1
+    rc = can_reset(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- shutdown DUT1
+    rc = can_exit(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
 //- (void)testPerformanceExample {

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0F1CB25624BCEF2400171203 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F1CB25524BCEF2400171203 /* main.cpp */; };
+		0F6FA0A026922AC8000B4CCC /* Tester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA09E26922AC8000B4CCC /* Tester.cpp */; };
+		0F6FA0A626925567000B4CCC /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA0A426925567000B4CCC /* Timer.cpp */; };
 		0F84AA45268BA44F00DA70C3 /* can_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F84AA44268BA44F00DA70C3 /* can_api.c */; };
 		0F8F0ACF26908D9F00C2D974 /* Testing.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F8F0ACE26908D9F00C2D974 /* Testing.mm */; };
 		0F8F0AD626908F6800C2D974 /* can_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F84AA44268BA44F00DA70C3 /* can_api.c */; };
@@ -54,6 +56,10 @@
 		0F1CB24A24BCEC5B00171203 /* KvaserCAN */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KvaserCAN; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F1CB25524BCEF2400171203 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
 		0F1CB25824BCF00800171203 /* build_no.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build_no.h; path = ../Sources/build_no.h; sourceTree = "<group>"; };
+		0F6FA09E26922AC8000B4CCC /* Tester.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tester.cpp; sourceTree = "<group>"; };
+		0F6FA09F26922AC8000B4CCC /* Tester.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tester.h; sourceTree = "<group>"; };
+		0F6FA0A126925567000B4CCC /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
+		0F6FA0A426925567000B4CCC /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 		0F84AA43268BA44F00DA70C3 /* can_defs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = can_defs.h; path = ../Sources/Wrapper/can_defs.h; sourceTree = "<group>"; };
 		0F84AA44268BA44F00DA70C3 /* can_api.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = can_api.c; path = ../Sources/Wrapper/can_api.c; sourceTree = "<group>"; };
 		0F84AA47268BA48D00DA70C3 /* can_api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = can_api.h; path = ../Sources/CANAPI/can_api.h; sourceTree = "<group>"; };
@@ -173,12 +179,16 @@
 		0F8F0ACD26908D9F00C2D974 /* Testing */ = {
 			isa = PBXGroup;
 			children = (
+				0F6FA0A426925567000B4CCC /* Timer.cpp */,
+				0F6FA0A126925567000B4CCC /* Timer.h */,
 				0F8F0AD026908D9F00C2D974 /* Info.plist */,
 				0F8F0AE42690916300C2D974 /* Settings.h */,
 				0F8F0ACE26908D9F00C2D974 /* Testing.mm */,
 				0F8F0AE52690DD0600C2D974 /* test_can_test.mm */,
 				0F8F0AE22690911900C2D974 /* test_can_init.mm */,
 				0F8F0AE72690ECCE00C2D974 /* test_can_start.mm */,
+				0F6FA09E26922AC8000B4CCC /* Tester.cpp */,
+				0F6FA09F26922AC8000B4CCC /* Tester.h */,
 			);
 			path = Testing;
 			sourceTree = "<group>";
@@ -292,6 +302,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F8F0ADC26908F8400C2D974 /* MacCAN_MsgQueue.c in Sources */,
+				0F6FA0A026922AC8000B4CCC /* Tester.cpp in Sources */,
 				0F8F0ADD26908F8A00C2D974 /* KvaserUSB_Device.c in Sources */,
 				0F8F0AD826908F7300C2D974 /* MacCAN_Debug.c in Sources */,
 				0F8F0ADB26908F7F00C2D974 /* MacCAN_MsgPipe.c in Sources */,
@@ -301,6 +312,7 @@
 				0F8F0ACF26908D9F00C2D974 /* Testing.mm in Sources */,
 				0F8F0AD726908F6D00C2D974 /* can_btr.c in Sources */,
 				0F8F0AE82690ECCE00C2D974 /* test_can_start.mm in Sources */,
+				0F6FA0A626925567000B4CCC /* Timer.cpp in Sources */,
 				0F8F0ADA26908F7B00C2D974 /* MacCAN_IOUsbKit.c in Sources */,
 				0F8F0AE126908F9F00C2D974 /* KvaserCAN.cpp in Sources */,
 				0F8F0ADF26908F9300C2D974 /* LeafPro.c in Sources */,

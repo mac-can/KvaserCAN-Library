@@ -108,7 +108,11 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-    // TODO:
+#if (OPTION_SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+#endif
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);

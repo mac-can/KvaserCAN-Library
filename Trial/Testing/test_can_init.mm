@@ -97,7 +97,11 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-    // TODO:
+#if (OPTION_SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+#endif
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -139,7 +143,11 @@
 
     // @post:
     // @- sunnyday traffic (optional):
-    // TODO:
+#if (OPTION_SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+#endif
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -170,7 +178,11 @@
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- sunnyday traffic (optional):
-    // TODO:
+#if (OPTION_SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+#endif
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -211,7 +223,11 @@
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- sunnyday traffic (optional):
-    // TODO:
+#if (OPTION_SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+#endif
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -329,8 +345,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-    // TODO:
+    // @note: listen-only mode (when supported) prevents the sending of frames!
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
