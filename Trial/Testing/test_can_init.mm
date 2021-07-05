@@ -287,19 +287,19 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- initialize with invalid channel no. -1
+    // @- try to initialize with invalid channel no. -1
     rc = can_init((SInt32)(-1), TEST_CANMODE, NULL);
     XCTAssertNotEqual(CANERR_NOERROR, rc);
     XCTAssert((CANERR_NOTINIT == rc) || (CANERR_VENDOR >= rc));
-    // @- initialize with invalid channel no. INT8_MIN
+    // @- try to initialize with invalid channel no. INT8_MIN
     rc = can_init((SInt32)INT8_MIN, TEST_CANMODE, NULL);
     XCTAssertNotEqual(CANERR_NOERROR, rc);
     XCTAssert((CANERR_NOTINIT == rc) || (CANERR_VENDOR >= rc));
-    // @- initialize with invalid channel no. INT16_MIN
+    // @- try to initialize with invalid channel no. INT16_MIN
     rc = can_init((SInt32)INT16_MIN, TEST_CANMODE, NULL);
     XCTAssertNotEqual(CANERR_NOERROR, rc);
     XCTAssert((CANERR_NOTINIT == rc) || (CANERR_VENDOR >= rc));
-    // @- initialize with invalid channel no. INT32_MIN
+    // @- try to initialize with invalid channel no. INT32_MIN
     rc = can_init((SInt32)INT32_MIN, TEST_CANMODE, NULL);
     XCTAssertNotEqual(CANERR_NOERROR, rc);
     XCTAssert((CANERR_NOTINIT == rc) || (CANERR_VENDOR >= rc));
