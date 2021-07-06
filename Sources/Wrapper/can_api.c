@@ -249,7 +249,7 @@ int can_exit(int handle)
     }
     else {
         for (i = 0; i < KVASER_MAX_HANDLES; i++) {
-            if (!can[i].device.configured) // must be an opened handle
+            if (can[i].device.configured) // must be an opened handle
             {
                 /*if (!can[handle].status.can_stopped) // go to CAN INIT mode (bus off)*/
                     (void)KvaserCAN_CanBusOff(&can[i].device);
@@ -289,7 +289,7 @@ int can_kill(int handle)
     }
     else {
         for (i = 0; i < KVASER_MAX_HANDLES; i++) {
-            if (!can[i].device.configured) // must be an opened handle
+            if (can[i].device.configured) // must be an opened handle
                 (void)KvaserCAN_SignalChannel(&can[i].device);
         }
     }
