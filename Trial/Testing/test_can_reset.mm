@@ -73,7 +73,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -152,7 +152,7 @@
     // @post:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -195,7 +195,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -255,7 +255,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -315,7 +315,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);

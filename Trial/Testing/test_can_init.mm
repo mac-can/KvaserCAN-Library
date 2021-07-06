@@ -73,7 +73,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -127,7 +127,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -181,7 +181,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -234,7 +234,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -270,7 +270,7 @@
     // @test:
     // @- initialize DUT1 a second time
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -343,7 +343,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -355,7 +355,7 @@
     mode.byte = capa.byte;
     // @- initialize DUT1 with all bits from operation capacity
     handle = can_init(DUT1, mode.byte, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -391,7 +391,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -405,7 +405,7 @@
     rc = can_init(DUT1, mode.byte, NULL);
     if (capa.mon) {
         handle = rc;
-        XCTAssertGreaterThanOrEqual(0, handle);
+        XCTAssertLessThanOrEqual(0, handle);
         // @- get operation mode from DUT1
         rc = can_property(handle, CANPROP_GET_OP_MODE, (void*)&mode.byte, sizeof(UInt8));
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -429,7 +429,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -443,7 +443,7 @@
     rc = can_init(DUT1, mode.byte, NULL);
     if (capa.err) {
         handle = rc;
-        XCTAssertGreaterThanOrEqual(0, handle);
+        XCTAssertLessThanOrEqual(0, handle);
         // @- get operation mode from DUT1
         rc = can_property(handle, CANPROP_GET_OP_MODE, (void*)&mode.byte, sizeof(UInt8));
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -467,7 +467,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -481,7 +481,7 @@
     rc = can_init(DUT1, mode.byte, NULL);
     if (capa.nrtr) {
         handle = rc;
-        XCTAssertGreaterThanOrEqual(0, handle);
+        XCTAssertLessThanOrEqual(0, handle);
         // @- get operation mode from DUT1
         rc = can_property(handle, CANPROP_GET_OP_MODE, (void*)&mode.byte, sizeof(UInt8));
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -505,7 +505,7 @@
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertGreaterThanOrEqual(0, handle);
+    XCTAssertLessThanOrEqual(0, handle);
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -519,7 +519,7 @@
     rc = can_init(DUT1, mode.byte, NULL);
     if (capa.nxtd) {
         handle = rc;
-        XCTAssertGreaterThanOrEqual(0, handle);
+        XCTAssertLessThanOrEqual(0, handle);
         // @- get operation mode from DUT1
         rc = can_property(handle, CANPROP_GET_OP_MODE, (void*)&mode.byte, sizeof(UInt8));
         XCTAssertEqual(CANERR_NOERROR, rc);
