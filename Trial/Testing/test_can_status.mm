@@ -49,11 +49,11 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
-@interface test_can_exit : XCTestCase
+@interface test_can_status : XCTestCase
 
 @end
 
-@implementation test_can_exit
+@implementation test_can_status
 
 - (void)setUp {
     // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -70,16 +70,73 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @pre
+    // @test:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- try to get status with invalid handle -1
+    rc = can_status(INVALID_HANDLE, &status.byte);
+    XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- try to get status with invalid handle INT32_MAX
+    rc = can_status(INT32_MAX, &status.byte);
+    XCTAssertEqual(CANERR_HANDLE, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    // @- sunnyday traffic (optional):
+#if (OPTION_SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+#endif
+    // @- stop/reset DUT1
+    rc = can_reset(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- try to get status with invalid handle INT32_MIN
+    rc = can_status(INT32_MIN, &status.byte);
+    XCTAssertEqual(CANERR_HANDLE, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- shutdown DUT1
+    rc = can_exit(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+}
+
+- (void)testWithNullPointerForStatus {
+    can_bitrate_t bitrate = { TEST_BTRINDEX };
+    can_status_t status = { CANSTAT_RESET };
+    int handle = INVALID_HANDLE;
+    int rc = CANERR_FATAL;
+    // @test:
+    // @- initialize DUT1 with configured settings
+    handle = can_init(DUT1, TEST_CANMODE, NULL);
+    XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 with NULL for status
+    rc = can_status(handle, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- start DUT1 with configured bit-rate settings
+    rc = can_start(handle, &bitrate);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 with NULL for status
+    rc = can_status(handle, NULL);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
@@ -98,25 +155,13 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 with NULL for status
+    rc = can_status(handle, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
-    // @test:
-    // @note: value -1 is used to shutdown all interfaces!
-    // @- try to shutdown DUT1 with wrong handle INT32_MAX
-    rc = can_exit(INT32_MAX);
-    XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to shutdown DUT1 with wrong handle INT32_MIN
-    rc = can_exit(INT32_MIN);
-    XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- get status of DUT1 and check to be in INIT state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertTrue(status.can_stopped);
-
-    // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -129,14 +174,14 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to shutdown DUT1 with wrong handle -1
-    rc = can_exit(INVALID_HANDLE);
+    // @- try to get status of DUT1 with wrong handle -1
+    rc = can_status(INVALID_HANDLE, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to shutdown DUT1 with wrong handle INT32_MIN
-    rc = can_exit(INT32_MAX);
+    // @- try to get status of DUT1 with wrong handle INT32_MIN
+    rc = can_status(INT32_MAX, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to shutdown DUT1 with wrong handle INT32_MIN
-    rc = can_exit(INT32_MIN);
+    // @- try to get status of DUT1 with wrong handle INT32_MIN
+    rc = can_status(INT32_MIN, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
     // @post:
@@ -174,69 +219,6 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-}
-
-- (void)testWhenInterfaceNotStarted {
-    can_status_t status = { CANSTAT_RESET };
-    int handle = INVALID_HANDLE;
-    int rc = CANERR_FATAL;
-
-    // @pre:
-    // @- initialize DUT1 with configured settings
-    handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertLessThanOrEqual(0, handle);
-    // @- get status of DUT1 and check to be in INIT state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertTrue(status.can_stopped);
-
-    // @test:
-    // @- shutdown DUT1
-    rc = can_exit(handle);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get status of DUT1 (should return an error)
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-}
-
-- (void)testWhenInterfaceStarted {
-    can_bitrate_t bitrate = { TEST_BTRINDEX };
-    can_status_t status = { CANSTAT_RESET };
-    int handle = INVALID_HANDLE;
-    int rc = CANERR_FATAL;
-
-    // @pre:
-    // @- initialize DUT1 with configured settings
-    handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertLessThanOrEqual(0, handle);
-    // @- get status of DUT1 and check to be in INIT state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertTrue(status.can_stopped);
-    // @- start DUT1 with configured bit-rate settings
-    rc = can_start(handle, &bitrate);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get status of DUT1 and check to be in RUNNING state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
-    CTester tester;
-    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
-    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
-    // @- get status of DUT1 and check to be in RUNNING state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertFalse(status.can_stopped);
-#endif
-    // @test:
-    // @- shutdown DUT1
-    rc = can_exit(handle);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get status of DUT1 (should return an error)
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
 - (void)testWhenInterfaceShutdown {
@@ -282,54 +264,37 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 
     // @test:
-    // @- try to shutdown DUT1 again
-    rc = can_exit(handle);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- get status of DUT1 (should return an error)
+    // @- try to get status of DUT1 again
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-- (void)testShutdownAllInterfaces {
-    can_bitrate_t bitrate = { TEST_BTRINDEX };
-    can_status_t status = { CANSTAT_RESET };
-    int handle1 = INVALID_HANDLE;
-    int handle2 = INVALID_HANDLE;
-    int rc = CANERR_FATAL;
+//- (void)testWhenStatusBusOff {
+//        TODO: insert coin here
+//}
 
-    // @pre:
-    // @- initialize DUT1 with configured settings
-    handle1 = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertLessThanOrEqual(0, handle1);
-    // @- get status of DUT1 and check to be in INIT state
-    rc = can_status(handle1, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertTrue(status.can_stopped);
-    // @- initialize DUT2 with configured settings
-    handle2 = can_init(DUT2, TEST_CANMODE, NULL);
-    XCTAssertLessThanOrEqual(0, handle2);
-    // @- get status of DUT2 and check to be in INIT state
-    rc = can_status(handle2, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertTrue(status.can_stopped);
-    // @- start DUT2 with configured bit-rate settings
-    rc = can_start(handle2, &bitrate);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get status of DUT2 and check to be in RUNNING state
-    rc = can_status(handle2, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertFalse(status.can_stopped);
+//- (void)testWhenStatusWarningLevel {
+//        TODO: insert coin here
+//}
 
-    // @test:
-    // @- shutdown all interfaces
-    rc = can_exit(CANEXIT_ALL);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get status of DUT2 (should return an error)
-    rc = can_status(handle2, &status.byte);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- get status of DUT1 (should return an error)
-    rc = can_status(handle1, &status.byte);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-}
+//- (void)testWhenStatusBusBrror {
+//        TODO: insert coin here
+//}
+
+//- (void)testWhenStatusTransmitterBusy {
+//        TODO: insert coin here
+//}
+
+//- (void)testWhenStatusReceiverEmpty {
+//        TODO: insert coin here
+//}
+
+//- (void)testWhenStatusMessageLost {
+//        TODO: insert coin here
+//}
+
+//- (void)testWhenStatusQueueOverrun {
+//        TODO: insert coin here
+//}
 
 @end

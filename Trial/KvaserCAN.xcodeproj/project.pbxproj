@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		0F0179F42694BDAC0090F2D8 /* test_can_reset.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F32694BDAC0090F2D8 /* test_can_reset.mm */; };
 		0F0179F62694C8B20090F2D8 /* test_can_exit.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F52694C8B20090F2D8 /* test_can_exit.mm */; };
+		0F0179F82694EA630090F2D8 /* test_can_status.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F72694EA630090F2D8 /* test_can_status.mm */; };
+		0F0179FA2694F0670090F2D8 /* test_can_busload.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F92694F0670090F2D8 /* test_can_busload.mm */; };
 		0F1CB25624BCEF2400171203 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F1CB25524BCEF2400171203 /* main.cpp */; };
 		0F6FA0A026922AC8000B4CCC /* Tester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA09E26922AC8000B4CCC /* Tester.cpp */; };
 		0F6FA0A626925567000B4CCC /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA0A426925567000B4CCC /* Timer.cpp */; };
@@ -57,6 +59,8 @@
 /* Begin PBXFileReference section */
 		0F0179F32694BDAC0090F2D8 /* test_can_reset.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_reset.mm; sourceTree = "<group>"; };
 		0F0179F52694C8B20090F2D8 /* test_can_exit.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_exit.mm; sourceTree = "<group>"; };
+		0F0179F72694EA630090F2D8 /* test_can_status.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_status.mm; sourceTree = "<group>"; };
+		0F0179F92694F0670090F2D8 /* test_can_busload.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_busload.mm; sourceTree = "<group>"; };
 		0F1CB24A24BCEC5B00171203 /* KvaserCAN */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KvaserCAN; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F1CB25524BCEF2400171203 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
 		0F1CB25824BCF00800171203 /* build_no.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build_no.h; path = ../Sources/build_no.h; sourceTree = "<group>"; };
@@ -191,6 +195,8 @@
 				0F8F0AE72690ECCE00C2D974 /* test_can_start.mm */,
 				0F0179F32694BDAC0090F2D8 /* test_can_reset.mm */,
 				0F0179F52694C8B20090F2D8 /* test_can_exit.mm */,
+				0F0179F72694EA630090F2D8 /* test_can_status.mm */,
+				0F0179F92694F0670090F2D8 /* test_can_busload.mm */,
 				0F6FA09E26922AC8000B4CCC /* Tester.cpp */,
 				0F6FA09F26922AC8000B4CCC /* Tester.h */,
 				0F6FA0A426925567000B4CCC /* Timer.cpp */,
@@ -312,11 +318,13 @@
 				0F8F0ADD26908F8A00C2D974 /* KvaserUSB_Device.c in Sources */,
 				0F8F0AD826908F7300C2D974 /* MacCAN_Debug.c in Sources */,
 				0F0179F62694C8B20090F2D8 /* test_can_exit.mm in Sources */,
+				0F0179F82694EA630090F2D8 /* test_can_status.mm in Sources */,
 				0F8F0ADB26908F7F00C2D974 /* MacCAN_MsgPipe.c in Sources */,
 				0F0179F42694BDAC0090F2D8 /* test_can_reset.mm in Sources */,
 				0F8F0AE026908F9800C2D974 /* KvaserCAN_Driver.c in Sources */,
 				0F8F0AD926908F7800C2D974 /* MacCAN_Devices.c in Sources */,
 				0F8F0AE32690911900C2D974 /* test_can_init.mm in Sources */,
+				0F0179FA2694F0670090F2D8 /* test_can_busload.mm in Sources */,
 				0F8F0ACF26908D9F00C2D974 /* Testing.mm in Sources */,
 				0F8F0AD726908F6D00C2D974 /* can_btr.c in Sources */,
 				0F8F0AE82690ECCE00C2D974 /* test_can_start.mm in Sources */,
