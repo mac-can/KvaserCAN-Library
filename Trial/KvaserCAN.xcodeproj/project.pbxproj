@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F0179F42694BDAC0090F2D8 /* test_can_reset.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F32694BDAC0090F2D8 /* test_can_reset.mm */; };
 		0F1CB25624BCEF2400171203 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F1CB25524BCEF2400171203 /* main.cpp */; };
 		0F6FA0A026922AC8000B4CCC /* Tester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA09E26922AC8000B4CCC /* Tester.cpp */; };
 		0F6FA0A626925567000B4CCC /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA0A426925567000B4CCC /* Timer.cpp */; };
@@ -53,6 +54,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0F0179F32694BDAC0090F2D8 /* test_can_reset.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_reset.mm; sourceTree = "<group>"; };
 		0F1CB24A24BCEC5B00171203 /* KvaserCAN */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KvaserCAN; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F1CB25524BCEF2400171203 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
 		0F1CB25824BCF00800171203 /* build_no.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build_no.h; path = ../Sources/build_no.h; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 				0F8F0AE52690DD0600C2D974 /* test_can_test.mm */,
 				0F8F0AE22690911900C2D974 /* test_can_init.mm */,
 				0F8F0AE72690ECCE00C2D974 /* test_can_start.mm */,
+				0F0179F32694BDAC0090F2D8 /* test_can_reset.mm */,
 				0F6FA09E26922AC8000B4CCC /* Tester.cpp */,
 				0F6FA09F26922AC8000B4CCC /* Tester.h */,
 			);
@@ -306,6 +309,7 @@
 				0F8F0ADD26908F8A00C2D974 /* KvaserUSB_Device.c in Sources */,
 				0F8F0AD826908F7300C2D974 /* MacCAN_Debug.c in Sources */,
 				0F8F0ADB26908F7F00C2D974 /* MacCAN_MsgPipe.c in Sources */,
+				0F0179F42694BDAC0090F2D8 /* test_can_reset.mm in Sources */,
 				0F8F0AE026908F9800C2D974 /* KvaserCAN_Driver.c in Sources */,
 				0F8F0AD926908F7800C2D974 /* MacCAN_Devices.c in Sources */,
 				0F8F0AE32690911900C2D974 /* test_can_init.mm in Sources */,
