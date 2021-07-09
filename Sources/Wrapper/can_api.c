@@ -338,11 +338,12 @@ int can_start(int handle, const can_bitrate_t *bitrate)
     // (c) set bit-rate (with respect of the selected operation mode)
     if ((rc = KvaserCAN_SetBusParams(&can[handle].device, &busParams)) < 0)
         return (rc != CANUSB_ERROR_ILLPARA) ? rc : CANERR_BAUDRATE;
-    // (d) clear status and counters
+    // (d) clear status, counters, and the receive queue
     can[handle].status.byte = CANSTAT_RESET;
     can[handle].counters.tx = 0U;
     can[handle].counters.rx = 0U;
     can[handle].counters.err = 0U;
+    (void)CANQUE_Reset(can[handle].device.recvData.msgQueue);
     // (e) start the CAN controller with the selected operation mode
     rc = KvaserCAN_CanBusOn(&can[handle].device, can[handle].mode.mon ? true : false);
     can[handle].status.can_stopped = (rc == CANUSB_SUCCESS) ? 0 : 1;
