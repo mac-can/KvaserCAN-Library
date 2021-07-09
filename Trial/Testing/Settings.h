@@ -58,6 +58,7 @@
 
 #define TEST_FRAMES  8
 #define TEST_TRAFFIC  2048
+#define TEST_QUEUE_FULL  65536
 
 #define INVALID_HANDLE  (-1)
 

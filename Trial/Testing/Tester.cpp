@@ -58,7 +58,7 @@
 #define ERROR_MSG_LOST  (-72)
 #define ERROR_MSG_FATAL  (-79)
 
-int CTester::SendSomeFrames(int handle, int32_t channel, int frames) {
+int CTester::SendSomeFrames(int handle, int32_t channel, int frames, uint32_t canId) {
     CANAPI_Message_t trmMessage = {}, rcvMessage = {};
     CANAPI_Bitrate_t bitrate = { CANBTR_INDEX_250K };
     CANAPI_OpMode_t opMode = { CANMODE_DEFAULT };
@@ -80,10 +80,10 @@ int CTester::SendSomeFrames(int handle, int32_t channel, int frames) {
     if (retVal != CTester::NoError)
         goto exitSendSomeFrames;
     
-    trmMessage.id = 0x100;
+    trmMessage.id = canId;
     trmMessage.fdf = opMode.fdoe ? 1 : 0;
     trmMessage.brs = opMode.brse ? 1 : 0;
-    trmMessage.xtd = 0;
+    trmMessage.xtd = (canId > CAN_MAX_STD_ID) ? 1 : 0;
     trmMessage.rtr = 0;
     trmMessage.esi = 0;
     trmMessage.sts = 0;
@@ -146,7 +146,7 @@ exitSendSomeFrames:
     return retVal;
 }
 
-int CTester::ReceiveSomeFrames(int handle, int32_t channel, int frames) {
+int CTester::ReceiveSomeFrames(int handle, int32_t channel, int frames, uint32_t canId) {
     CANAPI_Message_t trmMessage = {}, rcvMessage = {};
     CANAPI_Bitrate_t bitrate = { CANBTR_INDEX_250K };
     CANAPI_OpMode_t opMode = { CANMODE_DEFAULT };
@@ -168,10 +168,10 @@ int CTester::ReceiveSomeFrames(int handle, int32_t channel, int frames) {
     if (retVal != CTester::NoError)
         goto exitReceiveSomeFrames;
     
-    trmMessage.id = 0x200;
+    trmMessage.id = canId;
     trmMessage.fdf = opMode.fdoe ? 1 : 0;
     trmMessage.brs = opMode.brse ? 1 : 0;
-    trmMessage.xtd = 0;
+    trmMessage.xtd = (canId > CAN_MAX_STD_ID) ? 1 : 0;
     trmMessage.rtr = 0;
     trmMessage.esi = 0;
     trmMessage.sts = 0;

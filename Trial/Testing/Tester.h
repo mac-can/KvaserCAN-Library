@@ -56,12 +56,14 @@ public:
     CTester() {};
     virtual ~CTester() {};
     // methods
-    int SendSomeFrames(int handle, int32_t channel, int frames = 1);
-    int ReceiveSomeFrames(int handle, int32_t channel, int frames = 1);
+    int SendSomeFrames(int handle, int32_t channel, int frames = 1, uint32_t canId = 0x100U);
+    int ReceiveSomeFrames(int handle, int32_t channel, int frames = 1, uint32_t canId = 0x200U);
 private:
     int CheckReceivedId(const CANAPI_Message_t &message, int32_t canId);
     int CheckReceivedDlc(const CANAPI_Message_t &message, uint8_t canDlc);
     int CheckReceivedData(const CANAPI_Message_t &message, uint64_t &expected);
-};
+public:
+    static uint8_t Dlc2Len(uint8_t dlc) { return CCanApi::Dlc2Len(dlc); }
+    static uint8_t Len2Dlc(uint8_t len) { return CCanApi::Len2Dlc(len); }};
 
 #endif /* TESTER_H_INCLUDED */
