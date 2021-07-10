@@ -140,6 +140,12 @@ Type `can_test --help` to display all program options.
 
 Note: _**Leaf Pro HS v2** devices can currently only be operated in **CAN 2.0 mode**!_
 
+### Testing
+
+The XCode project for the trial program includes a xctest target with one test suite for each CAN API V3 **C** interface function.
+To run the test suites or single test cases two CAN devices are required.
+General test settings can be change in the file `Settings.h`.
+
 ## Known Bugs and Caveats
 
 - For a list of known bugs and caveats see tab [Issues](https://github.com/mac-can/MacCAN-KvaserCAN/issues) in the GitHub repo.
@@ -177,4 +183,4 @@ _If you connect your CAN device to a real CAN network when using this library, y
 ### Contact
 
 E-Mail: mailto://info@mac.can.com \
-Internet: https://www.mac-can.com
+Internet: https://mac-can.github.io
