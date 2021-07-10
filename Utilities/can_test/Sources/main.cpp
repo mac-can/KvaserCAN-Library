@@ -20,7 +20,7 @@
 #include "build_no.h"
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    1
-#define VERSION_PATCH    0
+#define VERSION_PATCH    1
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(_WIN64)
@@ -81,11 +81,11 @@ static const char LICENSE[]     = "This program is free software: you can redist
 class CCanDriver : public CKvaserCAN {
 public:
     uint64_t ReceiverTest(bool checkCounter = false, uint64_t expectedNumber = 0U, bool stopOnError = false);
-    uint64_t TransmitterTest(time_t duration, MacCAN_OpMode_t opMode, uint32_t id = 0x100U, uint8_t dlc = 0U, uint32_t delay = 0U, uint64_t offset = 0U);
-    uint64_t TransmitterTest(uint64_t count, MacCAN_OpMode_t opMode, bool random = false, uint32_t id = 0x100U, uint8_t dlc = 0U, uint32_t delay = 0U, uint64_t offset = 0U);
+    uint64_t TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, uint32_t id = 0x100U, uint8_t dlc = 0U, uint32_t delay = 0U, uint64_t offset = 0U);
+    uint64_t TransmitterTest(uint64_t count, CANAPI_OpMode_t opMode, bool random = false, uint32_t id = 0x100U, uint8_t dlc = 0U, uint32_t delay = 0U, uint64_t offset = 0U);
 public:
     static int ListCanDevices(const char *vendor = NULL);
-    static int TestCanDevices(MacCAN_OpMode_t opMode, const char *vendor = NULL);
+    static int TestCanDevices(CANAPI_OpMode_t opMode, const char *vendor = NULL);
     // list of CAN interface vendors
     static const struct TCanVendor {
         int32_t id;
@@ -140,7 +140,7 @@ int main(int argc, const char * argv[]) {
     int stop_on_error = 0;
     int num_boards = 0;
     int show_version = 0;
-    char *device, *firmware, *software, *library;
+    char *device, *firmware, *software;
     struct option long_options[] = {
         {"baudrate", required_argument, 0, 'b'},
         {"bitrate", required_argument, 0, 'B'},
@@ -167,14 +167,14 @@ int main(int argc, const char * argv[]) {
         {"version", no_argument, &show_version, 1},
         {0, 0, 0, 0}
     };
-    MacCAN_Bitrate_t bitrate = {};
+    CANAPI_Bitrate_t bitrate = {};
     bitrate.index = CANBTR_INDEX_250K;
-    MacCAN_OpMode_t opMode = {};
+    CANAPI_OpMode_t opMode = {};
     opMode.byte = CANMODE_DEFAULT;
-    MacCAN_Return_t retVal = 0;
+    CANAPI_Return_t retVal = 0;
 
     /* default bit-timing */
-    MacCAN_BusSpeed_t speed = {};
+    CANAPI_BusSpeed_t speed = {};
     (void)CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate);
     (void)CCanDriver::MapBitrate2Speed(bitrate, speed);
     (void)op;
@@ -216,11 +216,11 @@ int main(int argc, const char * argv[]) {
                 case 10:   case 10000:   bitrate.index = (int32_t)CANBTR_INDEX_10K; break;
                 default:                 bitrate.index = (int32_t)-baudrate; break;
             }
-            if (CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate) != CMacCAN::NoError) {
+            if (CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
-            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CMacCAN::NoError) {
+            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
@@ -234,11 +234,11 @@ int main(int argc, const char * argv[]) {
                 fprintf(stderr, "%s: missing argument for option `--bitrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
-            if (CCanDriver::MapString2Bitrate(optarg, bitrate) != CMacCAN::NoError) {
+            if (CCanDriver::MapString2Bitrate(optarg, bitrate) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
-            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CMacCAN::NoError) {
+            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
@@ -448,25 +448,25 @@ int main(int argc, const char * argv[]) {
         case 'L':  /* option `--list-boards[=<vendor>]' (-L) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
 #ifdef COMPILE_MACCAN_SOURCES
-            (void)CMacCAN::Initializer();
+            (void)CCanApi::Initializer();
 #endif
             /* list all supported interfaces */
             num_boards = CCanDriver::ListCanDevices(optarg);
             fprintf(stdout, "Number of supported CAN interfaces: %i\n", num_boards);
 #ifdef COMPILE_MACCAN_SOURCES
-            (void)CMacCAN::Finalizer();
+            (void)CCanApi::Finalizer();
 #endif
             return (num_boards >= 0) ? 0 : 1;
         case 'T':  /* option `--test-boards[=<vendor>]' (-T) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
 #ifdef COMPILE_MACCAN_SOURCES
-            (void)CMacCAN::Initializer();
+            (void)CCanApi::Initializer();
 #endif
             /* list all available interfaces */
             num_boards = CCanDriver::TestCanDevices(opMode, optarg);
             fprintf(stdout, "Number of present CAN interfaces: %i\n", num_boards);
 #ifdef COMPILE_MACCAN_SOURCES
-            (void)CMacCAN::Finalizer();
+            (void)CCanApi::Finalizer();
 #endif
             return (num_boards >= 0) ? 0 : 1;
         case 'h':
@@ -545,8 +545,8 @@ int main(int argc, const char * argv[]) {
     fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
     /* - load the MacCAN driver */
 #ifdef COMPILE_MACCAN_SOURCES
-    retVal = CMacCAN::Initializer();
-    if (retVal != CMacCAN::NoError) {
+    retVal = CCanApi::Initializer();
+    if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ fatal: MacCAN driver could not be loaded (%i)\n", retVal);
         return retVal;
     }
@@ -600,10 +600,10 @@ int main(int argc, const char * argv[]) {
     fprintf(stdout, "Hardware=%s...", CCanDriver::m_CanDevices[channel].name);
     fflush (stdout);
     retVal = canDriver.InitializeChannel(CCanDriver::m_CanDevices[channel].adapter, opMode);
-    if (retVal != CMacCAN::NoError) {
+    if (retVal != CCanApi::NoError) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be initialized (%i)", retVal);
-        if (retVal == CMacCAN::NotSupported)
+        if (retVal == CCanApi::NotSupported)
             fprintf(stderr, " - possibly CAN operating mode %02Xh not supported", opMode.byte);
         fputc('\n', stderr);
         goto finalize;
@@ -634,7 +634,7 @@ int main(int argc, const char * argv[]) {
     }
     fflush(stdout);
     retVal = canDriver.StartController(bitrate);
-    if (retVal != CMacCAN::NoError) {
+    if (retVal != CCanApi::NoError) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be started (%i)\n", retVal);
         goto teardown;
@@ -660,22 +660,20 @@ int main(int argc, const char * argv[]) {
         fprintf(stdout, "Hardware: %s\n", device);
     if ((firmware = canDriver.GetFirmwareVersion()) != NULL)
         fprintf(stdout, "Firmware: %s\n", firmware);
-    if ((library = CMacCAN::GetVersion()) != NULL)
-        fprintf(stdout, "Software: %s\n", library);
     if ((software = CCanDriver::GetVersion()) != NULL)
-        fprintf(stdout, "          %s\n", software);
+        fprintf(stdout, "Software: %s\n", software);
 teardown:
     /* - teardown the interface*/
     retVal = canDriver.TeardownChannel();
-    if (retVal != CMacCAN::NoError) {
+    if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ error: CAN Controller could not be reset (%i)\n", retVal);
         goto finalize;
     }
 finalize:
     /* - release the MacCAN driver */
 #ifdef COMPILE_MACCAN_SOURCES
-    retVal = CMacCAN::Finalizer();
-    if (retVal != CMacCAN::NoError) {
+    retVal = CCanApi::Finalizer();
+    if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ fatal: MacCAN driver could not be released (%i)\n", retVal);
     }
 #endif
@@ -719,7 +717,7 @@ int CCanDriver::ListCanDevices(const char *vendor) {
     return n;
 }
 
-int CCanDriver::TestCanDevices(MacCAN_OpMode_t opMode, const char *vendor) {
+int CCanDriver::TestCanDevices(CANAPI_OpMode_t opMode, const char *vendor) {
     int32_t library = EOF; int n = 0;
 
     if (vendor != NULL) {
@@ -738,16 +736,16 @@ int CCanDriver::TestCanDevices(MacCAN_OpMode_t opMode, const char *vendor) {
             fprintf(stdout, "Hardware=%s...", CCanDriver::m_CanDevices[i].name);
             fflush(stdout);
             EChannelState state;
-            MacCAN_Return_t retVal = CCanDriver::ProbeChannel(CCanDriver::m_CanDevices[i].adapter, opMode, state);
-            if ((retVal == CMacCAN::NoError) || (retVal == CMacCAN::IllegalParameter)) {
+            CANAPI_Return_t retVal = CCanDriver::ProbeChannel(CCanDriver::m_CanDevices[i].adapter, opMode, state);
+            if ((retVal == CCanApi::NoError) || (retVal == CCanApi::IllegalParameter)) {
                 CTimer::Delay(333U * CTimer::MSEC);  // to fake probing a hardware
                 switch (state) {
-                    case CMacCAN::ChannelOccupied: fprintf(stdout, "occupied\n"); n++; break;
-                    case CMacCAN::ChannelAvailable: fprintf(stdout, "available\n"); n++; break;
-                    case CMacCAN::ChannelNotAvailable: fprintf(stdout, "not available\n"); break;
+                    case CCanApi::ChannelOccupied: fprintf(stdout, "occupied\n"); n++; break;
+                    case CCanApi::ChannelAvailable: fprintf(stdout, "available\n"); n++; break;
+                    case CCanApi::ChannelNotAvailable: fprintf(stdout, "not available\n"); break;
                     default: fprintf(stdout, "not testable\n"); break;
                 }
-                if (retVal == CMacCAN::IllegalParameter)
+                if (retVal == CCanApi::IllegalParameter)
                     fprintf(stderr, "+++ warning: CAN operation mode not supported (%02xh)\n", opMode.byte);
             } else
                 fprintf(stdout, "FAILED!\n");
@@ -756,9 +754,9 @@ int CCanDriver::TestCanDevices(MacCAN_OpMode_t opMode, const char *vendor) {
     return n;
 }
 
-uint64_t CCanDriver::TransmitterTest(time_t duration, MacCAN_OpMode_t opMode, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
-    MacCAN_Message_t message;
-    MacCAN_Return_t retVal;
+uint64_t CCanDriver::TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
+    CANAPI_Message_t message;
+    CANAPI_Return_t retVal;
 
     time_t start = time(NULL);
     uint64_t frames = 0;
@@ -794,9 +792,9 @@ uint64_t CCanDriver::TransmitterTest(time_t duration, MacCAN_OpMode_t opMode, ui
 retry_tx_test:
         calls++;
         retVal = WriteMessage(message);
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stderr, "%s", prompt[(frames++ % 4)]);
-        else if ((retVal == CMacCAN::TransmitterBusy) && running)
+        else if ((retVal == CCanApi::TransmitterBusy) && running)
             goto retry_tx_test;
         else
             errors++;
@@ -823,9 +821,9 @@ retry_tx_test:
     return frames;
 }
 
-uint64_t CCanDriver::TransmitterTest(uint64_t count, MacCAN_OpMode_t opMode, bool random, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
-    MacCAN_Message_t message;
-    MacCAN_Return_t retVal;
+uint64_t CCanDriver::TransmitterTest(uint64_t count, CANAPI_OpMode_t opMode, bool random, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
+    CANAPI_Message_t message;
+    CANAPI_Return_t retVal;
 
     time_t start = time(NULL);
     uint64_t frames = 0;
@@ -868,9 +866,9 @@ uint64_t CCanDriver::TransmitterTest(uint64_t count, MacCAN_OpMode_t opMode, boo
 retry_tx_test:
         calls++;
         retVal = WriteMessage(message);
-        if (retVal == CMacCAN::NoError)
+        if (retVal == CCanApi::NoError)
             fprintf(stderr, "%s", prompt[(frames++ % 4)]);
-        else if ((retVal == CMacCAN::TransmitterBusy) && running)
+        else if ((retVal == CCanApi::TransmitterBusy) && running)
             goto retry_tx_test;
         else
             errors++;
@@ -900,9 +898,9 @@ retry_tx_test:
     return frames;}
 
 uint64_t CCanDriver::ReceiverTest(bool checkCounter, uint64_t expectedNumber, bool stopOnError) {
-    MacCAN_Message_t message;
-    MacCAN_Status_t status;
-    MacCAN_Return_t retVal;
+    CANAPI_Message_t message;
+    CANAPI_Status_t status;
+    CANAPI_Return_t retVal;
 
     time_t start = time(NULL);
     uint64_t frames = 0U;
@@ -915,7 +913,7 @@ uint64_t CCanDriver::ReceiverTest(bool checkCounter, uint64_t expectedNumber, bo
     fflush (stdout);
     for (;;) {
         retVal = ReadMessage(message);
-        if (retVal == CMacCAN::NoError) {
+        if (retVal == CCanApi::NoError) {
             fprintf(stderr, "%s", prompt[(frames++ % 4)]);
             // checking PCBUSB issue #198 (aka. MACCAN-2)
             if (checkCounter) {
@@ -941,7 +939,7 @@ uint64_t CCanDriver::ReceiverTest(bool checkCounter, uint64_t expectedNumber, bo
                     fprintf(stdout, "ISSUE#198!\n");
                     fprintf(stderr, "+++ data inconsistent: %" PRIu64 " received / %" PRIu64 " expected\n", data, expectedNumber);
                     retVal = GetStatus(status);
-                    if ((retVal == CMacCAN::NoError) && ((status.byte & ~CANSTAT_RESET) != 0x00U)) {
+                    if ((retVal == CCanApi::NoError) && ((status.byte & ~CANSTAT_RESET) != 0x00U)) {
                         fprintf(stderr, "    status register:%s%s%s%s%s%s (%02X)\n",
                             (status.bus_off) ? " BO" : "",
                             (status.warning_level) ? " WL" : "",
@@ -964,7 +962,7 @@ uint64_t CCanDriver::ReceiverTest(bool checkCounter, uint64_t expectedNumber, bo
                 }
                 expectedNumber++;  // depending on DLC received data may wrap around while number is counting up!
             }
-        } else if (retVal != CMacCAN::ReceiverEmpty)
+        } else if (retVal != CCanApi::ReceiverEmpty)
             errors++;
         calls++;
         if (!running) {

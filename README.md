@@ -24,41 +24,49 @@ Note: _This project does not aim to implement Kvaser´s CANlib library on macOS.
 
 ```C++
 /// \name   KvaserCAN API
-/// \brief  MacCAN driver for Kvaser CAN Leaf interfaces
-/// \note   See CMacCAN for a description of the overridden methods
+/// \brief  CAN API V3 driver for Kvaser CAN interfaces
+/// \note   See CCanApi for a description of the overridden methods
 /// \{
-class CKvaserCAN : public CMacCAN {
+class CKvaserCAN : public CCanApi {
 public:
     // constructor / destructor
     CKvaserCAN();
     ~CKvaserCAN();
 
-    // CMacCAN overrides
-    static MacCAN_Return_t ProbeChannel(int32_t channel, MacCAN_OpMode_t opMode, const void *param, EChannelState &state);
-    static MacCAN_Return_t ProbeChannel(int32_t channel, MacCAN_OpMode_t opMode, EChannelState &state);
+    // CCanApi overrides
+    static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, const void *param, EChannelState &state);
+    static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, EChannelState &state);
 
-    MacCAN_Return_t InitializeChannel(int32_t channel, MacCAN_OpMode_t opMode, const void *param = NULL);
-    MacCAN_Return_t TeardownChannel();
-    MacCAN_Return_t SignalChannel();
+    CANAPI_Return_t InitializeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, const void *param = NULL);
+    CANAPI_Return_t TeardownChannel();
+    CANAPI_Return_t SignalChannel();
 
-    MacCAN_Return_t StartController(MacCAN_Bitrate_t bitrate);
-    MacCAN_Return_t ResetController();
+    CANAPI_Return_t StartController(CANAPI_Bitrate_t bitrate);
+    CANAPI_Return_t ResetController();
 
-    MacCAN_Return_t WriteMessage(MacCAN_Message_t message, uint16_t timeout = 0U);
-    MacCAN_Return_t ReadMessage(MacCAN_Message_t &message, uint16_t timeout = CANREAD_INFINITE);
+    CANAPI_Return_t WriteMessage(CANAPI_Message_t message, uint16_t timeout = 0U);
+    CANAPI_Return_t ReadMessage(CANAPI_Message_t &message, uint16_t timeout = CANREAD_INFINITE);
 
-    MacCAN_Return_t GetStatus(MacCAN_Status_t &status);
-    MacCAN_Return_t GetBusLoad(uint8_t &load);
+    CANAPI_Return_t GetStatus(CANAPI_Status_t &status);
+    CANAPI_Return_t GetBusLoad(uint8_t &load);
 
-    MacCAN_Return_t GetBitrate(MacCAN_Bitrate_t &bitrate);
-    MacCAN_Return_t GetBusSpeed(MacCAN_BusSpeed_t &speed);
+    CANAPI_Return_t GetBitrate(CANAPI_Bitrate_t &bitrate);
+    CANAPI_Return_t GetBusSpeed(CANAPI_BusSpeed_t &speed);
 
-    MacCAN_Return_t GetProperty(uint16_t param, void *value, uint32_t nbyte);
-    MacCAN_Return_t SetProperty(uint16_t param, const void *value, uint32_t nbyte);
+    CANAPI_Return_t GetProperty(uint16_t param, void *value, uint32_t nbyte);
+    CANAPI_Return_t SetProperty(uint16_t param, const void *value, uint32_t nbyte);
 
     char *GetHardwareVersion();  // (for compatibility reasons)
     char *GetFirmwareVersion();  // (for compatibility reasons)
     static char *GetVersion();  // (for compatibility reasons)
+
+    static CANAPI_Return_t MapIndex2Bitrate(int32_t index, CANAPI_Bitrate_t &bitrate);
+    static CANAPI_Return_t MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate);
+    static CANAPI_Return_t MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length);
+    static CANAPI_Return_t MapBitrate2Speed(CANAPI_Bitrate_t bitrate, CANAPI_BusSpeed_t &speed);
+
+    static uint8_t Dlc2Len(uint8_t dlc) { return CCanApi::Dlc2Len(dlc); }
+    static uint8_t Len2Dlc(uint8_t len) { return CCanApi::Len2Dlc(len); }
 };
 /// \}
 ```
@@ -116,8 +124,8 @@ Type `can_test --help` to display all program options.
 #### macOS Big Sur
 
 - macOS Big Sur (11.4) on a MacBook Pro (2019)
-- Apple clang version 12.0.5 (clang-1205.0.22.9)
-- Xcode Version 12.5 (12E262)
+- Apple clang version 12.0.5 (clang-1205.0.22.11)
+- Xcode Version 12.5.1 (12E507)
 
 #### macOS High Sierra
 
@@ -131,6 +139,12 @@ Type `can_test --help` to display all program options.
 - Kvaser Leaf Pro HS v2 (EAN: 73-30130-00843-4)
 
 Note: _**Leaf Pro HS v2** devices can currently only be operated in **CAN 2.0 mode**!_
+
+### Testing
+
+The XCode project for the trial program includes a xctest target with one test suite for each CAN API V3 **C** interface function.
+To run the test suites or single test cases two CAN devices are required.
+General test settings can be change in the file `Settings.h`.
 
 ## Known Bugs and Caveats
 
@@ -169,6 +183,4 @@ _If you connect your CAN device to a real CAN network when using this library, y
 ### Contact
 
 E-Mail: mailto://info@mac.can.com \
-Internet: https://www.mac-can.com
-
-##### *Enjoy!*
+Internet: https://mac-can.github.io

@@ -53,14 +53,16 @@ HOME_DIR = ../..
 
 SOURCE_DIR = $(HOME_DIR)/Sources
 CANAPI_DIR = $(HOME_DIR)/Sources/CANAPI
-MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN_Core
-KVASER_DIR = $(HOME_DIR)/Sources/KvaserCAN_Driver
+MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
+KVASER_DIR = $(HOME_DIR)/Sources/Driver
+WRAPPER_DIR = $(HOME_DIR)/Sources/Wrapper
 
-OBJECTS = $(OUTDIR)/KvaserCAN.o $(OUTDIR)/KvaserCAN_Driver.o \
-	$(OUTDIR)/KvaserUSB_Device.o $(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
-	$(OUTDIR)/MacCAN.o $(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
+OBJECTS = $(OUTDIR)/KvaserCAN.o \
+	$(OUTDIR)/KvaserCAN_Driver.o $(OUTDIR)/KvaserUSB_Device.o \
+	$(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
+	$(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
 	$(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
-	$(OUTDIR)/can_btr.o
+	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
 
 ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
@@ -100,7 +102,8 @@ DEFINES = -DOPTION_KVASERCAN_DYLIB=1 \
 HEADERS = -I$(SOURCE_DIR) \
 	-I$(CANAPI_DIR) \
 	-I$(MACCAN_DIR) \
-	-I$(KVASER_DIR)
+	-I$(KVASER_DIR) \
+	-I$(WRAPPER_DIR)
 
 CFLAGS += -O2 -Wall -Wno-parentheses \
 	-fno-strict-aliasing \
@@ -125,9 +128,9 @@ ARFLAGS = r
 endif
 
 
-CXX = g++
-CC = gcc
-LD = g++
+CXX = clang++
+CXX = clang
+LD = clang++
 AR = ar
 RM = rm -f
 CP = cp -f
@@ -157,7 +160,7 @@ incdir:
 	@mkdir -p $(INCDIR)
 	@cp $(SOURCE_DIR)/KvaserCAN_Defines.h $(INCDIR)
 	@cp $(SOURCE_DIR)/KvaserCAN.h $(INCDIR)
-	@cp $(MACCAN_DIR)/MacCAN.h $(INCDIR)
+	@cp $(CANAPI_DIR)/CANAPI.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Types.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Defines.h $(INCDIR)
 
@@ -192,9 +195,6 @@ $(OUTDIR)/LeafLight.o: $(KVASER_DIR)/LeafLight.c
 $(OUTDIR)/LeafPro.o: $(KVASER_DIR)/LeafPro.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/MacCAN.o: $(MACCAN_DIR)/MacCAN.cpp
-	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
-
 $(OUTDIR)/MacCAN_Debug.o: $(MACCAN_DIR)/MacCAN_Debug.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
@@ -208,6 +208,9 @@ $(OUTDIR)/MacCAN_MsgQueue.o: $(MACCAN_DIR)/MacCAN_MsgQueue.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/MacCAN_MsgPipe.o: $(MACCAN_DIR)/MacCAN_MsgPipe.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
+$(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c

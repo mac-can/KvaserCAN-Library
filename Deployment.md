@@ -17,14 +17,15 @@ _All rights reserved._
    when required and commit them with commit comment:
   - `Update CAN API V3 sources to rev. `_nnn_ \
     `- `_list of major changes_
-2. Update the MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN_Core` from SVN repo
+2. Update the MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN` from SVN repo
    when required and commit them with commit comment:
   - `Update MacCAN-Core sources to rev. `_nnn_ \
     `- `_list of major changes_
 3. Check and update the version and date information in the following files:
   - `$(PROJROOT)/Sources/KvaserCAN.h`
   - `$(PROJROOT)/Sources/KvaserCAN.cpp`
-  - `$(PROJROOT)/Sources/KvaserCAN_Wrapper/can_api.cpp`
+  - `$(PROJROOT)/Sources/Wrapper/can_api.c`
+  - `$(PROJROOT)/Sources/Swift/CANAPI.swift`
   - `$(PROJROOT)/Libraries/CANAPI/Makefile`<sup>*</sup>
   - `$(PROJROOT)/Libraries/KvaserCAN/Makefile`<sup>*</sup>
   - `$(PROJROOT)/Utilities/can_moni/Sources/main.cpp`
@@ -54,13 +55,15 @@ _All rights reserved._
 6. Build and try out the examples (repair them when necessary);
   - `$(PROJROOT)/Examples/C++`
   - `$(PROJROOT)/Examples/Python`
+  - `$(PROJROOT)/Examples/Swift`
 
 ### Pull Request
 
 1. Update the `README.md` (e.g. development environment, supported devices, etc.).
 2. Push the feature branch onto the remote repo.
 3. Create a pull request and name it somehow like '**Release Candidate #**_n_'.
-4. Review the changes and merge the feature branch into the default branch.
+4. Review the changes and wait for Travis CI build result.
+5. Merge the feature branch into the default branch.
 
 ## Release Tag
 

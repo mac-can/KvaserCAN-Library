@@ -55,9 +55,9 @@
  *               |  SJW  |          BRP          |SAM|   TSEG2   |     TSEG1     |<br>
  *               +-7-+-6-+-5-+---+---+---+---+-0-+-7-+-6-+---+-4-+-3-+---+---+-0-+<br>
  *
- *  @author      $Author: eris $
+ *  @author      $Author: haumea $
  *
- *  @version     $Rev: 995 $
+ *  @version     $Rev: 1006 $
  *
  *  @addtogroup  can_btr
  *  @{
@@ -153,33 +153,33 @@ int btr_bitrate2speed(const btr_bitrate_t *bitrate, bool fdoe, bool brse, btr_sp
     bool data = brse;                   // to convert also data bit-rate settings
     int rc = BTRERR_FATAL;              // return value
 
-    if(!bitrate || !speed)              // check for null-pointer
+    if (!bitrate || !speed)             // check for null-pointer
         return BTRERR_NULLPTR;
 
-    if(bitrate->index <= 0) {           // CAN 2.0 bit-rate index
-        if((rc = btr_index2bitrate(bitrate->index, &temporary)) != BTRERR_NOERROR)
+    if (bitrate->index <= 0) {          // CAN 2.0 bit-rate index
+        if ((rc = btr_index2bitrate(bitrate->index, &temporary)) != BTRERR_NOERROR)
             return rc;
         fdoe = brse = data = false;     //   could not be CAN FD!
     }
     else {                              // CAN FD bit-rate settings
-        if((bitrate->btr.nominal.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
+        if ((bitrate->btr.nominal.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
             return BTRERR_BAUDRATE;
-        if((bitrate->btr.nominal.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
+        if ((bitrate->btr.nominal.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
             return BTRERR_BAUDRATE;
-        if((bitrate->btr.nominal.tseg2 < BTR_NOMINAL_TSEG2_MIN) || (BTR_NOMINAL_TSEG2_MAX < bitrate->btr.nominal.tseg2))
+        if ((bitrate->btr.nominal.tseg2 < BTR_NOMINAL_TSEG2_MIN) || (BTR_NOMINAL_TSEG2_MAX < bitrate->btr.nominal.tseg2))
             return BTRERR_BAUDRATE;
-        if((bitrate->btr.nominal.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
+        if ((bitrate->btr.nominal.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
             return BTRERR_BAUDRATE;
 #if (OPTION_CAN_2_0_ONLY == 0)
-        if(fdoe && (brse ||             //   bit-rate switching enabled
+        if (fdoe && (brse ||             //   bit-rate switching enabled
                    (bitrate->btr.data.brp && bitrate->btr.data.tseg1 && bitrate->btr.data.tseg2 && bitrate->btr.data.sjw))) {
-            if((bitrate->btr.data.brp < BTR_DATA_BRP_MIN) || (BTR_DATA_BRP_MAX < bitrate->btr.data.brp))
+            if ((bitrate->btr.data.brp < BTR_DATA_BRP_MIN) || (BTR_DATA_BRP_MAX < bitrate->btr.data.brp))
                 return BTRERR_BAUDRATE;
-            if((bitrate->btr.data.tseg1 < BTR_DATA_TSEG1_MIN) || (BTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
+            if ((bitrate->btr.data.tseg1 < BTR_DATA_TSEG1_MIN) || (BTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
                 return BTRERR_BAUDRATE;
-            if((bitrate->btr.data.tseg2 < BTR_DATA_TSEG2_MIN) || (BTR_DATA_TSEG2_MAX < bitrate->btr.data.tseg2))
+            if ((bitrate->btr.data.tseg2 < BTR_DATA_TSEG2_MIN) || (BTR_DATA_TSEG2_MAX < bitrate->btr.data.tseg2))
                 return BTRERR_BAUDRATE;
-            if((bitrate->btr.data.sjw < BTR_DATA_SJW_MIN) || (BTR_DATA_SJW_MAX < bitrate->btr.data.sjw))
+            if ((bitrate->btr.data.sjw < BTR_DATA_SJW_MIN) || (BTR_DATA_SJW_MAX < bitrate->btr.data.sjw))
                 return BTRERR_BAUDRATE;
             data = true;                //   if we have all data register set, but not the brse flag!
         }
@@ -205,7 +205,7 @@ int btr_bitrate2speed(const btr_bitrate_t *bitrate, bool fdoe, bool brse, btr_sp
      *
      * (2) sp = (1 + tseg1) / (1 + tseg1 + tseg2)
      */
-    if(data) {
+    if (data) {
         speed->data.speed = (float)(temporary.btr.frequency)
                           / (float)(temporary.btr.data.brp * (1u + temporary.btr.data.tseg1 + temporary.btr.data.tseg2));
         speed->data.samplepoint = (float)(1u + temporary.btr.data.tseg1)
@@ -223,7 +223,7 @@ int btr_bitrate2speed(const btr_bitrate_t *bitrate, bool fdoe, bool brse, btr_sp
 
 int btr_speed2bitrate(const btr_speed_t *speed, btr_bitrate_t *bitrate)
 {
-    if(!bitrate || !speed)              // check for null-pointer
+    if (!bitrate || !speed)             // check for null-pointer
         return BTRERR_NULLPTR;
 
     /* note: there could be serveral settings to match the speed! */
@@ -236,14 +236,14 @@ int btr_index2bitrate(const btr_index_t index, btr_bitrate_t *bitrate)
     btr_sja1000_t btr0btr1 = 0x0000u;   // SJA1000 registers
     int rc = BTRERR_FATAL;              // return value
 
-    if(!bitrate)                        // check for null-pointer
+    if (!bitrate)                       // check for null-pointer
         return BTRERR_NULLPTR;
 
     /* first convert the index into SJA1000 registers */
-    if((rc = btr_index2sja1000(index, &btr0btr1)) != BTRERR_NOERROR)
+    if ((rc = btr_index2sja1000(index, &btr0btr1)) != BTRERR_NOERROR)
         return rc;
     /* then convert the SJA1000 registers into bit-rate settings */
-    if((rc = btr_sja10002bitrate(btr0btr1, bitrate)) != BTRERR_NOERROR)
+    if ((rc = btr_sja10002bitrate(btr0btr1, bitrate)) != BTRERR_NOERROR)
         return rc;
 
     return BTRERR_NOERROR;
@@ -255,15 +255,15 @@ int btr_bitrate2index(const btr_bitrate_t *bitrate, btr_index_t *index)
     int rc = BTRERR_FATAL;              // return value
     int i;
 
-    if(!bitrate || !index)              // check for null-pointer
+    if (!bitrate || !index)             // check for null-pointer
         return BTRERR_NULLPTR;
 
     /* first convert bit-rate into SJA1000 register BTR0 and BTR1 */
-    if((rc = btr_bitrate2sja1000(bitrate, &btr0btr1)) != BTRERR_NOERROR)
+    if ((rc = btr_bitrate2sja1000(bitrate, &btr0btr1)) != BTRERR_NOERROR)
         return rc;
     /* then look in the table of predefined bit-timing indexes */
-    for(i = 0; i < BTR_SJA1000_MAX_INDEX; i++) {
-        if(btr0btr1 == sja1000_btr0btr1[i]) {
+    for (i = 0; i < BTR_SJA1000_MAX_INDEX; i++) {
+        if (btr0btr1 == sja1000_btr0btr1[i]) {
             *index = (btr_index_t)(i * (-1));
             return BTRERR_NOERROR;
         }
@@ -274,7 +274,7 @@ int btr_bitrate2index(const btr_bitrate_t *bitrate, btr_index_t *index)
 
 int btr_string2bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool *brse)
 {
-    if(!bitrate || !string || !brse)    // check for null-pointer
+    if (!bitrate || !string || !brse)   // check for null-pointer
         return BTRERR_NULLPTR;
 
     return scan_bitrate(string, bitrate, brse);
@@ -286,32 +286,32 @@ int btr_bitrate2string(const btr_bitrate_t *bitrate, bool brse, btr_string_t str
     bool data = brse;                   // to convert also data bit-rate settings
     int rc = BTRERR_FATAL;              // return value
 
-    if(!bitrate || !string)             // check for null-pointer
+    if (!bitrate || !string)            // check for null-pointer
         return BTRERR_NULLPTR;
 
-    if(bitrate->index <= 0) {           // CAN 2.0 bit-rate index
-        if((rc = btr_index2bitrate(bitrate->index, &temporary)) != BTRERR_NOERROR)
+    if (bitrate->index <= 0) {          // CAN 2.0 bit-rate index
+        if ((rc = btr_index2bitrate(bitrate->index, &temporary)) != BTRERR_NOERROR)
             return rc;
     }
     else {                              // CAN FD bit-rate settings
-        if((bitrate->btr.nominal.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
+        if ((bitrate->btr.nominal.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
             return BTRERR_BAUDRATE;
-        if((bitrate->btr.nominal.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
+        if ((bitrate->btr.nominal.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
             return BTRERR_BAUDRATE;
-        if((bitrate->btr.nominal.tseg2 < BTR_NOMINAL_TSEG2_MIN) || (BTR_NOMINAL_TSEG2_MAX < bitrate->btr.nominal.tseg2))
+        if ((bitrate->btr.nominal.tseg2 < BTR_NOMINAL_TSEG2_MIN) || (BTR_NOMINAL_TSEG2_MAX < bitrate->btr.nominal.tseg2))
             return BTRERR_BAUDRATE;
-        if((bitrate->btr.nominal.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
+        if ((bitrate->btr.nominal.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
             return BTRERR_BAUDRATE;
 #if (OPTION_CAN_2_0_ONLY == 0)
-        if(brse ||                      //   bit-rate switching enabled
+        if (brse ||                     //   bit-rate switching enabled
           (bitrate->btr.data.brp && bitrate->btr.data.tseg1 && bitrate->btr.data.tseg2 && bitrate->btr.data.sjw)) {
-            if((bitrate->btr.data.brp < BTR_DATA_BRP_MIN) || (BTR_DATA_BRP_MAX < bitrate->btr.data.brp))
+            if ((bitrate->btr.data.brp < BTR_DATA_BRP_MIN) || (BTR_DATA_BRP_MAX < bitrate->btr.data.brp))
                 return BTRERR_BAUDRATE;
-            if((bitrate->btr.data.tseg1 < BTR_DATA_TSEG1_MIN) || (BTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
+            if ((bitrate->btr.data.tseg1 < BTR_DATA_TSEG1_MIN) || (BTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
                 return BTRERR_BAUDRATE;
-            if((bitrate->btr.data.tseg2 < BTR_DATA_TSEG2_MIN) || (BTR_DATA_TSEG2_MAX < bitrate->btr.data.tseg2))
+            if ((bitrate->btr.data.tseg2 < BTR_DATA_TSEG2_MIN) || (BTR_DATA_TSEG2_MAX < bitrate->btr.data.tseg2))
                 return BTRERR_BAUDRATE;
-            if((bitrate->btr.data.sjw < BTR_DATA_SJW_MIN) || (BTR_DATA_SJW_MAX < bitrate->btr.data.sjw))
+            if ((bitrate->btr.data.sjw < BTR_DATA_SJW_MIN) || (BTR_DATA_SJW_MAX < bitrate->btr.data.sjw))
                 return BTRERR_BAUDRATE;
             data = true;                //   if we have all data register set, but not the brse flag!
         }
@@ -319,7 +319,7 @@ int btr_bitrate2string(const btr_bitrate_t *bitrate, bool brse, btr_string_t str
         memcpy(&temporary, bitrate, sizeof(btr_bitrate_t));
     }
 #if (OPTION_CAN_2_0_ONLY == 0)
-    if(!data) {                         // overwrite data settings with nominal settings when not brse flag
+    if (!data) {                        // overwrite data settings with nominal settings when not brse flag
         temporary.btr.data.brp = temporary.btr.nominal.brp;
         temporary.btr.data.tseg1 = temporary.btr.nominal.tseg1;
         temporary.btr.data.tseg2 = temporary.btr.nominal.tseg2;
@@ -331,7 +331,7 @@ int btr_bitrate2string(const btr_bitrate_t *bitrate, bool brse, btr_string_t str
 
 int btr_sja10002bitrate(const btr_sja1000_t btr0btr1, btr_bitrate_t *bitrate)
 {
-    if(!bitrate)                        // check for null-pointer
+    if (!bitrate)                       // check for null-pointer
         return BTRERR_NULLPTR;
 
     memset(bitrate, 0, sizeof(btr_bitrate_t));
@@ -349,23 +349,23 @@ int btr_sja10002bitrate(const btr_sja1000_t btr0btr1, btr_bitrate_t *bitrate)
 
 int btr_bitrate2sja1000(const btr_bitrate_t *bitrate, btr_sja1000_t *btr0btr1)
 {
-    if(!bitrate || !btr0btr1)           // check for null-pointer
+    if (!bitrate || !btr0btr1)          // check for null-pointer
         return BTRERR_NULLPTR;
 
-    if(bitrate->btr.frequency != BTR_FREQ_SJA1000)
+    if (bitrate->btr.frequency != BTR_FREQ_SJA1000)
         return BTRERR_BAUDRATE;
-    if((bitrate->btr.nominal.sjw < BTR_SJA1000_SJW_MIN) || (BTR_SJA1000_SJW_MAX < bitrate->btr.nominal.sjw))
+    if ((bitrate->btr.nominal.sjw < BTR_SJA1000_SJW_MIN) || (BTR_SJA1000_SJW_MAX < bitrate->btr.nominal.sjw))
         return BTRERR_BAUDRATE;
-    if((bitrate->btr.nominal.brp < BTR_SJA1000_BRP_MIN) || (BTR_SJA1000_BRP_MAX < bitrate->btr.nominal.brp))
+    if ((bitrate->btr.nominal.brp < BTR_SJA1000_BRP_MIN) || (BTR_SJA1000_BRP_MAX < bitrate->btr.nominal.brp))
         return BTRERR_BAUDRATE;
-    if(/*(bitrate->btr.nominal.sam < BTR_SJA1000_SAM_MIN) ||*/ (BTR_SJA1000_SAM_MAX < bitrate->btr.nominal.sam))
+    if (/*(bitrate->btr.nominal.sam < BTR_SJA1000_SAM_MIN) ||*/ (BTR_SJA1000_SAM_MAX < bitrate->btr.nominal.sam))
         return BTRERR_BAUDRATE;
-    if((bitrate->btr.nominal.tseg2 < BTR_SJA1000_TSEG2_MIN) || (BTR_SJA1000_TSEG2_MAX < bitrate->btr.nominal.tseg2))
+    if ((bitrate->btr.nominal.tseg2 < BTR_SJA1000_TSEG2_MIN) || (BTR_SJA1000_TSEG2_MAX < bitrate->btr.nominal.tseg2))
         return BTRERR_BAUDRATE;
-    if((bitrate->btr.nominal.tseg1 < BTR_SJA1000_TSEG1_MIN) || (BTR_SJA1000_TSEG1_MAX < bitrate->btr.nominal.tseg1))
+    if ((bitrate->btr.nominal.tseg1 < BTR_SJA1000_TSEG1_MIN) || (BTR_SJA1000_TSEG1_MAX < bitrate->btr.nominal.tseg1))
         return BTRERR_BAUDRATE;
 #if (0)
-    if(bitrate->btr.data.brp || bitrate->btr.data.tseg1 || bitrate->btr.data.tseg2 || bitrate->btr.data.sjw)
+    if (bitrate->btr.data.brp || bitrate->btr.data.tseg1 || bitrate->btr.data.tseg2 || bitrate->btr.data.sjw)
         return BTRERR_BAUDRATE;
 #endif
     /* make SJA1000 register BTR0 and BTR1 (don't forget the -1) */
@@ -382,13 +382,13 @@ int btr_index2sja1000(const btr_index_t index, btr_sja1000_t *btr0btr1)
 {
     int rc = BTRERR_FATAL;              // return value
 
-    if(!btr0btr1)                       // check for null-pointer
+    if (!btr0btr1)                      // check for null-pointer
         return BTRERR_NULLPTR;
-    if(index > 0)                       // must be negative value
+    if (index > 0)                      // must be negative value
         return BTRERR_FATAL;
 
     /* get SJA1000 register BTR0 and BTR1 from table */
-    if(-BTR_SJA1000_MAX_INDEX < index) {
+    if (-BTR_SJA1000_MAX_INDEX < index) {
         *btr0btr1 = sja1000_btr0btr1[-index];
         rc = BTRERR_NOERROR;
     }
@@ -407,8 +407,8 @@ static int print_bitrate(const btr_bitrate_t *bitrate, bool brse, btr_string_t s
 
     /* note: all fields have been checked for their limits before */
 
-    if(bitrate->btr.frequency == BTR_FREQ_SJA1000) { // CAN 2.0
-        if(sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u,nom_sam=%u",
+    if (bitrate->btr.frequency == BTR_FREQ_SJA1000) { // CAN 2.0
+        if (sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u,nom_sam=%u",
                    bitrate->btr.frequency,
                    bitrate->btr.nominal.brp,
                    bitrate->btr.nominal.tseg1,
@@ -418,8 +418,8 @@ static int print_bitrate(const btr_bitrate_t *bitrate, bool brse, btr_string_t s
                    return BTRERR_BAUDRATE;
     }
 #if (OPTION_CAN_2_0_ONLY == 0)
-    else if(!brse) {                    // CAN FD: long frames only
-        if(sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u",
+    else if (!brse) {                   // CAN FD: long frames only
+        if (sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u",
                    bitrate->btr.frequency,
                    bitrate->btr.nominal.brp,
                    bitrate->btr.nominal.tseg1,
@@ -428,7 +428,7 @@ static int print_bitrate(const btr_bitrate_t *bitrate, bool brse, btr_string_t s
             return BTRERR_BAUDRATE;
     }
     else {                              // CAN FD: long and fast frames
-        if(sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u,"
+        if (sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u,"
                                      "data_brp=%u,data_tseg1=%u,data_tseg2=%u,data_sjw=%u",
                    bitrate->btr.frequency,
                    bitrate->btr.nominal.brp,
@@ -443,7 +443,7 @@ static int print_bitrate(const btr_bitrate_t *bitrate, bool brse, btr_string_t s
     }
 #else
     else {  // FIXME!
-        if(sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u",
+        if (sprintf(string, "f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u",
                    bitrate->btr.frequency,
                    bitrate->btr.nominal.brp,
                    bitrate->btr.nominal.tseg1,
@@ -474,27 +474,27 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
     float data_sample_point = 0.0;
     float tmp_float = 0.0;
 #endif
-    if(strlen(string) >= BTR_STRING_LENGTH)
+    if (strlen(string) >= BTR_STRING_LENGTH)
         return BTRERR_BAUDRATE;
     strncpy(str, string, BTR_STRING_LENGTH);
     ptr = str;
 
-    while(*ptr != '\0') {               // lexical analysis:
+    while (*ptr != '\0') {              // lexical analysis:
         // skip blanks and scan: <key> '='
-        if(!(key = skip_blanks(ptr)))
+        if (!(key = skip_blanks(ptr)))
             return BTRERR_BAUDRATE;
-        if(!(ptr = scan_key(key)))
+        if (!(ptr = scan_key(key)))
             return BTRERR_BAUDRATE;
         // skip blanks and scan: <value> [',']
-        if(!(value = skip_blanks(ptr)))
+        if (!(value = skip_blanks(ptr)))
             return BTRERR_BAUDRATE;
-        if(!(ptr = scan_value(value)))
+        if (!(ptr = scan_value(value)))
             return BTRERR_BAUDRATE;
         // evaluate <key> '=' <value> [',']
-        if(strlen(value) == 0 || strlen(value) > 9)
+        if (strlen(value) == 0 || strlen(value) > 9)
             return BTRERR_BAUDRATE;
         // convert <value> = [0-9]+ and less or equal '999999999'
-        if(strchr(value, '.') == NULL)
+        if (strchr(value, '.') == NULL)
             tmp = (uint32_t)strtol(value, NULL, 10);
 #if (0)
         else
@@ -504,14 +504,14 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
             return BTRERR_BAUDRATE;
 #endif
         // f_clock: (80000000, 60000000, 40000000, 30000000, 24000000, 20000000)
-        if(!strcasecmp(key, "f_clock")) {
+        if (!strcasecmp(key, "f_clock")) {
 #ifndef OPTION_CANBTR_PEAK_FREQUENCIES
-            if((BTR_FREQUENCY_MIN <= tmp) && (tmp <= BTR_FREQUENCY_MAX))
+            if ((BTR_FREQUENCY_MIN <= tmp) && (tmp <= BTR_FREQUENCY_MAX))
                 temporary.btr.frequency = (int32_t)tmp;
             else
                 return BTRERR_BAUDRATE;
 #else
-            switch(tmp) {
+            switch (tmp) {
             case 80000000u: temporary.btr.frequency = BTR_FREQ_80MHz; break;
             case 60000000u: temporary.btr.frequency = BTR_FREQ_60MHz; break;
             case 40000000u: temporary.btr.frequency = BTR_FREQ_40MHz; break;
@@ -523,14 +523,14 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
 #endif
         }
         // f_clock_mhz: (80, 60, 40, 30, 24, 20)
-        else if(!strcasecmp(key, "f_clock_mhz")) {
+        else if (!strcasecmp(key, "f_clock_mhz")) {
 #ifndef OPTION_CANBTR_PEAK_FREQUENCIES
-            if((BTR_FREQUENCY_MHZ_MIN <= tmp) && (tmp <= BTR_FREQUENCY_MHZ_MAX))
+            if ((BTR_FREQUENCY_MHZ_MIN <= tmp) && (tmp <= BTR_FREQUENCY_MHZ_MAX))
                 temporary.btr.frequency = (int32_t)tmp * (int32_t)1000000;
             else
                 return BTRERR_BAUDRATE;
 #else
-            switch(tmp) {
+            switch (tmp) {
             case 80u: temporary.btr.frequency = BTR_FREQ_80MHz; break;
             case 60u: temporary.btr.frequency = BTR_FREQ_60MHz; break;
             case 40u: temporary.btr.frequency = BTR_FREQ_40MHz; break;
@@ -542,37 +542,37 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
 #endif
         }
         // nom_brp: 1..1024
-        else if(!strcasecmp(key, "nom_brp")) {
-            if((BTR_NOMINAL_BRP_MIN <= tmp) && (tmp <= BTR_NOMINAL_BRP_MAX))
+        else if (!strcasecmp(key, "nom_brp")) {
+            if ((BTR_NOMINAL_BRP_MIN <= tmp) && (tmp <= BTR_NOMINAL_BRP_MAX))
                 temporary.btr.nominal.brp = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
         }
         // nom_tseg1: 1..256
-        else if(!strcasecmp(key, "nom_tseg1")) {
-            if((BTR_NOMINAL_TSEG1_MIN <= tmp) && (tmp <= BTR_NOMINAL_TSEG1_MAX))
+        else if (!strcasecmp(key, "nom_tseg1")) {
+            if ((BTR_NOMINAL_TSEG1_MIN <= tmp) && (tmp <= BTR_NOMINAL_TSEG1_MAX))
                 temporary.btr.nominal.tseg1 = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
         }
         // nom_tseg2: 1..128
-        else if(!strcasecmp(key, "nom_tseg2")) {
-            if((BTR_NOMINAL_TSEG2_MIN <= tmp) && (tmp <= BTR_NOMINAL_TSEG2_MAX))
+        else if (!strcasecmp(key, "nom_tseg2")) {
+            if ((BTR_NOMINAL_TSEG2_MIN <= tmp) && (tmp <= BTR_NOMINAL_TSEG2_MAX))
                 temporary.btr.nominal.tseg2 = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
         }
         // nom_sjw: 1..128
-        else if(!strcasecmp(key, "nom_sjw")) {
-            if((BTR_NOMINAL_SJW_MIN <= tmp) && (tmp <= BTR_NOMINAL_SJW_MAX))
+        else if (!strcasecmp(key, "nom_sjw")) {
+            if ((BTR_NOMINAL_SJW_MIN <= tmp) && (tmp <= BTR_NOMINAL_SJW_MAX))
                 temporary.btr.nominal.sjw = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
         }
         // nom_sam: (none)
-        else if(!strcasecmp(key, "nom_sam")) {
+        else if (!strcasecmp(key, "nom_sam")) {
 #if (0)
-            if((BTR_NOMINAL_SAM_MIN <= tmp) && (tmp <= BTR_NOMINAL_SAM_MAX))
+            if ((BTR_NOMINAL_SAM_MIN <= tmp) && (tmp <= BTR_NOMINAL_SAM_MAX))
                 temporary.btr.nominal.sam = (uint8_t)tmp;
             else
                 return BTRERR_BAUDRATE;
@@ -583,39 +583,39 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
         }
 #if (OPTION_CAN_2_0_ONLY == 0)
         // data_brp: 1..1024
-        else if(!strcasecmp(key, "data_brp")) {
-            if((BTR_DATA_BRP_MIN <= tmp) && (tmp <= BTR_DATA_BRP_MAX))
+        else if (!strcasecmp(key, "data_brp")) {
+            if ((BTR_DATA_BRP_MIN <= tmp) && (tmp <= BTR_DATA_BRP_MAX))
                 temporary.btr.data.brp = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
             data = true;
         }
         // data_tseg1: 1..32
-        else if(!strcasecmp(key, "data_tseg1")) {
-            if((BTR_DATA_TSEG1_MIN <= tmp) && (tmp <= BTR_DATA_TSEG1_MAX))
+        else if (!strcasecmp(key, "data_tseg1")) {
+            if ((BTR_DATA_TSEG1_MIN <= tmp) && (tmp <= BTR_DATA_TSEG1_MAX))
                 temporary.btr.data.tseg1 = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
             data = true;
         }
         // data_tseg2: 1..16
-        else if(!strcasecmp(key, "data_tseg2")) {
-            if((BTR_DATA_TSEG2_MIN <= tmp) && (tmp <= BTR_DATA_TSEG2_MAX))
+        else if (!strcasecmp(key, "data_tseg2")) {
+            if ((BTR_DATA_TSEG2_MIN <= tmp) && (tmp <= BTR_DATA_TSEG2_MAX))
                 temporary.btr.data.tseg2 = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
             data = true;
         }
         // data_sjw: 1..16
-        else if(!strcasecmp(key, "data_sjw")) {
-            if((BTR_DATA_SJW_MIN <= tmp) && (tmp <= BTR_DATA_SJW_MAX))
+        else if (!strcasecmp(key, "data_sjw")) {
+            if ((BTR_DATA_SJW_MIN <= tmp) && (tmp <= BTR_DATA_SJW_MAX))
                 temporary.btr.data.sjw = (uint16_t)tmp;
             else
                 return BTRERR_BAUDRATE;
             data = true;
         }
         // data_ssp_offset: (none)
-        else if(!strcasecmp(key, "data_ssp_offset")) {
+        else if (!strcasecmp(key, "data_ssp_offset")) {
             // not used
         }
 #if (0)
