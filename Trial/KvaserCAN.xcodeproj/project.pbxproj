@@ -11,6 +11,7 @@
 		0F0179F62694C8B20090F2D8 /* test_can_exit.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F52694C8B20090F2D8 /* test_can_exit.mm */; };
 		0F0179F82694EA630090F2D8 /* test_can_status.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F72694EA630090F2D8 /* test_can_status.mm */; };
 		0F0179FA2694F0670090F2D8 /* test_can_busload.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0179F92694F0670090F2D8 /* test_can_busload.mm */; };
+		0F0850F926997E7A0026FE24 /* test_can_kill.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F0850F826997E7A0026FE24 /* test_can_kill.mm */; };
 		0F19F8312696118700EE961C /* test_can_hardware.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F19F8302696118700EE961C /* test_can_hardware.mm */; };
 		0F19F8332696119E00EE961C /* test_can_software.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F19F8322696119E00EE961C /* test_can_software.mm */; };
 		0F19F835269611BD00EE961C /* test_can_version.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F19F834269611BD00EE961C /* test_can_version.mm */; };
@@ -67,6 +68,7 @@
 		0F0179F52694C8B20090F2D8 /* test_can_exit.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_exit.mm; sourceTree = "<group>"; };
 		0F0179F72694EA630090F2D8 /* test_can_status.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_status.mm; sourceTree = "<group>"; };
 		0F0179F92694F0670090F2D8 /* test_can_busload.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_busload.mm; sourceTree = "<group>"; };
+		0F0850F826997E7A0026FE24 /* test_can_kill.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_kill.mm; sourceTree = "<group>"; };
 		0F19F8302696118700EE961C /* test_can_hardware.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_hardware.mm; sourceTree = "<group>"; };
 		0F19F8322696119E00EE961C /* test_can_software.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_software.mm; sourceTree = "<group>"; };
 		0F19F834269611BD00EE961C /* test_can_version.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_version.mm; sourceTree = "<group>"; };
@@ -208,6 +210,7 @@
 				0F19F8382696432200EE961C /* test_can_read.mm */,
 				0F19F83A2696433F00EE961C /* test_can_write.mm */,
 				0F0179F32694BDAC0090F2D8 /* test_can_reset.mm */,
+				0F0850F826997E7A0026FE24 /* test_can_kill.mm */,
 				0F0179F52694C8B20090F2D8 /* test_can_exit.mm */,
 				0F0179F72694EA630090F2D8 /* test_can_status.mm */,
 				0F0179F92694F0670090F2D8 /* test_can_busload.mm */,
@@ -332,6 +335,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F8F0ADC26908F8400C2D974 /* MacCAN_MsgQueue.c in Sources */,
+				0F0850F926997E7A0026FE24 /* test_can_kill.mm in Sources */,
 				0F6FA0A026922AC8000B4CCC /* Tester.cpp in Sources */,
 				0F8F0ADD26908F8A00C2D974 /* KvaserUSB_Device.c in Sources */,
 				0F8F0AD826908F7300C2D974 /* MacCAN_Debug.c in Sources */,
