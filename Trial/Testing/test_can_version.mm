@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC15.1: Query CAN API version number at any place in a standard sequence (cf. SmokeTest).
+//
+// @expected: Not NULL
+//
 - (void)testAnyPlaceAnyTime {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };

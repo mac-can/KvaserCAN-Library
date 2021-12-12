@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC05.1: Send a CAN message with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -86,7 +90,7 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, mode.byte, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- try to send a message from DUT1 with wrong handle -1
+    // @- try to send a message from DUT1 with invalid handle -1
     rc = can_write(INVALID_HANDLE, &message, 0U);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -96,7 +100,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to send a message from DUT1 with wrong handle INT32_MIN
+    // @- try to send a message from DUT1 with invalid handle INT32_MIN
     rc = can_write(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -116,7 +120,7 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to send a message from DUT1 with wrong handle INT32_MIN
+    // @- try to send a message from DUT1 with invalid handle INT32_MIN
     rc = can_write(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -128,6 +132,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.2: Give a NULL pointer as argument for parameter 'message'.
+//
+// @expected: CANERR_NULLPTR
+//
 - (void)testWithNullPointerForMessage {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -146,7 +154,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 
     // @test:
-    // @- send a message from DUT1 with NULL for message
+    // @- send a message from DUT1 with NULL for parameter 'message'
     rc = can_write(handle, NULL, 0U);
     XCTAssertEqual(CANERR_NULLPTR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -177,6 +185,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.3: Send a CAN message when interface is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -196,13 +208,13 @@
     memset(message.data, 0, CANFD_MAX_LEN);
 
     // @test:
-    // @- try to send a message from DUT1 with wrong handle -1
+    // @- try to send a message from DUT1 with invalid handle -1
     rc = can_write(INVALID_HANDLE, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to send a message from DUT1 with wrong handle INT32_MIN
+    // @- try to send a message from DUT1 with invalid handle INT32_MIN
     rc = can_write(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to send a message from DUT1 with wrong handle INT32_MIN
+    // @- try to send a message from DUT1 with invalid handle INT32_MIN
     rc = can_write(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
@@ -243,6 +255,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.4: Send a CAN message when CAN controller is not started.
+//
+// @expected: CANERR_OFFLINE
+//
 - (void)testWhenInterfaceNotStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -305,6 +321,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.5: Send a CAN message when CAN controller already stopped.
+//
+// @expected: CANERR_OFFLINE
+//
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -367,6 +387,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.6: Send a CAN message when interface already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -427,6 +451,10 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC05.7: Send CAN messages with valid 11-bit identifier and check its correct transmission on receiver side.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithValid11bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -522,6 +550,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.8: Send CAN messages with invalid 11-bit identifier.
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testWithInvalid11bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -638,6 +670,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.9: Send CAN messages with valid 29-bit identifier and check its correct transmission on receiver side.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithValid29bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -733,6 +769,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.10: Send CAN messages with invalid 29-bit identifier.
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testWithInvalid29bitIdentifier  {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -801,6 +841,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.11: Send CAN messages with valid Data Length Code and check its correct transmission on receiver side.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithValidDataLengthCode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -896,6 +940,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.12: Send CAN messages with invalid Data Length Code.
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testWithInvalidDataLengthCode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -994,6 +1042,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.13: Send a CAN message with flag XTD when operation mode NXTD is selected (suppress extended frames).
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testCheckFlagXtdWhenOperationModeNoXtd {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1076,6 +1128,10 @@
     }
 }
 
+// @xctest TC05.14: Send a CAN message with flag RTR set when operation mode NRTR is selected (suppress remote frames).
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testCheckFlagRtrWhenOperationModeNoRtr {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1158,6 +1214,10 @@
     }
 }
 
+// @xctest TC05.15: Send a CAN FD message with flag FDF set in CAN 2.0 operation mode (FDOE = 0).
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testCheckFlagFdfInCan20OperationMode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1241,6 +1301,10 @@
     }
 }
 
+// @xctest TC05.16: Send a CAN FD message with flag BRS set in CAN 2.0 operation mode (FDOE = 0 and BRSE = 0).
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testCheckFlagBrsInCan20OperationMode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1324,6 +1388,10 @@
     }
 }
 
+// @xctest TC05.17: Send a CAN FD message with flag BRS set in CAN FD operation mode (FDOE = 1) when bit-rate switching is not enabled (BRSE = 0).
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testCheckFlagBrsWithoutFlagFdf {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1407,6 +1475,10 @@
     }
 }
 
+// @xctest TC05.18: Send a CAN message with flag STS set (status message).
+//
+// @expected: CANERR_ILLPARA
+//
 - (void)testCheckFlagSts {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1474,6 +1546,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC05.19: Send a CAN message when the transmitter is busy (transmitt queue full).
+//
+// @expected: CANERR_TX_BUSY
+//
 - (void)testWhenTransmitterIsBusy {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };

@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC06.1: Stop CAN controller with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -96,13 +100,13 @@
     XCTAssertFalse(status.can_stopped);
 #endif
     // @test:
-    // @- try to stop DUT1 with wrong handle -1
+    // @- try to stop DUT1 with invalid handle -1
     rc = can_reset(INVALID_HANDLE);
     XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to stop DUT1 with wrong handle INT32_MIN
+    // @- try to stop DUT1 with invalid handle INT32_MIN
     rc = can_reset(INT32_MAX);
     XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to stop DUT1 with wrong handle INT32_MIN
+    // @- try to stop DUT1 with invalid handle INT32_MIN
     rc = can_reset(INT32_MIN);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -132,6 +136,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC06.2: Stop CAN controller when interface is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -139,13 +147,13 @@
     int rc = CANERR_FATAL;
     
     // @test:
-    // @- try to stop DUT1 with wrong handle -1
+    // @- try to stop DUT1 with invalid handle -1
     rc = can_reset(INVALID_HANDLE);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to stop DUT1 with wrong handle INT32_MIN
+    // @- try to stop DUT1 with invalid handle INT32_MIN
     rc = can_reset(INT32_MAX);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to stop DUT1 with wrong handle INT32_MIN
+    // @- try to stop DUT1 with invalid handle INT32_MIN
     rc = can_reset(INT32_MIN);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
@@ -186,7 +194,11 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceNotStarted {
+// @xctest TC06.3: Stop CAN controller when interface initialized (but CAN controller not started).
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
@@ -246,6 +258,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC06.4: Stop CAN controller when it was stopped before.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -306,6 +322,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC06.5: Stop CAN controller when interface already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };

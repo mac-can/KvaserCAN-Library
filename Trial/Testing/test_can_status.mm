@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC09.1: Get CAN controller status with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -116,6 +120,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC09.2: Give a NULL pointer as argument for parameter 'status'.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithNullPointerForStatus {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -125,7 +133,7 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get status of DUT1 with NULL for status
+    // @- get status of DUT1 with NULL for parameter 'status'
     rc = can_status(handle, NULL);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -135,7 +143,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get status of DUT1 with NULL for status
+    // @- get status of DUT1 with NULL for parameter 'status'
     rc = can_status(handle, NULL);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -155,7 +163,7 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get status of DUT1 with NULL for status
+    // @- get status of DUT1 with NULL for parameter 'status'
     rc = can_status(handle, NULL);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -167,6 +175,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC09.3: Get CAN controller status when interface is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -174,13 +186,13 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to get status of DUT1 with wrong handle -1
+    // @- try to get status of DUT1 with invalid handle -1
     rc = can_status(INVALID_HANDLE, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get status of DUT1 with wrong handle INT32_MIN
+    // @- try to get status of DUT1 with invalid handle INT32_MIN
     rc = can_status(INT32_MAX, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get status of DUT1 with wrong handle INT32_MIN
+    // @- try to get status of DUT1 with invalid handle INT32_MIN
     rc = can_status(INT32_MIN, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
@@ -221,6 +233,34 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC09.4: Get CAN controller status when interface initialized (but CAN controller not started).
+//
+// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+//
+//- (void)testWhenInterfaceInitialized {
+//        TODO: insert coin here
+//}
+
+// @xctest TC09.5: Get CAN controller status when CAN controller started.
+//
+// @expected: CANERR_NOERROR and status bit 'can_stopped' = 0
+//
+//- (void)testWhenInterfaceStarted {
+//        TODO: insert coin here
+//}
+
+// @xctest TC09.6: Get CAN controller status when CAN controller stopped.
+//
+// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+//
+//- (void)testWhenInterfaceStopped {
+//        TODO: insert coin here
+//}
+
+// @xctest TC09.7: Get CAN controller status when interface already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -269,30 +309,44 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC09.8: tbd.
+//
 //- (void)testWhenStatusBusOff {
 //        TODO: insert coin here
 //}
 
+// @xctest TC09.9: tbd.
+//
 //- (void)testWhenStatusWarningLevel {
 //        TODO: insert coin here
 //}
 
+// @xctest TC09.10: tbd.
+//
 //- (void)testWhenStatusBusBrror {
 //        TODO: insert coin here
 //}
 
+// @xctest TC09.11: tbd.
+//
 //- (void)testWhenStatusTransmitterBusy {
 //        TODO: insert coin here
 //}
 
+// @xctest TC09.12: tbd.
+//
 //- (void)testWhenStatusReceiverEmpty {
 //        TODO: insert coin here
 //}
 
+// @xctest TC09.13: tbd.
+//
 //- (void)testWhenStatusMessageLost {
 //        TODO: insert coin here
 //}
 
+// @xctest TC09.14: tbd.
+//
 //- (void)testWhenStatusQueueOverrun {
 //        TODO: insert coin here
 //}

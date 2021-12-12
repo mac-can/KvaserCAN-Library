@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC11.1: Get CAN bit-rate settings with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -74,7 +78,7 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- try to get bit-rate of DUT1 with wrong handle -1
+    // @- try to get bit-rate of DUT1 with invalid handle -1
     rc = can_bitrate(INVALID_HANDLE, &bitrate, NULL);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -84,7 +88,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
+    // @- try to get bit-rate of DUT1 with invalid handle INT32_MIN
     rc = can_bitrate(INT32_MAX, &bitrate, NULL);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -104,7 +108,7 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
+    // @- try to get bit-rate of DUT1 with invalid handle INT32_MIN
     rc = can_bitrate(INT32_MIN, &bitrate, NULL);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -116,6 +120,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC11.2: Give a NULL pointer as argument for parameter 'bitrate'.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithNullPointerForBitrate {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -136,7 +144,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     
     // @test:
-    // @- get bit-rate of DUT1 with NULL for bitrate
+    // @- get bit-rate of DUT1 with NULL for parameter 'bitrate'
     rc = can_bitrate(handle, NULL, &speed);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -167,6 +175,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC11.3: Give a NULL pointer as argument for parameter 'speed'.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithNullPointerForSpeed {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -217,6 +229,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC11.4: Give a NULL pointer as argument for parameter 'bitrate' and 'speed'.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithNullPointerForBoth {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -267,6 +283,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC11.5: Get CAN bit-rate settings when interface is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -274,13 +294,13 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to get bit-rate of DUT1 with wrong handle -1
+    // @- try to get bit-rate of DUT1 with invalid handle -1
     rc = can_bitrate(INVALID_HANDLE, &bitrate, NULL);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
+    // @- try to get bit-rate of DUT1 with invalid handle INT32_MIN
     rc = can_bitrate(INT32_MAX, &bitrate, NULL);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
+    // @- try to get bit-rate of DUT1 with invalid handle INT32_MIN
     rc = can_bitrate(INT32_MIN, &bitrate, NULL);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
@@ -321,7 +341,11 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceNotStarted {
+// @xctest TC11.6: Get CAN bit-rate settings when interface initialized (but CAN controller not started).
+//
+// @expected: CANERR_OFFLINE
+//
+- (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
@@ -371,6 +395,18 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC11.7: Get CAN bit-rate settings when CAN controller started.
+//
+// @expected: CANERR_NOERROR
+//
+//- (void)testWhenInterfaceStarted {
+//        TODO: insert coin here
+//}
+
+// @xctest TC11.8: Get CAN bit-rate settings when CAN controller stopped.
+//
+// @expected: CANERR_OFFLINE
+//
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -421,6 +457,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC11.9: Get CAN bit-rate settings when interface already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -468,7 +508,11 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-- (void)testWithDifferentCan20BitrateSettings {
+// @xctest TC11.10: Get CAN bit-rate settings when CAN controller started with various CAN 2.0 bit-rate settings and check for correctness.
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWithVariousCan20BitrateSettings {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
@@ -530,7 +574,11 @@
     }
 }
 
-//- (void)testWithDifferentCanFdBitrateSettings {
+// @xctest TC11.11: Get CAN bit-rate settings when CAN controller started with various CAN FD bit-rate settings and check for correctness.
+//
+// @expected: CANERR_NOERROR
+//
+//- (void)testWithVariousCanFdBitrateSettings {
 //        TODO: insert coin here
 //}
 

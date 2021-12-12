@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC13.1: Get hardware version with invalid interface handle(s).
+//
+// @expected: NULL
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -75,7 +79,7 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- try to get version of DUT1 with wrong handle -1
+    // @- try to get version of DUT1 with invalid handle -1
     string = can_hardware(INVALID_HANDLE);
     XCTAssertTrue(NULL == string);
     // @- get status of DUT1 and check to be in INIT state
@@ -85,7 +89,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get version of DUT1 with wrong handle INT32_MIN
+    // @- try to get version of DUT1 with invalid handle INT32_MIN
     string = can_hardware(INT32_MAX);
     XCTAssertTrue(NULL == string);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -105,7 +109,7 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get version of DUT1 with wrong handle INT32_MIN
+    // @- try to get version of DUT1 with invalid handle INT32_MIN
     string = can_hardware(INT32_MIN);
     XCTAssertTrue(NULL == string);
     // @- get status of DUT1 and check to be in INIT state
@@ -117,6 +121,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC13.2: Get hardware version when interface is not initialized.
+//
+// @expected: NULL
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -125,13 +133,13 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to get version of DUT1 with wrong handle -1
+    // @- try to get version of DUT1 with invalid handle -1
     string = can_hardware(INVALID_HANDLE);
     XCTAssertTrue(NULL == string);
-    // @- try to get version of DUT1 with wrong handle INT32_MIN
+    // @- try to get version of DUT1 with invalid handle INT32_MIN
     string = can_hardware(INT32_MAX);
     XCTAssertTrue(NULL == string);
-    // @- try to get version of DUT1 with wrong handle INT32_MIN
+    // @- try to get version of DUT1 with invalid handle INT32_MIN
     string = can_hardware(INT32_MIN);
     XCTAssertTrue(NULL == string);
 
@@ -171,6 +179,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC13.3: Get hardware version when interface already shutdown.
+//
+// @expected: NULL
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -220,6 +232,10 @@
     XCTAssertTrue(NULL == string);
 }
 
+// @xctest TC13.4: Query hardware version at any place in a standard sequence (cf. SmokeTest).
+//
+// @expected: Not NULL
+//
 - (void)testAnyPlaceAnyTime {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };

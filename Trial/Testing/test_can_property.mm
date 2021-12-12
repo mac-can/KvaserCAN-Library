@@ -64,7 +64,21 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-- (void)testWithInvalidHandle {
+// @xctest TC12.1.1: Get property values from library with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
+//- (void)testWithInvalidHandleFromLibrary {
+//        TODO: insert coin here
+//}
+
+// @xctest TC12.1: Get property values from device with invalid interface handle(s).
+//
+// @todo: rework this
+//
+// @expected: CANERR_HANDLE
+//
+- (void)testWithInvalidHandleFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -75,7 +89,7 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get property VERSION from DUT1 with wrong handle -1 (should succeed)
+    // @- get property VERSION from DUT1 with invalid handle -1 (should succeed)
     rc = can_property(INVALID_HANDLE, CANPROP_GET_VERSION, value, CANPROP_MAX_BUFFER_SIZE);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -85,7 +99,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get property LIBRARY_ID from DUT1 with wrong handle INT32_MIN (should succeed)
+    // @- get property LIBRARY_ID from DUT1 with invalid handle INT32_MIN (should succeed)
     rc = can_property(INT32_MIN, CANPROP_GET_LIBRARY_ID, value, CANPROP_MAX_BUFFER_SIZE);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -105,7 +119,7 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get property DEVICE_TYPE from DUT1 with wrong handle INT32_MAX
+    // @- try to get property DEVICE_TYPE from DUT1 with invalid handle INT32_MAX
     rc = can_property(INT32_MAX, CANPROP_GET_DEVICE_TYPE, value, CANPROP_MAX_BUFFER_SIZE);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -117,6 +131,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC12.2: Give a NULL pointer as argument for parameter 'value'
+//
+// @expected: CANERR_NULLPTR and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
+//
 - (void)testWithNullPointerForValue {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -244,7 +262,21 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWithWrongParmeterValue {
+// @xctest TC12.3.1: Get property values from libray with invalid value for parameter 'param'.
+//
+// @expected: CANERR_NOTSUPP
+//
+//- (void)testWithInvalidParmeterValueFromLibrary {
+//        TODO: insert coin here
+//}
+
+// @xctest TC12.3.2: Get property values from device with invalid value for parameter 'param'.
+//
+// @todo: rework this
+//
+// @expected: CANERR_NOTSUPP
+//
+- (void)testWithInvalidParmeterValueFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -298,7 +330,21 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWithWrongParameterSize {
+// @xctest TC12.4.1: Get property values from library with wrong parameter size (too small).
+//
+// @expected: CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
+//
+//- (void)testWithWrongParameterSizeFromLibrary {
+//        TODO: insert coin here
+//}
+
+// @xctest TC12.4.2: Get property values from device with wrong parameter size (too small).
+//
+// @todo: rework this
+//
+// @expected: CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
+//
+- (void)testWithWrongParameterSizeFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -427,8 +473,21 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC12.5.1: Get property values from library when interface is not initialized.
+//
+// @expected: CANERR_NOERROR
+//
+//- (void)testWhenInterfaceNotInitializedFromLibrary {
+//        TODO: insert coin here
+//}
 
-- (void)testWhenInterfaceNotInitialized {
+// @xctest TC12.5.2: Get property values from device when interface is not initialized.
+//
+// @todo: rework this
+//
+// @expected: CANERR_NOTINIT
+//
+- (void)testWhenInterfaceNotInitializedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -436,7 +495,7 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- get library property from DUT1 with wrong handle -1 (should succeed)
+    // @- get library property from DUT1 with invalid handle -1 (should succeed)
     rc = can_property(INVALID_HANDLE, CANPROP_GET_SPEC, value, sizeof(uint16_t));
     XCTAssertEqual(CANERR_NOERROR, rc);
     rc = can_property(INVALID_HANDLE, CANPROP_GET_VERSION, value, sizeof(uint16_t));
@@ -465,10 +524,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     rc = can_property(INVALID_HANDLE, CANPROP_SET_NEXT_CHANNEL, NULL, 0U);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- get property LIBRARY_ID from DUT1 with wrong handle INT32_MIN (should succeed)
+    // @- get property LIBRARY_ID from DUT1 with invalid handle INT32_MIN (should succeed)
     rc = can_property(INT32_MIN, CANPROP_GET_LIBRARY_ID, value, CANPROP_MAX_BUFFER_SIZE);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get property DEVICE_TYPE from DUT1 with wrong handle INT32_MAX
+    // @- try to get property DEVICE_TYPE from DUT1 with invalid handle INT32_MAX
     rc = can_property(INT32_MAX, CANPROP_GET_DEVICE_TYPE, value, CANPROP_MAX_BUFFER_SIZE);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
@@ -509,7 +568,21 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceNotStarted {
+// @xctest TC12.6.1: Get property values fom library when interface initialized (but CAN controller not started).
+//
+// @expected: CANERR_NOERROR
+//
+//- (void)testWhenInterfaceInitializedFromLibrary {
+//        TODO: insert coin here
+//}
+
+// @xctest TC12.6.2: Get property values fom device when interface initialized (but CAN controller not started).
+//
+// @todo: rework this
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWhenInterfaceInitializedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -638,7 +711,19 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceStarted {
+// @xctest TC12.7.1: Get property values from library when CAN controller started.
+//
+// @expected: CANERR_NOERROR
+//
+//- (void)testWhenInterfaceStartedFromLibrary {
+//        TODO: insert coin here
+//}
+
+// @xctest TC12.7.2: Get property values from device when CAN controller started.
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWhenInterfaceStartedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -766,7 +851,21 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceStopped {
+// @xctest TC12.8.1: Get property values from library when CAN controller stopped.
+//
+// @expected: CANERR_NOERROR
+//
+//- (void)testWhenInterfaceStoppedFromLibray {
+//        TODO: insert coin here
+//}
+
+// @xctest TC12.8.2: Get property values from device when CAN controller stopped.
+//
+// @todo: rework this
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWhenInterfaceStoppedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -894,7 +993,21 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceShutdown {
+// @xctest TC12.9.1: Get property values from library when interface already shutdown.
+//
+// @expected: CANERR_NOERROR
+//
+//- (void)testWhenInterfaceShutdownFromLibray {
+//        TODO: insert coin here
+//}
+
+// @xctest TC12.9.2: Get property values from device when interface already shutdown.
+//
+// @todo: rework this
+//
+// @expected: CANERR_NOTINIT
+//
+- (void)testWhenInterfaceShutdownFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};

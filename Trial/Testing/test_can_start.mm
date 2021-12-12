@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC03.1: Start CAN controller with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -80,13 +84,13 @@
     XCTAssertTrue(status.can_stopped);
 
     // @test:
-    // @- try to start DUT1 with wrong handle -1
+    // @- try to start DUT1 with invalid handle -1
     rc = can_start(INVALID_HANDLE, &bitrate);
     XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to start DUT1 with wrong handle INT32_MIN
+    // @- try to start DUT1 with invalid handle INT32_MIN
     rc = can_start(INT32_MAX, &bitrate);
     XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to start DUT1 with wrong handle INT32_MIN
+    // @- try to start DUT1 with invalid handle INT32_MIN
     rc = can_start(INT32_MIN, &bitrate);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -124,6 +128,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.2: Give a NULL pointer as argument for parameter 'bitrate'.
+//
+// @expected: CANERR_NULLPTR
+//
 - (void)testWithNullPointerForBitrate {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -140,7 +148,7 @@
     XCTAssertTrue(status.can_stopped);
 
     // @test:
-    // @- try to start DUT1 with NULL pointer for paramete bitrate
+    // @- try to start DUT1 with NULL pointer for parameter 'bitrate'
     rc = can_start(handle, NULL);
     XCTAssertEqual(CANERR_NULLPTR, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -178,6 +186,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.3: Start CAN controller when interface is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -226,6 +238,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.4: Start CAN controller when CAN controller is not started.
+//
+// @expected: CANERR_ONLINE
+//
 - (void)testWhenInterfaceStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -280,6 +296,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.5: Start CAN controller when it was stopped before.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -350,6 +370,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.6: Start CAN controller when interface already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -398,6 +422,10 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC03.7: Start CAN controller with CiA bit-timing index 0 (1000 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex0 {
     can_bitrate_t bitrate = { CANBTR_INDEX_1M };
     can_status_t status = { CANSTAT_RESET };
@@ -448,6 +476,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.8: Start CAN controller with CiA bit-timing index 1 (800 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex1 {
     can_bitrate_t bitrate = { CANBTR_INDEX_800K };
     can_status_t status = { CANSTAT_RESET };
@@ -498,6 +530,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.9: Start CAN controller with CiA bit-timing index 2 (500 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex2 {
     can_bitrate_t bitrate = { CANBTR_INDEX_500K };
     can_status_t status = { CANSTAT_RESET };
@@ -548,6 +584,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.10: Start CAN controller with CiA bit-timing index 3 (250 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex3 {
     can_bitrate_t bitrate = { CANBTR_INDEX_250K };
     can_status_t status = { CANSTAT_RESET };
@@ -598,6 +638,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.11: Start CAN controller with CiA bit-timing index 4 (125 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex4 {
     can_bitrate_t bitrate = { CANBTR_INDEX_125K };
     can_status_t status = { CANSTAT_RESET };
@@ -648,6 +692,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.12: Start CAN controller with CiA bit-timing index 5 (100 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex5 {
     can_bitrate_t bitrate = { CANBTR_INDEX_100K };
     can_status_t status = { CANSTAT_RESET };
@@ -698,6 +746,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.13: Start CAN controller with CiA bit-timing index 6 (50 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex6 {
     can_bitrate_t bitrate = { CANBTR_INDEX_50K };
     can_status_t status = { CANSTAT_RESET };
@@ -748,6 +800,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.14: Start CAN controller with CiA bit-timing index 7 (20 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex7 {
     can_bitrate_t bitrate = { CANBTR_INDEX_20K };
     can_status_t status = { CANSTAT_RESET };
@@ -798,6 +854,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.15: Start CAN controller with CiA bit-timing index 8 (10 kbps).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testCheckCiaIndex8 {
     can_bitrate_t bitrate = { CANBTR_INDEX_10K };
     can_status_t status = { CANSTAT_RESET };
@@ -848,6 +908,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.16: Start CAN controller with invalid CiA bit-timing index.
+//
+// @expected:
+//
 - (void)testCheckInvalidCiaIndex {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -948,6 +1012,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC03.17: Re-Start CAN controller with the same CiA bit-tining index after it was stopped.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithSameCiaIndexAfterCanStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1018,6 +1086,10 @@
     }
 }
 
+// @xctest TC03.18: Re-Start CAN controller with a different CiA bit-tining index after it was stopped.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithDifferentCiaIndexAfterCanStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1091,46 +1163,68 @@
     }
 }
 
+// @xctest TC03.19: tbd.
+//
 //- (void)testWithValidCan20BitrateSettings {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.20: tbd.
+//
 //- (void)testWithInvalidCan20BitrateSettings {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.21: tbd.
+//
 //- (void)testWithSameCan20BitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.22: tbd.
+//
 //- (void)testWithDifferentCan20BitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.23: tbd.
+//
 //- (void)testWithValidCanFdBitrateSettings {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.24: tbd.
+//
 //- (void)testWithInvalidCanFdBitrateSettings {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.25: tbd.
+//
 //- (void)testWithSameCanFdBitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.26: tbd.
+//
 //- (void)testWithDifferentCanFdBitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.27: tbd.
+//
 //- (void)testWithCan20CiaIndexInCanFdMode {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.28: tbd.
+//
 //- (void)testWithCan20BitrateSettingsInCanFdMode {
 //        TODO: insert coin here
 //}
 
+// @xctest TC03.29: tbd.
+//
 //- (void)testWithCanFdBitrateSettingsInCan20Mode {
 //        TODO: insert coin here
 //}

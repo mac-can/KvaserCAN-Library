@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC07.1: Signal interface with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -88,10 +92,10 @@
     
     // @test:
     // @note: value -1 is used to signal all interfaces!
-    // @- try to signal DUT1 with wrong handle INT32_MAX
+    // @- try to signal DUT1 with invalid handle INT32_MAX
     rc = can_kill(INT32_MAX);
     XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to signal DUT1 with wrong handle INT32_MIN
+    // @- try to signal DUT1 with invalid handle INT32_MIN
     rc = can_kill(INT32_MIN);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -122,6 +126,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC07.2: Signal interface when it is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -129,15 +137,16 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to signal DUT1 with wrong handle -1
+    // @- try to signal DUT1 with invalid handle -1
     rc = can_kill(INVALID_HANDLE);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to signal DUT1 with wrong handle INT32_MIN
+    // @- try to signal DUT1 with invalid handle INT32_MIN
     rc = can_kill(INT32_MAX);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to signal DUT1 with wrong handle INT32_MIN
+    // @- try to signal DUT1 with invalid handle INT32_MIN
     rc = can_kill(INT32_MIN);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // TODO: loop over list of valid handles
 
     // @post:
     // @- initialize DUT1 with configured settings
@@ -176,7 +185,11 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceNotStarted {
+// @xctest TC07.3: Signal interface when it is initializes (but CAN controller not started).
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWhenInterfaceInitialized {
     can_status_t status = { CANSTAT_RESET };
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     int handle = INVALID_HANDLE;
@@ -230,6 +243,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC07.4: Signal interface when CAN controller is started.
+//
+// @expected: CANERR_NOERROR.
+//
 - (void)testWhenInterfaceStarted {
     can_status_t status = { CANSTAT_RESET };
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -285,6 +302,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC07.5: Signal interface after CAN controller is stopped.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWhenInterfaceStopped {
     can_status_t status = { CANSTAT_RESET };
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -340,6 +361,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC07.6: Signal interface when already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -388,6 +413,10 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC07.7: Signal all initialized interfaces at once.
+//
+// @expected: CANERR_NOERROR.
+//
 - (void)testSignalAllInterfaces {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -429,7 +458,7 @@
 
     // @test:
     // @- signal all interfaces
-    rc = can_kill(CANEXIT_ALL);
+    rc = can_kill(CANKILL_ALL);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // TODO: check if the thread for DUT1 has terminated
     // @- get status of DUT1 and check to be in RUNNING state
@@ -447,5 +476,12 @@
     rc = can_exit(CANEXIT_ALL);
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
+
+// @xctest TC07.8: tbd.
+//
+//- (void)testWhenBlockingOperationInProgress {
+//        TODO: insert coin here
+//        FIXME: Start something like a Ctrl-C handler
+//}
 
 @end

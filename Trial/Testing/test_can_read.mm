@@ -63,6 +63,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC04.1: Read a CAN message with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -74,7 +78,7 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- try to read a message from DUT1 with wrong handle -1
+    // @- try to read a message from DUT1 with invalid handle -1
     rc = can_read(INVALID_HANDLE, &message, 0U);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -84,7 +88,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to read a message from DUT1 with wrong handle INT32_MIN
+    // @- try to read a message from DUT1 with invalid handle INT32_MIN
     rc = can_read(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -104,7 +108,7 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to read a message from DUT1 with wrong handle INT32_MIN
+    // @- try to read a message from DUT1 with invalid handle INT32_MIN
     rc = can_read(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
@@ -116,6 +120,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC04.2: Give a NULL pointer as argument for parameter 'message'.
+//
+// @expected: CANERR_NULLPTR
+//
 - (void)testWithNullPointerForMessage {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -134,7 +142,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 
     // @test:
-    // @- read a message from DUT1 with NULL for message
+    // @- read a message from DUT1 with NULL for parameter 'message'
     rc = can_read(handle, NULL, 0U);
     XCTAssertEqual(CANERR_NULLPTR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
@@ -165,6 +173,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC04.3: Read a CAN message when interface is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -173,13 +185,13 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to read a message from DUT1 with wrong handle -1
+    // @- try to read a message from DUT1 with invalid handle -1
     rc = can_read(INVALID_HANDLE, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to read a message from DUT1 with wrong handle INT32_MIN
+    // @- try to read a message from DUT1 with invalid handle INT32_MIN
     rc = can_read(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to read a message from DUT1 with wrong handle INT32_MIN
+    // @- try to read a message from DUT1 with invalid handle INT32_MIN
     rc = can_read(INT32_MIN, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
@@ -220,6 +232,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC04.4: Read a CAN message when CAN controller is not started.
+//
+// @expected: CANERR_OFFLINE
+//
 - (void)testWhenInterfaceNotStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -271,6 +287,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC04.5: Read a CAN message when CAN controller already stopped.
+//
+// @expected: CANERR_OFFLINE
+//
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -322,6 +342,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC04.6: Read a CAN message when interface already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -371,6 +395,10 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC04.7: Read a CAN message when reception queue is empty.
+//
+// @expected: CANERR_RX_EMPTY
+//
 - (void)testWhenReceiveQueueIsEmpty {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -428,6 +456,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC04.8: Read a CAN message from reception queue after overrun.
+//
+// @expected: CANERR_NOERROR, but status bit 'queue_overrun' = 1
+//
 - (void)testWhenReceiveQueueIsFull {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -545,6 +577,8 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC04.9: tbd.
+//
 //- (void)testWhenMessageLost {
 //        TODO: insert coin here
 //        FIXME: How to loose a message?
