@@ -399,9 +399,59 @@
 //
 // @expected: CANERR_NOERROR
 //
-//- (void)testWhenInterfaceStarted {
-//        TODO: insert coin here
-//}
+- (void)testWhenInterfaceStarted {
+    can_bitrate_t bitrate = { TEST_BTRINDEX };
+    can_status_t status = { CANSTAT_RESET };
+    int handle = INVALID_HANDLE;
+    int rc = CANERR_FATAL;
+
+    // @pre
+    // @- initialize DUT1 with configured settings
+    handle = can_init(DUT1, TEST_CANMODE, NULL);
+    XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- start DUT1 with configured bit-rate settings
+    rc = can_start(handle, &bitrate);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    // @- sunnyday traffic (optional):
+#if (OPTION_SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+#endif
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    
+    // @test:
+    // @- get bit-rate of DUT1
+    rc = can_bitrate(handle, &bitrate, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+
+    // @post:
+    // @- stop/reset DUT1
+    rc = can_reset(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- shutdown DUT1
+    rc = can_exit(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+}
 
 // @xctest TC11.8: Get CAN bit-rate settings when CAN controller stopped.
 //
