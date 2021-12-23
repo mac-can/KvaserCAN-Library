@@ -19,7 +19,6 @@
 		0F19F837269619F800EE961C /* test_can_bitrate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F19F836269619F800EE961C /* test_can_bitrate.mm */; };
 		0F19F8392696432200EE961C /* test_can_read.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F19F8382696432200EE961C /* test_can_read.mm */; };
 		0F19F83B2696433F00EE961C /* test_can_write.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0F19F83A2696433F00EE961C /* test_can_write.mm */; };
-		0F1CB25624BCEF2400171203 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F1CB25524BCEF2400171203 /* main.cpp */; };
 		0F6FA0A026922AC8000B4CCC /* Tester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA09E26922AC8000B4CCC /* Tester.cpp */; };
 		0F6FA0A626925567000B4CCC /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0F6FA0A426925567000B4CCC /* Timer.cpp */; };
 		0F84AA45268BA44F00DA70C3 /* can_api.c in Sources */ = {isa = PBXBuildFile; fileRef = 0F84AA44268BA44F00DA70C3 /* can_api.c */; };
@@ -50,6 +49,8 @@
 		0FDA0A7A25D3200A00E50E4B /* KvaserCAN_Driver.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */; };
 		0FDA0A7F25D33EF700E50E4B /* KvaserCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */; };
 		0FEABC1125E8340400DD9ADB /* LeafPro.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FEABC0F25E8340400DD9ADB /* LeafPro.c */; };
+		44BDCA8A2775143600BE9790 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 44BDCA88277513FE00BE9790 /* main.c */; };
+		44BDCA8B2775143F00BE9790 /* printmsg.c in Sources */ = {isa = PBXBuildFile; fileRef = 44BDCA87277513FE00BE9790 /* printmsg.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -78,7 +79,6 @@
 		0F19F8382696432200EE961C /* test_can_read.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_read.mm; sourceTree = "<group>"; };
 		0F19F83A2696433F00EE961C /* test_can_write.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_write.mm; sourceTree = "<group>"; };
 		0F1CB24A24BCEC5B00171203 /* KvaserCAN */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = KvaserCAN; sourceTree = BUILT_PRODUCTS_DIR; };
-		0F1CB25524BCEF2400171203 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
 		0F1CB25824BCF00800171203 /* build_no.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = build_no.h; path = ../Sources/build_no.h; sourceTree = "<group>"; };
 		0F6FA09E26922AC8000B4CCC /* Tester.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Tester.cpp; sourceTree = "<group>"; };
 		0F6FA09F26922AC8000B4CCC /* Tester.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tester.h; sourceTree = "<group>"; };
@@ -122,6 +122,9 @@
 		0FEABC0F25E8340400DD9ADB /* LeafPro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafPro.c; path = ../Sources/Driver/LeafPro.c; sourceTree = "<group>"; };
 		0FEABC1025E8340400DD9ADB /* LeafPro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafPro.h; path = ../Sources/Driver/LeafPro.h; sourceTree = "<group>"; };
 		44BDCA8627750BA600BE9790 /* Template.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Template.h; sourceTree = "<group>"; };
+		44BDCA87277513FE00BE9790 /* printmsg.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = printmsg.c; path = Sources/printmsg.c; sourceTree = "<group>"; };
+		44BDCA88277513FE00BE9790 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = main.c; path = Sources/main.c; sourceTree = "<group>"; };
+		44BDCA89277513FE00BE9790 /* printmsg.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = printmsg.h; path = Sources/printmsg.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +166,9 @@
 		0F1CB25424BCEF0300171203 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				44BDCA87277513FE00BE9790 /* printmsg.c */,
+				44BDCA89277513FE00BE9790 /* printmsg.h */,
+				44BDCA88277513FE00BE9790 /* main.c */,
 				0F84AA43268BA44F00DA70C3 /* can_defs.h */,
 				0F84AA44268BA44F00DA70C3 /* can_api.c */,
 				0F84AA47268BA48D00DA70C3 /* can_api.h */,
@@ -195,7 +201,6 @@
 				0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */,
 				0FDA0A7E25D33EF700E50E4B /* KvaserCAN.h */,
 				0F1CB25824BCF00800171203 /* build_no.h */,
-				0F1CB25524BCEF2400171203 /* main.cpp */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -317,6 +322,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44BDCA8A2775143600BE9790 /* main.c in Sources */,
+				44BDCA8B2775143F00BE9790 /* printmsg.c in Sources */,
 				0FD97E3B25D1EA1300C8A7C7 /* MacCAN_MsgQueue.c in Sources */,
 				0FDA0A7A25D3200A00E50E4B /* KvaserCAN_Driver.c in Sources */,
 				0FD97E2425D1BB3C00C8A7C7 /* MacCAN_Debug.c in Sources */,
@@ -328,7 +335,6 @@
 				0F84AA45268BA44F00DA70C3 /* can_api.c in Sources */,
 				0FD97E3425D1C06400C8A7C7 /* KvaserUSB_Device.c in Sources */,
 				0FDA0A7525D2F67700E50E4B /* LeafLight.c in Sources */,
-				0F1CB25624BCEF2400171203 /* main.cpp in Sources */,
 				0FEABC1125E8340400DD9ADB /* LeafPro.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
