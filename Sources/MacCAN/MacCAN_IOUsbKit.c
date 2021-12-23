@@ -1430,7 +1430,12 @@ static int SetupDirectory(SInt32 vendorID, SInt32 productID)
     kern_return_t           kr;
 
     /* Create a master port for communication with the I/O Kit */
+#if defined(__MAC_12_0) && (__MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_12_0)
+    kr = IOMainPort(MACH_PORT_NULL, &masterPort);
+#else
+    /*  'IOMasterPort' is deprecated: first deprecated in macOS 12.0 */
     kr = IOMasterPort(MACH_PORT_NULL, &masterPort);
+#endif
     if (kr || !masterPort)
     {
         MACCAN_DEBUG_ERROR("+++ Couldn't create a master I/O Kit port (%08x)\n", kr);
@@ -1815,7 +1820,7 @@ static IOReturn FindInterface(IOUSBDeviceInterface **device, int index)
         {
             (void)(*interface)->USBInterfaceClose(interface);
             (void)(*interface)->Release(interface);
-            kr = kIOReturnInvalid;  // iokit_common_err(0x1) = should never be seen
+            kr = kIOReturnError;
         }
         break;
     }
@@ -1857,5 +1862,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1006 2021-06-10 20:12:03Z haumea $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1045 2021-12-23 15:49:37Z neptune $ *** (c) UV Software, Berlin ***
  */
