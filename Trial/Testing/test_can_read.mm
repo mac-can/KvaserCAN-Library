@@ -96,7 +96,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -152,7 +152,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -211,7 +211,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -266,7 +266,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -314,7 +314,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -369,7 +369,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -429,7 +429,7 @@
     // @- check if bit CANSTAT_RX_EMPTY is set in status register
     XCTAssertTrue(status.receiver_empty);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -531,6 +531,12 @@
         if (CANERR_NOERROR != rc)
             break;
     }
+#if (TX_ACKNOWLEDGE_UNSUPPORTED != 0)
+    // @note: a delay (after burner) to guarantee that all CAN messages are really sent
+    //        is required when messages are not acknowlegded by the CAN controller.
+    CTimer::Delay(TEST_AFTER_BURNER*CTimer::MSEC);
+    // @note: the delay depends on the bit-rate (set TEST_AFTER_BURNER in "Settings.h").
+#endif
     NSLog(@"%d frame(s) sent", i);
     // @- read a message from DUT1 (there should be at least one)
     rc = can_read(handle1, &message1, 0U);
@@ -584,3 +590,5 @@
 //        FIXME: How to loose a message?
 //
 @end
+
+// $Id: test_can_read.mm 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //

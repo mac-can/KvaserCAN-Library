@@ -107,7 +107,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -165,7 +165,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -217,7 +217,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -275,7 +275,7 @@
 
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -322,7 +322,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -350,7 +350,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
     // @- get status of DUT1 and check to be in RUNNING state
@@ -396,7 +396,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -422,7 +422,7 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-// @xctest TC03.7: Start CAN controller with CiA bit-timing index 0 (1000 kbps).
+// @xctest TC03.7: Start CAN controller with CiA bit-timing index 0 (1000kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -455,7 +455,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -476,10 +476,13 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC03.8: Start CAN controller with CiA bit-timing index 1 (800 kbps).
+// @xctest TC03.8: Start CAN controller with CiA bit-timing index 1 (800kbps).
 //
 // @expected: CANERR_NOERROR
 //
+// @note: CiA index 1 (800kbps) is not supported by all CAN controllers.
+//
+#if (BITRATE_800K_UNSUPPORTED == 0)
 - (void)testCheckCiaIndex1 {
     can_bitrate_t bitrate = { CANBTR_INDEX_800K };
     can_status_t status = { CANSTAT_RESET };
@@ -509,7 +512,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -529,8 +532,9 @@
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
+#endif
 
-// @xctest TC03.9: Start CAN controller with CiA bit-timing index 2 (500 kbps).
+// @xctest TC03.9: Start CAN controller with CiA bit-timing index 2 (500kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -563,7 +567,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -584,7 +588,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC03.10: Start CAN controller with CiA bit-timing index 3 (250 kbps).
+// @xctest TC03.10: Start CAN controller with CiA bit-timing index 3 (250kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -617,7 +621,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -638,7 +642,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC03.11: Start CAN controller with CiA bit-timing index 4 (125 kbps).
+// @xctest TC03.11: Start CAN controller with CiA bit-timing index 4 (125kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -671,7 +675,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -692,7 +696,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC03.12: Start CAN controller with CiA bit-timing index 5 (100 kbps).
+// @xctest TC03.12: Start CAN controller with CiA bit-timing index 5 (100kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -725,7 +729,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -746,7 +750,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC03.13: Start CAN controller with CiA bit-timing index 6 (50 kbps).
+// @xctest TC03.13: Start CAN controller with CiA bit-timing index 6 (50kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -779,7 +783,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -800,7 +804,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC03.14: Start CAN controller with CiA bit-timing index 7 (20 kbps).
+// @xctest TC03.14: Start CAN controller with CiA bit-timing index 7 (20kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -833,7 +837,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -854,7 +858,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC03.15: Start CAN controller with CiA bit-timing index 8 (10 kbps).
+// @xctest TC03.15: Start CAN controller with CiA bit-timing index 8 (10kbps).
 //
 // @expected: CANERR_NOERROR
 //
@@ -887,7 +891,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -910,7 +914,7 @@
 
 // @xctest TC03.16: Start CAN controller with invalid CiA bit-timing index.
 //
-// @expected:
+// @expected: CANERR_NOERROR
 //
 - (void)testCheckInvalidCiaIndex {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -931,13 +935,17 @@
     // @note: pre-defined BTR0BTR1 bit-timing table has 10 entries, index 0 to 9.
     //        But the index must be given as negative value to 'bitbate.index'!
     //        Remark: The CiA bit-timing table has only 9 entries!
-    bitrate.index = -10/*-BTR_SJA1000_MAX_INDEX*/;
+#if (BITRATE_5K_UNSUPPORTED != 0)
+    bitrate.index = -9;
+#else
+    bitrate.index = -10;
+#endif
     // @- try to start DUT1 with invalid index value -10
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_BAUDRATE, rc);
 
     // @note: Positive values represent the CAN clock in Hertz, but there will
-    //        probably be no clock below 10 Hertz (or above 999'999'999 Hertz).
+    //        be probably no clock below 10 Hertz (or above 999'999'999 Hertz).
     bitrate.index = CANBDR_800;
     XCTAssertEqual(1, bitrate.index);
     // @- try to start DUT1 with invalid index value 1
@@ -1024,6 +1032,11 @@
     
     // @test: loop over CiA bit-timing table indexes 0 to 8
     for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
+#if (BITRATE_800K_UNSUPPORTED != 0)
+        // @note: CiA index 1 (800kbps) is not supported by all CAN controllers.
+        if (index == CANBTR_INDEX_800K)
+            continue;
+#endif
         bitrate.index = index;
         // @- initialize DUT1 with configured settings
         handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1040,7 +1053,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
         // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1065,7 +1078,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
         // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
         // @- get status of DUT1 and check to be in RUNNING state
@@ -1098,6 +1111,11 @@
     
     // @test: loop over CiA bit-timing table indexes 0 to 8
     for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
+#if (BITRATE_800K_UNSUPPORTED != 0)
+        // @note: CiA index 1 (800kbps) is not supported by all CAN controllers.
+        if (index == CANBTR_INDEX_800K)
+            continue;
+#endif
         bitrate.index = index;
         // @- initialize DUT1 with configured settings
         handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1114,7 +1132,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
         // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1133,6 +1151,11 @@
 
         // @- new CiA bit-timing table index = 8 - old
         bitrate.index = CANBTR_INDEX_10K - index;
+#if (BITRATE_800K_UNSUPPORTED != 0)
+        // @note: CiA index 1 (800kbps) is not supported by all CAN controllers.
+        if ((CANBTR_INDEX_20K <= index) && (index <= CANBTR_INDEX_500K))
+            bitrate.index -= 1;
+#endif
         // @- start DUT1 again with a different bit-rate settings
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -1141,7 +1164,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
         // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
         // @- get status of DUT1 and check to be in RUNNING state
@@ -1230,3 +1253,5 @@
 //}
 
 @end
+
+// $Id: test_can_start.mm 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //

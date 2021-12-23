@@ -90,7 +90,6 @@
 		0F84AA49268BA48D00DA70C3 /* CANAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CANAPI.h; path = ../Sources/CANAPI/CANAPI.h; sourceTree = "<group>"; };
 		0F8F0ACC26908D9F00C2D974 /* Testing.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Testing.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0F8F0ACE26908D9F00C2D974 /* Testing.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Testing.mm; sourceTree = "<group>"; };
-		0F8F0AD026908D9F00C2D974 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0F8F0AE22690911900C2D974 /* test_can_init.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_init.mm; sourceTree = "<group>"; };
 		0F8F0AE42690916300C2D974 /* Settings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Settings.h; sourceTree = "<group>"; };
 		0F8F0AE52690DD0600C2D974 /* test_can_test.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_test.mm; sourceTree = "<group>"; };
@@ -122,6 +121,7 @@
 		0FDA0A7E25D33EF700E50E4B /* KvaserCAN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN.h; path = ../Sources/KvaserCAN.h; sourceTree = "<group>"; };
 		0FEABC0F25E8340400DD9ADB /* LeafPro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafPro.c; path = ../Sources/Driver/LeafPro.c; sourceTree = "<group>"; };
 		0FEABC1025E8340400DD9ADB /* LeafPro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafPro.h; path = ../Sources/Driver/LeafPro.h; sourceTree = "<group>"; };
+		44BDCA8627750BA600BE9790 /* Template.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Template.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -203,7 +203,7 @@
 		0F8F0ACD26908D9F00C2D974 /* Testing */ = {
 			isa = PBXGroup;
 			children = (
-				0F8F0AD026908D9F00C2D974 /* Info.plist */,
+				44BDCA8627750BA600BE9790 /* Template.h */,
 				0F8F0AE42690916300C2D974 /* Settings.h */,
 				0F8F0ACE26908D9F00C2D974 /* Testing.mm */,
 				0F8F0AE52690DD0600C2D974 /* test_can_test.mm */,

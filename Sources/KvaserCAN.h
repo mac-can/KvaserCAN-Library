@@ -48,6 +48,7 @@
 #ifndef KVASERCAN_H_INCLUDED
 #define KVASERCAN_H_INCLUDED
 
+#include "KvaserCAN_Defines.h"
 #include "CANAPI.h"
 
 /// \name   KvaserCAN

@@ -108,7 +108,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -164,7 +164,7 @@
     
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -234,7 +234,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -300,7 +300,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -359,7 +359,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -425,7 +425,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -649,7 +649,7 @@
 
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -820,7 +820,7 @@
 
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1021,7 +1021,7 @@
 
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1106,7 +1106,7 @@
 
         // @post:
         // @-- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1192,7 +1192,7 @@
 
         // @post:
         // @-- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1279,7 +1279,7 @@
 
         // @post:
         // @-- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1366,7 +1366,7 @@
 
         // @post:
         // @-- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1453,7 +1453,7 @@
 
         // @post:
         // @-- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1525,7 +1525,7 @@
 
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1546,10 +1546,13 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.19: Send a CAN message when the transmitter is busy (transmitt queue full).
+// @xctest TC05.19: Send a CAN message when the transmitter is busy (transmit queue full).
 //
 // @expected: CANERR_TX_BUSY
 //
+// @note: flag 'transmitter_busy' is only set when the message is acknowlegded by the CAN controller.
+//
+#if (TX_ACKNOWLEDGE_UNSUPPORTED == 0)
 - (void)testWhenTransmitterIsBusy {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -1641,5 +1644,8 @@
     rc = can_exit(handle2);
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
+#endif
 
 @end
+
+// $Id: test_can_write.mm 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //

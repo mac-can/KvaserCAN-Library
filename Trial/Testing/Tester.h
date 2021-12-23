@@ -48,9 +48,9 @@
 #ifndef TESTER_H_INCLUDED
 #define TESTER_H_INCLUDED
 
-#include "KvaserCAN.h"
+#include "Template.h"
 
-class CTester : CKvaserCAN {
+class CTester : CDriverCAN {
 public:
     // constructor / destructor
     CTester() {};
@@ -66,4 +66,6 @@ public:
     static uint8_t Dlc2Len(uint8_t dlc) { return CCanApi::Dlc2Len(dlc); }
     static uint8_t Len2Dlc(uint8_t len) { return CCanApi::Len2Dlc(len); }};
 
-#endif /* TESTER_H_INCLUDED */
+#endif // TESTER_H_INCLUDED
+
+// $Id: Tester.h 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //

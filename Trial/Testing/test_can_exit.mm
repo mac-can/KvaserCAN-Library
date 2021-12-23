@@ -90,7 +90,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -164,7 +164,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -238,7 +238,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -282,7 +282,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -358,3 +358,5 @@
 }
 
 @end
+
+// $Id: test_can_exit.mm 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //

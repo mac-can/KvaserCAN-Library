@@ -96,7 +96,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -142,7 +142,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     // @- get bit-rate of DUT1 with NULL for parameter 'bitrate'
     rc = can_bitrate(handle, NULL, &speed);
@@ -151,10 +151,10 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -196,7 +196,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     // @- get bit-rate of DUT1 with NULL for speed
     rc = can_bitrate(handle, &bitrate, NULL);
@@ -205,10 +205,10 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -259,10 +259,10 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -320,7 +320,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -374,7 +374,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -421,7 +421,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -434,7 +434,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @test:
     // @- get bit-rate of DUT1
     rc = can_bitrate(handle, &bitrate, NULL);
@@ -479,7 +479,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -500,7 +500,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
@@ -532,7 +532,7 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -602,7 +602,7 @@
         XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
         XCTAssertEqual(bitrate.btr.nominal.sam, result.btr.nominal.sam);
         // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -633,3 +633,5 @@
 //}
 
 @end
+
+// $Id: test_can_bitrate.mm 1036 2021-12-21 14:42:37Z makemake $  Copyright (c) UV Software, Berlin //

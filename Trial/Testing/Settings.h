@@ -49,30 +49,35 @@
 #define SETTINGS_H_INCLUDED
 
 #import "Tester.h"
+#import "Timer.h"
 
-#define DUT1  (SInt32)0
-#define DUT2  (SInt32)1
+//  Device under Test (2 devices required)
+#define DUT1  (SInt32)CAN_DEVICE1
+#define DUT2  (SInt32)CAN_DEVICE2
 
+//  Default operation mode and bit-rate settings
 #define TEST_CANMODE  CANMODE_DEFAULT
 #define TEST_BTRINDEX  CANBTR_INDEX_250K
 
+//  General test options:
+//  - number of CAN frames to be send during test cases
 #define TEST_FRAMES  8
+//  - number of CAN frames to be send during smoke test
 #define TEST_TRAFFIC  2048
+//  - number of CAN frames to be send until queue overrun
 #define TEST_QUEUE_FULL  65536
+#if (TX_ACKNOWLEDGE_UNSUPPORTED != 0)
+#define TEST_AFTER_BURNER  3000 /* [ms] */
+#endif
+//  - enable/disable sending of CAN frames during test cases
+#define SEND_TEST_FRAMES  1
+//  - enable/disable sending of CAN frames with non-default baudrate
+//    note: disable this option when a 3rd CAN device is on the bus.
+#define SEND_WITH_NONE_DEFAULT_BAUDRATE  0
 
+//  Useful stuff:
 #define INVALID_HANDLE  (-1)
 
-#define BITRATE_1M(x)       do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_500K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_250K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_125K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; } while(0)
+#endif // SETTINGS_H_INCLUDED
 
-#define BITRATE_1M8M(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1= 3; x.btr.data.tseg2=1; x.btr.data.sjw=1; } while(0)
-#define BITRATE_500K4M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1= 7; x.btr.data.tseg2=2; x.btr.data.sjw=2; } while(0)
-#define BITRATE_250K2M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=2; } while(0)
-#define BITRATE_125K1M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1=31; x.btr.data.tseg2=8; x.btr.data.sjw=2; } while(0)
-
-#define OPTION_SEND_TEST_FRAMES  1
-#define OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE  0
-
-#endif /* SETTINGS_H_INCLUDED */
+// $Id: Settings.h 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //
