@@ -13,6 +13,16 @@
 		0FBD2B1C267675BB008DA17E /* CANAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FBD2B1A267675BB008DA17E /* CANAPI.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		44BDCA842774F43F00BE9790 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44BDCA802774F43F00BE9790 /* can_send.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0F975C942673407000339DBF;
+			remoteInfo = can_send;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		0F975CBC2673A4F600339DBF /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -31,6 +41,7 @@
 		0F975CCF2673A82F00339DBF /* libUVCANKVL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libUVCANKVL.a; path = ../../Binaries/libUVCANKVL.a; sourceTree = "<group>"; };
 		0FBD2B19267675BB008DA17E /* KvaserCAN.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KvaserCAN.swift; path = ../../Sources/Swift/KvaserCAN.swift; sourceTree = "<group>"; };
 		0FBD2B1A267675BB008DA17E /* CANAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CANAPI.swift; path = ../../Sources/Swift/CANAPI.swift; sourceTree = "<group>"; };
+		44BDCA802774F43F00BE9790 /* can_send.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = can_send.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +59,7 @@
 		0F975CB52673A4F600339DBF = {
 			isa = PBXGroup;
 			children = (
+				44BDCA802774F43F00BE9790 /* can_send.xcodeproj */,
 				0F975CCF2673A82F00339DBF /* libUVCANKVL.a */,
 				0F975CCC2673A68700339DBF /* Sources */,
 				0F975CBF2673A4F600339DBF /* Products */,
@@ -70,6 +82,14 @@
 				0F975CCD2673A6A400339DBF /* main.swift */,
 			);
 			name = Sources;
+			sourceTree = "<group>";
+		};
+		44BDCA812774F43F00BE9790 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				44BDCA852774F43F00BE9790 /* can_send */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -118,12 +138,28 @@
 			mainGroup = 0F975CB52673A4F600339DBF;
 			productRefGroup = 0F975CBF2673A4F600339DBF /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 44BDCA812774F43F00BE9790 /* Products */;
+					ProjectRef = 44BDCA802774F43F00BE9790 /* can_send.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				0F975CBD2673A4F600339DBF /* can_recv */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		44BDCA852774F43F00BE9790 /* can_send */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = can_send;
+			remoteRef = 44BDCA842774F43F00BE9790 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0F975CBA2673A4F600339DBF /* Sources */ = {
@@ -191,7 +227,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../Binaries";
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -249,7 +285,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../../Binaries";
-				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = "-lc++";

@@ -1,4 +1,6 @@
 //
+//  MacCAN-KvaserCAN - Swift example for receiving CAN messages
+//
 //  Please build the MacCAN artifacts first by calling `make` in the repo´s root.
 //  You should have the following folders created:
 //  - $(REPOROOT)/Binaries
@@ -21,7 +23,7 @@ print("\(try CanApi.GetVersion())")
 //    print(">>> ProbeChannel(\(x.rawValue)): \(x.description) -> (\(state.description))")
 //}
 do {
-    step = "InitializeChannel)"
+    step = "InitializeChannel"
     print(">>> \(step)(channel: \(channel), mode: \(mode))")
     try can.InitializeChannel(channel: channel, mode: mode)
     step = "StartController"
