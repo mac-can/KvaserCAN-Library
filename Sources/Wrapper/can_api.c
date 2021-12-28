@@ -184,12 +184,14 @@ int can_test(int32_t channel, uint8_t mode, const void *param, int *result)
         //       CANERR_NOTINIT in this case
         return CANERR_NOTINIT;
 #endif
+    // attention: check first CAN FD operation dependent mode flags
+    bool wrong = (!(mode & CANMODE_FDOE) && ((mode & CANMODE_BRSE) || (mode & CANMODE_NISO))) ? true : false;
     // probe the CAN channel and check it selected operation mode is supported by the CAN controller
     rc = KvaserCAN_ProbeChannel(channel, mode, result);
     // note: 1. parameter 'result' is checked for NULL pointer by the called function
     //       2. error code CANERR_ILLPARA is return in case the operation mode is not supported
     (void) param;
-    return (int)rc;
+    return ((rc == CANERR_NOERROR) && wrong) ? (int)CANERR_ILLPARA : (int)rc;
 }
 
 EXPORT
@@ -220,6 +222,9 @@ int can_init(int32_t channel, uint8_t mode, const void *param)
         //       CANERR_NOTINIT in this case
         return CANERR_NOTINIT;
 #endif
+    // attention: check first CAN FD operation dependent mode flags
+    if (!(mode & CANMODE_FDOE) && ((mode & CANMODE_BRSE) || (mode & CANMODE_NISO)))
+        return CANERR_ILLPARA;
     // initialize CAN channel with selected operation mode
     if ((rc = KvaserCAN_InitializeChannel(channel, mode, &can[channel].device)) < CANERR_NOERROR)
         return rc;
