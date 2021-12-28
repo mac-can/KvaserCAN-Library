@@ -216,8 +216,48 @@ CANUSB_Return_t KvaserCAN_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_Bus
     return retVal;
 }
 
-//CANUSB_Return_t KvaserCAN_SetBusParamsFD(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *param);
-//CANUSB_Return_t KvaserCAN_GetBusParamsFD(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *param);
+CANUSB_Return_t KvaserCAN_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsFd_t *params) {
+    CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
+
+    /* sanity check */
+    if (!device)
+        return CANUSB_ERROR_NULLPTR;
+    if (!device->configured)
+        return CANUSB_ERROR_NOTINIT;
+
+    /* set bus parameters */
+    switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_SetBusParamsFd(device, params);
+            break;
+        case LEAF_LIGHT_PRODUCT_ID:
+            retVal = CANUSB_ERROR_NOTSUPP;
+            break;
+    }
+    return retVal;
+}
+
+CANUSB_Return_t KvaserCAN_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusParamsFd_t *params) {
+    CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
+
+    /* sanity check */
+    if (!device)
+        return CANUSB_ERROR_NULLPTR;
+    if (!device->configured)
+        return CANUSB_ERROR_NOTINIT;
+
+    /* get bus parameters */
+    switch (device->productId) {
+        case LEAF_PRO_PRODUCT_ID:
+            retVal = LeafPro_GetBusParamsFd(device, params);
+            break;
+        case LEAF_LIGHT_PRODUCT_ID:
+            retVal = CANUSB_ERROR_NOTSUPP;
+            break;
+    }
+    return retVal;
+}
+
 
 CANUSB_Return_t KvaserCAN_CanBusOn(KvaserUSB_Device_t *device, bool silent) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;

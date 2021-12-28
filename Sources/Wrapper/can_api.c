@@ -126,6 +126,8 @@ typedef struct {                        // Kvaser CAN interface:
  */
 static int map_bitrate2busparams(const can_bitrate_t *bitrate, KvaserUSB_BusParams_t *busParams);
 static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, can_bitrate_t *bitrate);
+static int map_bitrate2busparams_fd(const can_bitrate_t *bitrate, KvaserUSB_BusParamsFd_t *busParams);
+static int map_busparams2bitrate_fd(const KvaserUSB_BusParamsFd_t *busParams, can_bitrate_t *bitrate);
 static int lib_parameter(uint16_t param, void *value, size_t nbyte);
 static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte);
 
@@ -304,6 +306,7 @@ int can_start(int handle, const can_bitrate_t *bitrate)
     can_bitrate_t tmpBitrate;           // bit-rate settings
     can_speed_t tmpSpeed;               // transmission speed
     KvaserUSB_BusParams_t busParams;    // Kvaser bus parameter
+    KvaserUSB_BusParamsFd_t busParamsFd;// Kvaser FD bus parameter
 
     if (!init)                          // must be initialized
         return CANERR_NOTINIT;
@@ -319,25 +322,46 @@ int can_start(int handle, const can_bitrate_t *bitrate)
     memcpy(&tmpBitrate, bitrate, sizeof(can_bitrate_t));
     memset(&tmpSpeed, 0, sizeof(can_speed_t));
     memset(&busParams, 0, sizeof(KvaserUSB_BusParams_t));
+    memset(&busParamsFd, 0, sizeof(KvaserUSB_BusParamsFd_t));
     bool fdoe = can[handle].mode.fdoe ? true : false;
     bool brse = can[handle].mode.brse ? true : false;
 
-    // (a) check bit-rate settings (possibly after conversion from index)
-    if (bitrate->btr.frequency <= 0) {
-        // note: bit-rate settings are checked by the conversion function
-        if (btr_index2bitrate(bitrate->index, &tmpBitrate) < 0)
+    // CAN 2.0 operation mode:
+    if (!can[handle].mode.fdoe) {
+        // (a) check bit-rate settings (possibly after conversion from index)
+        if (bitrate->btr.frequency <= 0) {
+            // note: bit-rate settings are checked by the conversion function
+            if (btr_index2bitrate(bitrate->index, &tmpBitrate) < 0)
+                return CANERR_BAUDRATE;
+        } else {
+            // note: bit-rate settings are checked by the conversion function
+            if (btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed) < 0)
+                return CANERR_BAUDRATE;
+        }
+        // (b) convert bit-rate settings to Kvaser bus parameter
+        if (map_bitrate2busparams(&tmpBitrate, &busParams) < 0)
             return CANERR_BAUDRATE;
-    } else {
-        // note: bit-rate settings are checked by the conversion function
-        if (btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed) < 0)
-            return CANERR_BAUDRATE;
+        // (c) set bit-rate (with respect of the selected operation mode)
+        if ((rc = KvaserCAN_SetBusParams(&can[handle].device, &busParams)) < 0)
+            return (rc != CANUSB_ERROR_ILLPARA) ? rc : CANERR_BAUDRATE;
     }
-    // (b) convert bit-rate settings to Kvaser bus parameter
-    if (map_bitrate2busparams(&tmpBitrate, &busParams) < 0)
-        return CANERR_BAUDRATE;
-    // (c) set bit-rate (with respect of the selected operation mode)
-    if ((rc = KvaserCAN_SetBusParams(&can[handle].device, &busParams)) < 0)
-        return (rc != CANUSB_ERROR_ILLPARA) ? rc : CANERR_BAUDRATE;
+    // CAN FD operation mode:
+    else {
+        // (a) check bit-rate settings (w/0 conversion from index)
+        if (bitrate->btr.frequency <= 0) {
+            return CANERR_BAUDRATE;
+        } else {
+            // note: bit-rate settings are checked by the conversion function
+            if (btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed) < 0)
+                return CANERR_BAUDRATE;
+        }
+        // (b) convert bit-rate settings to Kvaser bus parameter
+        if (map_bitrate2busparams_fd(&tmpBitrate, &busParamsFd) < 0)
+            return CANERR_BAUDRATE;
+        // (c) set bit-rate (with respect of the selected operation mode)
+        if ((rc = KvaserCAN_SetBusParamsFd(&can[handle].device, &busParamsFd)) < 0)
+            return (rc != CANUSB_ERROR_ILLPARA) ? rc : CANERR_BAUDRATE;
+    }
     // (d) clear status, counters, and the receive queue
     can[handle].status.byte = CANSTAT_RESET;
     can[handle].counters.tx = 0U;
@@ -405,9 +429,8 @@ int can_write(int handle, const can_message_t *message, uint16_t timeout)
         return CANERR_ILLPARA;          // bit-rate switching only with CAN FD
     if (message->sts)
         return CANERR_ILLPARA;          // error frames cannot be sent
-
-    if (message->dlc > CAN_MAX_LEN)     //   data length 0 .. 8!
-        return CANERR_ILLPARA;
+    if (message->dlc > (uint8_t)(message->fdf ? CANFD_MAX_DLC : CAN_MAX_DLC))
+        return CANERR_ILLPARA;          // invalid data length code
 
     // transmit the given CAN message (w/ or w/o acknowledgment)
     rc = KvaserCAN_WriteMessage(&can[handle].device, message, timeout);
@@ -503,6 +526,7 @@ int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed)
     can_bitrate_t tmpBitrate;           // bit-rate settings
     can_speed_t tmpSpeed;               // transmission speed
     KvaserUSB_BusParams_t busParams;    // Kvaser bus parameter
+    KvaserUSB_BusParamsFd_t busParamsFd;// Kvaser FD bus parameter
 
     if (!init)                          // must be initialized
         return CANERR_NOTINIT;
@@ -514,13 +538,26 @@ int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed)
     memset(&tmpBitrate, 0, sizeof(can_bitrate_t));
     memset(&tmpSpeed, 0, sizeof(can_speed_t));
     memset(&busParams, 0, sizeof(KvaserUSB_BusParams_t));
+    memset(&busParamsFd, 0, sizeof(KvaserUSB_BusParamsFd_t));
     bool fdoe = can[handle].mode.fdoe ? true : false;
     bool brse = can[handle].mode.brse ? true : false;
 
-    // get bit-rate settings from device
-    if ((rc = KvaserCAN_GetBusParams(&can[handle].device, &busParams)) == CANUSB_SUCCESS) {
-        if ((rc = map_busparams2bitrate(&busParams, &tmpBitrate)) == CANUSB_SUCCESS) {
-            rc = btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed);
+    // CAN 2.0 operation mode:
+    if (!can[handle].mode.fdoe) {
+        // get bit-rate settings from device
+        if ((rc = KvaserCAN_GetBusParams(&can[handle].device, &busParams)) == CANUSB_SUCCESS) {
+            if ((rc = map_busparams2bitrate(&busParams, &tmpBitrate)) == CANUSB_SUCCESS) {
+                rc = btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed);
+            }
+        }
+    }
+    // CAN FD operation mode:
+    else {
+        // get bit-rate settings from device
+        if ((rc = KvaserCAN_GetBusParamsFd(&can[handle].device, &busParamsFd)) == CANUSB_SUCCESS) {
+            if ((rc = map_busparams2bitrate_fd(&busParamsFd, &tmpBitrate)) == CANUSB_SUCCESS) {
+                rc = btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed);
+            }
         }
     }
     if (bitrate)
@@ -632,13 +669,12 @@ static int map_bitrate2busparams(const can_bitrate_t *bitrate, KvaserUSB_BusPara
 }
 
 static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, can_bitrate_t *bitrate)
-
 {
     // sanity check
     if (!busParams || !bitrate)
         return CANERR_NULLPTR;
 
-    // Kvaser canLin32 doesn't offer the used controller frequency and bit-rate prescaler.
+    // Kvaser canLib32 doesn't offer the used controller frequency and bit-rate prescaler.
     // We suppose it's running with 80MHz and calculate the bit-rate prescaler as follows:
     //
     // (1) brp = 80MHz / (bit-rate * (1 + tseg1 + tseq2))
@@ -670,6 +706,98 @@ static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, can_bit
     return CANERR_NOERROR;
 }
 
+static int map_bitrate2busparams_fd(const can_bitrate_t *bitrate, KvaserUSB_BusParamsFd_t *busParams)
+{
+    // sanity check
+    if (!bitrate || !busParams)
+        return CANERR_NULLPTR;
+    if ((bitrate->btr.nominal.brp < CANBTR_NOMINAL_BRP_MIN) || (CANBTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.nominal.tseg1 < CANBTR_NOMINAL_TSEG1_MIN) || (CANBTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.nominal.tseg2 < CANBTR_NOMINAL_TSEG2_MIN) || (CANBTR_NOMINAL_TSEG2_MAX < bitrate->btr.nominal.tseg2))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.nominal.sjw < CANBTR_NOMINAL_SJW_MIN) || (CANBTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.brp < CANBTR_DATA_BRP_MIN) || (CANBTR_DATA_BRP_MAX < bitrate->btr.data.brp))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.tseg1 < CANBTR_DATA_TSEG1_MIN) || (CANBTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.tseg2 < CANBTR_DATA_TSEG2_MIN) || (CANBTR_DATA_TSEG2_MAX < bitrate->btr.data.tseg2))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.sjw < CANBTR_DATA_SJW_MIN) || (CANBTR_DATA_SJW_MAX < bitrate->btr.data.sjw))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.nominal.brp == 0) || (bitrate->btr.data.brp == 0))   // devide-by-zero!
+        return CANERR_BAUDRATE;
+
+    // arbitration phase: bit-rate = frequency / (brp * (1 + tseg1 + tseg2))
+    busParams->nominal.bitRate = (int32_t)bitrate->btr.frequency /
+        ((int32_t)bitrate->btr.nominal.brp * (1l + (int32_t)bitrate->btr.nominal.tseg1 + (int32_t)bitrate->btr.nominal.tseg2));
+    busParams->nominal.tseg1 = (uint16_t)bitrate->btr.nominal.tseg1;
+    busParams->nominal.tseg2 = (uint16_t)bitrate->btr.nominal.tseg2;
+    busParams->nominal.sjw = (uint16_t)bitrate->btr.nominal.sjw;
+    busParams->nominal.noSamp = (uint16_t)((bitrate->btr.nominal.sam != 0) ? 3 : 1);  // SJA1000: single or triple sampling
+    //busParams->nominal.syncmode = (uint16_t)0;
+
+    // data phase: bit-rate = frequency / (brp * (1 + tseg1 + tseg2))
+    busParams->data.bitRate = (int32_t)bitrate->btr.frequency /
+        ((int32_t)bitrate->btr.data.brp * (1l + (int32_t)bitrate->btr.data.tseg1 + (int32_t)bitrate->btr.data.tseg2));
+    busParams->data.tseg1 = (uint16_t)bitrate->btr.data.tseg1;
+    busParams->data.tseg2 = (uint16_t)bitrate->btr.data.tseg2;
+    busParams->data.sjw = (uint16_t)bitrate->btr.data.sjw;
+    busParams->data.noSamp = (uint16_t)((bitrate->btr.nominal.sam != 0) ? 3 : 1);  // SJA1000: single or triple sampling
+    //busParams->data.syncmode = (uint16_t)0;
+
+    // operate in CAN FD mode
+    busParams->canFd = true;
+    
+    return CANERR_NOERROR;
+}
+
+static int map_busparams2bitrate_fd(const KvaserUSB_BusParamsFd_t *busParams, can_bitrate_t *bitrate)
+{
+    // sanity check
+    if (!busParams || !bitrate)
+        return CANERR_NULLPTR;
+
+    // Kvaser canLib32 doesn't offer the used controller frequency and bit-rate prescaler.
+    // We suppose it's running with 80MHz and calculate the bit-rate prescaler as follows:
+    //
+    // (1) brp = 80MHz / (bit-rate * (1 + tseg1 + tseq2))
+    //
+    if ((busParams->nominal.bitRate <= 0) || (busParams->data.bitRate <= 0))   // divide-by-zero!
+        return CANERR_BAUDRATE;
+    bitrate->btr.frequency = (int32_t)80000000;
+    bitrate->btr.nominal.brp = (uint16_t)(80000000L
+                             / (busParams->nominal.bitRate * (int32_t)(1u + busParams->nominal.tseg1 + busParams->nominal.tseg2)));
+    bitrate->btr.nominal.tseg1 = (uint16_t)busParams->nominal.tseg1;
+    bitrate->btr.nominal.tseg2 = (uint16_t)busParams->nominal.tseg2;
+    bitrate->btr.nominal.sjw = (uint16_t)busParams->nominal.sjw;
+    bitrate->btr.nominal.sam = (uint8_t)((busParams->nominal.noSamp < 3) ? 0 : 1);  // SJA1000: single or triple sampling
+    bitrate->btr.data.brp = (uint16_t)(80000000L
+                          / (busParams->data.bitRate * (int32_t)(1u + busParams->data.tseg1 + busParams->data.tseg2)));
+    bitrate->btr.data.tseg1 = (uint16_t)busParams->data.tseg1;
+    bitrate->btr.data.tseg2 = (uint16_t)busParams->data.tseg2;
+    bitrate->btr.data.sjw = (uint16_t)busParams->data.sjw;
+    // range check
+    if ((bitrate->btr.nominal.brp < CANBTR_NOMINAL_BRP_MIN) || (CANBTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.nominal.tseg1 < CANBTR_NOMINAL_TSEG1_MIN) || (CANBTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.nominal.tseg2 < CANBTR_NOMINAL_TSEG2_MIN) || (CANBTR_NOMINAL_TSEG2_MAX < bitrate->btr.nominal.tseg2))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.nominal.sjw < CANBTR_NOMINAL_SJW_MIN) || (CANBTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.brp < CANBTR_DATA_BRP_MIN) || (CANBTR_DATA_BRP_MAX < bitrate->btr.data.brp))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.tseg1 < CANBTR_DATA_TSEG1_MIN) || (CANBTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.tseg2 < CANBTR_DATA_TSEG2_MIN) || (CANBTR_DATA_TSEG2_MAX < bitrate->btr.data.tseg2))
+        return CANERR_BAUDRATE;
+    if ((bitrate->btr.data.sjw < CANBTR_DATA_SJW_MIN) || (CANBTR_DATA_SJW_MAX < bitrate->btr.data.sjw))
+        return CANERR_BAUDRATE;
+    return CANERR_NOERROR;
+}
 
 /*  - - - - - -  CAN API V3 properties  - - - - - - - - - - - - - - - - -
  */

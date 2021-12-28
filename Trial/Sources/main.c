@@ -220,14 +220,14 @@ int main(int argc, char *argv[])
     //}
     for (i = 1; i < argc; i++) {
         /* Kvaser CAN channel */
-        if(!strcmp(argv[i], "Kvaser CAN Channel 0") || !strcmp(argv[i], "CH0")) channel = KVASER_CAN_CHANNEL0;
-        if(!strcmp(argv[i], "Kvaser CAN Channel 1") || !strcmp(argv[i], "CH1")) channel = KVASER_CAN_CHANNEL1;
-        if(!strcmp(argv[i], "Kvaser CAN Channel 2") || !strcmp(argv[i], "CH2")) channel = KVASER_CAN_CHANNEL2;
-        if(!strcmp(argv[i], "Kvaser CAN Channel 3") || !strcmp(argv[i], "CH3")) channel = KVASER_CAN_CHANNEL3;
-        if(!strcmp(argv[i], "Kvaser CAN Channel 4") || !strcmp(argv[i], "CH4")) channel = KVASER_CAN_CHANNEL4;
-        if(!strcmp(argv[i], "Kvaser CAN Channel 5") || !strcmp(argv[i], "CH5")) channel = KVASER_CAN_CHANNEL5;
-        if(!strcmp(argv[i], "Kvaser CAN Channel 6") || !strcmp(argv[i], "CH6")) channel = KVASER_CAN_CHANNEL6;
-        if(!strcmp(argv[i], "Kvaser CAN Channel 7") || !strcmp(argv[i], "CH7")) channel = KVASER_CAN_CHANNEL7;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 0") || !strcmp(argv[i], "CH:0")) channel = KVASER_CAN_CHANNEL0;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 1") || !strcmp(argv[i], "CH:1")) channel = KVASER_CAN_CHANNEL1;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 2") || !strcmp(argv[i], "CH:2")) channel = KVASER_CAN_CHANNEL2;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 3") || !strcmp(argv[i], "CH:3")) channel = KVASER_CAN_CHANNEL3;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 4") || !strcmp(argv[i], "CH:4")) channel = KVASER_CAN_CHANNEL4;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 5") || !strcmp(argv[i], "CH:5")) channel = KVASER_CAN_CHANNEL5;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 6") || !strcmp(argv[i], "CH:6")) channel = KVASER_CAN_CHANNEL6;
+        if(!strcmp(argv[i], "Kvaser CAN Channel 7") || !strcmp(argv[i], "CH:7")) channel = KVASER_CAN_CHANNEL7;
         /* baud rate (CAN 2.0) */
         if(!strcmp(argv[i], "BD:0") || !strcmp(argv[i], "BD:1000")) bitrate.index = -CANBDR_1000;
         if(!strcmp(argv[i], "BD:1") || !strcmp(argv[i], "BD:800")) bitrate.index = -CANBDR_800;
