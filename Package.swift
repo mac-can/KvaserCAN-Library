@@ -33,7 +33,6 @@ let package = Package(
             path: "Sources",
             exclude: [
                 "KvaserCAN.cpp",
-                "MacCAN/MacCAN.cpp",
                 "MacCAN/README.md",
                 "MacCAN/LICENSE.BSD-2-Clause",
                 "MacCAN/LICENSE.GPL-3.0-or-later",

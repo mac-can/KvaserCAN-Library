@@ -1182,7 +1182,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
 
 static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
     uint8_t length = 0U;
-    uint16_t flags = 0U;
+    uint32_t flags = 0U;
     uint64_t ticks = 0ULL;
     bool result = false;
 
@@ -1211,7 +1211,7 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
      */
     bzero(message, sizeof(KvaserUSB_CanMessage_t));
     /* flags and length */
-    flags = BUF2UINT16(buffer[8]);
+    flags = BUF2UINT32(buffer[8]);
     if (!(flags & MSGFLAG_ERROR_FRAME))
         length = Dlc2Len(buffer[21] & 0xFU);
     else

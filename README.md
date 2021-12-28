@@ -2,9 +2,9 @@
 
 _Copyright &copy; 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
-# Running CAN on Mac&reg;
+# Running CAN and CAN FD on Mac&reg;
 
-_Running CAN on Mac_ is the mission of the MacCAN project.
+_Running CAN and CAN FD on Mac_ is the mission of the MacCAN project.
 The macOS driver for CAN Leaf interfaces from [Kvaser](https://www.kvaser.com) is based on _MacCAN-Core_ which is an abstraction (or rather a wrapper) of Apple´s IOUsbKit to create USB user-space drivers for CAN interfaces from various vendors under macOS.
 
 ## MacCAN-KvaserCAN
@@ -183,4 +183,4 @@ _If you connect your CAN device to a real CAN network when using this library, y
 ### Contact
 
 E-Mail: mailto://info@mac.can.com \
-Internet: https://mac-can.github.io
+Internet: https://www.mac-can.net

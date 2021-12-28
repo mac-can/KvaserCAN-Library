@@ -59,8 +59,8 @@
 #define LEAF_PRO_CPU_FREQUENCY  80U
 #define LEAF_PRO_MAX_OUTSTANDING_TX  200U
 
-#define LEAF_PRO_MODE_FDOE  0 /* CAN FD operation enable/disable */
-#define LEAF_PRO_MODE_BRSE  0 /* bit-rate switch enable/disable */
+#define LEAF_PRO_MODE_FDOE  1 /* CAN FD operation enable/disable */
+#define LEAF_PRO_MODE_BRSE  1 /* bit-rate switch enable/disable */
 #define LEAF_PRO_MODE_NISO  0 /* Non-ISO CAN FD enable/disable */
 #define LEAF_PRO_MODE_SHRD  0 /* shared access enable/disable */
 #define LEAF_PRO_MODE_NXTD  1 /* extended format disable/enable */
