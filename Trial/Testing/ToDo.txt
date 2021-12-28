@@ -7,9 +7,9 @@ TC02.10: Check if interface can be initialized with operation mode bit NRTR set 
 TC02.11: Check if interface can be initialized with operation mode bit NXTD set (suppress extended frames):
 - try to send & receive some extended frames
 TC02.12: Check if interface can be initialized with operation mode bit FDOE set (CAN FD operation enabled):
-- implement this
+- try to send & receive some CAN FD long frames
 TC02.13: Check if interface can be initialized with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled):
-- implement this
+- try to send & receive some CAN FD fast frames
 TC03.19: testWithValidCan20BitrateSettings
 - define test subject
 - implement this

@@ -1432,7 +1432,8 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- start DUT1 with configured bit-rate settings
+        // @-- start DUT1 with CAN FD bit-rate settings: 250kbps : 2'000kbps
+        BITRATE_250K2M(bitrate);
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
         // @-- get status of DUT1 and check to be in RUNNING state
@@ -1453,6 +1454,8 @@
 
         // @post:
         // @-- sunnyday traffic (optional):
+#if (0)
+        // FIXME: 2nd device must also be CAN FD capable!
 #if (SEND_TEST_FRAMES != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1461,6 +1464,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
+#endif
 #endif
         // @-- stop/reset DUT1
         rc = can_reset(handle);
@@ -1648,4 +1652,4 @@
 
 @end
 
-// $Id: test_can_write.mm 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_write.mm 1067 2021-12-28 21:18:35Z makemake $  Copyright (c) UV Software, Berlin //

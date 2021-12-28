@@ -74,7 +74,7 @@
 //#define TX0x_y_WORKARAOUND  1
 
 //  (§7) define macro CAN_FD_SUPPORTED when CAN FD operation mode is supported
-#define CAN_FD_SUPPORTED  0
+#define CAN_FD_SUPPORTED 1
 #if (CAN_FD_SUPPORTED != 0)
 
 //  (§8) define macros for CAN Classic bit-rate settings (at least BITRATE_1M8M, BITRATE_500K4M, BITRATE_250K2M, BITRATE_125K1M)
