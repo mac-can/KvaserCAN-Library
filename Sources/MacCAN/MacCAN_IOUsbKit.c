@@ -77,7 +77,7 @@
 
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     2
-#define VERSION_PATCH     2
+#define VERSION_PATCH     3
 
 /*#define OPTION_MACCAN_MULTICHANNEL  0  !* set globally: 0 = only one channel on multi-channel devices */
 /*#define OPTION_MACCAN_PIPE_TIMEOUT  0  !* set globally: 0 = do not use xxxPipeTO variant (e.g. macOS < 10.15) */
@@ -488,7 +488,7 @@ CANUSB_Return_t CANUSB_ReadPipe(CANUSB_Handle_t handle, UInt8 pipeRef, void *buf
     if (!IS_HANDLE_VALID(handle))
         return CANUSB_ERROR_HANDLE;
     /* check for NULL pointer */
-    if (!buffer)
+    if (!buffer || !size)
         return CANUSB_ERROR_NULLPTR;
 
     MACCAN_DEBUG_FUNC("lock #%i (%u)\n", handle, pipeRef);
@@ -1862,5 +1862,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1045 2021-12-23 15:49:37Z neptune $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1066 2021-12-28 16:37:33Z makemake $ *** (c) UV Software, Berlin ***
  */
