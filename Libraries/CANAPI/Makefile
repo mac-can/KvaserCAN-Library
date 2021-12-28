@@ -69,8 +69,8 @@ ifeq ($(current_OS),Darwin) # macOS - libUVCANKVL.dylib
 LIBRARY = libUVCANKVL
 
 MAJOR = 0
-MINOR = 1
-PATCH = 2
+MINOR = 2
+PATCH = 0
 
 VERSION = $(MAJOR).$(MINOR).$(PATCH)
 TARGET  = $(LIBRARY).$(VERSION).dylib
@@ -170,8 +170,8 @@ clean:
 	$(RM) $(TARGET) $(STATIC) $(OUTDIR)/*.o $(OUTDIR)/*.d
 
 pristine:
-	$(RM) $(TARGET) $(STATIC) $(OUTDIR)/*.o $(OUTDIR)/*.d
-	$(RM) $(BINDIR)/$(TARGET) $(BINDIR)/$(STATIC) $(BINDIR)/$(LIBRARY).dylib
+	$(RM) *.dylib *.a $(OUTDIR)/*.o $(OUTDIR)/*.d
+	$(RM) $(BINDIR)/*.dylib $(BINDIR)/*.a
 	$(RM) $(INCDIR)/*.h
 
 install:

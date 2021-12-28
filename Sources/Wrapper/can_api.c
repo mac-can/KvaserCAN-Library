@@ -50,8 +50,8 @@
  */
 #include "build_no.h"
 #define VERSION_MAJOR    0
-#define VERSION_MINOR    1
-#define VERSION_PATCH    2
+#define VERSION_MINOR    2
+#define VERSION_PATCH    99
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(__APPLE__)
@@ -755,7 +755,7 @@ static int map_bitrate2busparams_fd(const can_bitrate_t *bitrate, KvaserUSB_BusP
 
     // operate in CAN FD mode
     busParams->canFd = true;
-    
+
     return CANERR_NOERROR;
 }
 
