@@ -117,15 +117,21 @@ Type `can_test --help` to display all program options.
 
 ### Target Platform
 
-- Apple´s macOS (x86_64)
+- macOS 11.0 and later (Intel and Apple silicon)
 
 ### Development Environment
 
+#### macOS Monterey
+
+- macOS Monterey (12.1) on a Mac mini (M1, 2020)
+- Apple clang version 13.0.0 (clang-1300.0.29.30)
+- Xcode Version 13.2.1 (13C100)
+
 #### macOS Big Sur
 
-- macOS Big Sur (11.4) on a MacBook Pro (2019)
-- Apple clang version 12.0.5 (clang-1205.0.22.11)
-- Xcode Version 12.5.1 (12E507)
+- macOS Big Sur (11.6.1) on a MacBook Pro (2019)
+- Apple clang version 13.0.0 (clang-1300.0.29.30)
+- Xcode Version 13.2.1 (13C100)
 
 #### macOS High Sierra
 
@@ -133,12 +139,10 @@ Type `can_test --help` to display all program options.
 - Apple LLVM version 10.0.0 (clang-1000.11.45.5)
 - Xcode Version 10.1 (10B61)
 
-### CAN Hardware
+### Supported CAN Hardware
 
 - Kvaser Leaf Light v2 (EAN: 73-30130-00685-0)
 - Kvaser Leaf Pro HS v2 (EAN: 73-30130-00843-4)
-
-Note: _**Leaf Pro HS v2** devices can currently only be operated in **CAN 2.0 mode**!_
 
 ### Testing
 
