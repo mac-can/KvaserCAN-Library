@@ -1,7 +1,7 @@
 #
 #	CAN Interface API, Version 3 (for Kvaser CAN Leaf Interfaces)
 #
-#	Copyright (c) 2017-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
 #
 #	This file is part of MacCAN-KvaserCAN.
@@ -73,7 +73,7 @@ MAJOR = 0
 MINOR = 2
 PATCH = 0
 
-VERSION = $(MAJOR).$(MINOR).$(PATCH)
+VERSION = $(MAJOR).$(MINOR)
 TARGET  = $(LIBRARY).$(VERSION).dylib
 STATIC  = $(LIBRARY).a
 

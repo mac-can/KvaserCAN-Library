@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 //
-//  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -48,8 +48,8 @@
 #include "build_no.h"
 #ifdef _MSC_VER
 #define VERSION_MAJOR    0
-#define VERSION_MINOR    2
-#define VERSION_PATCH    2
+#define VERSION_MINOR    0
+#define VERSION_PATCH    0
 #else
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    2
@@ -132,6 +132,7 @@ CKvaserCAN::CKvaserCAN() {
 
 EXPORT
 CKvaserCAN::~CKvaserCAN() {
+    // set CAN contoller into INIT mode and close USB device
     (void)TeardownChannel();
 }
 

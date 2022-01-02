@@ -3,7 +3,6 @@
 //  MacCAN-KvaserCAN
 //  Bart Simpson didn´t do it
 //
-#include "KvaserCAN_Defines.h"
 #include "KvaserCAN.h"
 
 #include <stdio.h>
@@ -226,7 +225,7 @@ int main(int argc, const char * argv[]) {
     if (option_test) {
         for (int32_t ch = 0; ch < 8; ch++) {
             retVal = CKvaserCAN::ProbeChannel(ch, opMode, state);
-            fprintf(stdout, ">>> myDriver.ProbeChannel(%i): state = %s", ch,
+            fprintf(stdout, ">>> CKvaserCANProbeChannel(%i): state = %s", ch,
                             (state == CCanApi::ChannelOccupied) ? "occupied" :
                             (state == CCanApi::ChannelAvailable) ? "available" :
                             (state == CCanApi::ChannelNotAvailable) ? "not available" : "not testable");

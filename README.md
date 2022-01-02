@@ -1,6 +1,6 @@
 ### macOS&reg; User-Space Driver for CAN Leaf Interfaces from Kvaser
 
-_Copyright &copy; 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
+_Copyright &copy; 2020-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
 # Running CAN and CAN FD on Mac&reg;
 

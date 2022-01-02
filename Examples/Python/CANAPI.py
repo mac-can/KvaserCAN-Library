@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 #
-#   CAN Interface API, Version 3 (Interface Definition)
+#   CAN Interface API, Version 3 (Python Wrapper)
 #
-#   Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+#   Copyright (c) 2005-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 #	All rights reserved.
 #
-#	This file is part of CAN API V3.
+#   This file is part of CAN API V3.
 #
 #	CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-#	under the GNU General Public License v3.0 (or any later version).
-#	You can choose between one of them if you use this file.
+#	under the GNU General Public License v3.0 (or any later version). You can
+#	choose between one of them if you use CAN API V3 in whole or in part.
 #
 #	BSD 2-Clause Simplified License:
 #	Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,9 @@
     Interface API for various CAN interfaces from different
     vendors running under multiple operating systems.
 
-    $Author: eris $
+    $Author: haumea $
 
-    $Rev: 999 $
+    $Rev: 1018 $
 """
 from ctypes import *
 import platform
@@ -762,5 +762,5 @@ if __name__ == '__main__':
     # have a great time
     print('Bye, bye!')
 
-# * $Id: CANAPI.py 999 2021-06-02 15:28:37Z eris $ *** (c) UV Software, Berlin ***
+# * $Id: CANAPI.py 1018 2021-12-31 20:20:26Z haumea $ *** (c) UV Software, Berlin ***
 #
