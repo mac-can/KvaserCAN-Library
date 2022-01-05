@@ -2,7 +2,7 @@
 /*
  *  CAN Interface API, Version 3 (generic)
  *
- *  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+ *  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
  *  All rights reserved.
  *
  *  This file is part of CAN API V3.
@@ -51,7 +51,7 @@
  *
  *  @author      $Author: eris $
  *
- *  @version     $Rev: 993 $
+ *  @version     $Rev: 1020 $
  *
  *  @defgroup    can_api CAN Interface API, Version 3
  *  @{
@@ -120,6 +120,7 @@ typedef int                             can_handle_t;
  *  @{ */
 #define can_transmit(hnd, msg)          can_write(hnd, msg, 0U)
 #define can_receive(hnd, msg)           can_read(hnd, msg, 0U)
+#define can_software(hnd)               can_firmware(hnd)
 #define can_msg_t                       can_message_t
 /** @} */
 
@@ -445,7 +446,7 @@ CANAPI char *can_hardware(int handle);
  *
  *  @returns     pointer to a zero-terminated string, or NULL on error.
  */
-CANAPI char *can_software(int handle);
+CANAPI char *can_firmware(int handle);
 
 
 #if (OPTION_CANAPI_LIBRARY != 0)

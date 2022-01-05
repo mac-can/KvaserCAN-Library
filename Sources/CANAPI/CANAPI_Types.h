@@ -49,9 +49,9 @@
  *
  *  @brief       CAN API V3 for generic CAN Interfaces - Data Types and Defines
  *
- *  @author      $Author: eris $
+ *  @author      $Author: makemake $
  *
- *  @version     $Rev: 993 $
+ *  @version     $Rev: 1017 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -292,7 +292,7 @@ extern "C" {
 #define CANPROP_GET_LIBRARY_ID       4U /**< library id of the library (int32_t) */
 #define CANPROP_GET_LIBRARY_VENDOR   5U /**< vendor name of the library (char[256]) */
 #define CANPROP_GET_LIBRARY_DLLNAME  6U /**< file name of the library DLL (char[256]) */
-#define CANPROP_GET_DEVICE_TYPE     10U /**< device type of the CAN interface (int32_t) */
+#define CANPROP_GET_DEVICE_CHANNEL  10U /**< device type of the CAN interface (int32_t) */
 #define CANPROP_GET_DEVICE_NAME     11U /**< device name of the CAN interface (char[256]) */
 #define CANPROP_GET_DEVICE_VENDOR   12U /**< vendor name of the CAN interface (char[256]) */
 #define CANPROP_GET_DEVICE_DLLNAME  13U /**< file name of the CAN interface DLL (char[256]) */
@@ -303,10 +303,13 @@ extern "C" {
 #define CANPROP_GET_SPEED           18U /**< active bus speed of the CAN controller (can_speed_t) */
 #define CANPROP_GET_STATUS          19U /**< current status register of the CAN controller (uint8_t) */
 #define CANPROP_GET_BUSLOAD         20U /**< current bus load of the CAN controller (uint8_t) */
+#define CANPROP_GET_NUM_CHANNELS    21U /**< numbers of CAN channels on the CAN interface (uint8_t) */
+#define CANPROP_GET_CAN_CHANNEL     22U /**< active CAN channel on the CAN interface (uint8_t) */
+#define CANPROP_GET_CAN_CLOCKS      23U /**< supported CAN clocks (in [Hz]) (int32_t[64]) */
 #define CANPROP_GET_TX_COUNTER      24U /**< total number of sent messages (uint64_t) */
 #define CANPROP_GET_RX_COUNTER      25U /**< total number of reveiced messages (uint64_t) */
 #define CANPROP_GET_ERR_COUNTER     26U /**< total number of reveiced error frames (uint64_t) */
-#define CANPROP_GET_RCV_QUEUE_MAX   27U /**< maximum number of message the receive queue can hold (uint32_t) */
+#define CANPROP_GET_RCV_QUEUE_SIZE  27U /**< maximum number of message the receive queue can hold (uint32_t) */
 #define CANPROP_GET_RCV_QUEUE_HIGH  28U /**< maximum number of message the receive queue has hold (uint32_t) */
 #define CANPROP_GET_RCV_QUEUE_OVFL  29U /**< overflow counter of the receive queue (uint64_t) */
 #define CANPROP_GET_FLT_11BIT_CODE  32U /**< accecptance filter code of 11-bit identifier (int32_t) */
@@ -368,8 +371,8 @@ extern "C" {
 #endif
 #define CANPROP_SET_FIRST_CHANNEL  240U /**< set index to the first entry in the interface list (int32_t) */
 #define CANPROP_SET_NEXT_CHANNEL   241U /**< set index to the next entry in the interface list (NULL) */
-#define CANPROP_GET_CHANNEL_TYPE   242U /**< get device type at actual index in the interface list (int32_t) */
-#define CANPROP_GET_CHANNEL_NAME   243U /**< get device name at actual index in the interface list (char[256]) */
+#define CANPROP_GET_CHANNEL_NO     242U /**< get channel no. at actual index in the interface list (int32_t) */
+#define CANPROP_GET_CHANNEL_NAME   243U /**< get channel name at actual index in the interface list (char[256]) */
 #define CANPROP_GET_CHANNEL_DLLNAME 244U /**< get file name of the DLL at actual index in the interface list (char[256]) */
 #define CANPROP_GET_CHANNEL_VENDOR_ID 245U /**< get library id at actual index in the interface list (int32_t) */
 #define CANPROP_GET_CHANNEL_VENDOR_NAME 246U /**< get vendor name at actual index in the interface list (char[256]) */
@@ -383,6 +386,10 @@ extern "C" {
 #define CANPROP_VENDOR_PROP_RANGE  256U /**< range for vendor-specific property values */
 #define CANPROP_MAX_BUFFER_SIZE    256U /**< max. buffer size for property values */
 #define CANPROP_MAX_STRING_LENGTH 1024U /**< max. length of a formatted message */
+/* - -  aliases (legacy names)  - - - - - - - - - - - - - - - - - - - - */
+#define CANPROP_GET_DEVICE_TYPE         CANPROP_GET_DEVICE_CHANNEL
+#define CANPROP_GET_CHANNEL_TYPE        CANPROP_GET_CHANNEL_NO
+#define CANPROP_GET_RCV_QUEUE_MAX       CANPROP_GET_RCV_QUEUE_SIZE
 /** @} */
 
 /** @name  Property Values
