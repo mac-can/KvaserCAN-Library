@@ -953,6 +953,9 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_SPEED:             // active bus speed of the CAN controller (can_speed_t)
     case CANPROP_GET_STATUS:            // current status register of the CAN controller (uint8_t)
     case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint8_t)
+    case CANPROP_GET_NUM_CHANNELS:      // numbers of CAN channels on the CAN interface (uint8_t)
+    case CANPROP_GET_CAN_CHANNEL:       // active CAN channel on the CAN interface (uint8_t)
+    case CANPROP_GET_CAN_CLOCKS:        // supported CAN clocks (in [Hz]) (int32_t[64])
     case CANPROP_GET_TX_COUNTER:        // total number of sent messages (uint64_t)
     case CANPROP_GET_RX_COUNTER:        // total number of reveiced messages (uint64_t)
     case CANPROP_GET_ERR_COUNTER:       // total number of reveiced error frames (uint64_t)
@@ -986,9 +989,9 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
     }
     /* CAN interface properties */
     switch (param) {
-    case CANPROP_GET_DEVICE_TYPE:       // device type of the CAN interface (int32_t)
+    case CANPROP_GET_DEVICE_CHANNEL:    // device type of the CAN interface (int32_t)
         if (nbyte >= sizeof(int32_t)) {
-            *(int32_t*)value = (int32_t)can[handle].device.deviceInfo.card.hwType;
+            *(int32_t*)value = (int32_t)can[handle].device.handle;  // TODO: check this
             rc = CANERR_NOERROR;
         }
         break;
@@ -1054,6 +1057,27 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
             }
         }
         break;
+    case CANPROP_GET_NUM_CHANNELS:      // numbers of CAN channels on the CAN interface (uint8_t)
+        if (nbyte >= sizeof(uint8_t)) {
+            *(uint8_t*)value = (uint8_t)can[handle].device.numChannels;
+            rc = CANERR_NOERROR;
+        }
+        break;
+    case CANPROP_GET_CAN_CHANNEL:       // active CAN channel on the CAN interface (uint8_t)
+        if (nbyte >= sizeof(uint8_t)) {
+            *(uint8_t*)value = (uint8_t)can[handle].device.channelNo;
+            rc = CANERR_NOERROR;
+        }
+        break;
+#if (0)
+    // TODO: get clocks from device
+    case CANPROP_GET_CAN_CLOCKS:        // supported CAN clocks (in [Hz]) (int32_t[64])
+        if (nbyte >= sizeof(can[handle].device.clocks)) {
+            memcpy(value, can[handle].device.clocks, sizeof(can[handle].device.clocks));
+            rc = CANERR_NOERROR;
+        }
+        break;
+#endif
     case CANPROP_GET_TX_COUNTER:        // total number of sent messages (uint64_t)
         if (nbyte >= sizeof(uint64_t)) {
             *(uint64_t*)value = (uint64_t)can[handle].counters.tx;
@@ -1069,6 +1093,26 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_ERR_COUNTER:       // total number of reveiced error frames (uint64_t)
         if (nbyte >= sizeof(uint64_t)) {
             *(uint64_t*)value = (uint64_t)can[handle].counters.err;
+            rc = CANERR_NOERROR;
+        }
+        break;
+#if (0)
+    case CANPROP_GET_RCV_QUEUE_SIZE:    // maximum number of message the receive queue can hold (uint32_t)
+        if (nbyte >= sizeof(uint32_t)) {
+            *(uint32_t*)value = (uint32_t)CANQUE_QueuSize(can[handle].device.recvData.msgQueue);
+            rc = CANERR_NOERROR;
+        }
+        break;
+    case CANPROP_GET_RCV_QUEUE_HIGH:    // maximum number of message the receive queue has hold (uint32_t)
+        if (nbyte >= sizeof(uint32_t)) {
+            *(uint32_t*)value = (uint32_t)CANQUE_QueuHigh(can[handle].device.recvData.msgQueue);
+            rc = CANERR_NOERROR;
+        }
+        break;
+#endif
+    case CANPROP_GET_RCV_QUEUE_OVFL:    // overflow counter of the receive queue (uint64_t)
+        if (nbyte >= sizeof(uint64_t)) {
+            *(uint64_t*)value = (uint64_t)CANQUE_OverflowCounter(can[handle].device.recvData.msgQueue);
             rc = CANERR_NOERROR;
         }
         break;
