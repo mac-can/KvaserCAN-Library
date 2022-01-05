@@ -51,21 +51,27 @@
 #include <MacTypes.h>
 
 /* CAN API V3 compatible error codes */
-#define CANUSB_ERROR_FATAL    (-99)
-#define CANUSB_ERROR_NOTSUPP  (-98)
-#define CANUSB_ERROR_LIBRARY  (-97)
-#define CANUSB_ERROR_YETINIT  (-96)
-#define CANUSB_ERROR_NOTINIT  (-95)
-#define CANUSB_ERROR_NULLPTR  (-94)
-#define CANUSB_ERROR_ILLPARA  (-93)
-#define CANUSB_ERROR_HANDLE   (-92)
-#define CANUSB_ERROR_reserved (-91)
-#define CANUSB_ERROR_RESOURCE (-90)
-#define CANUSB_ERROR_TIMEOUT  (-50)
-#define CANUSB_ERROR_EMPTY    (-30)
-#define CANUSB_ERROR_FULL     (-20)
-#define CANUSB_ERROR_OK         (0)
+#define CANUSB_ERROR_FATAL     (-99)
+#define CANUSB_ERROR_NOTSUPP   (-98)
+#define CANUSB_ERROR_LIBRARY   (-97)
+#define CANUSB_ERROR_YETINIT   (-96)
+#define CANUSB_ERROR_NOTINIT   (-95)
+#define CANUSB_ERROR_NULLPTR   (-94)
+#define CANUSB_ERROR_ILLPARA   (-93)
+#define CANUSB_ERROR_HANDLE    (-92)
+#define CANUSB_ERROR_reserved  (-91)
+#define CANUSB_ERROR_RESOURCE  (-90)
+#define CANUSB_ERROR_TIMEOUT   (-50)
+#define CANUSB_ERROR_EMPTY     (-30)
+#define CANUSB_ERROR_FULL      (-20)
+#define CANUSB_ERROR_OK          (0)
 #define CANUSB_SUCCESS  CANUSB_ERROR_OK
+
+/* CAN API V3 compatible board states */
+#define CANUSB_BOARD_NOT_AVAILABLE  (-1)
+#define CANUSB_BOARD_AVAILABLE       (0)
+#define CANUSB_BOARD_OCCUPIED       (+1)
+#define CANUSB_BOARD_NOT_TESTABLE   (-2)
 
 /* CAN API V3 compatible time-out value */
 #define CANUSB_INFINITE  (65535U)
@@ -79,5 +85,5 @@ extern "C" {
 #endif
 #endif /* MACCAN_COMMAN_H_INCLUDED */
 
-/* * $Id: MacCAN_Common.h 1001 2021-05-25 17:57:49Z eris $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Common.h 1068 2021-12-30 18:14:57Z makemake $ *** (c) UV Software, Berlin ***
  */

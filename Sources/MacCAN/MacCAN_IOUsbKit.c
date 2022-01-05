@@ -1683,7 +1683,7 @@ static IOReturn FindInterface(IOUSBDeviceInterface **device, int index)
     UInt8                       interfaceProtocol;
     UInt8                       interfaceNumEndpoints;
     CFRunLoopSourceRef          runLoopSource;
-#ifdef OPTION_MACCAN_PIPE_INFO
+#if (OPTION_MACCAN_PIPE_INFO != 0)
     int                         pipeRef;
 #endif
 
@@ -1742,7 +1742,7 @@ static IOReturn FindInterface(IOUSBDeviceInterface **device, int index)
             (void)(*interface)->Release(interface);
             break;
         }
-#ifdef OPTION_MACCAN_PIPE_INFO
+#if (OPTION_MACCAN_PIPE_INFO != 0)
         MACCAN_DEBUG_CORE("      - Interface class %d, subclass %d, protocol %d\n", interfaceClass, interfaceSubClass, interfaceProtocol);
         MACCAN_DEBUG_CORE("      - Interface has %d endpoints:\n", interfaceNumEndpoints);
         /* Access each pipe in turn, starting with the pipe at index 1 */
@@ -1862,5 +1862,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1066 2021-12-28 16:37:33Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1069 2021-12-30 18:17:47Z makemake $ *** (c) UV Software, Berlin ***
  */
