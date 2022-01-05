@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -70,12 +70,12 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
     retVal = KvaserUSB_ProbeUsbDevice(channel, &productId);
     if (retVal < 0) {
         if (state)
-            *state = CANBRD_NOT_PRESENT;
-        return CANERR_NOERROR;
+            *state = CANUSB_BOARD_NOT_AVAILABLE;
+        return CANUSB_SUCCESS;
     } else {
         if (state)
-            *state = retVal > 0 ? CANBRD_OCCUPIED : CANBRD_PRESENT;
-        retVal = CANERR_NOERROR;
+            *state = retVal > 0 ? CANUSB_BOARD_OCCUPIED : CANUSB_BOARD_AVAILABLE;
+        retVal = CANUSB_SUCCESS;
     }
     /* get operation capability of the appropriate CAN controller */
     switch (productId) {
@@ -88,7 +88,7 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
     }
     /* check given operation mode against the operation capability */
     if ((opMode & ~opCapa) != 0) {
-        retVal = CANERR_ILLPARA;
+        retVal = CANUSB_ERROR_ILLPARA;
     }
     return retVal;
 }
@@ -274,14 +274,14 @@ CANUSB_Return_t KvaserCAN_CanBusOn(KvaserUSB_Device_t *device, bool silent) {
             // TODO: (void)LeafPro_ResetStatistics(device, KVASER_USB_REQUEST_DELAY);
             // TODO: (void)LeafPro_ResetErrorCounter(device, KVASER_USB_REQUEST_DELAY);
             retVal = LeafPro_SetDriverMode(device, silent ? DRIVERMODE_SILENT : DRIVERMODE_NORMAL);
-            if (retVal == CANERR_NOERROR)
+            if (retVal == CANUSB_SUCCESS)
                 retVal = LeafPro_StartChip(device, KVASER_USB_COMMAND_TIMEOUT);
            break;
         case LEAF_LIGHT_PRODUCT_ID:
             (void)LeafLight_ResetStatistics(device, KVASER_USB_REQUEST_DELAY);
             (void)LeafLight_ResetErrorCounter(device, KVASER_USB_REQUEST_DELAY);
             retVal = LeafLight_SetDriverMode(device, silent ? DRIVERMODE_SILENT : DRIVERMODE_NORMAL);
-            if (retVal == CANERR_NOERROR)
+            if (retVal == CANUSB_SUCCESS)
                 retVal = LeafLight_StartChip(device, KVASER_USB_COMMAND_TIMEOUT);
            break;
     }
@@ -301,12 +301,12 @@ CANUSB_Return_t KvaserCAN_CanBusOff(KvaserUSB_Device_t *device) {
     switch (device->productId) {
         case LEAF_PRO_PRODUCT_ID:
             retVal = LeafPro_StopChip(device, KVASER_USB_COMMAND_TIMEOUT);
-            if (retVal == CANERR_NOERROR)
+            if (retVal == CANUSB_SUCCESS)
                 retVal = LeafPro_SetDriverMode(device, DRIVERMODE_NORMAL/*_OFF*/);  // OFF doesn't work
             break;
         case LEAF_LIGHT_PRODUCT_ID:
             retVal = LeafLight_StopChip(device, KVASER_USB_COMMAND_TIMEOUT);
-            if (retVal == CANERR_NOERROR)
+            if (retVal == CANUSB_SUCCESS)
                 retVal = LeafLight_SetDriverMode(device, DRIVERMODE_OFF);
             break;
     }
