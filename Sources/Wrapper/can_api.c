@@ -955,10 +955,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint8_t)
     case CANPROP_GET_NUM_CHANNELS:      // numbers of CAN channels on the CAN interface (uint8_t)
     case CANPROP_GET_CAN_CHANNEL:       // active CAN channel on the CAN interface (uint8_t)
-#if (0)
-    // TODO: get clocks from device
     case CANPROP_GET_CAN_CLOCKS:        // supported CAN clocks (in [Hz]) (int32_t[64])
-#endif
     case CANPROP_GET_TX_COUNTER:        // total number of sent messages (uint64_t)
     case CANPROP_GET_RX_COUNTER:        // total number of reveiced messages (uint64_t)
     case CANPROP_GET_ERR_COUNTER:       // total number of reveiced error frames (uint64_t)
@@ -1075,15 +1072,12 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
             rc = CANERR_NOERROR;
         }
         break;
-#if (0)
-    // TODO: get clocks from device
     case CANPROP_GET_CAN_CLOCKS:        // supported CAN clocks (in [Hz]) (int32_t[64])
         if (nbyte >= sizeof(can[handle].device.clocks)) {
             memcpy(value, can[handle].device.clocks, sizeof(can[handle].device.clocks));
             rc = CANERR_NOERROR;
         }
         break;
-#endif
     case CANPROP_GET_TX_COUNTER:        // total number of sent messages (uint64_t)
         if (nbyte >= sizeof(uint64_t)) {
             *(uint64_t*)value = (uint64_t)can[handle].counters.tx;

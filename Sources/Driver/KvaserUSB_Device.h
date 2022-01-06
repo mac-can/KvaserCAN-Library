@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -182,7 +182,9 @@ typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
 
 typedef uint8_t KvaserUSB_CanChannel_t; /* CAN channel on a device (range 0,..n) */
 
-typedef struct kavser_hydra_channel_t_ {/* USB Hydra device data (Leaf Pro): */
+typedef int32_t KvaserUSB_CanClock_t;
+
+typedef struct kavser_hydra_channel_t_ {/* Hydra device data (Leaf Pro): */
     uint8_t channel2he;                 /* - to map a channel no. to HE (6-bit) */
     uint8_t he2channel;                 /* - to map 6-bit HE to a channel number */
 } KvaserUSB_HydraData_t;
@@ -196,9 +198,10 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     KvaserUSB_RecvData_t recvData;      /* - pipe w/ CAN message queue */
     KvaserUSB_CanChannel_t numChannels; /* - number of CAN channels */
     KvaserUSB_CanChannel_t channelNo;   /* - active CAN channel on device */
-    KvaserUSB_HydraData_t hydraData;    /* - USB Hydra device (Leaf Pro) */
     KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capability */
+    KvaserUSB_CanClock_t clocks[KVASER_MAX_CAN_CLOCKS+1]; /* - CAN clocks (in [Hz]) */
     KvaserUSB_DeviceInfo_t deviceInfo;  /* - device information (hw, sw, etc.) */
+    KvaserUSB_HydraData_t hydraData;    /* - Hydra device data (Leaf Pro) */
     char name[KVASER_MAX_NAME_LENGTH+1];  /* - device name (zero-terminated string) */
     char vendor[KVASER_MAX_NAME_LENGTH+1];/* - vendor name (zero-terminated string) */
     char website[KVASER_MAX_NAME_LENGTH+1];/*- vendor website (zero-terminated string) */
