@@ -769,7 +769,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.6.1: Get property values fom library when interface initialized (but CAN controller not started).
+// @xctest TC12.6.1: Get property values from library when interface initialized (but CAN controller not started).
 //
 // @expected: CANERR_NOERROR
 //
@@ -836,7 +836,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.6.2: Get property values fom device when interface initialized (but CAN controller not started).
+// @xctest TC12.6.2: Get property values from device when interface initialized (but CAN controller not started).
 //
 // @expected: CANERR_NOERROR
 //
@@ -1304,4 +1304,4 @@ static struct property {
 
 @end
 
-// $Id: test_can_property.mm 1080 2022-01-06 20:37:33Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_property.mm 1082 2022-01-06 22:16:16Z makemake $  Copyright (c) UV Software, Berlin //

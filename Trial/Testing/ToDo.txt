@@ -44,7 +44,11 @@ TC03.29: testWithCanFdBitrateSettingsInCan20Mode
 - define test subject
 - implement this
 TC04.9: testWhenMessageLost
+- define test subject
 - open point: How to loose a message?
+TC04.10: testTimestampAccuracy
+- define test case
+- implement this
 TC09.8: testWhenStatusBusOff
 - define test subject
 - implement this
@@ -89,38 +93,3 @@ TC10.16: testWhenStatusQueueOverrun
 - implement this
 TC11.11: Get CAN bit-rate settings when CAN controller started with various CAN FD bit-rate settings and check for correctness:
 - implement this
-TC12.1.1: Get property values from library with invalid interface handle(s):
-- implement this
-TC12.1: Get property values from device with invalid interface handle(s):
-- rework this
-TC12.3.1: Get property values from libray with invalid value for parameter 'param':
-- fix type in 'libray'
-- implement this
-TC12.3.2: Get property values from device with invalid value for parameter 'param':
-- rework this
-TC12.4.1: Get property values from library with wrong parameter size (too small):
-- implement this
-TC12.4.2: Get property values from device with wrong parameter size (too small):
-- rework this
-TC12.5.1: Get property values from library when interface is not initialized:
-- implement this
-TC12.5.2: Get property values from device when interface is not initialized:
-- rework this
-TC12.6.1: Get property values fom library when interface initialized (but CAN controller not started):
-- fix typo in 'fom'
-- implement this
-TC12.6.2: Get property values fom device when interface initialized (but CAN controller not started):
-- fix typo in 'fom'
-- rework this
-TC12.7.1: Get property values from library when CAN controller started:
-- implement this
-TC12.7.2: Get property values from device when CAN controller started:
-- rework this
-TC12.8.1: Get property values from library when CAN controller stopped:
-- implement this
-TC12.8.2: Get property values from device when CAN controller stopped:
-- rework this
-/TC12.9.1: Get property values from library when interface already shutdown:
-- implement this
-TC12.9.2: Get property values from device when interface already shutdown:
-- rework this
