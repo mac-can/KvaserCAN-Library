@@ -74,10 +74,12 @@
 //  - enable/disable sending of CAN frames with non-default baudrate
 //    note: disable this option when a 3rd CAN device is on the bus.
 #define SEND_WITH_NONE_DEFAULT_BAUDRATE  0
+//  - enable/disable exiting loops over properties on error
+#define EXIT_PROPERTY_LOOP_ON_ERROR  0
 
 //  Useful stuff:
 #define INVALID_HANDLE  (-1)
 
 #endif // SETTINGS_H_INCLUDED
 
-// $Id: Settings.h 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Settings.h 1080 2022-01-06 20:37:33Z makemake $  Copyright (c) UV Software, Berlin //
