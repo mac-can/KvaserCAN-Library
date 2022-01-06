@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -79,7 +79,9 @@ int CTester::SendSomeFrames(int handle, int32_t channel, int frames, uint32_t ca
     retVal = StartController(bitrate);
     if (retVal != CTester::NoError)
         goto exitSendSomeFrames;
-    
+#if (PCBUSB_INIT_DELAY_WORKAROUND  != 0)
+    CTimer::Delay(100U*CTimer::MSEC);
+#endif
     trmMessage.id = canId;
     trmMessage.fdf = opMode.fdoe ? 1 : 0;
     trmMessage.brs = opMode.brse ? 1 : 0;
@@ -101,10 +103,14 @@ int CTester::SendSomeFrames(int handle, int32_t channel, int frames, uint32_t ca
         trmMessage.data[7] = (uint8_t)((uint64_t)i >> 56);
         do {
             retVal = can_write(handle, &trmMessage, 0U);
+            if (retVal == CANERR_TX_BUSY)
+                CTimer::Delay(CTimer::MSEC);
         } while (retVal == CANERR_TX_BUSY);
         if (retVal != CANERR_NOERROR)
             goto exitSendSomeFrames;
-        
+#if (PCBUSB_QXMTFULL_WORKAROUND  != 0)
+        CTimer::Delay((uint32_t)(3U*CTimer::MSEC));
+#endif
         memset(&rcvMessage, 0, sizeof(can_message_t));
         if ((retVal = ReadMessage(rcvMessage, 0U)) == CTester::NoError) {
             if (rcvMessage.sts)
@@ -167,7 +173,9 @@ int CTester::ReceiveSomeFrames(int handle, int32_t channel, int frames, uint32_t
     retVal = StartController(bitrate);
     if (retVal != CTester::NoError)
         goto exitReceiveSomeFrames;
-    
+#if (PCBUSB_INIT_DELAY_WORKAROUND  != 0)
+    CTimer::Delay(100U*CTimer::MSEC);
+#endif
     trmMessage.id = canId;
     trmMessage.fdf = opMode.fdoe ? 1 : 0;
     trmMessage.brs = opMode.brse ? 1 : 0;
@@ -189,10 +197,14 @@ int CTester::ReceiveSomeFrames(int handle, int32_t channel, int frames, uint32_t
         trmMessage.data[7] = (uint8_t)((uint64_t)i >> 56);
         do {
             retVal = WriteMessage(trmMessage);
+            if (retVal == CTester::TransmitterBusy)
+                CTimer::Delay(CTimer::MSEC);
         } while (retVal == CTester::TransmitterBusy);
         if (retVal != CTester::NoError)
             goto exitReceiveSomeFrames;
-        
+#if (PCBUSB_QXMTFULL_WORKAROUND  != 0)
+        CTimer::Delay((uint32_t)(3U*CTimer::MSEC));
+#endif
         memset(&rcvMessage, 0, sizeof(can_message_t));
         if ((retVal = can_read(handle, &rcvMessage, 0U)) == CANERR_NOERROR) {
             if (rcvMessage.sts)
@@ -284,4 +296,4 @@ int CTester::CheckReceivedData(const CANAPI_Message_t &message, uint64_t &expect
     return rc;
 }
 
-// $Id: Tester.cpp 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Tester.cpp 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //

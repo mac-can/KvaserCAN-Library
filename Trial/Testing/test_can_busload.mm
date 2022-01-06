@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -368,7 +368,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @test:
     // @- get bus-load of DUT1 and check to be in INIT state
     rc = can_busload(handle, &load, &status.byte);
@@ -509,7 +509,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @test:
     // @- get bus-load of DUT1 and check to be in INIT state
     rc = can_busload(handle, &load, &status.byte);
@@ -625,4 +625,4 @@
 
 @end
 
-// $Id: test_can_busload.mm 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_busload.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //

@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -161,7 +161,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0)
@@ -290,7 +290,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @post:
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -380,7 +380,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
@@ -444,7 +444,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     // @- try to send a message from DUT1
     rc = can_write(handle, &message, 0U);
@@ -474,7 +474,7 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-    
+
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -588,7 +588,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @test:
     // @- try to send a message with invalid STD 0x800 from DUT1
     message.id = 0x800U;
@@ -693,7 +693,7 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-    
+
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -807,7 +807,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @test:
     // @- try to send a message with invalid XTD 0x20000000 from DUT1
     message.id = 0x20000000U;
@@ -864,7 +864,7 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-    
+
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -977,7 +977,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @test:
     // @- CAN 2.0:
     if (!mode.fdoe) {
@@ -1093,7 +1093,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
-        
+
         // @test:
         // @-- try to send a message with bit XTD set
         message.xtd = 1;
@@ -1179,7 +1179,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
-        
+
         // @test:
         // @-- try to send a message with bit RTR set
         message.rtr = 1;
@@ -1265,7 +1265,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
-        
+
         // @test:
         // @-- try to send a message with bit FDF set
         message.fdf = 1;
@@ -1352,7 +1352,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
-        
+
         // @test:
         // @-- try to send a message with bit BRS set
         message.fdf = 0;
@@ -1440,7 +1440,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
-        
+
         // @test:
         // @-- try to send a message with bit FDF cleared and BRS set
         message.fdf = 0;
@@ -1516,7 +1516,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @test:
     // @- try to send a message with bit STS set
     message.sts = 1;
@@ -1576,7 +1576,7 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-    
+
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -1652,4 +1652,4 @@
 
 @end
 
-// $Id: test_can_write.mm 1067 2021-12-28 21:18:35Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_write.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //

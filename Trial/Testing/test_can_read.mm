@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -149,7 +149,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0)
@@ -256,7 +256,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @post:
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -335,7 +335,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
@@ -388,7 +388,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     // @- try to read a message from DUT1
     rc = can_read(handle, &message, 0U);
@@ -417,7 +417,7 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     // @- try to read a message from DUT1 when there in none
     rc = can_read(handle, &message, 0U);
@@ -480,7 +480,7 @@
     message2.sts = 0;
     message2.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message2.data, 0, CANFD_MAX_LEN);
-    
+
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -546,7 +546,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
     // @- check if bit CANSTAT_QUE_OVR is set in status register
+#if (STATUS_QUEUE_OVFL_UNSUPPORTED == 0)
     XCTAssertTrue(status.queue_overrun);
+#endif
     // @- stop/reset DUT1 (this should clear the receive queue)
     rc = can_reset(handle1);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -591,4 +593,4 @@
 //
 @end
 
-// $Id: test_can_read.mm 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_read.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //

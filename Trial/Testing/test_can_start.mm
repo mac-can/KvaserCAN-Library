@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -73,7 +73,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -137,7 +137,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -195,7 +195,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @test:
     // @- try to start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -247,7 +247,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -305,7 +305,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -338,7 +338,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @test:
     // @- start DUT1 again with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -347,7 +347,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0)
@@ -379,7 +379,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -431,7 +431,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -452,7 +452,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -488,7 +488,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -509,7 +509,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -543,7 +543,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -564,7 +564,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -597,7 +597,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -618,7 +618,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -651,7 +651,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -672,7 +672,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -705,7 +705,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -726,7 +726,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -759,7 +759,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -780,7 +780,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -813,7 +813,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -834,7 +834,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -867,7 +867,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -888,7 +888,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
+
     // @post:
     // @- sunnyday traffic (optional):
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -921,7 +921,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 in CAN 2.0 operation mode
     handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
@@ -1029,7 +1029,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @test: loop over CiA bit-timing table indexes 0 to 8
     for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
 #if (BITRATE_800K_UNSUPPORTED != 0)
@@ -1108,7 +1108,7 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @test: loop over CiA bit-timing table indexes 0 to 8
     for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
 #if (BITRATE_800K_UNSUPPORTED != 0)
@@ -1254,4 +1254,4 @@
 
 @end
 
-// $Id: test_can_start.mm 1037 2021-12-21 19:27:26Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_start.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //
