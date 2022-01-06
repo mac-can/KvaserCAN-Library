@@ -1096,20 +1096,18 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
             rc = CANERR_NOERROR;
         }
         break;
-#if (0)
     case CANPROP_GET_RCV_QUEUE_SIZE:    // maximum number of message the receive queue can hold (uint32_t)
         if (nbyte >= sizeof(uint32_t)) {
-            *(uint32_t*)value = (uint32_t)CANQUE_QueuSize(can[handle].device.recvData.msgQueue);
+            *(uint32_t*)value = (uint32_t)CANQUE_QueueSize(can[handle].device.recvData.msgQueue);
             rc = CANERR_NOERROR;
         }
         break;
     case CANPROP_GET_RCV_QUEUE_HIGH:    // maximum number of message the receive queue has hold (uint32_t)
         if (nbyte >= sizeof(uint32_t)) {
-            *(uint32_t*)value = (uint32_t)CANQUE_QueuHigh(can[handle].device.recvData.msgQueue);
+            *(uint32_t*)value = (uint32_t)CANQUE_QueueHigh(can[handle].device.recvData.msgQueue);
             rc = CANERR_NOERROR;
         }
         break;
-#endif
     case CANPROP_GET_RCV_QUEUE_OVFL:    // overflow counter of the receive queue (uint64_t)
         if (nbyte >= sizeof(uint64_t)) {
             *(uint64_t*)value = (uint64_t)CANQUE_OverflowCounter(can[handle].device.recvData.msgQueue);

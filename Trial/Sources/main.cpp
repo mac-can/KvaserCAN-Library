@@ -461,7 +461,7 @@ retry:
         if ((myDriver.GetProperty(CANPROP_GET_RCV_QUEUE_SIZE, (void *)&u32QueSize, sizeof(uint32_t)) == CCanApi::NoError) &&
             (myDriver.GetProperty(CANPROP_GET_RCV_QUEUE_HIGH, (void *)&u32QueHigh, sizeof(uint32_t)) == CCanApi::NoError) &&
             (myDriver.GetProperty(CANPROP_GET_RCV_QUEUE_OVFL, (void *)&u64QueOvfl, sizeof(uint64_t)) == CCanApi::NoError))
-            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_QUEUE_*): size = %" PRIu32 " high = %" PRIu32 " overflows = %" PRIu64 "\n", u32QueSize, u32QueHigh, u64QueOvfl);
+            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_QUEUE_*): SIZE = %" PRIu32 " HIGH = %" PRIu32 " OVFL = %" PRIu64 "\n", u32QueSize, u32QueHigh, u64QueOvfl);
     }
     if (option_info) {
         char *hardware = myDriver.GetHardwareVersion();
