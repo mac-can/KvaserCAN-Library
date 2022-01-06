@@ -258,7 +258,7 @@ static Boolean EnqueueElement(CANQUE_MsgQueue_t queue, const void *element) {
         (void)memcpy(&queue->queueElem[(queue->tail * queue->elemSize)], element, queue->elemSize);
         queue->used += 1U;
         if (queue->high < queue->used)
-            queue->high = queue->high;
+            queue->high = queue->used;
         return true;
     } else {
         queue->ovfl.counter += 1U;
@@ -282,5 +282,5 @@ static Boolean DequeueElement(CANQUE_MsgQueue_t queue, void *element) {
         return false;
 }
 
-/* * $Id: MacCAN_MsgQueue.c 1076 2022-01-06 08:02:11Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgQueue.c 1077 2022-01-06 09:47:12Z makemake $ *** (c) UV Software, Berlin ***
  */
