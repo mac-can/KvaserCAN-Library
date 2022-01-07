@@ -59,27 +59,60 @@
 #define TEST_CANMODE  CANMODE_DEFAULT
 #define TEST_BTRINDEX  CANBTR_INDEX_250K
 
-//  General test options:
+//  General test settings:
 //  - number of CAN frames to be send during test cases
-#define TEST_FRAMES  8
+//    note: a small number speeds up the test duration.
+#define TEST_FRAMES  8  /// default = 8
 //  - number of CAN frames to be send during smoke test
-#define TEST_TRAFFIC  2048
+//    note: long-term stress test with a large number.
+#define TEST_TRAFFIC  2048  /// default = 2048
+//  - number of CAN frames to be send during time-stamp test
+//    note: not too small because of statistic evaluation.
+#define TEST_TIMESTAMP  1000  /// default = 1000
 //  - number of CAN frames to be send until queue overrun
-#define TEST_QUEUE_FULL  65536
+//    note: maybe delay for buffered transmission required.
+#define TEST_QUEUE_FULL  65536  /// default = 65'536
 #if (TX_ACKNOWLEDGE_UNSUPPORTED != 0)
-#define TEST_AFTER_BURNER  3000 /* [ms] */
+#define TEST_AFTER_BURNER  3000  /// default = 3000 (in [ms])
 #endif
-//  - enable/disable sending of CAN frames during test cases
-#define SEND_TEST_FRAMES  1
+//  - enable/disable sending of CAN frames during sunnyday scenarios
+//    note: disable this option to not repeat the same crap forever.
+#define SEND_TEST_FRAMES  1  /// default = enabled
 //  - enable/disable sending of CAN frames with non-default baudrate
 //    note: disable this option when a 3rd CAN device is on the bus.
-#define SEND_WITH_NONE_DEFAULT_BAUDRATE  0
+#define SEND_WITH_NONE_DEFAULT_BAUDRATE  1  /// default = enabled
 //  - enable/disable exiting loops over properties on error
-#define EXIT_PROPERTY_LOOP_ON_ERROR  0
+//    note: enable this option to debug a failing property.
+#define EXIT_PROPERTY_LOOP_ON_ERROR  0  /// default = disabled
+
+//  Settings for time-stamp accuracy:
+//  - time-stamp test with 10ms transmission delay
+#define TEST_TIMESTAMP_10MS   1  /// default = enabled
+#define TIMESTAMP_LOWER_10MS  9500  /// lower threshold = delay - 500usec
+#define TIMESTAMP_UPPER_10MS  10500 /// upper threshold = delay + 500usec
+//  - time-stamp test with 7ms transmission delay
+#define TEST_TIMESTAMP_7MS   1  /// default = enabled
+#define TIMESTAMP_LOWER_7MS  6500  /// lower threshold = delay - 500usec
+#define TIMESTAMP_UPPER_7MS  7500  /// upper threshold = delay + 500usec
+//  - time-stamp test with 5ms transmission delay
+#define TEST_TIMESTAMP_5MS   1  /// default = enabled
+#define TIMESTAMP_LOWER_5MS  4500  /// lower threshold = delay - 500usec
+#define TIMESTAMP_UPPER_5MS  5500  /// upper threshold = delay + 500usec
+//  - time-stamp test with 2ms transmission delay
+#define TEST_TIMESTAMP_2MS   1  /// default = enabled
+#define TIMESTAMP_LOWER_2MS  1500  /// lower threshold = delay - 500usec
+#define TIMESTAMP_UPPER_2MS  2500  /// upper threshold = delay + 500usec
+//  - time-stamp test with 1ms transmission delay
+#define TEST_TIMESTAMP_1MS   1  /// default = enabled
+#define TIMESTAMP_LOWER_1MS  500  /// lower threshold = delay - 500usec
+#define TIMESTAMP_UPPER_1MS  1500 /// upper threshold = delay + 500usec
+//  - time-stamp test without transmission delay
+#define TEST_TIMESTAMP_0MS   1   /// cannot be disabled
+#define TIMESTAMP_UPPER_0MS  25000  /// approx. time @ 5kbps
 
 //  Useful stuff:
 #define INVALID_HANDLE  (-1)
 
 #endif // SETTINGS_H_INCLUDED
 
-// $Id: Settings.h 1080 2022-01-06 20:37:33Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Settings.h 1084 2022-01-07 13:31:39Z makemake $  Copyright (c) UV Software, Berlin //
