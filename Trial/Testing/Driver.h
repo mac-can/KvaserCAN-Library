@@ -1,7 +1,7 @@
 //
 //  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
 //
-//  Copyright (C) 2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (C) 2021-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -44,8 +44,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef TEMPLATE_H_INCLUDED
-#define TEMPLATE_H_INCLUDED
+#ifndef DRIVER_H_INCLUDED
+#define DRIVER_H_INCLUDED
 
 //  A Template for CAN API V3 Testing
 //
@@ -90,6 +90,6 @@
 //#define TX0x_y_WORKARAOUND  1
 
 #endif // CAN_FD_SUPPORTED
-#endif // TEMPLATE_H_INCLUDED
+#endif // DRIVER_H_INCLUDED
 
 // $Id: Template.h 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //

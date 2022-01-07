@@ -120,7 +120,7 @@
 		0FEABC0F25E8340400DD9ADB /* LeafPro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafPro.c; path = ../Sources/Driver/LeafPro.c; sourceTree = "<group>"; };
 		0FEABC1025E8340400DD9ADB /* LeafPro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafPro.h; path = ../Sources/Driver/LeafPro.h; sourceTree = "<group>"; };
 		449AFC7027870CCC00A53CDA /* test_can_firmware.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = test_can_firmware.mm; sourceTree = "<group>"; };
-		44BDCA8627750BA600BE9790 /* Template.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Template.h; sourceTree = "<group>"; };
+		44BDCA8627750BA600BE9790 /* Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Driver.h; sourceTree = "<group>"; };
 		44CC011E277BB91100EF9361 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -203,7 +203,7 @@
 		0F8F0ACD26908D9F00C2D974 /* Testing */ = {
 			isa = PBXGroup;
 			children = (
-				44BDCA8627750BA600BE9790 /* Template.h */,
+				44BDCA8627750BA600BE9790 /* Driver.h */,
 				0F8F0AE42690916300C2D974 /* Settings.h */,
 				0F8F0ACE26908D9F00C2D974 /* Testing.mm */,
 				0F8F0AE52690DD0600C2D974 /* test_can_test.mm */,

@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -48,7 +48,10 @@
 #ifndef TESTER_H_INCLUDED
 #define TESTER_H_INCLUDED
 
-#include "Template.h"
+//  HowTo: make a copy of header 'Template.h' and name it 'Driver.h'
+//         set define 'CDriverCAN' to your MacCAN Driver Under Test
+//         and adapt the driver specific test settings there
+#include "Driver.h"
 
 class CTester : CDriverCAN {
 public:
@@ -68,4 +71,4 @@ public:
 
 #endif // TESTER_H_INCLUDED
 
-// $Id: Tester.h 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Tester.h 1083 2022-01-07 07:58:25Z makemake $  Copyright (c) UV Software, Berlin //
