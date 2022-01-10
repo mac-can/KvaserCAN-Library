@@ -2,7 +2,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
@@ -887,6 +887,41 @@ Boolean CANUSB_IsDevicePresent(CANUSB_Index_t index) {
     if (usbDevice[index].fPresent &&
         (usbDevice[index].ioDevice != NULL))
         ret = true;
+    LEAVE_CRITICAL_SECTION(index);
+    MACCAN_DEBUG_FUNC("unlocked\n");
+    return ret;
+}
+
+Boolean CANUSB_IsDeviceInUse(CANUSB_Index_t index) {
+    Boolean ret = false;
+    IOReturn kr;
+
+    /* must be initialized */
+    if (!fInitialized)
+        return false;
+    /* must be a valid index */
+    if (!IS_INDEX_VALID(index))
+        return false;
+
+    MACCAN_DEBUG_FUNC("lock #%i\n", index);
+    ENTER_CRITICAL_SECTION(index);
+    if (usbDevice[index].fPresent &&
+        (usbDevice[index].ioDevice != NULL)) {
+#if (OPTION_MACCAN_MULTICHANNEL == 0)
+        if (usbDevice[index].usbInterface.fOpened &&
+#else
+        if (usbDevice[index].usbInterface.nOpened &&
+#endif
+            (usbDevice[index].usbInterface.ioInterface != NULL))
+            ret = true;
+        else {
+            /* check if the device is used by another process by trying to open it in exclusive mode*/
+            kr = (*usbDevice[index].ioDevice)->USBDeviceOpen(usbDevice[index].ioDevice);
+            if (kIOReturnSuccess == kr)  /* note: if not then close the device immediately! */
+                (void)(*usbDevice[index].ioDevice)->USBDeviceClose(usbDevice[index].ioDevice);
+            ret = (kIOReturnSuccess != kr) ? true : false;
+        }
+    }
     LEAVE_CRITICAL_SECTION(index);
     MACCAN_DEBUG_FUNC("unlocked\n");
     return ret;
@@ -1862,5 +1897,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1069 2021-12-30 18:17:47Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1087 2022-01-10 16:09:31Z makemake $ *** (c) UV Software, Berlin ***
  */
