@@ -600,8 +600,15 @@
         // @-- get bitrate from DUT1 and compare with selected settings
         rc = can_bitrate(handle, &result, NULL);
         XCTAssertEqual(CANERR_NOERROR, rc);
+#if (KVASER_BUSPARAMS_WORKAROUND == 0)
         XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
         XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
+#else
+        if (bitrate.btr.nominal.brp && result.btr.nominal.brp)
+            XCTAssertEqual((bitrate.btr.frequency / bitrate.btr.nominal.brp), (result.btr.frequency / result.btr.nominal.brp));
+        else
+            XCTAssertTrue(false, @"Devide by Zero!");
+#endif
         XCTAssertEqual(bitrate.btr.nominal.tseg1, result.btr.nominal.tseg1);
         XCTAssertEqual(bitrate.btr.nominal.tseg2, result.btr.nominal.tseg2);
         XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
@@ -639,4 +646,4 @@
 
 @end
 
-// $Id: test_can_bitrate.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_bitrate.mm 1088 2022-01-10 21:14:15Z makemake $  Copyright (c) UV Software, Berlin //

@@ -60,10 +60,10 @@
 #define CAN_DEVICE2  KVASER_CAN_CHANNEL1
 
 //  (§4) define macros for CAN Classic bit-rate settings (at least BITRATE_1M, BITRATE_500K, BITRATE_250K, BITRATE_125K)
-#define BITRATE_1M(x)       do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_500K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_250K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_125K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; } while(0)
+#define BITRATE_1M(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp=1; x.btr.nominal.tseg1=5;  x.btr.nominal.tseg2=2; x.btr.nominal.sjw=1; x.btr.nominal.sam=1; } while(0)
+#define BITRATE_500K(x)     do{ x.btr.frequency=8000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=5;  x.btr.nominal.tseg2=2; x.btr.nominal.sjw=1; x.btr.nominal.sam=1; } while(0)
+#define BITRATE_250K(x)     do{ x.btr.frequency=8000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=5;  x.btr.nominal.tseg2=2; x.btr.nominal.sjw=1; x.btr.nominal.sam=1; } while(0)
+#define BITRATE_125K(x)     do{ x.btr.frequency=8000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2=4; x.btr.nominal.sjw=1; x.btr.nominal.sam=1; } while(0)
 
 //  ($5) define macros for unsupported features in CAN Classic operation mode (at least BITRATE_800K_UNSUPPORTED, ..)
 #define BITRATE_800K_UNSUPPORTED  0
@@ -71,6 +71,7 @@
 #define TX_ACKNOWLEDGE_UNSUPPORTED  0
 
 //  (§6) define macros for workarounds in CAN Classic operation mode (e.g. TC01_3_WORKARAOUND)
+#define KVASER_BUSPARAMS_WORKAROUND  1
 //#define TX0x_y_WORKARAOUND  1
 
 //  (§7) define macro CAN_FD_SUPPORTED when CAN FD operation mode is supported
@@ -78,10 +79,10 @@
 #if (CAN_FD_SUPPORTED != 0)
 
 //  (§8) define macros for CAN Classic bit-rate settings (at least BITRATE_1M8M, BITRATE_500K4M, BITRATE_250K2M, BITRATE_125K1M)
-#define BITRATE_1M8M(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1= 3; x.btr.data.tseg2=1; x.btr.data.sjw=1; } while(0)
-#define BITRATE_500K4M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1= 7; x.btr.data.tseg2=2; x.btr.data.sjw=2; } while(0)
-#define BITRATE_250K2M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=2; } while(0)
-#define BITRATE_125K1M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1=31; x.btr.data.tseg2=8; x.btr.data.sjw=2; } while(0)
+#define BITRATE_1M8M(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=31;  x.btr.nominal.tseg2= 8; x.btr.nominal.sjw=8; x.btr.data.brp=2; x.btr.data.tseg1=3;  x.btr.data.tseg2=1; x.btr.data.sjw=1; } while(0)
+#define BITRATE_500K4M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=63;  x.btr.nominal.tseg2=16; x.btr.nominal.sjw=8; x.btr.data.brp=2; x.btr.data.tseg1=7;  x.btr.data.tseg2=2; x.btr.data.sjw=2; } while(0)
+#define BITRATE_250K2M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw=8; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=2; } while(0)
+#define BITRATE_125K1M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw=8; x.btr.data.brp=2; x.btr.data.tseg1=31; x.btr.data.tseg2=8; x.btr.data.sjw=2; } while(0)
 
 //  ($9) define macros for unsupported features in CAN Classic operation mode
 //#define BITRATE_SWITCHING_UNSUPPORTED  0
