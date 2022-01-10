@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:can_recv.xcodeproj">
+      location = "group:can_send.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:can_send.xcodeproj">
+      location = "group:can_recv.xcodeproj">
    </FileRef>
 </Workspace>
