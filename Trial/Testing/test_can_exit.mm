@@ -74,7 +74,7 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @pre
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -89,7 +89,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -109,11 +109,11 @@
 
     // @test:
     // @note: value -1 is used to shutdown all interfaces!
-    // @- try to shutdown DUT1 with invalid handle INT32_MAX
-    rc = can_exit(INT32_MAX);
-    XCTAssertEqual(CANERR_HANDLE, rc);
     // @- try to shutdown DUT1 with invalid handle INT32_MIN
     rc = can_exit(INT32_MIN);
+    XCTAssertEqual(CANERR_HANDLE, rc);
+    // @- try to shutdown DUT1 with invalid handle INT32_MAX
+    rc = can_exit(INT32_MAX);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
@@ -141,12 +141,12 @@
     rc = can_exit(INVALID_HANDLE);
     XCTAssertEqual(CANERR_NOTINIT, rc);
     // @- try to shutdown DUT1 with invalid handle INT32_MIN
-    rc = can_exit(INT32_MAX);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to shutdown DUT1 with invalid handle INT32_MIN
     rc = can_exit(INT32_MIN);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // TODO: loop over list of valid handles
+    // @- try to shutdown DUT1 with invalid handle INT32_MAX
+    rc = can_exit(INT32_MAX);
+    XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @todo: loop over list of valid handles
 
     // @post:
     // @- initialize DUT1 with configured settings
@@ -163,7 +163,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -237,7 +237,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -281,7 +281,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -333,7 +333,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -411,4 +411,4 @@
 
 @end
 
-// $Id: test_can_exit.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_exit.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

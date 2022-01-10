@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -100,7 +100,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -158,7 +158,7 @@
     XCTAssertFalse(status.can_stopped);
 
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -205,7 +205,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -262,7 +262,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -445,7 +445,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertEqual(CANMODE_MON, mode.byte);
 
-        // TODO: try to send a frame & receive some frames
+        // @todo: try to send a frame & receive some frames
         // @- shutdown DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -487,7 +487,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertEqual(CANMODE_ERR, mode.byte);
 
-        // TODO: receive some error frames
+        // @todo: receive some error frames
         // @- shutdown DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -529,7 +529,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertEqual(CANMODE_NRTR, mode.byte);
 
-        // TODO: try to request & receive some remote frames
+        // @todo: try to request & receive some remote frames
         // @- shutdown DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -571,7 +571,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertEqual(CANMODE_NXTD, mode.byte);
 
-        // TODO: try to send & receive some extended frames
+        // @todo: try to send & receive some extended frames
         // @- shutdown DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -677,4 +677,4 @@
 
 @end
 
-// $Id: test_can_init.mm 1067 2021-12-28 21:18:35Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_init.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

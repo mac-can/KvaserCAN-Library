@@ -120,7 +120,7 @@ static struct property {
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC12.1.1: Get property values from library with invalid interface handle(s).
+// @xctest TC12.1.1: Get library property values with invalid interface handle(s)
 //
 // @expected: CANERR_HANDLE
 //
@@ -175,7 +175,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -213,7 +213,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.1.2: Get property values from device with invalid interface handle(s).
+// @xctest TC12.1.2: Get device property values with invalid interface handle(s)
 //
 // @todo: rework this
 //
@@ -270,7 +270,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -357,7 +357,7 @@ static struct property {
     XCTAssertFalse(status.can_stopped);
     
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -379,7 +379,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.3.1: Get property values from libray with invalid value for parameter 'param'.
+// @xctest TC12.3.1: Get library property values with invalid value for parameter 'param'
 //
 // @expected: CANERR_NOTSUPP
 //
@@ -415,7 +415,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -437,7 +437,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.3.2: Get property values from device with invalid value for parameter 'param'.
+// @xctest TC12.3.2: Get device property values with invalid value for parameter 'param'
 //
 // @expected: CANERR_NOTSUPP
 //
@@ -473,7 +473,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -495,7 +495,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.4.1: Get property values from library with wrong parameter size (too small).
+// @xctest TC12.4.1: Get library property values with wrong parameter size (too small)
 //
 // @expected: CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
 //
@@ -516,7 +516,7 @@ static struct property {
     // @- loop over all properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (properties[i].isLibParam && !properties[i].isSetParam) {
-            // @-- read libray property from DUT1 with wrong size (too small)
+            // @-- read library property from DUT1 with wrong size (too small)
             rc = can_property(INVALID_HANDLE, properties[i].param, (void*)value, 0U);  // FIXME: none string properties (size - 1)
             if ((properties[i].param != CANPROP_SET_FIRST_CHANNEL) && (properties[i].param != CANPROP_SET_NEXT_CHANNEL)) {
                 XCTAssertTrue((rc == CANERR_ILLPARA) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
@@ -545,7 +545,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -567,7 +567,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.4.2: Get property values from device with wrong parameter size (too small).
+// @xctest TC12.4.2: Get device property values with wrong parameter size (too small)
 //
 // @expected: CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
 //
@@ -617,7 +617,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -639,7 +639,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.5.1: Get property values from library when interface is not initialized.
+// @xctest TC12.5.1: Get library property values when interface is not initialized
 //
 // @expected: CANERR_NOERROR
 //
@@ -682,7 +682,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -704,7 +704,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.5.2: Get property values from device when interface is not initialized.
+// @xctest TC12.5.2: Get device property values when interface is not initialized
 //
 // @expected: CANERR_NOTINIT
 //
@@ -747,7 +747,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -769,7 +769,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.6.1: Get property values from library when interface initialized (but CAN controller not started).
+// @xctest TC12.6.1: Get library property values when interface initialized (but CAN controller not started)
 //
 // @expected: CANERR_NOERROR
 //
@@ -814,7 +814,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -836,7 +836,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.6.2: Get property values from device when interface initialized (but CAN controller not started).
+// @xctest TC12.6.2: Get device property values when interface initialized (but CAN controller not started)
 //
 // @expected: CANERR_NOERROR
 //
@@ -881,7 +881,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -903,7 +903,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.7.1: Get property values from library when CAN controller started.
+// @xctest TC12.7.1: Get library property values when CAN controller started
 //
 // @expected: CANERR_NOERROR
 //
@@ -948,7 +948,7 @@ static struct property {
     XCTAssertFalse(status.can_stopped);
     
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -971,7 +971,7 @@ static struct property {
 
 }
 
-// @xctest TC12.7.2: Get property values from device when CAN controller started.
+// @xctest TC12.7.2: Get device property values when CAN controller started
 //
 // @expected: CANERR_NOERROR
 //
@@ -1016,7 +1016,7 @@ static struct property {
     XCTAssertFalse(status.can_stopped);
     
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1038,11 +1038,11 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.8.1: Get property values from library when CAN controller stopped.
+// @xctest TC12.8.1: Get library property values when CAN controller stoppe
 //
 // @expected: CANERR_NOERROR
 //
-- (void)testWhenInterfaceStoppedFromLibray {
+- (void)testWhenInterfaceStoppedFromlibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -1065,7 +1065,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1083,7 +1083,7 @@ static struct property {
     // @- loop over all properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (properties[i].isLibParam && !properties[i].isSetParam) {
-            // @-- read libray property from DUT1 with handle -1
+            // @-- read library property from DUT1 with handle -1
             rc = can_property(INVALID_HANDLE, properties[i].param, (void*)value, properties[i].nbyte);
             XCTAssertTrue((rc == CANERR_NOERROR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
             // @-- exit loop when failed
@@ -1105,7 +1105,7 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.8.2: Get property values from device when CAN controller stopped.
+// @xctest TC12.8.2: Get device property values when CAN controller stopped
 //
 // @expected: CANERR_NOERROR
 //
@@ -1132,7 +1132,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1172,11 +1172,11 @@ static struct property {
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC12.9.1: Get property values from library when interface already shutdown.
+// @xctest TC12.9.1: Get library property values when interface already shutdown
 //
 // @expected: CANERR_NOERROR
 //
-- (void)testWhenInterfaceShutdownFromLibray {
+- (void)testWhenInterfaceShutdownFromlibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     uint8_t value[CANPROP_MAX_BUFFER_SIZE] = {};
@@ -1199,7 +1199,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1224,7 +1224,7 @@ static struct property {
     // @- loop over all properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (properties[i].isLibParam && !properties[i].isSetParam) {
-            // @-- read libray property from DUT1 when not initialized (should fail)
+            // @-- read library property from DUT1 when not initialized (should fail)
             rc = can_property(handle, properties[i].param, (void*)value, properties[i].nbyte);
             XCTAssertTrue((rc == CANERR_NOERROR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
             // @-- exit loop when failed
@@ -1237,7 +1237,7 @@ static struct property {
     XCTAssertEqual(MAX_PROPERTIES, i);
 }
 
-// @xctest TC12.9.2: Get property values from device when interface already shutdown.
+// @xctest TC12.9.2: Get device property values when interface already shutdown
 //
 // @expected: CANERR_NOTINIT
 //
@@ -1264,7 +1264,7 @@ static struct property {
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -1304,4 +1304,4 @@ static struct property {
 
 @end
 
-// $Id: test_can_property.mm 1082 2022-01-06 22:16:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_property.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

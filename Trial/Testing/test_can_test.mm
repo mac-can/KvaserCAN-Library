@@ -64,7 +64,7 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC01.1: Probe interface when not initialzed.
+// @xctest TC01.1: Probe interface when not initialized.
 //
 // @expected: CANERR_NOERROR and interface state CANBRD_PRESENT
 //
@@ -79,7 +79,7 @@
     XCTAssertEqual(CANBRD_PRESENT, state);
 }
 
-// @xctest TC01.2: Probe interface when already initialzed (by own process).
+// @xctest TC01.2: Probe interface when already initialized (by own process).
 //
 // @expected: CANERR_NOERROR and interface state CANBRD_OCCUPIED
 //
@@ -115,7 +115,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -452,4 +452,4 @@
 
 @end
 
-// $Id: test_can_test.mm 1036 2021-12-21 14:42:37Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_test.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

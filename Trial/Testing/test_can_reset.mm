@@ -89,7 +89,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -104,10 +104,10 @@
     rc = can_reset(INVALID_HANDLE);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- try to stop DUT1 with invalid handle INT32_MIN
-    rc = can_reset(INT32_MAX);
-    XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to stop DUT1 with invalid handle INT32_MIN
     rc = can_reset(INT32_MIN);
+    XCTAssertEqual(CANERR_HANDLE, rc);
+    // @- try to stop DUT1 with invalid handle INT32_MAX
+    rc = can_reset(INT32_MAX);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
@@ -115,7 +115,7 @@
     XCTAssertFalse(status.can_stopped);
 
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -151,10 +151,10 @@
     rc = can_reset(INVALID_HANDLE);
     XCTAssertEqual(CANERR_NOTINIT, rc);
     // @- try to stop DUT1 with invalid handle INT32_MIN
-    rc = can_reset(INT32_MAX);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to stop DUT1 with invalid handle INT32_MIN
     rc = can_reset(INT32_MIN);
+    XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @- try to stop DUT1 with invalid handle INT32_MAX
+    rc = can_reset(INT32_MAX);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
     // @post:
@@ -172,7 +172,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -236,7 +236,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -283,7 +283,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -347,7 +347,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -376,4 +376,4 @@
 
 @end
 
-// $Id: test_can_reset.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_reset.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

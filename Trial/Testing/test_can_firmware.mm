@@ -75,10 +75,12 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @test:
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+
+    // @test:
     // @- try to get version of DUT1 with invalid handle -1
     string = can_firmware(INVALID_HANDLE);
     XCTAssertTrue(NULL == string);
@@ -90,13 +92,13 @@
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- try to get version of DUT1 with invalid handle INT32_MIN
-    string = can_firmware(INT32_MAX);
+    string = can_firmware(INT32_MIN);
     XCTAssertTrue(NULL == string);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -109,13 +111,15 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get version of DUT1 with invalid handle INT32_MIN
-    string = can_firmware(INT32_MIN);
+    // @- try to get version of DUT1 with invalid handle INT32_MAX
+    string = can_firmware(INT32_MAX);
     XCTAssertTrue(NULL == string);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
+
+    // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -137,12 +141,13 @@
     string = can_firmware(INVALID_HANDLE);
     XCTAssertTrue(NULL == string);
     // @- try to get version of DUT1 with invalid handle INT32_MIN
-    string = can_firmware(INT32_MAX);
-    XCTAssertTrue(NULL == string);
-    // @- try to get version of DUT1 with invalid handle INT32_MIN
     string = can_firmware(INT32_MIN);
     XCTAssertTrue(NULL == string);
+    // @- try to get version of DUT1 with invalid handle INT32_MAX
+    string = can_firmware(INT32_MAX);
+    XCTAssertTrue(NULL == string);
 
+    // @post:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -157,7 +162,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -205,7 +210,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -264,7 +269,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -291,4 +296,4 @@
 
 @end
 
-// $Id: test_can_firmware.mm 1073 2022-01-03 18:52:16Z eris $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_firmware.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

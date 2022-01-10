@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -74,7 +74,7 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @pre
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -92,11 +92,11 @@
     
     // @test:
     // @note: value -1 is used to signal all interfaces!
-    // @- try to signal DUT1 with invalid handle INT32_MAX
-    rc = can_kill(INT32_MAX);
-    XCTAssertEqual(CANERR_HANDLE, rc);
     // @- try to signal DUT1 with invalid handle INT32_MIN
     rc = can_kill(INT32_MIN);
+    XCTAssertEqual(CANERR_HANDLE, rc);
+    // @- try to signal DUT1 with invalid handle INT32_MAX
+    rc = can_kill(INT32_MAX);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
@@ -104,7 +104,7 @@
     XCTAssertFalse(status.can_stopped);
 
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -141,12 +141,12 @@
     rc = can_kill(INVALID_HANDLE);
     XCTAssertEqual(CANERR_NOTINIT, rc);
     // @- try to signal DUT1 with invalid handle INT32_MIN
-    rc = can_kill(INT32_MAX);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to signal DUT1 with invalid handle INT32_MIN
     rc = can_kill(INT32_MIN);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // TODO: loop over list of valid handles
+    // @- try to signal DUT1 with invalid handle INT32_MAX
+    rc = can_kill(INT32_MAX);
+    XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @todo: loop over list of valid handles
 
     // @post:
     // @- initialize DUT1 with configured settings
@@ -163,7 +163,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -221,7 +221,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -280,7 +280,7 @@
     XCTAssertFalse(status.can_stopped);
 
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -328,7 +328,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -386,7 +386,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -439,7 +439,7 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // TODO: start a thread for DUT1 with blocking read
+    // @todo: start a thread for DUT1 with blocking read
     // @- initialize DUT2 with configured settings
     handle2 = can_init(DUT2, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle2);
@@ -454,18 +454,18 @@
     rc = can_status(handle2, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // TODO: start a thread for DUT2 with blocking read
+    // @todo: start a thread for DUT2 with blocking read
 
     // @test:
     // @- signal all interfaces
     rc = can_kill(CANKILL_ALL);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // TODO: check if the thread for DUT1 has terminated
+    // @todo: check if the thread for DUT1 has terminated
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // TODO: check if the thread for DUT1 has terminated
+    // @todo: check if the thread for DUT1 has terminated
     // @- get status of DUT2 and check to be in RUNNING state
     rc = can_status(handle2, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -486,4 +486,4 @@
 
 @end
 
-// $Id: test_can_kill.mm 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_kill.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

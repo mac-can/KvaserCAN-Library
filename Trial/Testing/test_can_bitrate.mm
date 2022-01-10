@@ -78,6 +78,8 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+
+    // @pre:
     // @- try to get bit-rate of DUT1 with invalid handle -1
     rc = can_bitrate(INVALID_HANDLE, &bitrate, NULL);
     XCTAssertEqual(CANERR_HANDLE, rc);
@@ -95,7 +97,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -115,6 +117,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
+
+    // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -153,7 +157,7 @@
     XCTAssertFalse(status.can_stopped);
 
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -207,7 +211,7 @@
     XCTAssertFalse(status.can_stopped);
 
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -261,7 +265,7 @@
     XCTAssertFalse(status.can_stopped);
 
     // @post:
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -298,10 +302,10 @@
     rc = can_bitrate(INVALID_HANDLE, &bitrate, NULL);
     XCTAssertEqual(CANERR_NOTINIT, rc);
     // @- try to get bit-rate of DUT1 with invalid handle INT32_MIN
-    rc = can_bitrate(INT32_MAX, &bitrate, NULL);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get bit-rate of DUT1 with invalid handle INT32_MIN
     rc = can_bitrate(INT32_MIN, &bitrate, NULL);
+    XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @- try to get bit-rate of DUT1 with invalid handle INT32_MAX
+    rc = can_bitrate(INT32_MAX, &bitrate, NULL);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
     // @post:
@@ -319,7 +323,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -373,7 +377,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -420,7 +424,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -478,7 +482,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -531,7 +535,7 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
+    // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -568,7 +572,8 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @test: loop over selected bit-rate settings
+    // @test: 
+    // @- loop over selected bit-rate settings
     for (int i = 0; i < 4; i++) {
         switch (i) {
             case 0: BITRATE_1M(bitrate); break;
@@ -578,21 +583,21 @@
             default: return;
         }
         can_bitrate_t result = {};
-        // @- initialize DUT1 with configured settings
+        // @-- initialize DUT1 with configured settings
         handle = can_init(DUT1, TEST_CANMODE, NULL);
         XCTAssertLessThanOrEqual(0, handle);
-        // @- get status of DUT1 and check to be in INIT state
+        // @-- get status of DUT1 and check to be in INIT state
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @- start DUT1 with selected bit-rate settings
+        // @-- start DUT1 with selected bit-rate settings
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
-        // @- get status of DUT1 and check to be in RUNNING state
+        // @-- get status of DUT1 and check to be in RUNNING state
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
-        // @- get bitrate from DUT1 and compare with selected settings
+        // @-- get bitrate from DUT1 and compare with selected settings
         rc = can_bitrate(handle, &result, NULL);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
@@ -601,24 +606,24 @@
         XCTAssertEqual(bitrate.btr.nominal.tseg2, result.btr.nominal.tseg2);
         XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
         XCTAssertEqual(bitrate.btr.nominal.sam, result.btr.nominal.sam);
-        // @- sunnyday traffic (optional):
+        // @-- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
         CTester tester;
         XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
         XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
-        // @- get status of DUT1 and check to be in RUNNING state
+        // @-- get status of DUT1 and check to be in RUNNING state
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertFalse(status.can_stopped);
 #endif
-        // @- stop/reset DUT1
+        // @-- stop/reset DUT1
         rc = can_reset(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
-        // @- get status of DUT1 and check to be in INIT state
+        // @-- get status of DUT1 and check to be in INIT state
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @- shutdown DUT1
+        // @-- shutdown DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     }
@@ -629,9 +634,9 @@
 // @expected: CANERR_NOERROR
 //
 //- (void)testWithVariousCanFdBitrateSettings {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 @end
 
-// $Id: test_can_bitrate.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_bitrate.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
