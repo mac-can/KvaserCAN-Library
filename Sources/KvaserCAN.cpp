@@ -149,8 +149,8 @@ bool CKvaserCAN::GetFirstChannel(SChannelInfo &info, void *param) {
             ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
             ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
             // we know the library id and its vendor already
-            info.m_nLibraryId = KVASERCAN_LIBRARY_ID;
-            strncpy(info.m_szVendorName, KVASERCAN_LIBRARY_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
+            info.m_nLibraryId = KVASER_LIB_ID;
+            strncpy(info.m_szVendorName, KVASER_LIB_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
             result = true;
         }
     }
@@ -171,8 +171,8 @@ bool CKvaserCAN::GetNextChannel(SChannelInfo &info, void *param) {
             ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
             ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
             // we know the library id and its vendor already
-            info.m_nLibraryId = KVASERCAN_LIBRARY_ID;
-            strncpy(info.m_szVendorName, KVASERCAN_LIBRARY_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
+            info.m_nLibraryId = KVASER_LIB_ID;
+            strncpy(info.m_szVendorName, KVASER_LIB_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
             result = true;
         }
     }
