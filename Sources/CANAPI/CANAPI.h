@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Interface Definition)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -73,9 +73,9 @@
 ///              zero to compile your program with the CAN API source files or to
 ///              link your program with the static library at compile-time.
 ///
-/// \author      $Author: eris $
+/// \author      $Author: makemake $
 //
-/// \version     $Rev: 1013 $
+/// \version     $Rev: 1033 $
 //
 /// \defgroup    can_api CAN Interface API, Version 3
 /// \{
@@ -144,13 +144,6 @@ typedef int CANAPI_Return_t;
 /// \{
 class CANCPP CCanApi {
 public:
-    /// \brief  CAN channel states
-    enum EChannelState {
-        ChannelOccupied = CANBRD_OCCUPIED, ///< channel is available, but occupied
-        ChannelAvailable = CANBRD_PRESENT, ///< channel is available and can be used
-        ChannelNotAvailable = CANBRD_NOT_PRESENT,  ///< channel is not available
-        ChannelNotTestable  = CANBRD_NOT_TESTABLE  ///< channel is not testable
-    };
     /// \brief  Common error codes (CAN API V3 compatible)
     enum EErrorCodes {
         NoError = CANERR_NOERROR,  ///< no error!
@@ -176,6 +169,80 @@ public:
         FatalError = CANERR_FATAL,  ///< fatal error
         VendorSpecific = CANERR_VENDOR  ///< offset for vendor-specific error code
     };
+    /// \brief  CAN channel states
+    enum EChannelState {
+        ChannelOccupied = CANBRD_OCCUPIED, ///< channel is available, but occupied
+        ChannelAvailable = CANBRD_PRESENT, ///< channel is available and can be used
+        ChannelNotAvailable = CANBRD_NOT_PRESENT,  ///< channel is not available
+        ChannelNotTestable  = CANBRD_NOT_TESTABLE  ///< channel is not testable
+    };
+    /// \brief  CAN channel information
+    struct SChannelInfo {
+        int32_t m_nChannelNo;  ///< channel no. at actual index in the interface list 
+        char m_szDeviceName[CANPROP_MAX_BUFFER_SIZE];  ///< device name at actual index in the interface list 
+        char m_szDeviceDllName[CANPROP_MAX_BUFFER_SIZE];  ///< file name of the DLL at actual index in the interface list
+        int32_t m_nLibraryId;  ///< library id at actual index in the interface list
+        char m_szVendorName[CANPROP_MAX_BUFFER_SIZE];  ///< vendor name at actual index in the interface list
+    };
+#if (OPTION_CANAPI_LIBRARY != 0)
+    /// \brief  CAN API library information
+    struct SLibraryInfo {
+        int32_t m_nLibraryId;  ///< library id at actual index in the vendor list
+        char m_szVendorName[CANPROP_MAX_BUFFER_SIZE];  ///< vendor name at actual index in the vendor list
+        char m_szVendorDllName[CANPROP_MAX_BUFFER_SIZE];  ///< file name of the DLL at actual index in the vendor list
+    };
+    /// \brief       query library information of the first CAN API library in the
+    ///              list of vendors, if any.
+    //
+    /// \param[out]  info    - the library information of the first entry in the list
+    //
+    /// \returns     true if library information have been successfully read, or
+    ///              false on error.
+    //
+    static bool GetFirstLibrary(SLibraryInfo &info);
+    
+    /// \brief       query library information of the next CAN API library in the
+    ///              list of vendors, if any.
+    //
+    /// \param[out]  info    - the library information of the next entry in the list
+    //
+    /// \returns     true if library information have been successfully read, or
+    ///              false on error.
+    //
+    static bool GetNextLibrary(SLibraryInfo &info);
+#endif
+    /// \brief       query channel information of the first CAN interface in the
+    ///              list of CAN interfaces, if any.
+    //
+    /// \param[in]   library - library id of the CAN interface list, or -1 for all vendors
+    /// \param[out]  info    - the channel information of the first entry in the list
+    /// \param[out]  param   - pointer to channel-specific parameters
+    //
+    /// \returns     true if channel information have been successfully read, or
+    ///              false on error.
+    //
+#if (OPTION_CANAPI_LIBRARY != 0)
+    static bool GetFirstChannel(int32_t library, SChannelInfo &info, void *param = NULL);
+#else
+    static bool GetFirstChannel(SChannelInfo &info, void *param = NULL);
+#endif
+
+    /// \brief       query channel information of the first CAN interface in the
+    ///              list of CAN interfaces, if any.
+    //
+    /// \param[in]   library - library id of the CAN interface list, or -1 for all vendors
+    /// \param[out]  info    - the channel information of the next entry in the list
+    /// \param[out]  param   - pointer to channel-specific parameters
+    //
+    /// \returns     true if channel information have been successfully read, or
+    ///              false on error.
+    //
+#if (OPTION_CANAPI_LIBRARY != 0)
+    static bool GetNextChannel(int32_t library, SChannelInfo &info, void *param = NULL);
+#else
+   static bool GetNextChannel(SChannelInfo &info, void *param = NULL);
+#endif
+
     /// \brief       probes if the CAN interface (hardware and driver) given by
     ///              the argument [ 'library' and ] 'channel' is present,
     ///              and if the requested operation mode is supported by the
@@ -306,7 +373,7 @@ public:
     //
     /// \returns     0 if successful, or a negative value on error.
     //
-    virtual CANAPI_Return_t GetBusLoad(uint8_t &load) = 0;
+    virtual CANAPI_Return_t GetBusLoad(uint8_t &load) = 0;  // deprecated
 
     /// \brief       retrieves the bit-rate setting of the CAN interface. The
     ///              CAN controller must be in operation state 'running'.
@@ -351,14 +418,14 @@ public:
     //
     /// \returns     pointer to a zero-terminated string, or NULL on error.
     //
-    virtual char *GetHardwareVersion() = 0;
+    virtual char *GetHardwareVersion() = 0;  // deprecated
 
     /// \brief       retrieves the firmware version of the CAN controller
     ///              board as a zero-terminated string.
     //
     /// \returns     pointer to a zero-terminated string, or NULL on error.
     //
-    virtual char *GetFirmwareVersion() = 0;
+    virtual char *GetFirmwareVersion() = 0;  // deprecated
 
     /// \brief       retrieves version information of the CAN API V3 driver
     ///              as a zero-terminated string.
@@ -411,4 +478,4 @@ public:
 /// \}
 #endif // CANAPI_H_INCLUDED
 /// \}
-// $Id: CANAPI.h 1013 2021-12-13 21:34:15Z eris $  Copyright (c) UV Software //
+// $Id: CANAPI.h 1033 2022-01-11 19:58:04Z makemake $  Copyright (c) UV Software //

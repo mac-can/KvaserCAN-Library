@@ -137,6 +137,50 @@ CKvaserCAN::~CKvaserCAN() {
 }
 
 EXPORT
+bool CKvaserCAN::GetFirstChannel(SChannelInfo &info, void *param) {
+    bool result = false;
+    memset(&info, 0, sizeof(SChannelInfo));
+    info.m_nChannelNo = (-1);
+    // set index to the first entry in the interface list (if any)
+    CANAPI_Return_t rc = can_property((-1), CANPROP_SET_FIRST_CHANNEL, NULL, 0U);
+    if (CANERR_NOERROR == rc) {
+        // get channel no, device name and device DLL name at actual index in the interface list
+        if (((can_property((-1), CANPROP_GET_CHANNEL_NO, (void*)&info.m_nChannelNo, sizeof(int32_t))) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
+            // we know the library id and its vendor already
+            info.m_nLibraryId = KVASERCAN_LIBRARY_ID;
+            strncpy(info.m_szVendorName, KVASERCAN_LIBRARY_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
+            result = true;
+        }
+    }
+    (void)param;
+    return result;
+}
+
+EXPORT
+bool CKvaserCAN::GetNextChannel(SChannelInfo &info, void *param) {
+    bool result = false;
+    memset(&info, 0, sizeof(SChannelInfo));
+    info.m_nChannelNo = (-1);
+    // set index to the next entry in the interface list (if any)
+    CANAPI_Return_t rc = can_property((-1), CANPROP_SET_NEXT_CHANNEL, NULL, 0U);
+    if (CANERR_NOERROR == rc) {
+        // get channel no, device name and device DLL name at actual index in the interface list
+        if (((can_property((-1), CANPROP_GET_CHANNEL_NO, (void*)&info.m_nChannelNo, sizeof(int32_t))) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
+            // we know the library id and its vendor already
+            info.m_nLibraryId = KVASERCAN_LIBRARY_ID;
+            strncpy(info.m_szVendorName, KVASERCAN_LIBRARY_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
+            result = true;
+        }
+    }
+    (void)param;
+    return result;
+}
+
+EXPORT
 CANAPI_Return_t CKvaserCAN::ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, const void *param, EChannelState &state) {
     // test the CAN interface (hardware and driver)
     int result = CANBRD_NOT_TESTABLE;

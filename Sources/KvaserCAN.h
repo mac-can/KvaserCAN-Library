@@ -92,6 +92,9 @@ public:
         GeneralError = VendorSpecific
     };
     // CCANAPI overrides
+    static bool GetFirstChannel(SChannelInfo &info, void *param = NULL);
+    static bool GetNextChannel(SChannelInfo &info, void *param = NULL);
+
     static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, const void *param, EChannelState &state);
     static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, EChannelState &state);
 

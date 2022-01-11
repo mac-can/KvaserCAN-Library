@@ -51,7 +51,7 @@
  *
  *  @author      $Author: makemake $
  *
- *  @version     $Rev: 1017 $
+ *  @version     $Rev: 1032 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -307,19 +307,19 @@ extern "C" {
 #define CANPROP_GET_CAN_CHANNEL     22U /**< active CAN channel on the CAN interface (uint8_t) */
 #define CANPROP_GET_CAN_CLOCKS      23U /**< supported CAN clocks (in [Hz]) (int32_t[64]) */
 #define CANPROP_GET_TX_COUNTER      24U /**< total number of sent messages (uint64_t) */
-#define CANPROP_GET_RX_COUNTER      25U /**< total number of reveiced messages (uint64_t) */
-#define CANPROP_GET_ERR_COUNTER     26U /**< total number of reveiced error frames (uint64_t) */
+#define CANPROP_GET_RX_COUNTER      25U /**< total number of received messages (uint64_t) */
+#define CANPROP_GET_ERR_COUNTER     26U /**< total number of received error frames (uint64_t) */
 #define CANPROP_GET_RCV_QUEUE_SIZE  27U /**< maximum number of message the receive queue can hold (uint32_t) */
 #define CANPROP_GET_RCV_QUEUE_HIGH  28U /**< maximum number of message the receive queue has hold (uint32_t) */
 #define CANPROP_GET_RCV_QUEUE_OVFL  29U /**< overflow counter of the receive queue (uint64_t) */
-#define CANPROP_GET_FLT_11BIT_CODE  32U /**< accecptance filter code of 11-bit identifier (int32_t) */
-#define CANPROP_GET_FLT_11BIT_MASK  33U /**< accecptance filter mask of 11-bit identifier (int32_t) */
-#define CANPROP_GET_FLT_29BIT_CODE  34U /**< accecptance filter code of 29-bit identifier (int32_t) */
-#define CANPROP_GET_FLT_29BIT_MASK  35U /**< accecptance filter mask of 29-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_11BIT_CODE  36U /**< set value for accecptance filter code of 11-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_11BIT_MASK  37U /**< set value for accecptance filter mask of 11-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_29BIT_CODE  38U /**< set value for accecptance filter code of 29-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_29BIT_MASK  39U /**< set value for accecptance filter mask of 29-bit identifier (int32_t) */
+#define CANPROP_GET_FLT_11BIT_CODE  32U /**< acceptance filter code of 11-bit identifier (int32_t) */
+#define CANPROP_GET_FLT_11BIT_MASK  33U /**< acceptance filter mask of 11-bit identifier (int32_t) */
+#define CANPROP_GET_FLT_29BIT_CODE  34U /**< acceptance filter code of 29-bit identifier (int32_t) */
+#define CANPROP_GET_FLT_29BIT_MASK  35U /**< acceptance filter mask of 29-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_11BIT_CODE  36U /**< set value for acceptance filter code of 11-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_11BIT_MASK  37U /**< set value for acceptance filter mask of 11-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_29BIT_CODE  38U /**< set value for acceptance filter code of 29-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_29BIT_MASK  39U /**< set value for acceptance filter mask of 29-bit identifier (int32_t) */
 #if (OPTION_CANAPI_LIBRARY != 0)
 /* - -  build-in bit-rate conversion  - - - - - - - - - - - - - - - - - */
 #define CANPROP_GET_BTR_INDEX       64U /**< bit-rate as CiA index (int32_t) */
@@ -369,7 +369,7 @@ extern "C" {
 #define CANPROP_GET_VENDOR_NAME    227U /**< get vendor name at actual index in the vendor list (char[256]) */
 #define CANPROP_GET_VENDOR_DLLNAME 228U /**< get file name of the DLL at actual index in the vendor list (char[256]) */
 #endif
-#define CANPROP_SET_FIRST_CHANNEL  240U /**< set index to the first entry in the interface list (int32_t) */
+#define CANPROP_SET_FIRST_CHANNEL  240U /**< set index to the first entry in the interface list (int32_t or NULL) */
 #define CANPROP_SET_NEXT_CHANNEL   241U /**< set index to the next entry in the interface list (NULL) */
 #define CANPROP_GET_CHANNEL_NO     242U /**< get channel no. at actual index in the interface list (int32_t) */
 #define CANPROP_GET_CHANNEL_NAME   243U /**< get channel name at actual index in the interface list (char[256]) */
@@ -381,8 +381,8 @@ extern "C" {
 /* - -  access to device handle (for C++ wrapper classes) - - - - - - - */
 #define CANPROP_GET_CPP_BACKDOOR   255U /**< get device handle (int32_t) */
 /* - -  access to vendor-specific properties  - - - - - - - - - - - - - */
-#define CANPROP_GET_VENDOR_PROP    256U /**< get a vendor-specific property value (void*) */
-#define CANPROP_SET_VENDOR_PROP    512U /**< set a vendor-specific property value (void*) */
+#define CANPROP_GET_VENDOR_PROP    256U /**< offset to get a vendor-specific property value (void*) */
+#define CANPROP_SET_VENDOR_PROP    512U /**< offset to set a vendor-specific property value (void*) */
 #define CANPROP_VENDOR_PROP_RANGE  256U /**< range for vendor-specific property values */
 #define CANPROP_MAX_BUFFER_SIZE    256U /**< max. buffer size for property values */
 #define CANPROP_MAX_STRING_LENGTH 1024U /**< max. length of a formatted message */
