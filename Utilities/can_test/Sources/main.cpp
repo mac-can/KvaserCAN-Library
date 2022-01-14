@@ -520,7 +520,6 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
 #endif
-#if (OPTION_CAN_2_0_ONLY == 0)
     /* - check data length length and make CAN FD DLC (0x0..0xF) */
     if (!opMode.fdoe && (dlc > CAN_MAX_LEN)) {
         fprintf(stderr, "%s: illegal combination of options `--mode' (m) and `--dlc' (d)\n", basename(argv[0]));
@@ -539,7 +538,6 @@ int main(int argc, const char * argv[]) {
         fprintf(stderr, "%s: illegal combination of options `--mode' (m) and `--bitrate'\n", basename(argv[0]));
         return 1;
     }
-#endif
     /* - check operation mode flags */
     if ((mode != RxMODE) && opMode.mon) {
         fprintf(stderr, "%s: illegal option `--listen-only' for transmitter test\n", basename(argv[0]));
@@ -582,19 +580,16 @@ int main(int argc, const char * argv[]) {
             fprintf(stdout, "Bit-rate=%.0fkbps@%.1f%%",
                 speed.nominal.speed / 1000.,
                 speed.nominal.samplepoint * 100.);
-#if (OPTION_CAN_2_0_ONLY == 0)
             if (speed.data.brse)
                 fprintf(stdout, ":%.0fkbps@%.1f%%",
                     speed.data.speed / 1000.,
                     speed.data.samplepoint * 100.);
-#endif
             fprintf(stdout, " (f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u",
                 bitrate.btr.frequency,
                 bitrate.btr.nominal.brp,
                 bitrate.btr.nominal.tseg1,
                 bitrate.btr.nominal.tseg2,
                 bitrate.btr.nominal.sjw);
-#if (OPTION_CAN_2_0_ONLY == 0)
             if (speed.data.brse)
                 fprintf(stdout, ",data_brp=%u,data_tseg1=%u,data_tseg2=%u,data_sjw=%u",
                     bitrate.btr.data.brp,
@@ -602,7 +597,6 @@ int main(int argc, const char * argv[]) {
                     bitrate.btr.data.tseg2,
                     bitrate.btr.data.sjw);
             else
-#endif
                 fprintf(stdout, ",nom_sam=%u", bitrate.btr.nominal.sam);
             fprintf(stdout, ")\n\n");
         }
@@ -635,11 +629,9 @@ int main(int argc, const char * argv[]) {
     if (bitrate.btr.frequency > 0) {
         fprintf(stdout, "Bit-rate=%.0fkbps",
             speed.nominal.speed / 1000.);
-#if (OPTION_CAN_2_0_ONLY == 0)
         if (speed.data.brse)
             fprintf(stdout, ":%.0fkbps",
                 speed.data.speed / 1000.);
-#endif
         fprintf(stdout, "...");
     }
     else {
@@ -759,12 +751,8 @@ uint64_t CCanDriver::TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, ui
     message.id  = id;
     message.xtd = 0;
     message.rtr = 0;
-#if (OPTION_CAN_2_0_ONLY == 0)
     message.fdf = opMode.fdoe;
     message.brs = opMode.brse;
-#else
-    (void)opMode;
-#endif
     message.dlc = dlc;
     fprintf(stdout, "\nTransmitting message(s)...");
     fflush (stdout);
@@ -777,9 +765,7 @@ uint64_t CCanDriver::TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, ui
         message.data[5] = (uint8_t)((frames + offset) >> 40);
         message.data[6] = (uint8_t)((frames + offset) >> 48);
         message.data[7] = (uint8_t)((frames + offset) >> 56);
-#if (OPTION_CAN_2_0_ONLY == 0)
         memset(&message.data[8], 0, CANFD_MAX_LEN - 8);
-#endif
         /* transmit message (repeat when busy) */
 retry_tx_test:
         calls++;
@@ -828,12 +814,8 @@ uint64_t CCanDriver::TransmitterTest(uint64_t count, CANAPI_OpMode_t opMode, boo
     message.id  = id;
     message.xtd = 0;
     message.rtr = 0;
-#if (OPTION_CAN_2_0_ONLY == 0)
     message.fdf = opMode.fdoe;
     message.brs = opMode.brse;
-#else
-    (void)opMode;
-#endif
     message.dlc = dlc;
     fprintf(stdout, "\nTransmitting message(s)...");
     fflush (stdout);
@@ -846,14 +828,9 @@ uint64_t CCanDriver::TransmitterTest(uint64_t count, CANAPI_OpMode_t opMode, boo
         message.data[5] = (uint8_t)((frames + offset) >> 40);
         message.data[6] = (uint8_t)((frames + offset) >> 48);
         message.data[7] = (uint8_t)((frames + offset) >> 56);
-#if (OPTION_CAN_2_0_ONLY == 0)
         memset(&message.data[8], 0, CANFD_MAX_LEN - 8);
         if (random)
             message.dlc = dlc + (uint8_t)(rand() % ((CANFD_MAX_DLC - dlc) + 1));
-#else
-        if (random)
-            message.dlc = dlc + (uint8_t)(rand() % ((CAN_MAX_DLC - dlc) + 1));
-#endif
         /* transmit message (repeat when busy) */
 retry_tx_test:
         calls++;

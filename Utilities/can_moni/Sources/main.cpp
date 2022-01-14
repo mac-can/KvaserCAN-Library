@@ -424,7 +424,6 @@ int main(int argc, const char * argv[]) {
                 wraparound = CCanMessage::OptionWraparoundNo;
             else if (!strcasecmp(optarg, "8"))
                 wraparound = CCanMessage::OptionWraparound8;
-#if (OPTION_CAN_2_0_ONLY == 0)
             else if (!strcasecmp(optarg, "10"))
                 wraparound = CCanMessage::OptionWraparound10;
             else if (!strcasecmp(optarg, "16"))
@@ -433,7 +432,6 @@ int main(int argc, const char * argv[]) {
                 wraparound = CCanMessage::OptionWraparound32;
             else if (!strcasecmp(optarg, "64"))
                 wraparound = CCanMessage::OptionWraparound64;
-#endif
             else {
                     fprintf(stderr, "%s: illegal argument for option `--wrap' (%c)\n", basename(argv[0]), opt);
                     return 1;
@@ -530,13 +528,11 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
 #endif
-#if (OPTION_CAN_2_0_ONLY == 0)
     /* - check bit-timing index (n/a for CAN FD) */
     if (opMode.fdoe && (bitrate.btr.frequency <= 0)) {
         fprintf(stderr, "%s: illegal combination of options `--mode' (m) and `--bitrate'\n", basename(argv[0]));
         return 1;
     }
-#endif
     /* CAN Monitor for Kvaser CAN Leaf interfaces */
     fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
     /* - load the MacCAN driver */
@@ -562,19 +558,16 @@ int main(int argc, const char * argv[]) {
             fprintf(stdout, "Bit-rate=%.0fkbps@%.1f%%",
                 speed.nominal.speed / 1000.,
                 speed.nominal.samplepoint * 100.);
-#if (OPTION_CAN_2_0_ONLY == 0)
             if (speed.data.brse)
                 fprintf(stdout, ":%.0fkbps@%.1f%%",
                     speed.data.speed / 1000.,
                     speed.data.samplepoint * 100.);
-#endif
             fprintf(stdout, " (f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u",
                 bitrate.btr.frequency,
                 bitrate.btr.nominal.brp,
                 bitrate.btr.nominal.tseg1,
                 bitrate.btr.nominal.tseg2,
                 bitrate.btr.nominal.sjw);
-#if (OPTION_CAN_2_0_ONLY == 0)
             if (speed.data.brse)
                 fprintf(stdout, ",data_brp=%u,data_tseg1=%u,data_tseg2=%u,data_sjw=%u",
                     bitrate.btr.data.brp,
@@ -582,7 +575,6 @@ int main(int argc, const char * argv[]) {
                     bitrate.btr.data.tseg2,
                     bitrate.btr.data.sjw);
             else
-#endif
                 fprintf(stdout, ",nom_sam=%u", bitrate.btr.nominal.sam);
             fprintf(stdout, ")\n\n");
         }
@@ -615,11 +607,9 @@ int main(int argc, const char * argv[]) {
     if (bitrate.btr.frequency > 0) {
         fprintf(stdout, "Bit-rate=%.0fkbps",
             speed.nominal.speed / 1000.);
-#if (OPTION_CAN_2_0_ONLY == 0)
         if (speed.data.brse)
             fprintf(stdout, ":%.0fkbps",
                 speed.data.speed / 1000.);
-#endif
         fprintf(stdout, "...");
     }
     else {
@@ -719,7 +709,7 @@ uint64_t CCanDriver::ReceptionLoop() {
     uint64_t frames = 0U;
 
     char string[CANPROP_MAX_STRING_LENGTH+1];
-    bzero(string, CANPROP_MAX_STRING_LENGTH+1);
+    memset(string, 0, CANPROP_MAX_STRING_LENGTH+1);
 
     fprintf(stderr, "\nPress ^C to abort.\n\n");
     while(running) {
@@ -828,9 +818,7 @@ static void usage(FILE *stream, const char *program)
     fprintf(stream, " -i  --id=(HEX|DEC|OCT)        display mode of CAN-IDs (default=HEX)\n");
     fprintf(stream, " -d, --data=(HEX|DEC|OCT)      display mode of data bytes (default=HEX)\n");
     fprintf(stream, " -a, --ascii=(ON|OFF)          display data bytes in ASCII (default=ON)\n");
-#if (OPTION_CAN_2_0_ONLY == 0)
     fprintf(stream, " -w, --wrap=(NO|8|10|16|32|64) wraparound after n data bytes (default=NO)\n");
-#endif
     fprintf(stream, " -x, --exclude=[~]<id-list>    exclude CAN-IDs: <id>[-<id>]{,<id>[-<id>]}\n");
 //    fprintf(stream, " -s, --script=<filename>       execute a script file\n"); // TODO: script engine
 #if (OPTION_CAN_2_0_ONLY == 0)

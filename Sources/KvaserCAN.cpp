@@ -90,9 +90,11 @@ static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " V
 #if (OPTION_KVASERCAN_DYLIB != 0)
 __attribute__((constructor))
 static void _initializer() {
+    // default initializer
 }
 __attribute__((destructor))
 static void _finalizer() {
+    // default finalizer
 }
 #define EXPORT  __attribute__((visibility("default")))
 #else
