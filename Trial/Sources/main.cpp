@@ -271,11 +271,11 @@ int main(int argc, const char * argv[]) {
         fprintf(stdout, "%s", (retVal == CCanApi::IllegalParameter) ? " (warning: Op.-Mode not supported)\n" : "\n");
     }
     if (option_info) {
-        retVal = myDriver.GetProperty(CANPROP_GET_DEVICE_CHANNEL, (void *)&i32Val, sizeof(int32_t));
+        retVal = myDriver.GetProperty(CANPROP_GET_DEVICE_TYPE, (void *)&i32Val, sizeof(int32_t));
         if (retVal == CCanApi::NoError)
-            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_DEVICE_CHANNEL): value = %d\n", i32Val);
+            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_DEVICE_TYPE): value = %d\n", i32Val);
         else
-            fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_DEVICE_CHANNEL) returned %i\n", retVal);
+            fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_DEVICE_TYPE) returned %i\n", retVal);
         retVal = myDriver.GetProperty(CANPROP_GET_DEVICE_NAME, (void *)szVal, CANPROP_MAX_BUFFER_SIZE);
         if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_DEVICE_NAME): value = '%s'\n", szVal);

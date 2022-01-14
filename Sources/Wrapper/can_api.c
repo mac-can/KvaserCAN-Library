@@ -992,9 +992,9 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
     }
     /* CAN interface properties */
     switch (param) {
-    case CANPROP_GET_DEVICE_CHANNEL:    // device type of the CAN interface (int32_t)
+    case CANPROP_GET_DEVICE_TYPE:       // device type of the CAN interface (int32_t)
         if (nbyte >= sizeof(int32_t)) {
-            *(int32_t*)value = (int32_t)can[handle].device.handle;  // TODO: check this
+            *(int32_t*)value = (int32_t)can[handle].device.deviceInfo.card.hwType;
             rc = CANERR_NOERROR;
         }
         break;

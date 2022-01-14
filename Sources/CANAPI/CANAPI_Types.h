@@ -2,7 +2,7 @@
 /*
  *  CAN Interface API, Version 3 (Data Types and Defines)
  *
- *  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+ *  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
  *  All rights reserved.
  *
  *  This file is part of CAN API V3.
@@ -51,7 +51,7 @@
  *
  *  @author      $Author: makemake $
  *
- *  @version     $Rev: 1032 $
+ *  @version     $Rev: 1034 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -292,7 +292,7 @@ extern "C" {
 #define CANPROP_GET_LIBRARY_ID       4U /**< library id of the library (int32_t) */
 #define CANPROP_GET_LIBRARY_VENDOR   5U /**< vendor name of the library (char[256]) */
 #define CANPROP_GET_LIBRARY_DLLNAME  6U /**< file name of the library DLL (char[256]) */
-#define CANPROP_GET_DEVICE_CHANNEL  10U /**< device type of the CAN interface (int32_t) */
+#define CANPROP_GET_DEVICE_TYPE     10U /**< device type of the CAN interface (int32_t) */
 #define CANPROP_GET_DEVICE_NAME     11U /**< device name of the CAN interface (char[256]) */
 #define CANPROP_GET_DEVICE_VENDOR   12U /**< vendor name of the CAN interface (char[256]) */
 #define CANPROP_GET_DEVICE_DLLNAME  13U /**< file name of the CAN interface DLL (char[256]) */
@@ -387,7 +387,6 @@ extern "C" {
 #define CANPROP_MAX_BUFFER_SIZE    256U /**< max. buffer size for property values */
 #define CANPROP_MAX_STRING_LENGTH 1024U /**< max. length of a formatted message */
 /* - -  aliases (legacy names)  - - - - - - - - - - - - - - - - - - - - */
-#define CANPROP_GET_DEVICE_TYPE         CANPROP_GET_DEVICE_CHANNEL
 #define CANPROP_GET_CHANNEL_TYPE        CANPROP_GET_CHANNEL_NO
 #define CANPROP_GET_RCV_QUEUE_MAX       CANPROP_GET_RCV_QUEUE_SIZE
 /** @} */

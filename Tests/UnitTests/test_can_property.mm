@@ -78,7 +78,7 @@ static struct property {
     { CANPROP_GET_LIBRARY_ID      , sizeof(int32_t),         LIB_PARAM, GETTER, REQUIRED },  // library id of the library (int32_t)
     { CANPROP_GET_LIBRARY_VENDOR  , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, GETTER, REQUIRED },  // vendor name of the library (char[256])
     { CANPROP_GET_LIBRARY_DLLNAME , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, GETTER, REQUIRED },  // file name of the library DLL (char[256])
-    { CANPROP_GET_DEVICE_CHANNEL  , sizeof(int32_t),         DRV_PARAM, GETTER, REQUIRED },  // device type of the CAN interface (int32_t)
+    { CANPROP_GET_DEVICE_TYPE     , sizeof(int32_t),         DRV_PARAM, GETTER, REQUIRED },  // device type of the CAN interface (int32_t)
     { CANPROP_GET_DEVICE_NAME     , CANPROP_MAX_BUFFER_SIZE, DRV_PARAM, GETTER, REQUIRED },  // device name of the CAN interface (char[256])
     { CANPROP_GET_DEVICE_VENDOR   , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, GETTER, REQUIRED },  // vendor name of the CAN interface (char[256])
     { CANPROP_GET_DEVICE_DLLNAME  , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, GETTER, REQUIRED },  // file name of the CAN interface DLL (char[256])
