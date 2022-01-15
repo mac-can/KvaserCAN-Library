@@ -457,27 +457,15 @@ int main(int argc, const char * argv[]) {
             break;
         case 'L':  /* option `--list-boards[=<vendor>]' (-L) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
-#ifdef COMPILE_MACCAN_SOURCES
-            (void)CCanApi::Initializer();
-#endif
             /* list all supported interfaces */
             num_boards = CCanDriver::ListCanDevices(/*optarg*/);
             fprintf(stdout, "Number of supported CAN interfaces: %i\n", num_boards);
-#ifdef COMPILE_MACCAN_SOURCES
-            (void)CCanApi::Finalizer();
-#endif
             return (num_boards >= 0) ? 0 : 1;
         case 'T':  /* option `--test-boards[=<vendor>]' (-T) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
-#ifdef COMPILE_MACCAN_SOURCES
-            (void)CCanApi::Initializer();
-#endif
             /* list all available interfaces */
             num_boards = CCanDriver::TestCanDevices(opMode/*, optarg*/);
             fprintf(stdout, "Number of present CAN interfaces: %i\n", num_boards);
-#ifdef COMPILE_MACCAN_SOURCES
-            (void)CCanApi::Finalizer();
-#endif
             return (num_boards >= 0) ? 0 : 1;
         case 'h':
             usage(stdout, basename(argv[0]));
@@ -535,14 +523,7 @@ int main(int argc, const char * argv[]) {
     }
     /* CAN Monitor for Kvaser CAN Leaf interfaces */
     fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
-    /* - load the MacCAN driver */
-#ifdef COMPILE_MACCAN_SOURCES
-    retVal = CCanApi::Initializer();
-    if (retVal != CCanApi::NoError) {
-        fprintf(stderr, "+++ fatal: MacCAN driver could not be loaded (%i)\n", retVal);
-        return retVal;
-    }
-#endif
+
     /* - show operation mode and bit-rate settings */
     if (verbose) {
         fprintf(stdout, "Op.-mode=%s", (opMode.byte & CANMODE_FDOE) ? "CANFD" : "CAN2.0");
@@ -649,13 +630,6 @@ teardown:
         goto finalize;
     }
 finalize:
-    /* - release the MacCAN driver */
-#ifdef COMPILE_MACCAN_SOURCES
-    retVal = CCanApi::Finalizer();
-    if (retVal != CCanApi::NoError) {
-        fprintf(stderr, "+++ fatal: MacCAN driver could not be released (%i)\n", retVal);
-    }
-#endif
     /* So long and farewell! */
     fprintf(stdout, "%s\n", COPYRIGHT);
     return retVal;
@@ -855,5 +829,5 @@ static void version(FILE *stream, const char *program)
 {
     fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, LICENSE);
     (void)program;
-    fprintf(stream, "Written by Uwe Vogt, UV Software, Berlin <http://www.uv-software.com/>\n");
+    fprintf(stream, "Written by Uwe Vogt, UV Software, Berlin <https://www.mac-can.net/>\n");
 }

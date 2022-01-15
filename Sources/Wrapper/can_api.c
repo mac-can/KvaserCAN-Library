@@ -75,6 +75,10 @@ static const char version[] = "CAN API V3 for Kvaser CAN Leaf Interfaces, Versio
 
 /*  -----------  options  ------------------------------------------------
  */
+#if (OPTION_CAN_2_0_ONLY != 0)
+#error Compilation with legacy CAN 2.0 frame format!
+#endif
+
 #if (OPTION_CANAPI_KVASERCAN_DYLIB != 0)
 __attribute__((constructor))
 static void _initializer() {
@@ -868,7 +872,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
             rc = CANERR_NOERROR;
         }
         break;
-    case CANPROP_GET_DEVICE_DLLNAME:    // file name of the CAN interface (char[256])
+    case CANPROP_GET_DEVICE_DLLNAME:    // file name of the CAN interface DLL (char[256])
         if ((nbyte > strlen(KVASER_LIB_CANLIB)) && (nbyte <= CANPROP_MAX_BUFFER_SIZE)) {
             strcpy((char*)value, KVASER_LIB_CANLIB);
             rc = CANERR_NOERROR;
@@ -887,7 +891,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
         else
             rc = CANERR_RESOURCE;
         break;
-    case CANPROP_GET_CHANNEL_TYPE:      // get device type at actual index in the interface list (int32_t)
+    case CANPROP_GET_CHANNEL_NO:        // get channel no. at actual index in the interface list (int32_t)
         if (nbyte >= sizeof(int32_t)) {
             if ((0 <= idx_board) && (idx_board < KVASER_BOARDS) &&
                 (can_boards[idx_board].type != EOF)) {
@@ -898,7 +902,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
                 rc = CANERR_RESOURCE;
         }
         break;
-    case CANPROP_GET_CHANNEL_NAME:      // get device name at actual index in the interface list (char[256])
+    case CANPROP_GET_CHANNEL_NAME:      // get channel name at actual index in the interface list (char[256])
         if ((0U < nbyte) && (nbyte <= CANPROP_MAX_BUFFER_SIZE)) {
             if ((0 <= idx_board) && (idx_board < KVASER_BOARDS) &&
                 (can_boards[idx_board].type != EOF)) {
@@ -952,10 +956,9 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_BITRATE:           // active bit-rate of the CAN controller (can_bitrate_t)
     case CANPROP_GET_SPEED:             // active bus speed of the CAN controller (can_speed_t)
     case CANPROP_GET_STATUS:            // current status register of the CAN controller (uint8_t)
-    case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint8_t)
+    case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint16_t)
     case CANPROP_GET_NUM_CHANNELS:      // numbers of CAN channels on the CAN interface (uint8_t)
     case CANPROP_GET_CAN_CHANNEL:       // active CAN channel on the CAN interface (uint8_t)
-    case CANPROP_GET_CAN_CLOCKS:        // supported CAN clocks (in [Hz]) (int32_t[64])
     case CANPROP_GET_TX_COUNTER:        // total number of sent messages (uint64_t)
     case CANPROP_GET_RX_COUNTER:        // total number of reveiced messages (uint64_t)
     case CANPROP_GET_ERR_COUNTER:       // total number of reveiced error frames (uint64_t)
@@ -1004,13 +1007,13 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
             rc = CANERR_NOERROR;
         }
         break;
-    case CANPROP_GET_DEVICE_VENDOR:     // file name of the CAN interface DLL (char[256])
+    case CANPROP_GET_DEVICE_VENDOR:     // vendor name of the CAN interface (char[256])
         if ((nbyte > strlen(can[handle].device.vendor)) && (nbyte <= CANPROP_MAX_BUFFER_SIZE)) {
             strcpy((char*)value, can[handle].device.vendor);
             rc = CANERR_NOERROR;
         }
         break;
-    case CANPROP_GET_DEVICE_DLLNAME:    // vendor name of the CAN interface (char[256])
+    case CANPROP_GET_DEVICE_DLLNAME:    // file name of the CAN interface DLL (char[256])
         if ((nbyte > strlen("(driverless)")) && (nbyte <= CANPROP_MAX_BUFFER_SIZE)) {
             strcpy((char*)value, "(driverless)");  // note: there is no kernel driver!
             rc = CANERR_NOERROR;
@@ -1052,10 +1055,13 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
             }
         }
         break;
-    case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint8_t)
+    case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint16_t)
         if (nbyte >= sizeof(uint8_t)) {
             if ((rc = can_busload(handle, &load, NULL)) == CANERR_NOERROR) {
-                *(uint8_t*)value = (uint8_t)load;
+                if (nbyte > sizeof(uint8_t))
+                    *(uint16_t*)value = (uint16_t)load * 100U;  // 0 - 10000 ==> 0.00% - 100.00%
+                else
+                    *(uint8_t*)value = (uint8_t)load;           // 0  -  100 ==> 0.00% - 100.00%
                 rc = CANERR_NOERROR;
             }
         }
@@ -1069,12 +1075,6 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_CAN_CHANNEL:       // active CAN channel on the CAN interface (uint8_t)
         if (nbyte >= sizeof(uint8_t)) {
             *(uint8_t*)value = (uint8_t)can[handle].device.channelNo;
-            rc = CANERR_NOERROR;
-        }
-        break;
-    case CANPROP_GET_CAN_CLOCKS:        // supported CAN clocks (in [Hz]) (int32_t[64])
-        if (nbyte >= sizeof(can[handle].device.clocks)) {
-            memcpy(value, can[handle].device.clocks, sizeof(can[handle].device.clocks));
             rc = CANERR_NOERROR;
         }
         break;
