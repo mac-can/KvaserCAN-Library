@@ -53,7 +53,7 @@
 
 @end
 
-#define MAX_PROPERTIES  34
+#define MAX_PROPERTIES  33
 
 #define LIB_PARAM  true
 #define DRV_PARAM  false
@@ -88,16 +88,15 @@ static struct property {
     { CANPROP_GET_BITRATE         , sizeof(can_bitrate_t),   DRV_PARAM, GETTER, REQUIRED },  // active bit-rate of the CAN controller (can_bitrate_t)
     { CANPROP_GET_SPEED           , sizeof(can_speed_t),     DRV_PARAM, GETTER, REQUIRED },  // active bus speed of the CAN controller (can_speed_t)
     { CANPROP_GET_STATUS          , sizeof(can_mode_t),      DRV_PARAM, GETTER, REQUIRED },  // current status register of the CAN controller (uint8_t)
-    { CANPROP_GET_BUSLOAD         , sizeof(uint8_t),         DRV_PARAM, GETTER, REQUIRED },  // current bus load of the CAN controller (uint8_t)
-    { CANPROP_GET_NUM_CHANNELS    , sizeof(uint8_t),         DRV_PARAM, GETTER, REQUIRED },  // numbers of CAN channels on the CAN interface (uint8_t)
-    { CANPROP_GET_CAN_CHANNEL     , sizeof(uint8_t),         DRV_PARAM, GETTER, REQUIRED },  // active CAN channel on the CAN interface (uint8_t)
-    { CANPROP_GET_CAN_CLOCKS      , CANPROP_MAX_BUFFER_SIZE, DRV_PARAM, GETTER, REQUIRED },  // supported CAN clocks (in [Hz]) (int32_t[64])
+    { CANPROP_GET_BUSLOAD         , sizeof(uint16_t),        DRV_PARAM, GETTER, REQUIRED },  // current bus load of the CAN controller (uint16_t)
+    { CANPROP_GET_NUM_CHANNELS    , sizeof(uint8_t),         DRV_PARAM, GETTER, OPTIONAL },  // numbers of CAN channels on the CAN interface (uint8_t)
+    { CANPROP_GET_CAN_CHANNEL     , sizeof(uint8_t),         DRV_PARAM, GETTER, OPTIONAL },  // active CAN channel on the CAN interface (uint8_t)
     { CANPROP_GET_TX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, GETTER, REQUIRED },  // total number of sent messages (uint64_t)
     { CANPROP_GET_RX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, GETTER, REQUIRED },  // total number of reveiced messages (uint64_t)
     { CANPROP_GET_ERR_COUNTER     , sizeof(uint64_t),        DRV_PARAM, GETTER, REQUIRED },  // total number of reveiced error frames (uint64_t)
-    { CANPROP_GET_RCV_QUEUE_SIZE  , sizeof(uint32_t),        DRV_PARAM, GETTER, REQUIRED },  // maximum number of message the receive queue can hold (uint32_t)
-    { CANPROP_GET_RCV_QUEUE_HIGH  , sizeof(uint32_t),        DRV_PARAM, GETTER, REQUIRED },  // maximum number of message the receive queue has hold (uint32_t)
-    { CANPROP_GET_RCV_QUEUE_OVFL  , sizeof(uint64_t),        DRV_PARAM, GETTER, REQUIRED },  // overflow counter of the receive queue (uint64_t)
+    { CANPROP_GET_RCV_QUEUE_SIZE  , sizeof(uint32_t),        DRV_PARAM, GETTER, OPTIONAL },  // maximum number of message the receive queue can hold (uint32_t)
+    { CANPROP_GET_RCV_QUEUE_HIGH  , sizeof(uint32_t),        DRV_PARAM, GETTER, OPTIONAL },  // maximum number of message the receive queue has hold (uint32_t)
+    { CANPROP_GET_RCV_QUEUE_OVFL  , sizeof(uint64_t),        DRV_PARAM, GETTER, OPTIONAL },  // overflow counter of the receive queue (uint64_t)
     /* note:  SET_FIRST_CHANNEL must be called before any GET_CHANNEL_xyz, therefore we define it as a getter because it gets a (virtual) index */
     { CANPROP_SET_FIRST_CHANNEL   , 0U /* NULL pointer*/,    LIB_PARAM, GETTER, REQUIRED },  // set index to the first entry in the interface list (NULL) */
     { CANPROP_GET_CHANNEL_NO      , sizeof(int32_t),         LIB_PARAM, GETTER, REQUIRED },  // get channel no. at actual index in the interface list (int32_t) */
@@ -1304,4 +1303,4 @@ static struct property {
 
 @end
 
-// $Id: test_can_property.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_property.mm 1092 2022-01-15 21:14:19Z makemake $  Copyright (c) UV Software, Berlin //

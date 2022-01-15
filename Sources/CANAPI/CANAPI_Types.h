@@ -49,9 +49,9 @@
  *
  *  @brief       CAN API V3 for generic CAN Interfaces - Data Types and Defines
  *
- *  @author      $Author: makemake $
+ *  @author      $Author: haumea $
  *
- *  @version     $Rev: 1034 $
+ *  @version     $Rev: 1036 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -302,10 +302,9 @@ extern "C" {
 #define CANPROP_GET_BITRATE         17U /**< active bit-rate of the CAN controller (can_bitrate_t) */
 #define CANPROP_GET_SPEED           18U /**< active bus speed of the CAN controller (can_speed_t) */
 #define CANPROP_GET_STATUS          19U /**< current status register of the CAN controller (uint8_t) */
-#define CANPROP_GET_BUSLOAD         20U /**< current bus load of the CAN controller (uint8_t) */
+#define CANPROP_GET_BUSLOAD         20U /**< current bus load of the CAN controller (uint16_t) */
 #define CANPROP_GET_NUM_CHANNELS    21U /**< numbers of CAN channels on the CAN interface (uint8_t) */
 #define CANPROP_GET_CAN_CHANNEL     22U /**< active CAN channel on the CAN interface (uint8_t) */
-#define CANPROP_GET_CAN_CLOCKS      23U /**< supported CAN clocks (in [Hz]) (int32_t[64]) */
 #define CANPROP_GET_TX_COUNTER      24U /**< total number of sent messages (uint64_t) */
 #define CANPROP_GET_RX_COUNTER      25U /**< total number of received messages (uint64_t) */
 #define CANPROP_GET_ERR_COUNTER     26U /**< total number of received error frames (uint64_t) */
@@ -377,7 +376,9 @@ extern "C" {
 #define CANPROP_GET_CHANNEL_VENDOR_ID 245U /**< get library id at actual index in the interface list (int32_t) */
 #define CANPROP_GET_CHANNEL_VENDOR_NAME 246U /**< get vendor name at actual index in the interface list (char[256]) */
 /* - -  search path for JSON files (for C++ wrapper classes)  - - - - - */
+#if (OPTION_CANAPI_LIBRARY != 0)
 #define CANPROP_SET_SEARCH_PATH    253U /**< set search path for interface configuration files (char[256]) */
+#endif
 /* - -  access to device handle (for C++ wrapper classes) - - - - - - - */
 #define CANPROP_GET_CPP_BACKDOOR   255U /**< get device handle (int32_t) */
 /* - -  access to vendor-specific properties  - - - - - - - - - - - - - */
