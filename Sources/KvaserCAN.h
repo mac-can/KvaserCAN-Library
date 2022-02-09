@@ -89,7 +89,7 @@ public:
     // CKvaserCAN-specific error codes (CAN API V3 extension)
     enum EErrorCodes {
         // note: range 0...-99 is reserved by CAN API V3
-        GeneralError = VendorSpecific
+        GeneralError = VendorSpecific, ///< mapped Kvaser CANlib error codes
     };
     // CCanApi overrides
     static bool GetFirstChannel(SChannelInfo &info, void *param = NULL);
@@ -156,7 +156,7 @@ public:
 #define KVASERCAN_PROPERTY_BUSLOAD          (CANPROP_GET_BUSLOAD)
 #define KVASERCAN_PROPERTY_NUM_CHANNELS     (CANPROP_GET_NUM_CHANNELS)
 #define KVASERCAN_PROPERTY_CAN_CHANNEL      (CANPROP_GET_CAN_CHANNEL)
-#define KVASERCAN_PROPERTY_CAN_CLOCKS       (CANPROP_GET_CAN_CLOCKS)
+//#define KVASERCAN_PROPERTY_CAN_CLOCKS       (CANPROP_GET_CAN_CLOCKS)
 #define KVASERCAN_PROPERTY_TX_COUNTER       (CANPROP_GET_TX_COUNTER)
 #define KVASERCAN_PROPERTY_RX_COUNTER       (CANPROP_GET_RX_COUNTER)
 #define KVASERCAN_PROPERTY_ERR_COUNTER      (CANPROP_GET_ERR_COUNTER)

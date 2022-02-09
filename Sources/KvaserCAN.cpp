@@ -48,8 +48,8 @@
 #include "build_no.h"
 #ifdef _MSC_VER
 #define VERSION_MAJOR    0
-#define VERSION_MINOR    0
-#define VERSION_PATCH    0
+#define VERSION_MINOR    2
+#define VERSION_PATCH    2
 #else
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    2
@@ -334,7 +334,7 @@ char *CKvaserCAN::GetHardwareVersion() {
 EXPORT
 char *CKvaserCAN::GetFirmwareVersion() {
     // retrieve the firmware version of the CAN controller
-    return can_software(m_Handle);
+    return can_firmware(m_Handle);
 }
 
 EXPORT

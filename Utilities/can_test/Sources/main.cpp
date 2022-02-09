@@ -601,7 +601,7 @@ int main(int argc, const char * argv[]) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be initialized (%i)", retVal);
         if (retVal == CCanApi::NotSupported)
-            fprintf(stderr, " - possibly CAN operating mode %02Xh not supported", opMode.byte);
+            fprintf(stderr, "\n           - possibly CAN operating mode %02Xh not supported", opMode.byte);
         fputc('\n', stderr);
         goto finalize;
     }

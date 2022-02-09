@@ -54,12 +54,12 @@
 
     @author   $Author: makemake $
 
-    @version  $Rev: 1025 $
+    @version  $Rev: 1026 $
  */
 import Foundation
 import CCanApi
 
-private let version = (major: 0, minor: 2, patch: 0)
+private let version = (major: 0, minor: 2, patch: 1)
 
 public class CanApi {
     private lazy var handle: CInt = -1  // CAN interface handle
@@ -962,4 +962,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1025 2022-01-10 17:24:03Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1026 2022-01-10 17:47:36Z makemake $  Copyright (c) UV Software, Berlin //

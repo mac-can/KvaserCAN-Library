@@ -239,7 +239,7 @@ int main(int argc, const char * argv[]) {
 #else
         retVal = myDriver.SetProperty(CANPROP_SET_FIRST_CHANNEL, (void *)NULL, 0U);
         while (retVal == CCanApi::NoError) {
-            retVal = myDriver.GetProperty(CANPROP_GET_CHANNEL_TYPE, (void *)&i32Val, sizeof(int32_t));
+            retVal = myDriver.GetProperty(CANPROP_GET_CHANNEL_NO, (void *)&i32Val, sizeof(int32_t));
             if (retVal == CCanApi::NoError) {
                 retVal = CKvaserCAN::ProbeChannel(i32Val, opMode, state);
                 fprintf(stdout, ">>> CCanApi::ProbeChannel(%i): state = %s", i32Val,
@@ -278,7 +278,7 @@ int main(int argc, const char * argv[]) {
         //    fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_NUM_CHANNELS) returned %i\n", retVal);
         retVal = myDriver.GetProperty(CANPROP_GET_CAN_CHANNEL, (void*)&u8Val, sizeof(uint8_t));
         if (retVal == CCanApi::NoError)
-            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_CAN_CHANNEL): value = %u\n", u8Val + 1U);
+            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_CAN_CHANNEL): value = %u\n", u8Val);
         //else [optional property]
         //    fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_CAN_CHANNEL) returned %i\n", retVal);
         retVal = myDriver.GetProperty(CANPROP_GET_DEVICE_TYPE, (void *)&i32Val, sizeof(int32_t));
