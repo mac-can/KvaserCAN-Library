@@ -1,7 +1,7 @@
 #
 #	CAN Interface API, Version 3 (for Kvaser CAN Leaf Interfaces)
 #
-#	Copyright (c) 2017-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
 #
 #	This file is part of MacCAN-KvaserCAN.
@@ -70,10 +70,10 @@ ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
 LIBRARY = libKvaserCAN
 
 MAJOR = 0
-MINOR = 1
-PATCH = 1
+MINOR = 2
+PATCH = 0
 
-VERSION = $(MAJOR).$(MINOR).$(PATCH)
+VERSION = $(MAJOR).$(MINOR)
 TARGET  = $(LIBRARY).$(VERSION).dylib
 STATIC  = $(LIBRARY).a
 
@@ -123,15 +123,20 @@ LDFLAGS  += -lpthread \
 	-current_version $(CURRENT_VERSION) \
 	-compatibility_version $(COMPATIBILITY_VERSION)
 
-ARFLAGS = r
+LTFLAGS += -static
 
+ifeq ($(BINARY),UNIVERSAL)
+CFLAGS += -arch arm64 -arch x86_64
+CXXFLAGS += -arch arm64 -arch x86_64
+LDFLAGS += -arch arm64 -arch x86_64
+endif
 endif
 
 
 CXX = clang++
-CXX = clang
+CC = clang
 LD = clang++
-AR = ar
+LT = libtool
 RM = rm -f
 CP = cp -f
 LN = ln -s
@@ -168,8 +173,8 @@ clean:
 	$(RM) $(TARGET) $(STATIC) $(OUTDIR)/*.o $(OUTDIR)/*.d
 
 pristine:
-	$(RM) $(TARGET) $(STATIC) $(OUTDIR)/*.o $(OUTDIR)/*.d
-	$(RM) $(BINDIR)/$(TARGET) $(BINDIR)/$(STATIC) $(BINDIR)/$(LIBRARY).dylib
+	$(RM) *.dylib *.a $(OUTDIR)/*.o $(OUTDIR)/*.d
+	$(RM) $(BINDIR)/*.dylib $(BINDIR)/*.a
 	$(RM) $(INCDIR)/*.h
 
 install:
@@ -218,10 +223,13 @@ $(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
 
 
 $(STATIC): $(OBJECTS)
-	$(AR) $(ARFLAGS) $@ $(OBJECTS) $(LIBRARIES)
-	$(CP) $(STATIC) $(BINDIR)
+	$(LT) $(LTFLAGS) -o $@ $(OBJECTS) $(LIBRARIES)
+	$(CP) $@ $(BINDIR)
+	@lipo -archs $@
+	@echo "\033[1mTarget '"$@"' successfully build\033[0m"
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBRARIES)
-	$(CP) $(TARGET) $(BINDIR)
+	$(CP) $@ $(BINDIR)
+	@lipo -archs $@
 	@echo "\033[1mTarget '"$@"' successfully build\033[0m"

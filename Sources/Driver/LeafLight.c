@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -154,6 +154,8 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
     device->recvData.txAck.maxMsg = LEAF_LIGHT_MAX_OUTSTANDING_TX;
     LeafLight_GetOperationCapability(&device->opCapability);
+    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
+    device->clocks[1] = (int32_t)-1;
 
     /* Gotcha! */
     device->configured = true;
@@ -223,6 +225,11 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
             device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
             break;
     }
+#if (0)
+    // TODO: list a possible CAN clocks and rework the bus params accordingly
+    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
+    device->clocks[1] = (int32_t)-1;
+#endif
     /* get max. outstanding transmit messages */
     if ((0U < device->deviceInfo.software.maxOutstandingTx) &&
         (device->deviceInfo.software.maxOutstandingTx < MIN(LEAF_LIGHT_MAX_OUTSTANDING_TX, 255U)))

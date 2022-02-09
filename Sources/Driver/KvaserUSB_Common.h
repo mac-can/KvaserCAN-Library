@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -58,6 +58,7 @@
 #define KVASER_LEAF_PRO_ID  0x107U
 #define KVASER_LEAF_LIGHT_ID  0x120U
 
+#define KVASER_MAX_CAN_CLOCKS    1U
 #define KVASER_MAX_CAN_CHANNELS  1U
 #define KVASER_MAX_NAME_LENGTH  32U
 

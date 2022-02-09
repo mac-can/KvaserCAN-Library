@@ -14,7 +14,7 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "0F8F0ACB26908D9F00C2D974"
+               BlueprintIdentifier = "44999AAB278CDD1200C466E9"
                BuildableName = "Testing.xctest"
                BlueprintName = "Testing"
                ReferencedContainer = "container:KvaserCAN.xcodeproj">
@@ -32,7 +32,7 @@
       <CodeCoverageTargets>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0F8F0ACB26908D9F00C2D974"
+            BlueprintIdentifier = "44999AAB278CDD1200C466E9"
             BuildableName = "Testing.xctest"
             BlueprintName = "Testing"
             ReferencedContainer = "container:KvaserCAN.xcodeproj">
@@ -43,7 +43,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "0F8F0ACB26908D9F00C2D974"
+               BlueprintIdentifier = "44999AAB278CDD1200C466E9"
                BuildableName = "Testing.xctest"
                BlueprintName = "Testing"
                ReferencedContainer = "container:KvaserCAN.xcodeproj">
@@ -71,7 +71,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0F8F0ACB26908D9F00C2D974"
+            BlueprintIdentifier = "44999AAB278CDD1200C466E9"
             BuildableName = "Testing.xctest"
             BlueprintName = "Testing"
             ReferencedContainer = "container:KvaserCAN.xcodeproj">

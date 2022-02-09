@@ -49,7 +49,7 @@ int main(int argc, const char * argv[]) {
         } while (result == CANERR_TX_BUSY);
         if (result < CANERR_NOERROR) {
             std::cerr << "\n+++ error: message could not be sent" << std::endl;
-            goto reset;;
+            goto reset;
         }
     }
 #if !defined(_WIN32) && !defined(_WIN64)

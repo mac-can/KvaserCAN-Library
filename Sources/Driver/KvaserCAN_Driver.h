@@ -68,8 +68,8 @@ extern CANUSB_Return_t KvaserCAN_SignalChannel(KvaserUSB_Device_t *device);
 
 extern CANUSB_Return_t KvaserCAN_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params);
 extern CANUSB_Return_t KvaserCAN_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params);
-//extern CANUSB_Return_t KvaserCAN_SetBusParamsFD(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *param);
-//extern CANUSB_Return_t KvaserCAN_GetBusParamsFD(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *param);
+extern CANUSB_Return_t KvaserCAN_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsFd_t *params);
+extern CANUSB_Return_t KvaserCAN_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusParamsFd_t *params);
 
 extern CANUSB_Return_t KvaserCAN_CanBusOn(KvaserUSB_Device_t *device, bool silent);
 extern CANUSB_Return_t KvaserCAN_CanBusOff(KvaserUSB_Device_t *device);

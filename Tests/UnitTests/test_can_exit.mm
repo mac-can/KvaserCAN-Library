@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -64,13 +64,17 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC08.1: Try to shutdown interface with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @pre
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -85,8 +89,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -102,14 +106,14 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
     // @test:
     // @note: value -1 is used to shutdown all interfaces!
-    // @- try to shutdown DUT1 with wrong handle INT32_MAX
-    rc = can_exit(INT32_MAX);
-    XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- try to shutdown DUT1 with wrong handle INT32_MIN
+    // @- try to shutdown DUT1 with invalid handle INT32_MIN
     rc = can_exit(INT32_MIN);
+    XCTAssertEqual(CANERR_HANDLE, rc);
+    // @- try to shutdown DUT1 with invalid handle INT32_MAX
+    rc = can_exit(INT32_MAX);
     XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
@@ -122,6 +126,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC08.2: Try to shutdown interface when it is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -129,15 +137,16 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to shutdown DUT1 with wrong handle -1
+    // @- try to shutdown DUT1 with invalid handle -1
     rc = can_exit(INVALID_HANDLE);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to shutdown DUT1 with wrong handle INT32_MIN
-    rc = can_exit(INT32_MAX);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to shutdown DUT1 with wrong handle INT32_MIN
+    // @- try to shutdown DUT1 with invalid handle INT32_MIN
     rc = can_exit(INT32_MIN);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @- try to shutdown DUT1 with invalid handle INT32_MAX
+    rc = can_exit(INT32_MAX);
+    XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @todo: loop over list of valid handles
 
     // @post:
     // @- initialize DUT1 with configured settings
@@ -154,8 +163,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -176,7 +185,11 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceNotStarted {
+// @xctest TC08.3: Shutdown interface when it is initializes (but CAN controller not started).
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWhenInterfaceInitialized {
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
@@ -199,6 +212,10 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC08.4: Shutdown interface when CAN controller is started.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWhenInterfaceStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -220,8 +237,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -239,6 +256,62 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC08.5: Shutdown interface after CAN controller is stopped.
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWhenInterfaceStopped {
+    can_bitrate_t bitrate = { TEST_BTRINDEX };
+    can_status_t status = { CANSTAT_RESET };
+    int handle = INVALID_HANDLE;
+    int rc = CANERR_FATAL;
+
+    // @pre:
+    // @- initialize DUT1 with configured settings
+    handle = can_init(DUT1, TEST_CANMODE, NULL);
+    XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- start DUT1 with configured bit-rate settings
+    rc = can_start(handle, &bitrate);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+#endif
+    // @- stop/reset DUT1
+    rc = can_reset(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
+    // @test:
+    // @- shutdown DUT1
+    rc = can_exit(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 (should return an error)
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOTINIT, rc);
+}
+
+// @xctest TC08.6: Shutdown interface when already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -260,8 +333,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -290,6 +363,10 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
+// @xctest TC08.7: Shutdown all initialized interfaces at once.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testShutdownAllInterfaces {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -333,3 +410,5 @@
 }
 
 @end
+
+// $Id: test_can_exit.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

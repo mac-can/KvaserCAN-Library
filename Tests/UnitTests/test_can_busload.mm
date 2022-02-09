@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -49,11 +49,11 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
-@interface test_can_bitrate : XCTestCase
+@interface test_can_busload : XCTestCase
 
 @end
 
-@implementation test_can_bitrate
+@implementation test_can_busload
 
 - (void)setUp {
     // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -64,62 +64,14 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC10.1: Get CAN bus load with invalid interface handle(s).
+//
+// @expected: CANERR_HANDLE
+//
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
-    int handle = INVALID_HANDLE;
-    int rc = CANERR_FATAL;
-
-    // @test:
-    // @- initialize DUT1 with configured settings
-    handle = can_init(DUT1, TEST_CANMODE, NULL);
-    XCTAssertLessThanOrEqual(0, handle);
-    // @- try to get bit-rate of DUT1 with wrong handle -1
-    rc = can_bitrate(INVALID_HANDLE, &bitrate, NULL);
-    XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- get status of DUT1 and check to be in INIT state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertTrue(status.can_stopped);
-    // @- start DUT1 with configured bit-rate settings
-    rc = can_start(handle, &bitrate);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
-    rc = can_bitrate(INT32_MAX, &bitrate, NULL);
-    XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- get status of DUT1 and check to be in RUNNING state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
-    CTester tester;
-    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
-    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
-    // @- get status of DUT1 and check to be in RUNNING state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertFalse(status.can_stopped);
-#endif
-    // @- stop/reset DUT1
-    rc = can_reset(handle);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
-    rc = can_bitrate(INT32_MIN, &bitrate, NULL);
-    XCTAssertEqual(CANERR_HANDLE, rc);
-    // @- get status of DUT1 and check to be in INIT state
-    rc = can_status(handle, &status.byte);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-    XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
-    rc = can_exit(handle);
-    XCTAssertEqual(CANERR_NOERROR, rc);
-}
-
-- (void)testWithNullPointerForBitrate {
-    can_bitrate_t bitrate = { TEST_BTRINDEX };
-    can_status_t status = { CANSTAT_RESET };
-    can_speed_t speed = {};
+    uint8_t load = 0U;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
@@ -127,6 +79,11 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+
+    // @test:
+    // @- try to get bus-load with invalid handle -1
+    rc = can_busload(INVALID_HANDLE, &load, &status.byte);
+    XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -134,19 +91,15 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
-    // @test:
-    // @- get bit-rate of DUT1 with NULL for bitrate
-    rc = can_bitrate(handle, NULL, &speed);
-    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- try to get bus-load with invalid handle INT32_MAX
+    rc = can_busload(INT32_MAX, &load, &status.byte);
+    XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
-    // @post:
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -158,16 +111,25 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- try to get bus-load with invalid handle INT32_MIN
+    rc = can_busload(INT32_MIN, &load, &status.byte);
+    XCTAssertEqual(CANERR_HANDLE, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
+
+    // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWithNullPointerForSpeed {
+// @xctest TC10.2: Give a NULL pointer as argument for parameter 'load'.
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWithNullPointerForLoad {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
@@ -177,6 +139,11 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+
+    // @test:
+    // @- get bus-load of DUT1 with NULL for parameter 'load'
+    rc = can_busload(handle, NULL, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -184,19 +151,15 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
-    // @test:
-    // @- get bit-rate of DUT1 with NULL for speed
-    rc = can_bitrate(handle, &bitrate, NULL);
+    // @- get bus-load of DUT1 with NULL for parameter 'load'
+    rc = can_busload(handle, NULL, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
-    // @post:
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -208,15 +171,85 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get bus-load of DUT1 with NULL for parameter 'load'
+    rc = can_busload(handle, NULL, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
+
+    // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC10.3: Give a NULL pointer as argument for parameter 'status'.
+//
+// @expected: CANERR_NOERROR
+//
+- (void)testWithNullPointerForStatus {
+    can_bitrate_t bitrate = { TEST_BTRINDEX };
+    can_status_t status = { CANSTAT_RESET };
+    uint8_t load = 0U;
+    int handle = INVALID_HANDLE;
+    int rc = CANERR_FATAL;
+
+    // @pre:
+    // @- initialize DUT1 with configured settings
+    handle = can_init(DUT1, TEST_CANMODE, NULL);
+    XCTAssertLessThanOrEqual(0, handle);
+
+    // @test:
+    // @- get bus-load of DUT1 with NULL for parameter 'status'
+    rc = can_busload(handle, &load, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- start DUT1 with configured bit-rate settings
+    rc = can_start(handle, &bitrate);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get bus-load of DUT1 with NULL for parameter 'status'
+    rc = can_busload(handle, &load, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+#endif
+    // @- stop/reset DUT1
+    rc = can_reset(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get bus-load of DUT1 with NULL for parameter 'status'
+    rc = can_busload(handle, &load, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
+    // @post:
+    // @- shutdown DUT1
+    rc = can_exit(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+}
+
+// @xctest TC10.4: Give a NULL pointer as argument for parameter 'load' and 'status'.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithNullPointerForBoth {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -227,6 +260,11 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+
+    // @test:
+    // @- get bus-load of DUT1 with NULL for both parameter
+    rc = can_busload(handle, NULL, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -234,19 +272,15 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
-    // @test:
-    // @- get bit-rate of DUT1 with NULL for both
-    rc = can_bitrate(handle, NULL, NULL);
+    // @- get bus-load of DUT1 with NULL for both parameter
+    rc = can_busload(handle, NULL, NULL);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    
-    // @post:
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -258,30 +292,40 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get bus-load of DUT1 with NULL for both parameter
+    rc = can_busload(handle, NULL, NULL);
+    XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
+
+    // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC10.5: Get CAN bus load when interface is not initialized.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
+    uint8_t load = 0U;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to get bit-rate of DUT1 with wrong handle -1
-    rc = can_bitrate(INVALID_HANDLE, &bitrate, NULL);
+    // @- try to get bus-load of DUT1 with invalid handle -1
+    rc = can_busload(INVALID_HANDLE, &load, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
-    rc = can_bitrate(INT32_MAX, &bitrate, NULL);
+    // @- try to get bus-load of DUT1 with invalid handle INT32_MIN
+    rc = can_busload(INT32_MAX, &load, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get bit-rate of DUT1 with wrong handle INT32_MIN
-    rc = can_bitrate(INT32_MIN, &bitrate, NULL);
+    // @- try to get bus-load of DUT1 with invalid handle INT32_MIN
+    rc = can_busload(INT32_MIN, &load, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
     // @post:
@@ -299,8 +343,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -321,9 +365,14 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-- (void)testWhenInterfaceNotStarted {
+// @xctest TC10.6: Get CAN bus load when interface initialized (but CAN controller not started).
+//
+// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+//
+- (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
+    uint8_t load = 0U;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
@@ -331,14 +380,21 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-
-    // @test:
-    // @- get bit-rate of DUT1
-    rc = can_bitrate(handle, &bitrate, NULL);
-    XCTAssertEqual(CANERR_OFFLINE, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
+    // @test:
+    // @- get bus-load of DUT1 and check to be in INIT state
+    rc = can_busload(handle, &load, &status.byte);
+#ifndef OPTION_CANAPI_RETVALS
+    XCTAssertEqual(CANERR_OFFLINE, rc);
+#else
+    // note: can_busload shall return CANERR_NOERROR even when
+    //       the CAN controller has not been started
+    XCTAssertEqual(CANERR_NOERROR, rc);
+#endif
     XCTAssertTrue(status.can_stopped);
 
     // @post:
@@ -349,8 +405,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -371,13 +427,73 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC10.7: Get CAN bus load when CAN controller started.
+//
+// @expected: CANERR_NOERROR and status bit 'can_stopped' = 0
+//
+- (void)testWhenInterfaceStarted {
+    can_bitrate_t bitrate = { TEST_BTRINDEX };
+    can_status_t status = { CANSTAT_RESET };
+    uint8_t load = 0U;
+    int handle = INVALID_HANDLE;
+    int rc = CANERR_FATAL;
+
+    // @pre:
+    // @- initialize DUT1 with configured settings
+    handle = can_init(DUT1, TEST_CANMODE, NULL);
+    XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- start DUT1 with configured bit-rate settings
+    rc = can_start(handle, &bitrate);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
+    CTester tester;
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+#endif
+    // @test:
+    // @- get bus-load of DUT1 and check to be in RUNNING state
+    rc = can_busload(handle, &load, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
+
+    // @post:
+    // @- stop/reset DUT1
+    rc = can_reset(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+    // @- shutdown DUT1
+    rc = can_exit(handle);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+}
+
+// @xctest TC10.8: Get CAN bus load when CAN controller stopped.
+//
+// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+//
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
+    uint8_t load = 0U;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @pre
+    // @test:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -392,8 +508,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -405,28 +521,41 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
-    // @test:
-    // @- get bit-rate of DUT1
-    rc = can_bitrate(handle, &bitrate, NULL);
-    XCTAssertEqual(CANERR_OFFLINE, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
+
+    // @test:
+    // @- get bus-load of DUT1 and check to be in INIT state
+    rc = can_busload(handle, &load, &status.byte);
+#ifndef OPTION_CANAPI_RETVALS
+    XCTAssertEqual(CANERR_OFFLINE, rc);
+#else
+    // note: can_busload shall return CANERR_NOERROR even when
+    //       the CAN controller has not been started
+    XCTAssertEqual(CANERR_NOERROR, rc);
+#endif
+    XCTAssertTrue(status.can_stopped);
+
     // @post:
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC10.9: Get CAN bus load when interface already shutdown.
+//
+// @expected: CANERR_NOTINIT
+//
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
+    uint8_t load = 0U;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -441,8 +570,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -463,75 +592,53 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 
     // @test:
-    // @- try to get bit-rate of DUT1
-    rc = can_bitrate(handle, &bitrate, NULL);
+    // @- try to get bus-load of DUT1 again
+    rc = can_busload(handle, &load, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-- (void)testWithDifferentCan20BitrateSettings {
-    can_bitrate_t bitrate = { TEST_BTRINDEX };
-    can_status_t status = { CANSTAT_RESET };
-    int handle = INVALID_HANDLE;
-    int rc = CANERR_FATAL;
+// @xctest TC10.10: tbd.
+//
+//- (void)testWhenStatusBusOff {
+//        TODO: insert coin here
+//}
 
-    // @test: loop over selected bit-rate settings
-    for (int i = 0; i < 4; i++) {
-        switch (i) {
-            case 0: BITRATE_1M(bitrate); break;
-            case 1: BITRATE_500K(bitrate); break;
-            case 2: BITRATE_250K(bitrate); break;
-            case 3: BITRATE_125K(bitrate); break;
-            default: return;
-        }
-        can_bitrate_t result = {};
-        // @- initialize DUT1 with configured settings
-        handle = can_init(DUT1, TEST_CANMODE, NULL);
-        XCTAssertLessThanOrEqual(0, handle);
-        // @- get status of DUT1 and check to be in INIT state
-        rc = can_status(handle, &status.byte);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-        XCTAssertTrue(status.can_stopped);
-        // @- start DUT1 with selected bit-rate settings
-        rc = can_start(handle, &bitrate);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-        // @- get status of DUT1 and check to be in RUNNING state
-        rc = can_status(handle, &status.byte);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-        XCTAssertFalse(status.can_stopped);
-        // @- get bitrate from DUT1 and compare with selected settings
-        rc = can_bitrate(handle, &result, NULL);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-        XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
-        XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
-        XCTAssertEqual(bitrate.btr.nominal.tseg1, result.btr.nominal.tseg1);
-        XCTAssertEqual(bitrate.btr.nominal.tseg2, result.btr.nominal.tseg2);
-        XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
-        XCTAssertEqual(bitrate.btr.nominal.sam, result.btr.nominal.sam);
-        // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0) && (OPTION_SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
-        CTester tester;
-        XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
-        XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
-        // @- get status of DUT1 and check to be in RUNNING state
-        rc = can_status(handle, &status.byte);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-        XCTAssertFalse(status.can_stopped);
-#endif
-        // @- stop/reset DUT1
-        rc = can_reset(handle);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-        // @- get status of DUT1 and check to be in INIT state
-        rc = can_status(handle, &status.byte);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-        XCTAssertTrue(status.can_stopped);
-        // @- shutdown DUT1
-        rc = can_exit(handle);
-        XCTAssertEqual(CANERR_NOERROR, rc);
-    }
-}
+// @xctest TC10.11: tbd.
+//
+//- (void)testWhenStatusWarningLevel {
+//        TODO: insert coin here
+//}
 
-//- (void)testWithDifferentCanFdBitrateSettings {
+// @xctest TC10.12: tbd.
+//
+//- (void)testWhenStatusBusBrror {
+//        TODO: insert coin here
+//}
+
+// @xctest TC10.13: tbd.
+//
+//- (void)testWhenStatusTransmitterBusy {
+//        TODO: insert coin here
+//}
+
+// @xctest TC10.14: tbd.
+//
+//- (void)testWhenStatusReceiverEmpty {
+//        TODO: insert coin here
+//}
+
+// @xctest TC10.15: tbd.
+//
+//- (void)testWhenStatusMessageLost {
+//        TODO: insert coin here
+//}
+
+// @xctest TC10.16: tbd.
+//
+//- (void)testWhenStatusQueueOverrun {
 //        TODO: insert coin here
 //}
 
 @end
+
+// $Id: test_can_busload.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

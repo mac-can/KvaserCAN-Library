@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 //
-//  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -49,11 +49,11 @@
 #ifdef _MSC_VER
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    2
-#define VERSION_PATCH    1
+#define VERSION_PATCH    2
 #else
 #define VERSION_MAJOR    0
-#define VERSION_MINOR    1
-#define VERSION_PATCH    1
+#define VERSION_MINOR    2
+#define VERSION_PATCH    0
 #endif
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
@@ -90,9 +90,11 @@ static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " V
 #if (OPTION_KVASERCAN_DYLIB != 0)
 __attribute__((constructor))
 static void _initializer() {
+    // default initializer
 }
 __attribute__((destructor))
 static void _finalizer() {
+    // default finalizer
 }
 #define EXPORT  __attribute__((visibility("default")))
 #else
@@ -132,7 +134,52 @@ CKvaserCAN::CKvaserCAN() {
 
 EXPORT
 CKvaserCAN::~CKvaserCAN() {
+    // set CAN contoller into INIT mode and close USB device
     (void)TeardownChannel();
+}
+
+EXPORT
+bool CKvaserCAN::GetFirstChannel(SChannelInfo &info, void *param) {
+    bool result = false;
+    memset(&info, 0, sizeof(SChannelInfo));
+    info.m_nChannelNo = (-1);
+    // set index to the first entry in the interface list (if any)
+    CANAPI_Return_t rc = can_property((-1), CANPROP_SET_FIRST_CHANNEL, NULL, 0U);
+    if (CANERR_NOERROR == rc) {
+        // get channel no, device name and device DLL name at actual index in the interface list
+        if (((can_property((-1), CANPROP_GET_CHANNEL_NO, (void*)&info.m_nChannelNo, sizeof(int32_t))) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
+            // we know the library id and its vendor already
+            info.m_nLibraryId = KVASER_LIB_ID;
+            strncpy(info.m_szVendorName, KVASER_LIB_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
+            result = true;
+        }
+    }
+    (void)param;
+    return result;
+}
+
+EXPORT
+bool CKvaserCAN::GetNextChannel(SChannelInfo &info, void *param) {
+    bool result = false;
+    memset(&info, 0, sizeof(SChannelInfo));
+    info.m_nChannelNo = (-1);
+    // set index to the next entry in the interface list (if any)
+    CANAPI_Return_t rc = can_property((-1), CANPROP_SET_NEXT_CHANNEL, NULL, 0U);
+    if (CANERR_NOERROR == rc) {
+        // get channel no, device name and device DLL name at actual index in the interface list
+        if (((can_property((-1), CANPROP_GET_CHANNEL_NO, (void*)&info.m_nChannelNo, sizeof(int32_t))) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
+            ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
+            // we know the library id and its vendor already
+            info.m_nLibraryId = KVASER_LIB_ID;
+            strncpy(info.m_szVendorName, KVASER_LIB_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
+            result = true;
+        }
+    }
+    (void)param;
+    return result;
 }
 
 EXPORT
@@ -287,7 +334,7 @@ char *CKvaserCAN::GetHardwareVersion() {
 EXPORT
 char *CKvaserCAN::GetFirmwareVersion() {
     // retrieve the firmware version of the CAN controller
-    return can_software(m_Handle);
+    return can_firmware(m_Handle);
 }
 
 EXPORT

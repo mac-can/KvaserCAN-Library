@@ -49,12 +49,11 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
-
-@interface Testing : XCTestCase
+@interface test_can_version : XCTestCase
 
 @end
 
-@implementation Testing
+@implementation test_can_version
 
 - (void)setUp {
     // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -65,16 +64,27 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-- (void)testSmokeTest {
+// @xctest TC15.1: Query CAN API version number at any place in a standard sequence (cf. SmokeTest).
+//
+// @expected: Not NULL
+//
+- (void)testAnyPlaceAnyTime {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
+    char *string = NULL;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @test:
+    // @- get CAN API version of DUT1
+    string = can_version();
+    XCTAssertTrue(NULL != string);
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get CAN API version of DUT1
+    string = can_version();
+    XCTAssertTrue(NULL != string);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -82,21 +92,29 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get CAN API version of DUT1
+    string = can_version();
+    XCTAssertTrue(NULL != string);
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- send some frames to DUT2 and receive some frames from DUT2
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
-    XCTAssertEqual(TEST_TRAFFIC, tester.SendSomeFrames(handle, DUT2, TEST_TRAFFIC));
-    XCTAssertEqual(TEST_TRAFFIC, tester.ReceiveSomeFrames(handle, DUT2, TEST_TRAFFIC));
+    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
     // @- get status of DUT1 and check to be in RUNNING state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
+#endif
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get CAN API version of DUT1
+    string = can_version();
+    XCTAssertTrue(NULL != string);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -104,55 +122,11 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get CAN API version of DUT1
+    string = can_version();
+    XCTAssertTrue(NULL != string);
 }
 
-//- (void)testPerformanceExample {
-//    // This is an example of a performance test case.
-//    [self measureBlock:^{
-//        // Put the code you want to measure the time of here.
-//    }];
-//}
-
-//- (void)testTemplate {
-//    can_bitrate_t bitrate = { TEST_BTRINDEX };
-//    can_status_t status = { CANSTAT_RESET };
-//    int handle = INVALID_HANDLE;
-//    int rc = CANERR_FATAL;
-//
-//    // @- initialize DUT1 with configured settings
-//    handle = can_init(DUT1, TEST_CANMODE, NULL);
-//    XCTAssertLessThanOrEqual(0, handle);
-//    // @- get status of DUT1 and check to be in INIT state
-//    rc = can_status(handle, &status.byte);
-//    XCTAssertEqual(CANERR_NOERROR, rc);
-//    XCTAssertTrue(status.can_stopped);
-//    // @- start DUT1 with configured bit-rate settings
-//    rc = can_start(handle, &bitrate);
-//    XCTAssertEqual(CANERR_NOERROR, rc);
-//    // @- get status of DUT1 and check to be in RUNNING state
-//    rc = can_status(handle, &status.byte);
-//    XCTAssertEqual(CANERR_NOERROR, rc);
-//    XCTAssertFalse(status.can_stopped);
-//    // @- sunnyday traffic (optional):
-//#if (OPTION_SEND_TEST_FRAMES != 0)
-//    CTester tester;
-//    XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
-//    XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
-//    // @- get status of DUT1 and check to be in RUNNING state
-//    rc = can_status(handle, &status.byte);
-//    XCTAssertEqual(CANERR_NOERROR, rc);
-//    XCTAssertFalse(status.can_stopped);
-//#endif
-//    // @- stop/reset DUT1
-//    rc = can_reset(handle);
-//    XCTAssertEqual(CANERR_NOERROR, rc);
-//    // @- get status of DUT1 and check to be in INIT state
-//    rc = can_status(handle, &status.byte);
-//    XCTAssertEqual(CANERR_NOERROR, rc);
-//    XCTAssertTrue(status.can_stopped);
-//    // @- shutdown DUT1
-//    rc = can_exit(handle);
-//    XCTAssertEqual(CANERR_NOERROR, rc);
-//}
-
 @end
+
+// $Id: test_can_version.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

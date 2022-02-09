@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -48,9 +48,12 @@
 #ifndef TESTER_H_INCLUDED
 #define TESTER_H_INCLUDED
 
-#include "KvaserCAN.h"
+//  HowTo: make a copy of header 'Template.h' and name it 'Driver.h'
+//         set define 'CDriverCAN' to your MacCAN Driver Under Test
+//         and adapt the driver specific test settings there
+#include "Driver.h"
 
-class CTester : CKvaserCAN {
+class CTester : CDriverCAN {
 public:
     // constructor / destructor
     CTester() {};
@@ -66,4 +69,6 @@ public:
     static uint8_t Dlc2Len(uint8_t dlc) { return CCanApi::Dlc2Len(dlc); }
     static uint8_t Len2Dlc(uint8_t len) { return CCanApi::Len2Dlc(len); }};
 
-#endif /* TESTER_H_INCLUDED */
+#endif // TESTER_H_INCLUDED
+
+// $Id: Tester.h 1083 2022-01-07 07:58:25Z makemake $  Copyright (c) UV Software, Berlin //

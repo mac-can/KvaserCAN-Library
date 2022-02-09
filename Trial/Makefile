@@ -63,11 +63,16 @@ LIBRARIES =
 LDFLAGS  += -lpthread \
 	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation
 
+ifeq ($(BINARY),UNIVERSAL)
+CFLAGS += -arch arm64 -arch x86_64
+CXXFLAGS += -arch arm64 -arch x86_64
+LDFLAGS += -arch arm64 -arch x86_64
+endif
 endif
 
 
 CXX = clang++
-CXX = clang
+CC = clang
 LD = clang++
 RM = rm -f
 CP = cp -f
@@ -143,4 +148,5 @@ $(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBRARIES)
+	@lipo -archs $@
 	@echo "\033[1mTarget '"$@"' successfully build\033[0m"

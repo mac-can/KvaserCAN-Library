@@ -1,5 +1,5 @@
-__CAN Tester for Kvaser CAN Leaf Interfaces, Version 0.1.0__ \
-Copyright &copy; 2007,2012-2021 by Uwe Vogt, UV Software, Berlin
+__CAN Tester for Kvaser CAN Leaf Interfaces, Version 0.2.0__ \
+Copyright &copy; 2007,2012-2022 by Uwe Vogt, UV Software, Berlin
 
 ```
 Usage: can_test <interface> [<option>...]

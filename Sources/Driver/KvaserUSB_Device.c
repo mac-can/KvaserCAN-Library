@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -128,7 +128,7 @@ CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, uint16_t *produ
     if (!CANUSB_IsDevicePresent(index)) {
 //        MACCAN_DEBUG_INFO("+++ MacCAN-Core: device (%02x) not available\n", channel);
         retVal = CANERR_HANDLE;
-    } else if (!CANUSB_IsDeviceOpened(index)) {
+    } else if (!CANUSB_IsDeviceInUse(index)) {
 //        MACCAN_DEBUG_INFO("+++ MacCAN-Core: device (%02x) available\n", channel);
         retVal = CANERR_NOERROR;
     } else {

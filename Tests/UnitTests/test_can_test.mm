@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC01.1: Probe interface when not initialized.
+//
+// @expected: CANERR_NOERROR and interface state CANBRD_PRESENT
+//
 - (void)testWhenInterfaceNotOccupied {
     int state = CANBRD_NOT_TESTABLE;
     int rc = CANERR_FATAL;
@@ -75,13 +79,17 @@
     XCTAssertEqual(CANBRD_PRESENT, state);
 }
 
+// @xctest TC01.2: Probe interface when already initialized (by own process).
+//
+// @expected: CANERR_NOERROR and interface state CANBRD_OCCUPIED
+//
 - (void)testWhenInterfaceOccupiedByOwnProcess {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int state = CANBRD_NOT_TESTABLE;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
+
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -107,8 +115,8 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-    // @- sunnyday traffic (optional):
-#if (OPTION_SEND_TEST_FRAMES != 0)
+    // @- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0)
     CTester tester;
     XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
     XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
@@ -139,6 +147,10 @@
     XCTAssertEqual(CANBRD_PRESENT, state);
 }
 
+// @xctest TC01.3: Probe interface when used by another process.
+//
+// @expected: CANERR_NOERROR and interface state CANBRD_OCCUPIED
+//
 - (void)testWhenInterfaceOccupiedByAnotherProcess {
     // @note: this scenario is not testable:
     //        1) up to now I didn´t found an I/O service to detect this
@@ -146,6 +158,10 @@
     XCTAssertTrue(true);
 }
 
+// @xctest TC01.4: Probe interface with valid channel number(s).
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testWithValidChannelNo {
     SInt32 channel = INVALID_HANDLE;
     int rc = CANERR_FATAL;
@@ -166,6 +182,10 @@
     }
 }
 
+// @xctest TC01.5: Probe interface with invalid channel number(s).
+//
+// @expected: CANERR_NOTINIT or CANERR_VENDOR
+//
 - (void)testWithInvalidChannelNo {
     int state = CANBRD_NOT_TESTABLE;
     int rc = CANERR_FATAL;
@@ -196,6 +216,10 @@
     //        Therefore, no assumptions can be made for positive values!
 }
 
+// @xctest TC01.6: Probe interface with its full operation mode capability.
+//
+// @expected: CANERR_NOERROR
+//
 - (void)testOperationModeCapability {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
@@ -212,7 +236,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     mode.byte = capa.byte;
     // @- probe DUT1 with all bits from operation capacity
@@ -220,6 +244,10 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
+// @xctest TC01.7: Probe interface with operation mode bit MON set (listen-only mode).
+//
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if listen-only mode is not supported
+//
 - (void)testMonitorModeEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
@@ -236,7 +264,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     mode.mon = 1;
     // @- probe DUT1 with operation mode bit MON set
@@ -249,6 +277,10 @@
 
 }
 
+// @xctest TC01.8: Probe interface with operation mode bit ERR set (error frame reception).
+//
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if error frame reception is not supported
+//
 - (void)testErrorFramesEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
@@ -265,7 +297,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     mode.err = 1;
     // @- probe DUT1 with operation mode bit ERR set
@@ -277,6 +309,10 @@
     }
 }
 
+// @xctest TC01.9: Probe interface with operation mode bit NRTR set (suppress remote frames).
+//
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of remote frames is not supported
+//
 - (void)testRemoteFramesDisableEnable {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
@@ -293,7 +329,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     mode.nrtr = 1;
     // @- probe DUT1 with operation mode bit NRTR set
@@ -305,6 +341,10 @@
     }
 }
 
+// @xctest TC01.10: Probe interface with operation mode bit NXTD set (suppress extended frames).
+//
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of extended frames is not supported
+//
 - (void)testExtendedFramesDisableEnable {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
@@ -321,7 +361,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     mode.nxtd = 1;
     // @- probe DUT1 with operation mode bit NXTD set
@@ -333,6 +373,10 @@
     }
 }
 
+// @xctest TC01.11: Probe interface with operation mode bit FDOE set (CAN FD operation enabled).
+//
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode is not supported
+//
 - (void)testCanFdOperationEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
@@ -349,9 +393,10 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     mode.fdoe = 1;
+    mode.brse = 0;
     // @- probe DUT1 with operation mode bit FDOE set
     rc = can_test(DUT1, mode.byte, NULL, NULL);
     if (capa.fdoe) {
@@ -361,6 +406,10 @@
     }
 }
 
+// @xctest TC01.12: Probe interface with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled).
+//
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode or bit-rate switching is not supported
+//
 - (void)testBitrateSwitchingEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
@@ -377,7 +426,7 @@
     // @- shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    
+
     // @test:
     mode.fdoe = 1;
     mode.brse = 1;
@@ -388,7 +437,7 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
-    
+
     // @test:
     mode.fdoe = 0;
     mode.brse = 1;
@@ -402,3 +451,5 @@
 }
 
 @end
+
+// $Id: test_can_test.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //

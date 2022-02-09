@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 //
-//  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -48,6 +48,7 @@
 #ifndef KVASERCAN_H_INCLUDED
 #define KVASERCAN_H_INCLUDED
 
+#include "KvaserCAN_Defines.h"
 #include "CANAPI.h"
 
 /// \name   KvaserCAN
@@ -61,7 +62,7 @@
 #endif
 #define KVASERCAN_LIBRARY_VENDOR  "UV Software, Berlin"
 #define KVASERCAN_LIBRARY_LICENSE  "BSD-2-Clause OR GPL-3.0-or-later"
-#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2020-2021  Uwe Vogt, UV Software, Berlin"
+#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2020-2022  Uwe Vogt, UV Software, Berlin"
 #define KVASERCAN_LIBRARY_HAZARD_NOTE  "If you connect your CAN device to a real CAN network when using this library,\n" \
                                        "you might damage your application."
 /// \}
@@ -88,9 +89,12 @@ public:
     // CKvaserCAN-specific error codes (CAN API V3 extension)
     enum EErrorCodes {
         // note: range 0...-99 is reserved by CAN API V3
-        GeneralError = VendorSpecific
+        GeneralError = VendorSpecific, ///< mapped Kvaser CANlib error codes
     };
-    // CCANAPI overrides
+    // CCanApi overrides
+    static bool GetFirstChannel(SChannelInfo &info, void *param = NULL);
+    static bool GetNextChannel(SChannelInfo &info, void *param = NULL);
+
     static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, const void *param, EChannelState &state);
     static CANAPI_Return_t ProbeChannel(int32_t channel, const CANAPI_OpMode_t &opMode, EChannelState &state);
 
@@ -133,25 +137,31 @@ public:
 /// \name   KvaserCAN Property IDs
 /// \brief  Properties that can be read (or written)
 /// \{
-#define KVASERCAN_PROPERTY_CANAPI         (CANPROP_GET_SPEC)
-#define KVASERCAN_PROPERTY_VERSION        (CANPROP_GET_VERSION)
-#define KVASERCAN_PROPERTY_PATCH_NO       (CANPROP_GET_PATCH_NO)
-#define KVASERCAN_PROPERTY_BUILD_NO       (CANPROP_GET_BUILD_NO)
-#define KVASERCAN_PROPERTY_LIBRARY_ID     (CANPROP_GET_LIBRARY_ID)
-#define KVASERCAN_PROPERTY_LIBRARY_NAME   (CANPROP_GET_LIBRARY_DLLNAME)
-#define KVASERCAN_PROPERTY_LIBRARY_VENDOR (CANPROP_GET_LIBRARY_VENDOR)
-#define KVASERCAN_PROPERTY_DEVICE_TYPE    (CANPROP_GET_DEVICE_TYPE)
-#define KVASERCAN_PROPERTY_DEVICE_NAME    (CANPROP_GET_DEVICE_NAME)
-#define KVASERCAN_PROPERTY_DEVICE_DRIVER  (CANPROP_GET_DEVICE_DLLNAME)
-#define KVASERCAN_PROPERTY_DEVICE_VENDOR  (CANPROP_GET_DEVICE_VENDOR)
-#define KVASERCAN_PROPERTY_OP_CAPABILITY  (CANPROP_GET_OP_CAPABILITY)
-#define KVASERCAN_PROPERTY_OP_MODE        (CANPROP_GET_OP_MODE)
-#define KVASERCAN_PROPERTY_BITRATE        (CANPROP_GET_BITRATE)
-#define KVASERCAN_PROPERTY_SPEED          (CANPROP_GET_SPEED)
-#define KVASERCAN_PROPERTY_STATUS         (CANPROP_GET_STATUS)
-#define KVASERCAN_PROPERTY_BUSLOAD        (CANPROP_GET_BUSLOAD)
-#define KVASERCAN_PROPERTY_TX_COUNTER     (CANPROP_GET_TX_COUNTER)
-#define KVASERCAN_PROPERTY_RX_COUNTER     (CANPROP_GET_RX_COUNTER)
-#define KVASERCAN_PROPERTY_ERR_COUNTER    (CANPROP_GET_ERR_COUNTER)
+#define KVASERCAN_PROPERTY_CANAPI           (CANPROP_GET_SPEC)
+#define KVASERCAN_PROPERTY_VERSION          (CANPROP_GET_VERSION)
+#define KVASERCAN_PROPERTY_PATCH_NO         (CANPROP_GET_PATCH_NO)
+#define KVASERCAN_PROPERTY_BUILD_NO         (CANPROP_GET_BUILD_NO)
+#define KVASERCAN_PROPERTY_LIBRARY_ID       (CANPROP_GET_LIBRARY_ID)
+#define KVASERCAN_PROPERTY_LIBRARY_NAME     (CANPROP_GET_LIBRARY_DLLNAME)
+#define KVASERCAN_PROPERTY_LIBRARY_VENDOR   (CANPROP_GET_LIBRARY_VENDOR)
+#define KVASERCAN_PROPERTY_DEVICE_TYPE      (CANPROP_GET_DEVICE_TYPE)
+#define KVASERCAN_PROPERTY_DEVICE_NAME      (CANPROP_GET_DEVICE_NAME)
+#define KVASERCAN_PROPERTY_DEVICE_VENDOR    (CANPROP_GET_DEVICE_VENDOR)
+#define KVASERCAN_PROPERTY_DEVICE_DRIVER    (CANPROP_GET_DEVICE_DLLNAME)
+#define KVASERCAN_PROPERTY_OP_CAPABILITY    (CANPROP_GET_OP_CAPABILITY)
+#define KVASERCAN_PROPERTY_OP_MODE          (CANPROP_GET_OP_MODE)
+#define KVASERCAN_PROPERTY_BITRATE          (CANPROP_GET_BITRATE)
+#define KVASERCAN_PROPERTY_SPEED            (CANPROP_GET_SPEED)
+#define KVASERCAN_PROPERTY_STATUS           (CANPROP_GET_STATUS)
+#define KVASERCAN_PROPERTY_BUSLOAD          (CANPROP_GET_BUSLOAD)
+#define KVASERCAN_PROPERTY_NUM_CHANNELS     (CANPROP_GET_NUM_CHANNELS)
+#define KVASERCAN_PROPERTY_CAN_CHANNEL      (CANPROP_GET_CAN_CHANNEL)
+//#define KVASERCAN_PROPERTY_CAN_CLOCKS       (CANPROP_GET_CAN_CLOCKS)
+#define KVASERCAN_PROPERTY_TX_COUNTER       (CANPROP_GET_TX_COUNTER)
+#define KVASERCAN_PROPERTY_RX_COUNTER       (CANPROP_GET_RX_COUNTER)
+#define KVASERCAN_PROPERTY_ERR_COUNTER      (CANPROP_GET_ERR_COUNTER)
+#define KVASERCAN_PROPERTY_RCV_QUEUE_SIZE   (CANPROP_GET_RCV_QUEUE_SIZE)
+#define KVASERCAN_PROPERTY_RCV_QUEUE_HIGH   (CANPROP_GET_RCV_QUEUE_HIGH)
+#define KVASERCAN_PROPERTY_RCV_QUEUE_OVFL   (CANPROP_GET_RCV_QUEUE_OVFL)
 /// \}
 #endif // KVASERCAN_H_INCLUDED

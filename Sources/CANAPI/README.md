@@ -1,8 +1,9 @@
 ### CAN Interface API, Version 3
 
-_Copyright &copy; 2004-2021  Uwe Vogt, UV Software, Berlin (info@uv-software.com)_
+_Copyright &copy; 2004-2022  Uwe Vogt, UV Software, Berlin (info@uv-software.com)_ \
+_All rights reserved._
 
-Version $Rev: 1008 $
+Version $Rev: 1036 $
 
 # A CAN Interface Wrapper Specification
 
@@ -53,7 +54,7 @@ extern int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed);
 extern int can_property(int handle, uint16_t param, void *value, uint32_t nbyte);
 
 extern char *can_hardware(int handle);
-extern char *can_software(int handle);
+extern char *can_firmware(int handle);
 
 #if (OPTION_CANAPI_LIBRARY != 0)
 extern char *can_library(int handle);
@@ -79,5 +80,3 @@ You can choose between one of them if you use this work in whole or in part.
 
 E-Mail: mailto://info@uv-software.com \
 Internet: https://www.uv-software.com
-
-##### *Do one thing, and do it well!*

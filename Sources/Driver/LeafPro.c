@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2021-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -136,6 +136,8 @@ bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.cpuFreq = LEAF_PRO_CPU_FREQUENCY;
     device->recvData.txAck.maxMsg = LEAF_PRO_MAX_OUTSTANDING_TX;
     LeafPro_GetOperationCapability(&device->opCapability);
+    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
+    device->clocks[1] = (int32_t)-1;
 
     // initialize Hydra HE address and channel no. */
     device->hydraData.channel2he = ILLEGAL_HE;
@@ -214,6 +216,11 @@ CANUSB_Return_t LeafPro_InitializeChannel(KvaserUSB_Device_t *device, const Kvas
             device->recvData.cpuFreq = LEAF_PRO_CPU_FREQUENCY;
             break;
     }
+#if (0)
+    // TODO: list a possible CAN clocks and rework the bus params accordingly
+    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
+    device->clocks[1] = (int32_t)-1;
+#endif
     /* get max. outstanding transmit messages */
     if ((0U < device->deviceInfo.software.maxOutstandingTx) &&
         (device->deviceInfo.software.maxOutstandingTx < MIN(LEAF_PRO_MAX_OUTSTANDING_TX, 255U)))
@@ -1182,7 +1189,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
 
 static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
     uint8_t length = 0U;
-    uint16_t flags = 0U;
+    uint32_t flags = 0U;
     uint64_t ticks = 0ULL;
     bool result = false;
 
@@ -1211,7 +1218,7 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
      */
     bzero(message, sizeof(KvaserUSB_CanMessage_t));
     /* flags and length */
-    flags = BUF2UINT16(buffer[8]);
+    flags = BUF2UINT32(buffer[8]);
     if (!(flags & MSGFLAG_ERROR_FRAME))
         length = Dlc2Len(buffer[21] & 0xFU);
     else

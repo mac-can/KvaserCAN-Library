@@ -1,0 +1,6 @@
+#.gitignore
+.svn
+# never ever commit the template
+# make a copy and name it 'Driver.h'
+Template.h
+ToDo.txt

@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Interface Definition)
 //
-//  Copyright (C) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (C) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -52,17 +52,18 @@
     Interface API for various CAN interfaces from different
     vendors running under multiple operating systems.
 
-    @author   $Author: eris $
+    @author   $Author: makemake $
 
-    @version  $Rev: 1009 $
+    @version  $Rev: 1039 $
  */
 import Foundation
 import CCanApi
 
-private let version = (major: 0, minor: 2, patch: 0)
+private let version = (major: 0, minor: 2, patch: 2)
 
 public class CanApi {
     private lazy var handle: CInt = -1  // CAN interface handle
+    private var channel: Int32 = -1  // CAN channel
 
     public init() {
         // try to relax and enjoy the crisis
@@ -619,7 +620,7 @@ public class CanApi {
         }
     }
     /*!
-        @brief  property:  CAN operation capability  (read-only)
+        @brief  property:  CAN operation capability (read-only)
      */
     public var capability: Mode? {
         get {
@@ -650,19 +651,16 @@ public class CanApi {
     /*!
         @brief  property:  CAN device informations (read-only)
      */
-    public var deviceInfo: (type: Int32, name: String, vendor: String)? {
+    public var deviceInfo: (channel: Int32, name: String, vendor: String)? {
         get {
-            var type: Int32 = 0
             var name = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
             var vendor = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
             var result: CInt
-            result = can_property(self.handle, UInt16(CANPROP_GET_DEVICE_TYPE), &type, UInt32(MemoryLayout<Int32>.size))
-            guard result == CANERR_NOERROR else { return nil }
             result = can_property(self.handle, UInt16(CANPROP_GET_DEVICE_NAME), &name, UInt32(CANPROP_MAX_BUFFER_SIZE))
             guard result == CANERR_NOERROR else { return nil }
             result = can_property(self.handle, UInt16(CANPROP_GET_DEVICE_VENDOR), &vendor, UInt32(CANPROP_MAX_BUFFER_SIZE))
             guard result == CANERR_NOERROR else { return nil }
-            return (type: type, name: String(cString: &name), vendor: String(cString: &vendor))
+            return (channel: self.channel, name: String(cString: &name), vendor: String(cString: &vendor))
         }
     }
     /*!
@@ -759,6 +757,7 @@ public class CanApi {
         let handle = can_init(channel, mode.rawValue, nil)
         guard handle >= 0 else { throw Error(rawValue: handle) ?? Error.FatalError }
         self.handle = handle
+        self.channel = channel
     }
     /*!
         @brief       stops any operation of the CAN interface and sets the operation
@@ -768,6 +767,7 @@ public class CanApi {
         let result =  can_exit(self.handle)
         guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
         self.handle = -1
+        self.channel = -1
     }
     /*!
         @brief       signals waiting event objects of the CAN interface. This can
@@ -953,7 +953,7 @@ public class CanApi {
         return String(cString: version)
     }
     public func GetFirmwareVersion() throws -> String {
-        guard let version = can_software(self.handle) else { throw Error.NullPointer }
+        guard let version = can_firmware(self.handle) else { throw Error.NullPointer }
         return String(cString: version)
     }
     public static func GetVersion() throws -> String {
@@ -962,4 +962,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1005 2021-06-21 17:42:49Z eris $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1039 2022-02-09 21:26:06Z makemake $  Copyright (c) UV Software, Berlin //

@@ -2,7 +2,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
@@ -193,6 +193,7 @@ CANQUE_Return_t CANQUE_Reset(CANQUE_MsgQueue_t msgQueue) {
         msgQueue->used = 0U;
         msgQueue->head = 0U;
         msgQueue->tail = 0U;
+        msgQueue->high = 0U;
         msgQueue->wait.flag = false;
         msgQueue->ovfl.flag = false;
         msgQueue->ovfl.counter = 0U;
@@ -218,12 +219,27 @@ UInt64 CANQUE_OverflowCounter(CANQUE_MsgQueue_t msgQueue) {
         return 0U;
 }
 
+UInt32 CANQUE_QueueSize(CANQUE_MsgQueue_t msgQueue) {
+    if (msgQueue)
+        return msgQueue->size;
+    else
+        return 0U;;
+}
+
+UInt32 CANQUE_QueueHigh(CANQUE_MsgQueue_t msgQueue) {
+    if (msgQueue)
+        return msgQueue->high;
+    else
+        return 0U;;
+}
+
 /*  ---  FIFO  ---
  *
  *  size :  total number of elements
  *  head :  read position of the queue
  *  tail :  write position of the queue
- *  used :  number of queued elements
+ *  used :  actual number of queued elements
+ *  high :  highest number of queued elements
  *
  *  (§1) empty :  used == 0
  *  (§2) full  :  used == size  &&  size > 0
@@ -241,6 +257,8 @@ static Boolean EnqueueElement(CANQUE_MsgQueue_t queue, const void *element) {
             queue->head = queue->tail;  /* to make sure */
         (void)memcpy(&queue->queueElem[(queue->tail * queue->elemSize)], element, queue->elemSize);
         queue->used += 1U;
+        if (queue->high < queue->used)
+            queue->high = queue->used;
         return true;
     } else {
         queue->ovfl.counter += 1U;
@@ -264,5 +282,5 @@ static Boolean DequeueElement(CANQUE_MsgQueue_t queue, void *element) {
         return false;
 }
 
-/* * $Id: MacCAN_MsgQueue.c 1001 2021-05-25 17:57:49Z eris $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgQueue.c 1077 2022-01-06 09:47:12Z makemake $ *** (c) UV Software, Berlin ***
  */
