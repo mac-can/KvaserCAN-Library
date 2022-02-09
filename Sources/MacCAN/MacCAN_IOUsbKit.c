@@ -76,8 +76,8 @@
 #include <IOKit/usb/USB.h>
 
 #define VERSION_MAJOR     0
-#define VERSION_MINOR     2
-#define VERSION_PATCH     3
+#define VERSION_MINOR     3
+#define VERSION_PATCH     0
 
 /*#define OPTION_MACCAN_MULTICHANNEL  0  !* set globally: 0 = only one channel on multi-channel devices */
 /*#define OPTION_MACCAN_PIPE_TIMEOUT  0  !* set globally: 0 = do not use xxxPipeTO variant (e.g. macOS < 10.15) */
@@ -1897,5 +1897,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1087 2022-01-10 16:09:31Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1090 2022-01-11 09:53:17Z haumea $ *** (c) UV Software, Berlin ***
  */
