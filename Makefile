@@ -1,7 +1,7 @@
 #
-#	KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
+#	KvaserCAN - macOS User-Space Driver and SDK for Kvaser USB CAN Interfaces
 #
-#	Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
 #
 #	This file is part of MacCAN-KvaserCAN.
@@ -76,6 +76,9 @@ install:
 
 test:
 	$(MAKE) -C Trial $@
+
+check:
+	$(MAKE) -C Trial $@ 2> checker.txt
 
 build_no:
 	@./build_no.sh
