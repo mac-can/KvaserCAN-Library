@@ -54,12 +54,12 @@
 
     @author   $Author: makemake $
 
-    @version  $Rev: 1039 $
+    @version  $Rev: 1042 $
  */
 import Foundation
 import CCanApi
 
-private let version = (major: 0, minor: 2, patch: 2)
+private let version = (major: 0, minor: 3, patch: 0)
 
 public class CanApi {
     private lazy var handle: CInt = -1  // CAN interface handle
@@ -721,6 +721,74 @@ public class CanApi {
     // MARK: - methods
 
     /*!
+        @brief       queries channel information of the first CAN interface in the
+                     list of CAN interfaces, if any.
+     
+        @returns     channel information as a quintuple;
+                     - channel no
+                     - channel name
+                     - library name
+                     - library id
+                     - vendor name
+                     or nil if there is no entry in the list of CAN interfaces
+     */
+    public static func GetFirstChannel() throws -> (channel: Int32, name: String, driver: String, library: Int32, vendor: String)? {
+        var channel: Int32 = -1
+        var library: Int32 = -1
+        var name = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
+        var driver = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
+        var vendor = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
+        var result: CInt
+        result = can_property(-1, UInt16(CANPROP_SET_FIRST_CHANNEL), nil, 0)
+        guard result == CANERR_NOERROR || result == CANERR_RESOURCE else { throw Error(rawValue: result) ?? Error.FatalError }
+        guard result == CANERR_NOERROR else { return nil }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_NO), &channel, UInt32(MemoryLayout<Int32>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_NAME), &name, UInt32(CANPROP_MAX_BUFFER_SIZE))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_DLLNAME), &driver, UInt32(CANPROP_MAX_BUFFER_SIZE))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_VENDOR_ID), &library, UInt32(MemoryLayout<Int32>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_VENDOR_NAME), &vendor, UInt32(CANPROP_MAX_BUFFER_SIZE))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        return (channel: channel, name: String(cString: &name), driver: String(cString: &driver), library: library, vendor: String(cString: &vendor))
+    }
+    /*!
+        @brief       queries channel information of the next CAN interface in the
+                     list of CAN interfaces, if any.
+     
+        @returns     channel information as a quintuple;
+                     - channel no
+                     - channel name
+                     - library name
+                     - library id
+                     - vendor name
+                     or nil if there are no more entries in the list of CAN interfaces
+     */
+    public static func GetNextChannel() throws -> (channel: Int32, name: String, driver: String, library: Int32, vendor: String)? {
+        var channel: Int32 = -1
+        var library: Int32 = -1
+        var name = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
+        var driver = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
+        var vendor = [UInt8](repeating: 0x00, count: Int(CANPROP_MAX_BUFFER_SIZE))
+        var result: CInt
+        result = can_property(-1, UInt16(CANPROP_SET_NEXT_CHANNEL), nil, 0)
+        guard result == CANERR_NOERROR || result == CANERR_RESOURCE else { throw Error(rawValue: result) ?? Error.FatalError }
+        guard result == CANERR_NOERROR else { return nil }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_NO), &channel, UInt32(MemoryLayout<Int32>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_NAME), &name, UInt32(CANPROP_MAX_BUFFER_SIZE))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_DLLNAME), &driver, UInt32(CANPROP_MAX_BUFFER_SIZE))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_VENDOR_ID), &library, UInt32(MemoryLayout<Int32>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        result = can_property(-1, UInt16(CANPROP_GET_CHANNEL_VENDOR_NAME), &vendor, UInt32(CANPROP_MAX_BUFFER_SIZE))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        return (channel: channel, name: String(cString: &name), driver: String(cString: &driver), library: library, vendor: String(cString: &vendor))
+    }
+    /*!
         @brief       probes if the CAN interface (hardware and driver) given by
                      the argument 'channel' is present, and if the requested
                      operation mode is supported by the CAN controller.
@@ -962,4 +1030,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1039 2022-02-09 21:26:06Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1042 2022-02-16 18:16:45Z makemake $  Copyright (c) UV Software, Berlin //
