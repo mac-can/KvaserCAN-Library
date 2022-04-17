@@ -3,18 +3,18 @@
 _Copyright &copy; 2012-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
 _All rights reserved._
 
-Version $Rev: 1090 $
+Version $Rev: 1171 $
 
-# Running CAN and CAN FD on a Mac&reg;
+# Running CAN and CAN FD on Mac&reg;
 
-_Running CAN and CAN FD on a Mac_ is the mission of the MacCAN project.
+_Running CAN and CAN FD on Mac_ is the mission of the MacCAN project.
 The MacCAN-Core repo is not aimed at building a driver or a library.
 It provides the source code of an abstraction (or rather of a wrapper) of Apple´s IOUsbKit to create USB user-space drivers for CAN interfaces from various vendors under macOS.
 
 ## A Stupid Question
 
 I´m working with the CAN bus since the late 1990th, mainly on microcontrollers
- (CANopen, SAE J1939, ISO-TP, UDS, etc.), but also on PC. See my [blog](https://www.uv-software.com/wordpress/) for the things I did.
+(CANopen, SAE J1939, ISO-TP, UDS, etc.), but also on PC. See my [blog](https://www.uv-software.com/wordpress/) for the things I did.
 
 Sometimes I tend to ask myself some stupid questions like _"Is it possible to ...?"_.
 In 2010 I asked a well known search engine if it is possible to run CAN on a Mac.

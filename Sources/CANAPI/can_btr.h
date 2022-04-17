@@ -2,7 +2,7 @@
 /*
  *  CAN Interface API, Version 3 (Bit-rate Conversion)
  *
- *  Copyright (c) 2017-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+ *  Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
  *  All rights reserved.
  *
  *  This file is part of CAN API V3.
@@ -49,9 +49,9 @@
  *
  *  @brief       CAN API V3 for generic CAN Interfaces (Bit-rate Conversion)
  *
- *  @author      $Author: eris $
+ *  @author      $Author: haumea $
  *
- *  @version     $Rev: 995 $
+ *  @version     $Rev: 1044 $
  *
  *  @defgroup    can_btr CAN Bit-rate Conversion
  *  @{
@@ -89,7 +89,11 @@ extern "C" {
  *         with CAN 2.0 frame format only (e.g. in the build environment).
  */
 #if (OPTION_CAN_2_0_ONLY != 0)
-#warning Compilation with legacy CAN 2.0 frame format!
+#ifdef _MSC_VER
+#pragma message ( "Compilation with with legacy CAN 2.0 frame format!" )
+#else
+#warning Compilation with with legacy CAN 2.0 frame format!
+#endif
 #endif
 
 /*  -----------  defines  ------------------------------------------------
