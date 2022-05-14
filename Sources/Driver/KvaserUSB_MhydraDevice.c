@@ -45,7 +45,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "LeafPro.h"
+#include "KvaserUSB_MhydraDevice.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -102,7 +102,7 @@ static uint32_t FillGetMaxOutstandingTxReq(uint8_t *buffer, uint32_t maxbyte);
 static uint8_t Dlc2Len(uint8_t dlc);
 //static uint8_t Len2Dlc(uint8_t len);
 
-void LeafPro_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
+void Mhydra_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
     if (opMode) {
         *opMode = 0x00U;
         *opMode |= LEAF_PRO_MODE_FDOE ? CANMODE_FDOE : 0x00U;
@@ -116,7 +116,7 @@ void LeafPro_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
     }
 }
 
-bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device) {
+bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
     /* sanity check */
     if (!device)
         return false;
@@ -124,8 +124,9 @@ bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device) {
         return false;
     if (device->handle == CANUSB_INVALID_HANDLE)
         return false;
-    if (device->productId != LEAF_PRO_PRODUCT_ID)
+    if (device->driverType != USB_MHYDRA_DRIVER)
         return false;
+    // TODO: rework this
     if (device->numChannels != LEAF_PRO_NUM_CHANNELS)
         return false;
     if (device->endpoints.numEndpoints != LEAF_PRO_NUM_ENDPOINTS)
@@ -135,7 +136,7 @@ bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->channelNo = 0U;  /* note: only one CAN channel */
     device->recvData.cpuFreq = LEAF_PRO_CPU_FREQUENCY;
     device->recvData.txAck.maxMsg = LEAF_PRO_MAX_OUTSTANDING_TX;
-    LeafPro_GetOperationCapability(&device->opCapability);
+    Mhydra_GetOperationCapability(&device->opCapability);
 
     // initialize Hydra HE address and channel no. */
     device->hydraData.channel2he = ILLEGAL_HE;
@@ -147,7 +148,7 @@ bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device) {
     return device->configured;
 }
 
-CANUSB_Return_t LeafPro_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode) {
+CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -176,31 +177,31 @@ CANUSB_Return_t LeafPro_InitializeChannel(KvaserUSB_Device_t *device, const Kvas
     }
     /* stop chip (go bus OFF) */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): stop chip (go bus OFF)\n", device->name, device->handle);
-    retVal = LeafPro_StopChip(device, HYDRA_CMD_RESP_TIMEOUT);
+    retVal = Mhydra_StopChip(device, HYDRA_CMD_RESP_TIMEOUT);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
         goto err_init;
     }
     /* set driver mode NORMAL (mode OFF seems not to be supported) */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode NORMAL\n", device->name, device->handle);
-    retVal = LeafPro_SetDriverMode(device, DRIVERMODE_NORMAL);
+    retVal = Mhydra_SetDriverMode(device, DRIVERMODE_NORMAL);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
         goto err_init;
     }
     /* trigger chip state event */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): trigger chip state event\n", device->name, device->handle);
-    retVal = LeafPro_RequestChipState(device, 0U);  /* 0 = no delay */
+    retVal = Mhydra_RequestChipState(device, 0U);  /* 0 = no delay */
     if (retVal != CANUSB_SUCCESS) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip state event could not be triggered (%i)\n", device->name, device->handle, retVal);
         goto end_init;
     }
     /* get device information (don't care about the result) */
-    retVal = LeafPro_GetCardInfo(device, &device->deviceInfo.card);
+    retVal = Mhydra_GetCardInfo(device, &device->deviceInfo.card);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): card information could not be read (%i)\n", device->name, device->handle, retVal);
     }
-    retVal = LeafPro_GetSoftwareInfo(device, &device->deviceInfo.software);
+    retVal = Mhydra_GetSoftwareInfo(device, &device->deviceInfo.software);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
     }
@@ -235,7 +236,7 @@ err_init:
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_TeardownChannel(KvaserUSB_Device_t *device) {
+CANUSB_Return_t Mhydra_TeardownChannel(KvaserUSB_Device_t *device) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -247,7 +248,7 @@ CANUSB_Return_t LeafPro_TeardownChannel(KvaserUSB_Device_t *device) {
     MACCAN_DEBUG_DRIVER("    Teardown %s driver...\n", device->name);
     /* stop chip (go bus OFF) */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): stop chip (go bus OFF)\n", device->name, device->handle);
-    retVal = LeafPro_StopChip(device, 0U);  /* 0 = don't wait for response */
+    retVal = Mhydra_StopChip(device, 0U);  /* 0 = don't wait for response */
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
         //goto end_exit;
@@ -262,7 +263,7 @@ CANUSB_Return_t LeafPro_TeardownChannel(KvaserUSB_Device_t *device) {
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params) {
+CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -297,7 +298,7 @@ CANUSB_Return_t LeafPro_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsFd_t *params) {
+CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsFd_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -332,7 +333,7 @@ CANUSB_Return_t LeafPro_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserU
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params) {
+CANUSB_Return_t Mhydra_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -375,7 +376,7 @@ CANUSB_Return_t LeafPro_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusPa
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusParamsFd_t *params) {
+CANUSB_Return_t Mhydra_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusParamsFd_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -447,7 +448,7 @@ CANUSB_Return_t LeafPro_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_Bus
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode) {
+CANUSB_Return_t Mhydra_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -466,7 +467,7 @@ CANUSB_Return_t LeafPro_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUS
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode) {
+CANUSB_Return_t Mhydra_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -502,7 +503,7 @@ CANUSB_Return_t LeafPro_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_Driv
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
+CANUSB_Return_t Mhydra_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -536,7 +537,7 @@ CANUSB_Return_t LeafPro_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) 
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
+CANUSB_Return_t Mhydra_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -570,7 +571,7 @@ CANUSB_Return_t LeafPro_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay) {
+CANUSB_Return_t Mhydra_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -591,7 +592,7 @@ CANUSB_Return_t LeafPro_RequestChipState(KvaserUSB_Device_t *device, uint16_t de
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout) {
+CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_EXT_SIZE];
     uint32_t size;
@@ -673,7 +674,7 @@ CANUSB_Return_t LeafPro_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout) {
+CANUSB_Return_t Mhydra_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -688,7 +689,7 @@ CANUSB_Return_t LeafPro_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMes
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/) {
+CANUSB_Return_t Mhydra_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -725,7 +726,7 @@ CANUSB_Return_t LeafPro_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
+CANUSB_Return_t Mhydra_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -768,7 +769,7 @@ CANUSB_Return_t LeafPro_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load) {
+CANUSB_Return_t Mhydra_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -817,7 +818,7 @@ CANUSB_Return_t LeafPro_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, int8_t dataLevel*/) {
+CANUSB_Return_t Mhydra_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, int8_t dataLevel*/) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
@@ -875,7 +876,7 @@ CANUSB_Return_t LeafPro_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardIn
     return retVal;
 }
 
-CANUSB_Return_t LeafPro_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info/*, uint8_t hydraExt*/) {
+CANUSB_Return_t Mhydra_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info/*, uint8_t hydraExt*/) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;

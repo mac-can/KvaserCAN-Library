@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2021-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -45,8 +45,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LEAF_PRO_H_INCLUDED
-#define LEAF_PRO_H_INCLUDED
+#ifndef KVASERUSB_MHYDRADEVICE_H_INCLUDED
+#define KVASERUSB_MHYDRADEVICE_H_INCLUDED
 
 #include "KvaserUSB_Common.h"
 #include "KvaserUSB_Device.h"
@@ -72,42 +72,42 @@
 extern "C" {
 #endif
 
-extern bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device);
-extern void LeafPro_GetOperationCapability(KvaserUSB_OpMode_t *opMode);
+extern bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device);
+extern void Mhydra_GetOperationCapability(KvaserUSB_OpMode_t *opMode);
 
-extern CANUSB_Return_t LeafPro_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode);
-extern CANUSB_Return_t LeafPro_TeardownChannel(KvaserUSB_Device_t *device);
+extern CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode);
+extern CANUSB_Return_t Mhydra_TeardownChannel(KvaserUSB_Device_t *device);
 
-extern CANUSB_Return_t LeafPro_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params);
-extern CANUSB_Return_t LeafPro_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params);
-extern CANUSB_Return_t LeafPro_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsFd_t *params);
-extern CANUSB_Return_t LeafPro_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusParamsFd_t *params);
+extern CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params);
+extern CANUSB_Return_t Mhydra_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params);
+extern CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsFd_t *params);
+extern CANUSB_Return_t Mhydra_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusParamsFd_t *params);
 
-extern CANUSB_Return_t LeafPro_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode);
-extern CANUSB_Return_t LeafPro_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode);
+extern CANUSB_Return_t Mhydra_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode);
+extern CANUSB_Return_t Mhydra_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode);
 
-extern CANUSB_Return_t LeafPro_StartChip(KvaserUSB_Device_t *device, uint16_t timeout);
-extern CANUSB_Return_t LeafPro_StopChip(KvaserUSB_Device_t *device, uint16_t timeout);
-//extern CANUSB_Return_t LeafPro_ResetChip(KvaserUSB_Device_t *device, uint16_t delay);
-//extern CANUSB_Return_t LeafPro_ResetCard(KvaserUSB_Device_t *device, uint16_t delay);
-extern CANUSB_Return_t LeafPro_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Mhydra_StartChip(KvaserUSB_Device_t *device, uint16_t timeout);
+extern CANUSB_Return_t Mhydra_StopChip(KvaserUSB_Device_t *device, uint16_t timeout);
+//extern CANUSB_Return_t Mhydra_ResetChip(KvaserUSB_Device_t *device, uint16_t delay);
+//extern CANUSB_Return_t Mhydra_ResetCard(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Mhydra_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay);
 
-extern CANUSB_Return_t LeafPro_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout);
-extern CANUSB_Return_t LeafPro_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout);
+extern CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout);
+extern CANUSB_Return_t Mhydra_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout);
 
-extern CANUSB_Return_t LeafPro_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/);
-//extern CANUSB_Return_t LeafPro_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay);
-//extern CANUSB_Return_t LeafPro_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Mhydra_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/);
+//extern CANUSB_Return_t Mhydra_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay);
+//extern CANUSB_Return_t Mhydra_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay);
 
-extern CANUSB_Return_t LeafPro_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec);
-extern CANUSB_Return_t LeafPro_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load);
+extern CANUSB_Return_t Mhydra_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec);
+extern CANUSB_Return_t Mhydra_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load);
 
-extern CANUSB_Return_t LeafPro_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, int8_t dataLevel*/);
-extern CANUSB_Return_t LeafPro_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info/*, uint8_t hydraExt*/);
-//extern CANUSB_Return_t LeafPro_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
+extern CANUSB_Return_t Mhydra_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, int8_t dataLevel*/);
+extern CANUSB_Return_t Mhydra_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info/*, uint8_t hydraExt*/);
+//extern CANUSB_Return_t Mhydra_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
 
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LEAF_PRO_H_INCLUDED */
+#endif /* KVASERUSB_MHYDRADEVICE_H_INCLUDED */

@@ -54,6 +54,12 @@
 #include "MacCAN_MsgQueue.h"
 #include "MacCAN_MsgPipe.h"
 
+typedef enum kavser_driver_type_t_ {    /* driver type: */
+    USB_LEAF_DRIVER,                    /* - driver for Leaf devices */
+    USB_MHYDRA_DRIVER,                  /* - driver for Mhydra devices */
+    USB_UNKNOWN_DRIVER                  /* - unknown/unsupported (last entry) */
+} KvaserUSB_DriverType_t;
+
 typedef struct kvaser_card_info_t_  {   /* card info: */
     uint8_t  channelCount;              /* - channel count */
     uint32_t serialNumber;              /* - serial no. */
@@ -200,6 +206,7 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     KvaserUSB_CanChannel_t channelNo;   /* - active CAN channel on device */
     KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capability */
     KvaserUSB_DeviceInfo_t deviceInfo;  /* - device information (hw, sw, etc.) */
+    KvaserUSB_DriverType_t driverType;  /* - driver type (Leaf or Mhydra device) */
     KvaserUSB_HydraData_t hydraData;    /* - Hydra device data (e.g. Leaf Pro HS v2) */
     char name[KVASER_MAX_STRING_LENGTH+1];   /* - device name (zero-terminated string) */
     char vendor[KVASER_MAX_STRING_LENGTH+1]; /* - vendor name (zero-terminated string) */
@@ -211,7 +218,7 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
 extern "C" {
 #endif
 
-extern CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, uint16_t *productId);
+extern CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, KvaserUSB_DriverType_t *driver);
 extern CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device_t *device);
 extern CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device);
 

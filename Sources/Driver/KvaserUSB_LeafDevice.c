@@ -45,7 +45,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "LeafLight.h"
+#include "KvaserUSB_LeafDevice.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -120,7 +120,7 @@ static uint32_t FillGetCardInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t da
 static uint32_t FillGetSoftwareInfoReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
 
-void LeafLight_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
+void Leaf_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
     if (opMode) {
         *opMode = 0x00U;
         *opMode |= LEAF_LIGHT_MODE_FDOE ? CANMODE_FDOE : 0x00U;
@@ -134,7 +134,7 @@ void LeafLight_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
     }
 }
 
-bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
+bool Leaf_ConfigureChannel(KvaserUSB_Device_t *device) {
     /* sanity check */
     if (!device)
         return false;
@@ -142,8 +142,9 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
         return false;
     if (device->handle == CANUSB_INVALID_HANDLE)
         return false;
-    if (device->productId != LEAF_LIGHT_PRODUCT_ID)
+    if (device->driverType != USB_LEAF_DRIVER)
         return false;
+    // TODO: rework this
     if (device->numChannels != LEAF_LIGHT_NUM_CHANNELS)
         return false;
     if (device->endpoints.numEndpoints != LEAF_LIGHT_NUM_ENDPOINTS)
@@ -153,7 +154,7 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->channelNo = 0U;  /* note: only one CAN channel */
     device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
     device->recvData.txAck.maxMsg = LEAF_LIGHT_MAX_OUTSTANDING_TX;
-    LeafLight_GetOperationCapability(&device->opCapability);
+    Leaf_GetOperationCapability(&device->opCapability);
 
     /* Gotcha! */
     device->configured = true;
@@ -161,7 +162,7 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
     return device->configured;
 }
 
-CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode) {
+CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -178,21 +179,21 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
     MACCAN_DEBUG_DRIVER("    Initializing %s driver...\n", device->name);
     /* stop chip (go bus OFF) */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): stop chip (go bus OFF)\n", device->name, device->handle);
-    retVal = LeafLight_StopChip(device, 0U);  /* 0 = don't wait for response */
+    retVal = Leaf_StopChip(device, 0U);  /* 0 = don't wait for response */
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
         goto end_init;
     }
     /* set driver mode OFF */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode OFF\n", device->name, device->handle);
-    retVal = LeafLight_SetDriverMode(device, DRIVERMODE_OFF);
+    retVal = Leaf_SetDriverMode(device, DRIVERMODE_OFF);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
         goto end_init;
     }
     /* trigger chip state event */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): trigger chip state event\n", device->name, device->handle);
-    retVal = LeafLight_RequestChipState(device, 0U);  /* 0 = no delay */
+    retVal = Leaf_RequestChipState(device, 0U);  /* 0 = no delay */
     if (retVal != CANUSB_SUCCESS) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip state event could not be triggered (%i)\n", device->name, device->handle, retVal);
         goto end_init;
@@ -204,11 +205,11 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
         goto end_init;
     }
     /* get device information (don't care about the result) */
-    retVal = LeafLight_GetCardInfo(device, &device->deviceInfo.card);
+    retVal = Leaf_GetCardInfo(device, &device->deviceInfo.card);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): card information could not be read (%i)\n", device->name, device->handle, retVal);
     }
-    retVal = LeafLight_GetSoftwareInfo(device, &device->deviceInfo.software);
+    retVal = Leaf_GetSoftwareInfo(device, &device->deviceInfo.software);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
     }
@@ -241,7 +242,7 @@ end_init:
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_TeardownChannel(KvaserUSB_Device_t *device) {
+CANUSB_Return_t Leaf_TeardownChannel(KvaserUSB_Device_t *device) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -253,14 +254,14 @@ CANUSB_Return_t LeafLight_TeardownChannel(KvaserUSB_Device_t *device) {
     MACCAN_DEBUG_DRIVER("    Teardown %s driver...\n", device->name);
     /* stop chip (go bus OFF) */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): stop chip (go bus OFF)\n", device->name, device->handle);
-    retVal = LeafLight_StopChip(device, 0U);  /* 0 = don't wait for response */
+    retVal = Leaf_StopChip(device, 0U);  /* 0 = don't wait for response */
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
         //goto end_exit;
     }
     /* set driver mode OFF */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode OFF\n", device->name, device->handle);
-    retVal = LeafLight_SetDriverMode(device, DRIVERMODE_OFF);
+    retVal = Leaf_SetDriverMode(device, DRIVERMODE_OFF);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
         //goto end_exit;
@@ -275,7 +276,7 @@ CANUSB_Return_t LeafLight_TeardownChannel(KvaserUSB_Device_t *device) {
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params) {
+CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -294,7 +295,7 @@ CANUSB_Return_t LeafLight_SetBusParams(KvaserUSB_Device_t *device, const KvaserU
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params) {
+CANUSB_Return_t Leaf_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -333,7 +334,7 @@ CANUSB_Return_t LeafLight_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_Bus
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode) {
+CANUSB_Return_t Leaf_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -352,7 +353,7 @@ CANUSB_Return_t LeafLight_SetDriverMode(KvaserUSB_Device_t *device, const Kvaser
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode) {
+CANUSB_Return_t Leaf_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -384,7 +385,7 @@ CANUSB_Return_t LeafLight_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_Dr
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
+CANUSB_Return_t Leaf_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -413,7 +414,7 @@ CANUSB_Return_t LeafLight_StartChip(KvaserUSB_Device_t *device, uint16_t timeout
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
+CANUSB_Return_t Leaf_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -442,7 +443,7 @@ CANUSB_Return_t LeafLight_StopChip(KvaserUSB_Device_t *device, uint16_t timeout)
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetChip(KvaserUSB_Device_t *device, uint16_t delay)  {
+CANUSB_Return_t Leaf_ResetChip(KvaserUSB_Device_t *device, uint16_t delay)  {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -463,7 +464,7 @@ CANUSB_Return_t LeafLight_ResetChip(KvaserUSB_Device_t *device, uint16_t delay) 
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetCard(KvaserUSB_Device_t *device, uint16_t delay) {
+CANUSB_Return_t Leaf_ResetCard(KvaserUSB_Device_t *device, uint16_t delay) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -484,7 +485,7 @@ CANUSB_Return_t LeafLight_ResetCard(KvaserUSB_Device_t *device, uint16_t delay) 
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay)  {
+CANUSB_Return_t Leaf_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay)  {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -505,7 +506,7 @@ CANUSB_Return_t LeafLight_RequestChipState(KvaserUSB_Device_t *device, uint16_t 
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout) {
+CANUSB_Return_t Leaf_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -567,7 +568,7 @@ CANUSB_Return_t LeafLight_SendMessage(KvaserUSB_Device_t *device, const KvaserUS
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout) {
+CANUSB_Return_t Leaf_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -582,7 +583,7 @@ CANUSB_Return_t LeafLight_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanM
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/) {
+CANUSB_Return_t Leaf_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -616,7 +617,7 @@ CANUSB_Return_t LeafLight_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay) {
+CANUSB_Return_t Leaf_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -637,7 +638,7 @@ CANUSB_Return_t LeafLight_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay) {
+CANUSB_Return_t Leaf_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -658,7 +659,7 @@ CANUSB_Return_t LeafLight_ResetStatistics(KvaserUSB_Device_t *device, uint16_t d
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
+CANUSB_Return_t Leaf_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -698,7 +699,7 @@ CANUSB_Return_t LeafLight_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) 
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load) {
+CANUSB_Return_t Leaf_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -743,7 +744,7 @@ CANUSB_Return_t LeafLight_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLo
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, uint8_t dataLevel*/) {
+CANUSB_Return_t Leaf_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, uint8_t dataLevel*/) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -802,7 +803,7 @@ CANUSB_Return_t LeafLight_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_Card
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info) {
+CANUSB_Return_t Leaf_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -839,7 +840,7 @@ CANUSB_Return_t LeafLight_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info) {
+CANUSB_Return_t Leaf_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;

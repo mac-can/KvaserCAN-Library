@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
  *
- *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -45,8 +45,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LEAF_LIGHT_H_INCLUDED
-#define LEAF_LIGHT_H_INCLUDED
+#ifndef KVASERUSB_LEAFDEVICE_H_INCLUDED
+#define KVASERUSB_LEAFDEVICE_H_INCLUDED
 
 #include "KvaserUSB_Common.h"
 #include "KvaserUSB_Device.h"
@@ -72,39 +72,39 @@
 extern "C" {
 #endif
 
-extern bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device);
-extern void LeafLight_GetOperationCapability(KvaserUSB_OpMode_t *opMode);
+extern bool Leaf_ConfigureChannel(KvaserUSB_Device_t *device);
+extern void Leaf_GetOperationCapability(KvaserUSB_OpMode_t *opMode);
 
-extern CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode);
-extern CANUSB_Return_t LeafLight_TeardownChannel(KvaserUSB_Device_t *device);
+extern CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode);
+extern CANUSB_Return_t Leaf_TeardownChannel(KvaserUSB_Device_t *device);
 
-extern CANUSB_Return_t LeafLight_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params);
-extern CANUSB_Return_t LeafLight_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params);
+extern CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params);
+extern CANUSB_Return_t Leaf_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params);
 
-extern CANUSB_Return_t LeafLight_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode);
-extern CANUSB_Return_t LeafLight_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode);
+extern CANUSB_Return_t Leaf_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode);
+extern CANUSB_Return_t Leaf_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode);
 
-extern CANUSB_Return_t LeafLight_StartChip(KvaserUSB_Device_t *device, uint16_t timeout);
-extern CANUSB_Return_t LeafLight_StopChip(KvaserUSB_Device_t *device, uint16_t timeout);
-extern CANUSB_Return_t LeafLight_ResetChip(KvaserUSB_Device_t *device, uint16_t delay);
-extern CANUSB_Return_t LeafLight_ResetCard(KvaserUSB_Device_t *device, uint16_t delay);
-extern CANUSB_Return_t LeafLight_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Leaf_StartChip(KvaserUSB_Device_t *device, uint16_t timeout);
+extern CANUSB_Return_t Leaf_StopChip(KvaserUSB_Device_t *device, uint16_t timeout);
+extern CANUSB_Return_t Leaf_ResetChip(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Leaf_ResetCard(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Leaf_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay);
 
-extern CANUSB_Return_t LeafLight_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout);
-extern CANUSB_Return_t LeafLight_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout);
+extern CANUSB_Return_t Leaf_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout);
+extern CANUSB_Return_t Leaf_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout);
 
-extern CANUSB_Return_t LeafLight_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/);
-extern CANUSB_Return_t LeafLight_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay);
-extern CANUSB_Return_t LeafLight_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Leaf_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/);
+extern CANUSB_Return_t Leaf_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Leaf_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay);
 
-extern CANUSB_Return_t LeafLight_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec);
-extern CANUSB_Return_t LeafLight_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load);
+extern CANUSB_Return_t Leaf_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec);
+extern CANUSB_Return_t Leaf_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load);
 
-extern CANUSB_Return_t LeafLight_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, uint8_t dataLevel*/);
-extern CANUSB_Return_t LeafLight_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info);
-extern CANUSB_Return_t LeafLight_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
+extern CANUSB_Return_t Leaf_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, uint8_t dataLevel*/);
+extern CANUSB_Return_t Leaf_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info);
+extern CANUSB_Return_t Leaf_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* LEAF_LIGHT_H_INCLUDED */
+#endif /* KVASERUSB_LEAFDEVICE_H_INCLUDED */
