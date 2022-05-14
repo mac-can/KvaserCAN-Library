@@ -154,8 +154,6 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
     device->recvData.txAck.maxMsg = LEAF_LIGHT_MAX_OUTSTANDING_TX;
     LeafLight_GetOperationCapability(&device->opCapability);
-    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
-    device->clocks[1] = (int32_t)-1;
 
     /* Gotcha! */
     device->configured = true;

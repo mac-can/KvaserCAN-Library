@@ -136,8 +136,6 @@ bool LeafPro_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.cpuFreq = LEAF_PRO_CPU_FREQUENCY;
     device->recvData.txAck.maxMsg = LEAF_PRO_MAX_OUTSTANDING_TX;
     LeafPro_GetOperationCapability(&device->opCapability);
-    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
-    device->clocks[1] = (int32_t)-1;
 
     // initialize Hydra HE address and channel no. */
     device->hydraData.channel2he = ILLEGAL_HE;

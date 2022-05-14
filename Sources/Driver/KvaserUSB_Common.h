@@ -51,16 +51,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define KVASER_NAME  "Kvaser AB, Sweden"
-#define KVASER_WEBSITE  "https://www.kvaser.com"
+#define KVASER_COMPANY_NAME  "Kvaser AB, Sweden"
+#define KVASER_WEBSITE_URL  "https://www.kvaser.com"
 
 #define KVASER_VENDOR_ID  0xBFDU
 #define KVASER_LEAF_PRO_ID  0x107U
 #define KVASER_LEAF_LIGHT_ID  0x120U
 
-#define KVASER_MAX_CAN_CLOCKS    1U
 #define KVASER_MAX_CAN_CHANNELS  1U
-#define KVASER_MAX_NAME_LENGTH  32U
+#define KVASER_MAX_STRING_LENGTH  32U
 
 #define KVASER_MIN_COMMAND_LENGTH  4U
 #define KVASER_MAX_COMMAND_LENGTH  32U

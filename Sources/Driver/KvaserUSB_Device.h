@@ -199,12 +199,11 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     KvaserUSB_CanChannel_t numChannels; /* - number of CAN channels */
     KvaserUSB_CanChannel_t channelNo;   /* - active CAN channel on device */
     KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capability */
-    KvaserUSB_CanClock_t clocks[KVASER_MAX_CAN_CLOCKS+1]; /* - CAN clocks (in [Hz]) */
     KvaserUSB_DeviceInfo_t deviceInfo;  /* - device information (hw, sw, etc.) */
-    KvaserUSB_HydraData_t hydraData;    /* - Hydra device data (Leaf Pro) */
-    char name[KVASER_MAX_NAME_LENGTH+1];  /* - device name (zero-terminated string) */
-    char vendor[KVASER_MAX_NAME_LENGTH+1];/* - vendor name (zero-terminated string) */
-    char website[KVASER_MAX_NAME_LENGTH+1];/*- vendor website (zero-terminated string) */
+    KvaserUSB_HydraData_t hydraData;    /* - Hydra device data (e.g. Leaf Pro HS v2) */
+    char name[KVASER_MAX_STRING_LENGTH+1];   /* - device name (zero-terminated string) */
+    char vendor[KVASER_MAX_STRING_LENGTH+1]; /* - vendor name (zero-terminated string) */
+    char website[KVASER_MAX_STRING_LENGTH+1];/* - vendor website (zero-terminated string) */
     bool configured;                    /* - to indicate the structure's validity */
 } KvaserUSB_Device_t;
 

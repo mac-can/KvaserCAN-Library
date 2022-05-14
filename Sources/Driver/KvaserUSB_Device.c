@@ -107,10 +107,10 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
         }
     }
     /* set device name, vendor name and website (zero-terminated strings) */
-    if (CANUSB_GetDeviceName(handle, device->name, KVASER_MAX_NAME_LENGTH) < 0)
-        strncpy(device->name, "(unkown)", KVASER_MAX_NAME_LENGTH);
-    strncpy(device->vendor, KVASER_NAME, KVASER_MAX_NAME_LENGTH);
-    strncpy(device->website, KVASER_WEBSITE, KVASER_MAX_NAME_LENGTH);
+    if (CANUSB_GetDeviceName(handle, device->name, KVASER_MAX_STRING_LENGTH) < 0)
+        strncpy(device->name, "(unkown)", KVASER_MAX_STRING_LENGTH);
+    strncpy(device->vendor, KVASER_COMPANY_NAME, KVASER_MAX_STRING_LENGTH);
+    strncpy(device->website, KVASER_WEBSITE_URL, KVASER_MAX_STRING_LENGTH);
 
     /* the USB handle and the CAN channel number are valid now,
      * but the configuration must be confirmed for the device! */
