@@ -51,29 +51,16 @@
 #include "KvaserUSB_Common.h"
 #include "KvaserUSB_Device.h"
 
-#define LEAF_PRO_VENDOR_ID   KVASER_VENDOR_ID
-#define LEAF_PRO_PRODUCT_ID  KVASER_LEAF_PRO_ID
-
-#define LEAF_PRO_NUM_CHANNELS  1U
-#define LEAF_PRO_NUM_ENDPOINTS  4U
-#define LEAF_PRO_CPU_FREQUENCY  80U
-#define LEAF_PRO_MAX_OUTSTANDING_TX  200U
-
-#define LEAF_PRO_MODE_FDOE  1 /* CAN FD operation enable/disable */
-#define LEAF_PRO_MODE_BRSE  1 /* bit-rate switch enable/disable */
-#define LEAF_PRO_MODE_NISO  0 /* Non-ISO CAN FD enable/disable */
-#define LEAF_PRO_MODE_SHRD  0 /* shared access enable/disable */
-#define LEAF_PRO_MODE_NXTD  1 /* extended format disable/enable */
-#define LEAF_PRO_MODE_NRTR  1 /* remote frames disable/enable */
-#define LEAF_PRO_MODE_ERR   1 /* error frames enable/disable */
-#define LEAF_PRO_MODE_MON   1 /* monitor mode enable/disable */
+#define MHYDRA_NUM_CHANNELS  1U
+#define MHYDRA_NUM_ENDPOINTS  4U
+#define MHYDRA_CPU_FREQUENCY  80U
+#define MHYDRA_MAX_OUTSTANDING_TX  200U
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 extern bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device);
-extern void Mhydra_GetOperationCapability(KvaserUSB_OpMode_t *opMode);
 
 extern CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode);
 extern CANUSB_Return_t Mhydra_TeardownChannel(KvaserUSB_Device_t *device);
@@ -105,7 +92,6 @@ extern CANUSB_Return_t Mhydra_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_B
 extern CANUSB_Return_t Mhydra_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, int8_t dataLevel*/);
 extern CANUSB_Return_t Mhydra_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info/*, uint8_t hydraExt*/);
 //extern CANUSB_Return_t Mhydra_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
-
 
 #ifdef __cplusplus
 }

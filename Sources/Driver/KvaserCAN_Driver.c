@@ -47,7 +47,7 @@
  */
 #include "KvaserCAN_Driver.h"
 
-#include "MacCAN_Devices.h"
+#include "KvaserCAN_Devices.h"
 #include "KvaserUSB_LeafDevice.h"
 #include "KvaserUSB_MhydraDevice.h"
 
@@ -55,21 +55,13 @@
 #include <string.h>
 #include <assert.h>
 
-const CANDEV_Device_t CANDEV_Devices[] = {
-    {KVASER_VENDOR_ID, USB_LEAF_PRO_HS_V2_PRODUCT_ID, 1U},
-    {KVASER_VENDOR_ID, USB_HYBRID_PRO_CANLIN_PRODUCT_ID, 1U},   // TODO: 2x CAN/LIN
-    {KVASER_VENDOR_ID, USB_U100P_PRODUCT_ID, 1U},
-    {KVASER_VENDOR_ID, USB_LEAF_LITE_V2_PRODUCT_ID, 1U},
-    CANDEV_LAST_ENTRY_IN_DEVICE_LIST
-};
-
 CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const KvaserUSB_OpMode_t opMode, int *state) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     KvaserUSB_OpMode_t opCapa = CANMODE_DEFAULT;
-    KvaserUSB_DriverType_t driverType = USB_UNKNOWN_DRIVER;
+    uint16_t productId = 0xFFFFU;
 
     /* test USB device at given index (channel) if it is present and possibly opened */
-    retVal = KvaserUSB_ProbeUsbDevice(channel, &driverType);
+    retVal = KvaserUSB_ProbeUsbDevice(channel, &productId);
     if (retVal < 0) {
         if (state)
             *state = CANUSB_BOARD_NOT_AVAILABLE;
@@ -80,16 +72,17 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
         retVal = CANUSB_SUCCESS;
     }
     /* get operation capability of the appropriate CAN controller */
-    switch (driverType) {
-        case USB_MHYDRA_DRIVER:
-            Mhydra_GetOperationCapability(&opCapa);
-            break;
-        case USB_LEAF_DRIVER:
-            Leaf_GetOperationCapability(&opCapa);
-            break;
-        default:
-            break;
-    }
+    /* note: we cannot ask the device itself because it is not initialized at this point
+     *       and we cannot/will not initialize it only to read its operation capability.
+     *       so we have to take the preconfigured operation capability properties.
+     */
+    opCapa |= KvaserDEV_IsCanFdSupported(productId) ? CANMODE_FDOE : 0x00U;
+    opCapa |= KvaserDEV_IsCanFdSupported(productId) ? CANMODE_BRSE : 0x00U;
+    opCapa |= KvaserDEV_IsNonIsoCanFdSupported(productId) ? CANMODE_NISO : 0x00U;
+    opCapa |= KvaserDEV_IsErrorFrameSupported(productId) ? CANMODE_ERR : 0x00U;
+    opCapa |= KvaserDEV_IsSilentModeSupported(productId) ? CANMODE_MON : 0x00U;
+    opCapa |= CANMODE_NXTD;
+    opCapa |= CANMODE_NRTR;
     /* check given operation mode against the operation capability */
     if ((opMode & ~opCapa) != 0) {
         retVal = CANUSB_ERROR_ILLPARA;

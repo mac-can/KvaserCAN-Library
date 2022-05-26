@@ -46,6 +46,7 @@
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "KvaserUSB_Device.h"
+#include "KvaserCAN_Devices.h"
 #include "MacCAN_Debug.h"
 
 #include <stdio.h>
@@ -54,58 +55,12 @@
 #include <assert.h>
 
 static KvaserUSB_DriverType_t GetUsbDriverType(uint16_t productId) {
-    switch (productId) {
+    switch (KvaserDEV_GetDeviceFamily(productId)) {
         /* ---  driver for Leaf devices  --- */
-        case USB_LEAF_DEVEL_PRODUCT_ID:          // Kvaser Leaf prototype (P010v2 and v3)
-        case USB_LEAF_LITE_PRODUCT_ID:           // Kvaser Leaf Light (P010v3)
-        case USB_LEAF_PRO_PRODUCT_ID:            // Kvaser Leaf Professional HS
-        case USB_LEAF_SPRO_PRODUCT_ID:           // Kvaser Leaf SemiPro HS
-        case USB_LEAF_PRO_LS_PRODUCT_ID:         // Kvaser Leaf Professional LS
-        case USB_LEAF_PRO_SWC_PRODUCT_ID:        // Kvaser Leaf Professional SWC
-        case USB_LEAF_PRO_LIN_PRODUCT_ID:        // Kvaser Leaf Professional LIN
-        case USB_LEAF_SPRO_LS_PRODUCT_ID:        // Kvaser Leaf SemiPro LS
-        case USB_LEAF_SPRO_SWC_PRODUCT_ID:       // Kvaser Leaf SemiPro SWC
-        case USB_MEMO2_DEVEL_PRODUCT_ID:         // Kvaser Memorator II, Prototype
-        case USB_MEMO2_HSHS_PRODUCT_ID:          // Kvaser Memorator II HS/HS
-        case USB_UPRO_HSHS_PRODUCT_ID:           // Kvaser USBcan Professional HS/HS
-        case USB_LEAF_LITE_GI_PRODUCT_ID:        // Kvaser Leaf Light GI
-        case USB_LEAF_PRO_OBDII_PRODUCT_ID:      // Kvaser Leaf Professional HS (OBD-II connector)
-        case USB_MEMO2_HSLS_PRODUCT_ID:          // Kvaser Memorator Professional HS/LS
-        case USB_LEAF_LITE_CH_PRODUCT_ID:        // Kvaser Leaf Light "China"
-        case USB_BLACKBIRD_SPRO_PRODUCT_ID:      // Kvaser BlackBird SemiPro
-        case USB_MEMO_R_SPRO_PRODUCT_ID:         // Kvaser Memorator R SemiPro
-        case USB_OEM_MERCURY_PRODUCT_ID:         // Kvaser OEM Mercury
-        case USB_OEM_LEAF_PRODUCT_ID:            // Kvaser OEM Leaf
-        case USB_OEM_KEY_DRIVING_PRODUCT_ID:     // Key Driving Interface HS
-        case USB_CAN_R_PRODUCT_ID:               // Kvaser USBcan R
-        case USB_LEAF_LITE_V2_PRODUCT_ID:         // Kvaser Leaf Light v2
-        case USB_MINI_PCI_EXPRESS_HS_PRODUCT_ID:  // Kvaser Mini PCI Express HS
-        case USB_LEAF_LIGHT_HS_V2_OEM_PRODUCT_ID: // Kvaser Leaf Light HS v2 OEM
-        case USB_USBCAN_LIGHT_2HS_PRODUCT_ID:     // Kvaser USBcan Light 2xHS
-        case USB_MINI_PCI_EXPRESS_2HS_PRODUCT_ID: // Kvaser Mini PCI Express 2xHS
-        case USB_USBCAN_R_V2_PRODUCT_ID:          // Kvaser USBcan R v2
-        case USB_LEAF_LITE_R_V2_PRODUCT_ID:       // Kvaser Leaf Light R v2
-        case USB_OEM_ATI_LEAF_LITE_V2_PRODUCT_ID: // Kvaser OEM ATI Leaf Light HS v2
+        case KVASER_USB_LEAF_DEVICE_FAMILY:
             return USB_LEAF_DRIVER;
         /* ---  driver for Mhydra devices  --- */
-        case USB_EAGLE_PRODUCT_ID:                 // Kvaser Eagle
-        case USB_BLACKBIRD_V2_PRODUCT_ID:          // Kvaser BlackBird v2
-        case USB_MEMO_PRO_5HS_PRODUCT_ID:          // Kvaser Memorator Pro 5xHS
-        case USB_USBCAN_PRO_5HS_PRODUCT_ID:        // Kvaser USBcan Pro 5xHS
-        case USB_USBCAN_LIGHT_4HS_PRODUCT_ID:      // Kvaser USBcan Light 4xHS (00831-1)
-        case USB_LEAF_PRO_HS_V2_PRODUCT_ID:        // Kvaser Leaf Pro HS v2 (00843-4)
-        case USB_USBCAN_PRO_2HS_V2_PRODUCT_ID:     // Kvaser USBcan Pro 2xHS v2 (00752-9)
-        case USB_MEMO_2HS_PRODUCT_ID:              // Kvaser Memorator 2xHS v2 (00821-2)
-        case USB_MEMO_PRO_2HS_V2_PRODUCT_ID:       // Kvaser Memorator Pro 2xHS v2 (00819-9)
-        case USB_HYBRID_CANLIN_PRODUCT_ID:         // Kvaser Hybrid 2xCAN/LIN (00965-3)
-        case USB_ATI_USBCAN_PRO_2HS_V2_PRODUCT_ID: // ATI USBcan Pro 2xHS v2 (00969-1)
-        case USB_ATI_MEMO_PRO_2HS_V2_PRODUCT_ID:   // ATI Memorator Pro 2xHS v2 (00971-4)
-        case USB_HYBRID_PRO_CANLIN_PRODUCT_ID:     // Kvaser Hybrid Pro 2xCAN/LIN (01042-0)
-        case USB_BLACKBIRD_PRO_HS_V2_PRODUCT_ID:   // Kvaser BlackBird Pro HS v2 (00983-7)
-        case USB_MEMO_LIGHT_HS_V2_PRODUCT_ID:      // Kvaser Memorator Light HS v2 (01058-1)
-        case USB_U100_PRODUCT_ID:                  // Kvaser U100 (01173-1)
-        case USB_U100P_PRODUCT_ID:                 // Kvaser U100P (01174-8)
-        case USB_U100S_PRODUCT_ID:                 // Kvaser U100P (01181-6)
+        case KVASER_USB_MHYDRA_DEVICE_FAMILY:
             return USB_MHYDRA_DRIVER;
         /* ---  unknown/unsupported devices  --- */
         default:
@@ -184,10 +139,9 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
     return retVal;
 }
 
-CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, KvaserUSB_DriverType_t *driver) {
+CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, uint16_t *productId) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     CANUSB_Index_t index = channel;
-    uint16_t productId = 0xFFFFU;
 
     /* check if the device is present (available) and opened (occupied) */
     if (!CANUSB_IsDevicePresent(index)) {
@@ -200,11 +154,9 @@ CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, KvaserUSB_Drive
 //        MACCAN_DEBUG_INFO("+++ MacCAN-Core: device (%02x) occupied\n", channel);
         retVal = CANERR_NOERROR + 1;
     }
-    /* get the product ID of the USB device and determine the driver type */
-    if (driver) {
-        (void)CANUSB_GetDeviceProductId(index, &productId);
-        *driver = GetUsbDriverType(productId);
-    }
+    /* get the product ID of the USB device (NULL pointer is checked there) */
+    (void)CANUSB_GetDeviceProductId(index, productId);
+
     return retVal;
 }
 

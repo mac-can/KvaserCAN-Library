@@ -51,67 +51,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define KVASER_VENDOR_ID  0xBFDU
 #define KVASER_COMPANY_NAME  "Kvaser AB, Sweden"
 #define KVASER_WEBSITE_URL  "https://www.kvaser.com"
-
-#define KVASER_VENDOR_ID  0xBFDU
-//#define KVASER_LEAF_PRO_ID  0x107U
-//#define KVASER_LEAF_LIGHT_ID  0x120U
-
-/* Kvaser Leaf interfaces:
- */
-#define USB_LEAF_DEVEL_PRODUCT_ID           10 // Kvaser Leaf prototype (P010v2 and v3)
-#define USB_LEAF_LITE_PRODUCT_ID            11 // Kvaser Leaf Light (P010v3)
-#define USB_LEAF_PRO_PRODUCT_ID             12 // Kvaser Leaf Professional HS
-#define USB_LEAF_SPRO_PRODUCT_ID            14 // Kvaser Leaf SemiPro HS
-#define USB_LEAF_PRO_LS_PRODUCT_ID          15 // Kvaser Leaf Professional LS
-#define USB_LEAF_PRO_SWC_PRODUCT_ID         16 // Kvaser Leaf Professional SWC
-#define USB_LEAF_PRO_LIN_PRODUCT_ID         17 // Kvaser Leaf Professional LIN
-#define USB_LEAF_SPRO_LS_PRODUCT_ID         18 // Kvaser Leaf SemiPro LS
-#define USB_LEAF_SPRO_SWC_PRODUCT_ID        19 // Kvaser Leaf SemiPro SWC
-#define USB_MEMO2_DEVEL_PRODUCT_ID          22 // Kvaser Memorator II, Prototype
-#define USB_MEMO2_HSHS_PRODUCT_ID           23 // Kvaser Memorator II HS/HS
-#define USB_UPRO_HSHS_PRODUCT_ID            24 // Kvaser USBcan Professional HS/HS
-#define USB_LEAF_LITE_GI_PRODUCT_ID         25 // Kvaser Leaf Light GI
-#define USB_LEAF_PRO_OBDII_PRODUCT_ID       26 // Kvaser Leaf Professional HS (OBD-II connector)
-#define USB_MEMO2_HSLS_PRODUCT_ID           27 // Kvaser Memorator Professional HS/LS
-#define USB_LEAF_LITE_CH_PRODUCT_ID         28 // Kvaser Leaf Light "China"
-#define USB_BLACKBIRD_SPRO_PRODUCT_ID       29 // Kvaser BlackBird SemiPro
-#define USB_MEMO_R_SPRO_PRODUCT_ID          32 // Kvaser Memorator R SemiPro
-#define USB_OEM_MERCURY_PRODUCT_ID          34 // Kvaser OEM Mercury
-#define USB_OEM_LEAF_PRODUCT_ID             35 // Kvaser OEM Leaf
-#define USB_OEM_KEY_DRIVING_PRODUCT_ID      38 // Key Driving Interface HS
-#define USB_CAN_R_PRODUCT_ID                39 // Kvaser USBcan R
-#define USB_LEAF_LITE_V2_PRODUCT_ID         288 // Kvaser Leaf Light v2
-#define USB_MINI_PCI_EXPRESS_HS_PRODUCT_ID  289 // Kvaser Mini PCI Express HS
-#define USB_LEAF_LIGHT_HS_V2_OEM_PRODUCT_ID 290 // Kvaser Leaf Light HS v2 OEM
-#define USB_USBCAN_LIGHT_2HS_PRODUCT_ID     291 // Kvaser USBcan Light 2xHS
-#define USB_MINI_PCI_EXPRESS_2HS_PRODUCT_ID 292 // Kvaser Mini PCI Express 2xHS
-#define USB_USBCAN_R_V2_PRODUCT_ID          294 // Kvaser USBcan R v2
-#define USB_LEAF_LITE_R_V2_PRODUCT_ID       295 // Kvaser Leaf Light R v2
-#define USB_OEM_ATI_LEAF_LITE_V2_PRODUCT_ID 296 // Kvaser OEM ATI Leaf Light HS v2
-
-/* Kvaser Mhydra* HW interfaces:
- */
-#define USB_EAGLE_PRODUCT_ID                  256 // Kvaser Eagle
-#define USB_BLACKBIRD_V2_PRODUCT_ID           258 // Kvaser BlackBird v2
-#define USB_MEMO_PRO_5HS_PRODUCT_ID           260 // Kvaser Memorator Pro 5xHS
-#define USB_USBCAN_PRO_5HS_PRODUCT_ID         261 // Kvaser USBcan Pro 5xHS
-#define USB_USBCAN_LIGHT_4HS_PRODUCT_ID       262 // Kvaser USBcan Light 4xHS (00831-1)
-#define USB_LEAF_PRO_HS_V2_PRODUCT_ID         263 // Kvaser Leaf Pro HS v2 (00843-4)
-#define USB_USBCAN_PRO_2HS_V2_PRODUCT_ID      264 // Kvaser USBcan Pro 2xHS v2 (00752-9)
-#define USB_MEMO_2HS_PRODUCT_ID               265 // Kvaser Memorator 2xHS v2 (00821-2)
-#define USB_MEMO_PRO_2HS_V2_PRODUCT_ID        266 // Kvaser Memorator Pro 2xHS v2 (00819-9)
-#define USB_HYBRID_CANLIN_PRODUCT_ID          267 // Kvaser Hybrid 2xCAN/LIN (00965-3)
-#define USB_ATI_USBCAN_PRO_2HS_V2_PRODUCT_ID  268 // ATI USBcan Pro 2xHS v2 (00969-1)
-#define USB_ATI_MEMO_PRO_2HS_V2_PRODUCT_ID    269 // ATI Memorator Pro 2xHS v2 (00971-4)
-#define USB_HYBRID_PRO_CANLIN_PRODUCT_ID      270 // Kvaser Hybrid Pro 2xCAN/LIN (01042-0)
-#define USB_BLACKBIRD_PRO_HS_V2_PRODUCT_ID    271 // Kvaser BlackBird Pro HS v2 (00983-7)
-#define USB_MEMO_LIGHT_HS_V2_PRODUCT_ID       272 // Kvaser Memorator Light HS v2 (01058-1)
-#define USB_U100_PRODUCT_ID                   273 // Kvaser U100 (01173-1)
-#define USB_U100P_PRODUCT_ID                  274 // Kvaser U100P (01174-8)
-#define USB_U100S_PRODUCT_ID                  275 // Kvaser U100P (01181-6)
-
 
 /* ---  general defines  ---
  */
@@ -131,7 +73,6 @@
 #define KVASER_HYDRA_RETENTION_SIZE 1024U /* 2 times max. packet size */
 
 #define KVASER_RECEIVE_QUEUE_SIZE  65536U
-
 
 /* ---  general CAN data types and defines  ---
  */
@@ -396,6 +337,28 @@
 #define SWOPTION_USE_HYDRA_EXT             0x200L
 #define SWOPTION_CANFD_CAP                 0x400L
 #define SWOPTION_NONISO_CAP                0x800L
+#define SWOPTION_80_MHZ_CAN_CLK           0x2000L
+#define SWOPTION_24_MHZ_CAN_CLK           0x4000L
+#define SWOPTION_CAN_CLK_MASK             0x6000L
+
+/*  for CMD_GET_CAPABILITIES_REQ: */
+#define CAP_SUB_CMD_DUMMY_NOT_IMPLEMENTED      0U
+#define CAP_SUB_CMD_DUMMY_UNAVAILABLE          1U
+#define CAP_SUB_CMD_SILENT_MODE                2U
+#define CAP_SUB_CMD_ERRFRAME                   3U
+#define CAP_SUB_CMD_BUS_STATS                  4U
+#define CAP_SUB_CMD_ERRCOUNT_READ              5U
+#define CAP_SUB_CMD_SINGLE_SHOT                6U
+#define CAP_SUB_CMD_SYNC_TX_FLUSH              7U
+#define CAP_SUB_CMD_HAS_LOGGER                 8U
+#define CAP_SUB_CMD_HAS_REMOTE                 9U
+#define CAP_SUB_CMD_HAS_SCRIPT                10U
+// Hydra devices:
+#define CAP_SUB_CMD_LIN_HYBRID                11U
+#define CAP_SUB_CMD_KDI_INFO                  12U
+#define CAP_SUB_CMD_HAS_KDI                   13U
+#define CAP_SUB_CMD_HAS_IO_API                14U
+#define CAP_SUB_CMD_HAS_BUSPARAMS_TQ          15U
 
 /*  for CMD_SET_AUTO_TX_REQ and _RESP: */
 #define AUTOTXBUFFER_CMD_GET_INFO              1U

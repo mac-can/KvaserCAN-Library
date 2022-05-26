@@ -51,29 +51,16 @@
 #include "KvaserUSB_Common.h"
 #include "KvaserUSB_Device.h"
 
-#define LEAF_LIGHT_VENDOR_ID   KVASER_VENDOR_ID
-#define LEAF_LIGHT_PRODUCT_ID  KVASER_LEAF_LIGHT_ID
-
-#define LEAF_LIGHT_NUM_CHANNELS  1U
-#define LEAF_LIGHT_NUM_ENDPOINTS  2U
-#define LEAF_LIGHT_CPU_FREQUENCY  24U
-#define LEAF_LIGHT_MAX_OUTSTANDING_TX  64U
-
-#define LEAF_LIGHT_MODE_FDOE  0 /* CAN FD operation enable/disable */
-#define LEAF_LIGHT_MODE_BRSE  0 /* bit-rate switch enable/disable */
-#define LEAF_LIGHT_MODE_NISO  0 /* Non-ISO CAN FD enable/disable */
-#define LEAF_LIGHT_MODE_SHRD  0 /* shared access enable/disable */
-#define LEAF_LIGHT_MODE_NXTD  1 /* extended format disable/enable */
-#define LEAF_LIGHT_MODE_NRTR  1 /* remote frames disable/enable */
-#define LEAF_LIGHT_MODE_ERR   1 /* error frames enable/disable */
-#define LEAF_LIGHT_MODE_MON   0 /* monitor mode enable/disable */  /* note: why not? */
+#define LEAF_NUM_CHANNELS  1U
+#define LEAF_NUM_ENDPOINTS  2U
+#define LEAF_CPU_FREQUENCY  24U
+#define LEAF_MAX_OUTSTANDING_TX  64U
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 extern bool Leaf_ConfigureChannel(KvaserUSB_Device_t *device);
-extern void Leaf_GetOperationCapability(KvaserUSB_OpMode_t *opMode);
 
 extern CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode);
 extern CANUSB_Return_t Leaf_TeardownChannel(KvaserUSB_Device_t *device);

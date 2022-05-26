@@ -87,10 +87,29 @@ typedef struct kvaser_software_info_t_ {  /* software info/details: */
     uint32_t maxBitrate;                /* - max. bit-rate (hydra only, otherwise 1Mbit/s)*/
 } KvaserUSB_SoftwareInfo_t;
 
+typedef struct kvaser_capability_t_ {   /* capability: */
+    uint16_t hasTimeQuanta : 1;         /* - CAP_SUB_CMD_HAS_BUSPARAMS_TQ (mhydra) */
+    uint16_t hasIoApi : 1;              /* - CAP_SUB_CMD_HAS_IO_API (mhydra) */
+    uint16_t hasKdi : 1;                /* - CAP_SUB_CMD_HAS_KDI (mhydra) */
+    uint16_t kdiInfo : 1;               /* - CAP_SUB_CMD_KDI_INFO (mhydra) */
+    uint16_t linHybrid : 1;             /* - CAP_SUB_CMD_LIN_HYBRID (mhydra) */
+    uint16_t hasScript : 1;             /* - CAP_SUB_CMD_HAS_SCRIPT */
+    uint16_t hasRemote : 1;             /* - CAP_SUB_CMD_HAS_REMOTE */
+    uint16_t hasLogger : 1;             /* - CAP_SUB_CMD_HAS_LOGGER */
+    uint16_t syncTxFlush : 1;           /* - CAP_SUB_CMD_SYNC_TX_FLUSH */
+    uint16_t singleShot : 1;            /* - CAP_SUB_CMD_SINGLE_SHOT */
+    uint16_t errorCount : 1;            /* - CAP_SUB_CMD_ERRCOUNT_READ */
+    uint16_t busStats : 1;              /* - CAP_SUB_CMD_BUS_STATS */
+    uint16_t errorFrame : 1;            /* - CAP_SUB_CMD_ERRFRAME */
+    uint16_t silentMode : 1;            /* - CAP_SUB_CMD_SILENT_MODE */
+    uint16_t dummy : 2;
+} KvaserUSB_Capability_t;
+
 typedef struct kvaser_device_info_t_ {  /* device info: */
     KvaserUSB_CardInfo_t card;          /* - card info */
 //  KvaserUSB_InterfaceInfo_t channel;  /* - channel info */
     KvaserUSB_SoftwareInfo_t software;  /* - software info */
+//  KvaserUSB_Capability_t capability;  /* - capability */
 } KvaserUSB_DeviceInfo_t;
 
 typedef struct kvaser_bus_params_t_ {   /* bus parameter: */
@@ -218,7 +237,7 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
 extern "C" {
 #endif
 
-extern CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, KvaserUSB_DriverType_t *driver);
+extern CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, uint16_t *productId);
 extern CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device_t *device);
 extern CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device);
 

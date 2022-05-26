@@ -46,6 +46,7 @@
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "KvaserUSB_MhydraDevice.h"
+#include "KvaserCAN_Devices.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -99,22 +100,9 @@ static uint32_t FillGetCardInfoReq(uint8_t *buffer, uint32_t maxbyte, int8_t dat
 static uint32_t FillGetSoftwareDetailsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t hydraExt);
 static uint32_t FillGetMaxOutstandingTxReq(uint8_t *buffer, uint32_t maxbyte);
 
+static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo);
 static uint8_t Dlc2Len(uint8_t dlc);
 //static uint8_t Len2Dlc(uint8_t len);
-
-void Mhydra_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
-    if (opMode) {
-        *opMode = 0x00U;
-        *opMode |= LEAF_PRO_MODE_FDOE ? CANMODE_FDOE : 0x00U;
-        *opMode |= LEAF_PRO_MODE_BRSE ? CANMODE_BRSE : 0x00U;
-        *opMode |= LEAF_PRO_MODE_NISO ? CANMODE_NISO : 0x00U;
-        *opMode |= LEAF_PRO_MODE_SHRD ? CANMODE_SHRD : 0x00U;
-        *opMode |= LEAF_PRO_MODE_NXTD ? CANMODE_NXTD : 0x00U;
-        *opMode |= LEAF_PRO_MODE_NRTR ? CANMODE_NRTR : 0x00U;
-        *opMode |= LEAF_PRO_MODE_ERR ? CANMODE_ERR : 0x00U;
-        *opMode |= LEAF_PRO_MODE_MON ? CANMODE_MON : 0x00U;
-    }
-}
 
 bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
     /* sanity check */
@@ -127,18 +115,26 @@ bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
     if (device->driverType != USB_MHYDRA_DRIVER)
         return false;
     // TODO: rework this
-    if (device->numChannels != LEAF_PRO_NUM_CHANNELS)
+    if (device->numChannels != MHYDRA_NUM_CHANNELS)
         return false;
-    if (device->endpoints.numEndpoints != LEAF_PRO_NUM_ENDPOINTS)
+    if (device->endpoints.numEndpoints != MHYDRA_NUM_ENDPOINTS)
         return false;
 
     /* set CAN channel properties and defaults */
     device->channelNo = 0U;  /* note: only one CAN channel */
-    device->recvData.cpuFreq = LEAF_PRO_CPU_FREQUENCY;
-    device->recvData.txAck.maxMsg = LEAF_PRO_MAX_OUTSTANDING_TX;
-    Mhydra_GetOperationCapability(&device->opCapability);
+    device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
+    device->recvData.txAck.maxMsg = MHYDRA_MAX_OUTSTANDING_TX;
 
-    // initialize Hydra HE address and channel no. */
+    /* set CAN channel operation capability from device spec. */
+    device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_FDOE : 0x00U;
+    device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_BRSE : 0x00U;
+    device->opCapability |= KvaserDEV_IsNonIsoCanFdSupported(device->productId) ? CANMODE_NISO : 0x00U;
+    device->opCapability |= KvaserDEV_IsErrorFrameSupported(device->productId) ? CANMODE_ERR : 0x00U;
+    device->opCapability |= KvaserDEV_IsSilentModeSupported(device->productId) ? CANMODE_MON : 0x00U;
+    device->opCapability |= CANMODE_NXTD;
+    device->opCapability |= CANMODE_NRTR;
+
+    /* initialize Hydra HE address and channel no. */
     device->hydraData.channel2he = ILLEGAL_HE;
     device->hydraData.he2channel = 0xFFU;
 
@@ -157,11 +153,6 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    /* check requested operation mode */
-    if ((opMode & ~device->opCapability)) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): unsupported operation mode (%02x)\n", device->name, device->handle, (opMode & ~device->opCapability));
-        return CANUSB_ERROR_ILLPARA;  /* [2021-05-30]: cf. CAN API V3 function 'can_test' */
-    }
     MACCAN_DEBUG_DRIVER("    Initializing %s driver...\n", device->name);
     /* start the reception loop */
     retVal = KvaserUSB_StartReception(device, ReceptionCallback);
@@ -194,7 +185,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
     retVal = Mhydra_RequestChipState(device, 0U);  /* 0 = no delay */
     if (retVal != CANUSB_SUCCESS) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip state event could not be triggered (%i)\n", device->name, device->handle, retVal);
-        goto end_init;
+        goto err_init;
     }
     /* get device information (don't care about the result) */
     retVal = Mhydra_GetCardInfo(device, &device->deviceInfo.card);
@@ -205,27 +196,35 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
     }
+    PrintDeviceInfo(&device->deviceInfo);
+    
     /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
     (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
     /* get CPU clock frequency (in [MHz]) from software options */
-    switch (device->deviceInfo.software.swOptions & SWOPTION_CPU_FQ_MASK) {
-        case SWOPTION_80_MHZ_CLK: device->recvData.cpuFreq = 80U; break;
-        case SWOPTION_24_MHZ_CLK: device->recvData.cpuFreq = 24U; break;
+    switch (device->deviceInfo.software.swOptions & SWOPTION_CAN_CLK_MASK) {
+        case SWOPTION_80_MHZ_CAN_CLK: device->recvData.cpuFreq = 80U; break;
+        case SWOPTION_24_MHZ_CAN_CLK: device->recvData.cpuFreq = 24U; break;
         default:
-            device->recvData.cpuFreq = LEAF_PRO_CPU_FREQUENCY;
+            device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
             break;
     }
-#if (0)
-    // TODO: list a possible CAN clocks and rework the bus params accordingly
-    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
-    device->clocks[1] = (int32_t)-1;
-#endif
     /* get max. outstanding transmit messages */
     if ((0U < device->deviceInfo.software.maxOutstandingTx) &&
-        (device->deviceInfo.software.maxOutstandingTx < MIN(LEAF_PRO_MAX_OUTSTANDING_TX, 255U)))
+        (device->deviceInfo.software.maxOutstandingTx < MIN(MHYDRA_MAX_OUTSTANDING_TX, 255U)))
         device->recvData.txAck.maxMsg = (uint8_t)device->deviceInfo.software.maxOutstandingTx;
     else
-        device->recvData.txAck.maxMsg = (uint8_t)MIN(LEAF_PRO_MAX_OUTSTANDING_TX, 255U);
+        device->recvData.txAck.maxMsg = (uint8_t)MIN(MHYDRA_MAX_OUTSTANDING_TX, 255U);
+    /* update capability from software options (in case of wrong configuration) */
+    device->opCapability &= ~(CANMODE_FDOE | CANMODE_BRSE | CANMODE_NISO);
+    device->opCapability |= (device->deviceInfo.software.swOptions & SWOPTION_CANFD_CAP) ? CANMODE_FDOE : 0x00;
+    device->opCapability |= (device->deviceInfo.software.swOptions & SWOPTION_CANFD_CAP) ? CANMODE_BRSE : 0x00;
+    device->opCapability |= (device->deviceInfo.software.swOptions & SWOPTION_NONISO_CAP) ? CANMODE_NISO : 0x00;
+    /* check requested operation mode */
+    if ((opMode & ~device->opCapability)) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): unsupported operation mode (%02x)\n", device->name, device->handle, (opMode & ~device->opCapability));
+        retVal = CANUSB_ERROR_ILLPARA;  /* [2021-05-30]: cf. CAN API V3 function 'can_test' */
+        goto err_init;
+    }
     /* store demanded CAN operation mode*/
     device->recvData.opMode = opMode;
     retVal = CANUSB_SUCCESS;
@@ -1765,6 +1764,89 @@ static uint32_t FillGetMaxOutstandingTxReq(uint8_t *buffer, uint32_t maxbyte) {
     buffer[3] = UINT8BYTE(0x00);
     /* return request length */
     return (uint32_t)HYDRA_CMD_SIZE;
+}
+
+
+static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
+    assert(deviceInfo);
+#if (0)
+    MACCAN_DEBUG_DRIVER("    - card info:\n");
+    MACCAN_DEBUG_DRIVER("      - channel count: %x\n", deviceInfo->card.channelCount);
+    MACCAN_DEBUG_DRIVER("      - serial no.: %d\n", deviceInfo->card.serialNumber);
+    MACCAN_DEBUG_DRIVER("      - clock resolution: %x\n", deviceInfo->card.clockResolution);
+    time_t mfgDate = (time_t)deviceInfo->card.mfgDate;
+    MACCAN_DEBUG_DRIVER("      - manufacturing date: %s", ctime(&mfgDate));
+    MACCAN_DEBUG_DRIVER("      - EAN code (LSB first): %x%x%x%x%x-%x%x%x%x%x-%x%x%x%x%x-%x(?)\n",
+                        (deviceInfo->card.EAN[7] >> 4), (deviceInfo->card.EAN[7] & 0xf),
+                        (deviceInfo->card.EAN[6] >> 4), (deviceInfo->card.EAN[6] & 0xf),
+                        (deviceInfo->card.EAN[5] >> 4), (deviceInfo->card.EAN[5] & 0xf),
+                        (deviceInfo->card.EAN[4] >> 4), (deviceInfo->card.EAN[4] & 0xf),
+                        (deviceInfo->card.EAN[3] >> 4), (deviceInfo->card.EAN[3] & 0xf),
+                        (deviceInfo->card.EAN[2] >> 4), (deviceInfo->card.EAN[2] & 0xf),
+                        (deviceInfo->card.EAN[1] >> 4), (deviceInfo->card.EAN[1] & 0xf),
+                        (deviceInfo->card.EAN[0] >> 4), (deviceInfo->card.EAN[0] & 0xf));
+    MACCAN_DEBUG_DRIVER("      - hardware revision: %x\n", deviceInfo->card.hwRevision);
+    MACCAN_DEBUG_DRIVER("      - USB HS mode: %x\n", deviceInfo->card.usbHsMode);
+    MACCAN_DEBUG_DRIVER("      - hardware type: %x\n", deviceInfo->card.hwType);
+    MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %x\n", deviceInfo->card.canTimeStampRef);
+//    MACCAN_DEBUG_DRIVER("    - channel info:\n");
+//    MACCAN_DEBUG_DRIVER("      - channel capabilities: %x\n", deviceInfo->channel.channelCapabilities);
+//    MACCAN_DEBUG_DRIVER("      - CAN chip type: %x\n", deviceInfo->channel.canChipType);
+//    MACCAN_DEBUG_DRIVER("      - CAN chip sub-type: %x\n", deviceInfo->channel.canChipSubType);
+    MACCAN_DEBUG_DRIVER("    - software info/details:\n");
+    MACCAN_DEBUG_DRIVER("      - software options: %x\n", deviceInfo->software.swOptions);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CONFIG_MODE: %x\n", (deviceInfo->software.swOptions & SWOPTION_CONFIG_MODE) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_AUTO_TX_BUFFER: %x\n", (deviceInfo->software.swOptions & SWOPTION_AUTO_TX_BUFFER) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_BETA: %x\n", (deviceInfo->software.swOptions & SWOPTION_BETA) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_RC: %x\n", (deviceInfo->software.swOptions & SWOPTION_RC) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_BAD_MOOD: %x\n", (deviceInfo->software.swOptions & SWOPTION_BAD_MOOD) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_XX_MHZ_CLK: %s\n",
+                        ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_16_MHZ_CLK) ? "16" :
+                        ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_80_MHZ_CLK) ? "80" :
+                        ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_24_MHZ_CLK) ? "24" : "XX");
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_TIMEOFFSET_VALID: %x\n", (deviceInfo->software.swOptions & SWOPTION_TIMEOFFSET_VALID) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CAP_REQ: %x\n", (deviceInfo->software.swOptions & SWOPTION_CAP_REQ) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_DELAY_MSGS (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_DELAY_MSGS) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_USE_HYDRA_EXT (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_USE_HYDRA_EXT) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CANFD_CAP (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_CANFD_CAP) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_NONISO_CAP (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_NONISO_CAP) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_XX_MHZ_CAN_CLK (mhydra): %s\n",
+                        ((deviceInfo->software.swOptions & SWOPTION_CAN_CLK_MASK) == SWOPTION_80_MHZ_CAN_CLK) ? "80" :
+                        ((deviceInfo->software.swOptions & SWOPTION_CAN_CLK_MASK) == SWOPTION_24_MHZ_CAN_CLK) ? "24" : "??");
+    uint8_t major = (uint8_t)(deviceInfo->software.firmwareVersion >> 24);
+    uint8_t minor = (uint8_t)(deviceInfo->software.firmwareVersion >> 16);
+    uint16_t build = (uint16_t)(deviceInfo->software.firmwareVersion >> 0);
+    MACCAN_DEBUG_DRIVER("      - firmware version: %u.%u (build %u)\n", major, minor, build);
+    MACCAN_DEBUG_DRIVER("      - max. outstanding Tx: %x\n", deviceInfo->software.maxOutstandingTx);
+    MACCAN_DEBUG_DRIVER("      - software name (hydra only): %x\n", deviceInfo->software.swName);
+    MACCAN_DEBUG_DRIVER("      - EAN code (LSB first, hydra only): %x%x%x%x%x-%x%x%x%x%x-%x%x%x%x%x-%x\n",
+                        (deviceInfo->software.EAN[7] >> 4), (deviceInfo->software.EAN[7] & 0xf),
+                        (deviceInfo->software.EAN[6] >> 4), (deviceInfo->software.EAN[6] & 0xf),
+                        (deviceInfo->software.EAN[5] >> 4), (deviceInfo->software.EAN[5] & 0xf),
+                        (deviceInfo->software.EAN[4] >> 4), (deviceInfo->software.EAN[4] & 0xf),
+                        (deviceInfo->software.EAN[3] >> 4), (deviceInfo->software.EAN[3] & 0xf),
+                        (deviceInfo->software.EAN[2] >> 4), (deviceInfo->software.EAN[2] & 0xf),
+                        (deviceInfo->software.EAN[1] >> 4), (deviceInfo->software.EAN[1] & 0xf),
+                        (deviceInfo->software.EAN[0] >> 4), (deviceInfo->software.EAN[0] & 0xf));
+    MACCAN_DEBUG_DRIVER("      - max. bit-rate (hydra only, otherwise 1Mbit/s): %d\n", deviceInfo->software.maxBitrate);
+#if (0)
+    MACCAN_DEBUG_DRIVER("    - capability:\n");  // TODO: activate hwen implemented
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_BUSPARAMS_TQ (mhydra): %x\n", deviceInfo->capability.hasTimeQuanta);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_IO_API (mhydra): %x\n", deviceInfo->capability.hasIoApi);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_KDI (mhydra): %x\n", deviceInfo->capability.hasKdi);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_KDI_INFO (mhydra): %x\n", deviceInfo->capability.kdiInfo);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_LIN_HYBRID (mhydra): %x\n", deviceInfo->capability.linHybrid);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_SCRIPT: %x\n", deviceInfo->capability.hasScript);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_REMOTE: %x\n", deviceInfo->capability.hasRemote);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_LOGGER: %x\n", deviceInfo->capability.hasLogger);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SYNC_TX_FLUSH: %x\n", deviceInfo->capability.syncTxFlush);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SINGLE_SHOT: %x\n", deviceInfo->capability.singleShot);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRCOUNT_READ: %x\n", deviceInfo->capability.errorCount);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_BUS_STATS: %x\n", deviceInfo->capability.busStats);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %x\n", deviceInfo->capability.errorFrame);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SILENT_MODE: %x\n", deviceInfo->capability.silentMode);
+#endif
+#endif
 }
 
 static uint8_t Dlc2Len(uint8_t dlc) {
