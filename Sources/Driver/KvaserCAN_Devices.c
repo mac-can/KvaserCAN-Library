@@ -369,7 +369,7 @@ static const struct kavser_can_device_t_ {
 #if (OPTION_USB_OEM_ATI_LEAF_LITE_V2_DEVICE != 0)
     #error Device not supported!
 #endif
-    {0xFFFFU, KVASER_UNKNOWN_DEVICE_FAMILY, 0U}
+    {0xFFFFU, KVASER_UNKNOWN_DEVICE_FAMILY, 0U, false, false, false, false}
 };
 
 KvaserCAN_DeviceFamily_t KvaserDEV_GetDeviceFamily(uint16_t productId) {

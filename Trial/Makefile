@@ -50,12 +50,12 @@ HEADERS = -I$(SOURCE_DIR) \
 	-I$(WRAPPER_DIR) \
 	-I$(MAIN_DIR)
 
-CFLAGS += -O2 -Wall -Wno-parentheses \
-	-fno-strict-aliasing \
+CFLAGS += -O0 -g -Wall -Wextra -Wno-parentheses \
+	-fmessage-length=0 -fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
-CXXFLAGS += -g -Wall -Wextra -pthread \
+CXXFLAGS += -O0 -g -Wall -Wextra -pthread \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -75,12 +75,12 @@ IGNORE   = -i MacCAN.cpp -i MacCAN_MsgPipe.c -i can_msg.c -i can_dev.c
 ifeq ($(HUNTER),BUGS)
 CHECKER += --bug-hunting
 endif
-endif
-
 
 CXX = clang++
 CC = clang
 LD = clang++
+endif
+
 RM = rm -f
 CP = cp -f
 

@@ -77,7 +77,7 @@
 
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     3
-#define VERSION_PATCH     0
+#define VERSION_PATCH     1
 
 /*#define OPTION_MACCAN_MULTICHANNEL  0  !* set globally: 0 = only one channel on multi-channel devices */
 /*#define OPTION_MACCAN_PIPE_TIMEOUT  0  !* set globally: 0 = do not use xxxPipeTO variant (e.g. macOS < 10.15) */
@@ -838,7 +838,7 @@ CANUSB_Index_t CANUSB_GetFirstDevice(void){
         return CANUSB_INVALID_INDEX;
 
     /* get the first registered device, if any */
-    if (idxDevice != 0)
+    // if (idxDevice != 0)  // note: logically equivalent
         idxDevice = 0;
     while (idxDevice < CANUSB_MAX_DEVICES) {
         if (usbDevice[idxDevice].fPresent &&
@@ -1897,5 +1897,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1090 2022-01-11 09:53:17Z haumea $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1191 2022-05-27 09:20:04Z eris $ *** (c) UV Software, Berlin ***
  */

@@ -1325,7 +1325,7 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t c
      * - byte 18: (not used)
      * - byte 19: flags
      */
-    buffer[0] = message->xtd ? LEN_TX_EXT_MESSAGE : LEN_TX_STD_MESSAGE;
+    buffer[0] = LEN_TX_STD_MESSAGE; // note: LEN_TX_EXT_MESSAGE == LEN_TX_STD_MESSAGE
     buffer[1] = message->xtd ? CMD_TX_EXT_MESSAGE : CMD_TX_STD_MESSAGE;
     buffer[2] = UINT8BYTE(channel);
     buffer[3] = UINT8BYTE(transId);

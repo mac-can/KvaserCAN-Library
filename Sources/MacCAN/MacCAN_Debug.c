@@ -2,7 +2,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
@@ -149,7 +149,7 @@ int can_log_write(unsigned char *buffer, size_t nbyte, const char *prefix) {
     if (prefix)
         fprintf(fp, "%s ", prefix);
     for (i = 0; i < (int)nbyte; i++) {
-        if (fprintf(fp, "%02X%c", buffer[i], (i+1) < nbyte ? ' ' : '\n') < 3) {
+        if (fprintf(fp, "%02X%c", buffer[i], (i+1) < (int)nbyte ? ' ' : '\n') < 3) {
             i = (-1);
             break;
         }
@@ -158,6 +158,7 @@ int can_log_write(unsigned char *buffer, size_t nbyte, const char *prefix) {
 #else
     if (buffer) { i = (-1); } /* to avoid compiler warnings */
     if (nbyte) { i = (-1); } /* to avoid compiler warnings */
+    if (prefix) { i = (-1); } /* to avoid compiler warnings */
 #endif
     return i;
 }
@@ -181,5 +182,5 @@ int can_log_printf(const char *format,...) {
     return rc;
 }
 
-/* * $Id: MacCAN_Debug.c 1001 2021-05-25 17:57:49Z eris $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Debug.c 1191 2022-05-27 09:20:04Z eris $ *** (c) UV Software, Berlin ***
  */

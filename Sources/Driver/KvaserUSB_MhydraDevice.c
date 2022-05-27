@@ -507,6 +507,7 @@ CANUSB_Return_t Mhydra_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     uint8_t buffer[HYDRA_CMD_SIZE];
     uint32_t size;
     uint8_t resp;
+    (void)timeout;  // FIXME: why isn't it used as in 'Mhydra_StopChip'
 
     /* sanity check */
     if (!device)
@@ -514,7 +515,7 @@ CANUSB_Return_t Mhydra_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    /* send request CMD_STOP_CHIP_REQ and wait for response */
+    /* send request CMD_START_CHIP_RESP and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillStartChipReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
     retVal = KvaserUSB_SendRequest(device, buffer, size);
@@ -952,7 +953,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
     KvaserUSB_RecvData_t *context = (KvaserUSB_RecvData_t*)refCon;
     KvaserUSB_CanMessage_t message;
     UInt32 index = 0U;
-    UInt32 nbyte = 0U;
+    UInt32 nbyte;
 
     assert(refCon);
     assert(buffer);
@@ -1641,6 +1642,7 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t d
 }
 
 static uint32_t FillFlushQueueReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, uint8_t flags) {
+    (void)flags;  // TODO: check for its purpose
     assert(buffer);
     assert(maxbyte >= HYDRA_CMD_SIZE);
     assert(destination < MAX_HE_COUNT);
@@ -1662,6 +1664,7 @@ static uint32_t FillFlushQueueReq(uint8_t *buffer, uint32_t maxbyte, uint8_t des
 }
 
 static uint32_t FillReadClockReq(uint8_t *buffer, uint32_t maxbyte, uint8_t flags) {
+    (void)flags;  // TODO: check for its purpose
     assert(buffer);
     assert(maxbyte >= HYDRA_CMD_SIZE);
     bzero(buffer, maxbyte);
