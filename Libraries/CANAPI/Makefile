@@ -67,7 +67,8 @@ OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o \
 
 ifeq ($(current_OS),Darwin)	# macOS - libUVCANKVL.dylib
 
-LIBRARY = libUVCANKVL
+PROJECT = UVCANKVL
+LIBRARY = lib$(PROJECT)
 
 MAJOR = 0
 MINOR = 2
@@ -77,7 +78,7 @@ VERSION = $(MAJOR).$(MINOR).$(PATCH)
 TARGET  = $(LIBRARY).$(VERSION).dylib
 STATIC  = $(LIBRARY).a
 
-INSTALL_NAME = $(TARGET)
+INSTALL_NAME = @rpath/$(TARGET)
 CURRENT_VERSION = $(MAJOR).$(MINOR).$(PATCH)
 COMPATIBILITY_VERSION = $(MAJOR).$(MINOR).0
 
@@ -104,8 +105,8 @@ HEADERS = -I$(SOURCE_DIR) \
 	-I$(DRIVER_DIR) \
 	-I$(WRAPPER_DIR)
 
-CFLAGS += -O2 -Wall -Wno-parentheses \
-	-fno-strict-aliasing \
+CFLAGS += -O2 -Wall -Wextra -Wno-parentheses \
+	-fmessage-length=0 -fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -118,9 +119,9 @@ LIBRARIES =
 LDFLAGS  += -lpthread \
 	-nostartfiles -dynamiclib -fvisibility=hidden \
 	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation \
-	-install_name $(INSTALL_NAME) \
-	-current_version $(CURRENT_VERSION) \
-	-compatibility_version $(COMPATIBILITY_VERSION)
+	-Wl,-install_name,$(INSTALL_NAME) \
+	-Wl,-current_version,$(CURRENT_VERSION) \
+	-Wl,-compatibility_version,$(COMPATIBILITY_VERSION)
 
 LTFLAGS += -static
 
@@ -129,13 +130,14 @@ CFLAGS += -arch arm64 -arch x86_64
 CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
-endif
 
 
 CXX = clang++
 CC = clang
 LD = clang
 LT = libtool
+endif
+
 RM = rm -f
 CP = cp -f
 LN = ln -s
@@ -177,7 +179,7 @@ pristine:
 
 install:
 	@echo "Copying library file..."
-	$(CP) $(TARGET) $(INSTALL)
+	$(RM) $(INSTALL)/$(TARGET); $(CP) $(TARGET) $(INSTALL)
 ifeq ($(current_OS),Darwin)
 	$(RM) $(INSTALL)/$(LIBRARY).dylib ; $(LN) $(INSTALL)/$(TARGET) $(INSTALL)/$(LIBRARY).dylib
 endif
