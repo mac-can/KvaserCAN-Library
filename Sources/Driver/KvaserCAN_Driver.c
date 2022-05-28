@@ -286,8 +286,8 @@ CANUSB_Return_t KvaserCAN_CanBusOn(KvaserUSB_Device_t *device, bool silent) {
     /* start CAN controller */
     switch (device->driverType) {
         case USB_MHYDRA_DRIVER:
-            // TODO: (void)Mhydra_ResetStatistics(device, KVASER_USB_REQUEST_DELAY);
-            // TODO: (void)Mhydra_ResetErrorCounter(device, KVASER_USB_REQUEST_DELAY);
+             (void)Mhydra_ResetStatistics(device, KVASER_USB_REQUEST_DELAY);
+             (void)Mhydra_ResetErrorCounter(device, KVASER_USB_REQUEST_DELAY);
             retVal = Mhydra_SetDriverMode(device, silent ? DRIVERMODE_SILENT : DRIVERMODE_NORMAL);
             if (retVal == CANUSB_SUCCESS)
                 retVal = Mhydra_StartChip(device, KVASER_USB_COMMAND_TIMEOUT);

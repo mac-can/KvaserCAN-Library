@@ -87,7 +87,7 @@ typedef struct kvaser_software_info_t_ {  /* software info/details: */
     uint32_t maxBitrate;                /* - max. bit-rate (hydra only, otherwise 1Mbit/s)*/
 } KvaserUSB_SoftwareInfo_t;
 
-typedef struct kvaser_capability_t_ {   /* capability: */
+typedef struct kvaser_capabilities_t_ { /* channel capabilities: */
     uint16_t hasTimeQuanta : 1;         /* - CAP_SUB_CMD_HAS_BUSPARAMS_TQ (mhydra) */
     uint16_t hasIoApi : 1;              /* - CAP_SUB_CMD_HAS_IO_API (mhydra) */
     uint16_t hasKdi : 1;                /* - CAP_SUB_CMD_HAS_KDI (mhydra) */
@@ -103,19 +103,26 @@ typedef struct kvaser_capability_t_ {   /* capability: */
     uint16_t errorFrame : 1;            /* - CAP_SUB_CMD_ERRFRAME */
     uint16_t silentMode : 1;            /* - CAP_SUB_CMD_SILENT_MODE */
     uint16_t dummy : 2;
-} KvaserUSB_Capability_t;
+} KvaserUSB_Capabilities_t;
+
+typedef struct kvaser_transceiver_info_t_ {  /* transceiver info: */
+    uint32_t transceiverCapabilities;   /* - capabilities */
+    uint8_t  transceiverStatus;         /* - status */
+    uint8_t  transceiverType;           /* - type */
+} KvaserUSB_TransceiverInfo_t;
 
 typedef struct kvaser_device_info_t_ {  /* device info: */
     KvaserUSB_CardInfo_t card;          /* - card info */
-//  KvaserUSB_InterfaceInfo_t channel;  /* - channel info */
+//  KvaserUSB_InterfaceInfo_t channel;  /* - channel info */  // TODO: uncomment when fixed
     KvaserUSB_SoftwareInfo_t software;  /* - software info */
-//  KvaserUSB_Capability_t capability;  /* - capability */
+//  KvaserUSB_Capabilities_t capabilities;   /* - channel capability */  // TODO: uncomment when fixed
+//  KvaserUSB_TransceiverInfo_t transceiver; /* - transceiver info */  // TODO: uncomment when fixed
 } KvaserUSB_DeviceInfo_t;
 
 typedef struct kvaser_bus_params_t_ {   /* bus parameter: */
     uint32_t bitRate;                   /* - bit rate (in [Hz]) */
     uint8_t  tseg1;                     /* - time segment 1 */
-    uint8_t  tseg2;                     /* - time segment 1 */
+    uint8_t  tseg2;                     /* - time segment 2 */
     uint8_t  sjw;                       /* - synchronization jump width */
     uint8_t  noSamp;                    /* - number of sample points */
 } KvaserUSB_BusParams_t;

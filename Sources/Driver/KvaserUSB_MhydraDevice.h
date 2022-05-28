@@ -75,23 +75,25 @@ extern CANUSB_Return_t Mhydra_GetDriverMode(KvaserUSB_Device_t *device, KvaserUS
 
 extern CANUSB_Return_t Mhydra_StartChip(KvaserUSB_Device_t *device, uint16_t timeout);
 extern CANUSB_Return_t Mhydra_StopChip(KvaserUSB_Device_t *device, uint16_t timeout);
-//extern CANUSB_Return_t Mhydra_ResetChip(KvaserUSB_Device_t *device, uint16_t delay);
-//extern CANUSB_Return_t Mhydra_ResetCard(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Mhydra_ResetChip(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Mhydra_ResetCard(KvaserUSB_Device_t *device, uint16_t delay);
 extern CANUSB_Return_t Mhydra_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay);
 
 extern CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout);
 extern CANUSB_Return_t Mhydra_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout);
 
 extern CANUSB_Return_t Mhydra_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/);
-//extern CANUSB_Return_t Mhydra_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay);
-//extern CANUSB_Return_t Mhydra_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Mhydra_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay);
+extern CANUSB_Return_t Mhydra_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay);
 
 extern CANUSB_Return_t Mhydra_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec);
 extern CANUSB_Return_t Mhydra_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load);
 
 extern CANUSB_Return_t Mhydra_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, int8_t dataLevel*/);
 extern CANUSB_Return_t Mhydra_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info/*, uint8_t hydraExt*/);
-//extern CANUSB_Return_t Mhydra_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
+extern CANUSB_Return_t Mhydra_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
+extern CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Capabilities_t *capabilities);
+extern CANUSB_Return_t Mhydra_GetTransceiverInfo(KvaserUSB_Device_t *device, KvaserUSB_TransceiverInfo_t *info);
 
 #ifdef __cplusplus
 }

@@ -90,6 +90,8 @@ extern CANUSB_Return_t Leaf_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_Bus
 extern CANUSB_Return_t Leaf_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, uint8_t dataLevel*/);
 extern CANUSB_Return_t Leaf_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info);
 extern CANUSB_Return_t Leaf_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info);
+extern CANUSB_Return_t Leaf_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Capabilities_t *capabilities);
+extern CANUSB_Return_t Leaf_GetTransceiverInfo(KvaserUSB_Device_t *device, KvaserUSB_TransceiverInfo_t *info);
 
 #ifdef __cplusplus
 }

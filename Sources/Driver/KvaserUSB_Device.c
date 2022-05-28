@@ -85,7 +85,7 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
         return retVal;
     if ((retVal = CANUSB_GetDeviceReleaseNo(handle, &device->releaseNo)) < 0)
         return retVal;
-    
+
     /* determine driver type (Leaf or Mhydra device) */
     if ((device->driverType = GetUsbDriverType(device->productId)) >= USB_UNKNOWN_DRIVER)
         return CANUSB_ERROR_NOTSUPP;
@@ -103,7 +103,7 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
     if ((retVal = CANUSB_GetInterfaceNumEndpoints(handle, &device->endpoints.numEndpoints)) < 0)
         return retVal;
     /* get endpoint properties from device */
-    // FIXME: Nah, nah, there's gotta be something better!
+    // TODO: Nah, nah, there's gotta be something better!
     for (uint8_t i = 1U; (i <= device->endpoints.numEndpoints) && (i < (1U + (KVASER_MAX_CAN_CHANNELS * 2U))); i++) {
         if (CANUSB_GetInterfaceEndpointDirection(handle, i, &dir) < 0)
             return retVal;
@@ -259,7 +259,7 @@ CANUSB_Return_t KvaserUSB_SendRequest(KvaserUSB_Device_t *device, const uint8_t 
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    retVal = CANUSB_WritePipe(device->handle, device->endpoints.bulkOut.pipeRef, buffer, nbyte, 0U);  // FIXME: time-out
+    retVal = CANUSB_WritePipe(device->handle, device->endpoints.bulkOut.pipeRef, buffer, nbyte, 0U);  // note: time-out only used if OPTION_MACCAN_PIPE_TIMEOUT enabled
     if (retVal == CANUSB_SUCCESS)
         MACCAN_LOG_WRITE((uint8_t*)buffer, nbyte, ">");
     else
