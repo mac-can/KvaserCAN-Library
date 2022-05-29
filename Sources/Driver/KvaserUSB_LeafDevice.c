@@ -58,6 +58,9 @@
 
 #include "MacCAN_Debug.h"
 
+#ifndef OPTION_PRINT_DEVICE_INFO
+#define OPTION_PRINT_DEVICE_INFO   0   /* note: set to non-zero value to print device information */
+#endif
 #define LEN_RX_STD_MESSAGE             24U
 #define LEN_TX_STD_MESSAGE             20U
 #define LEN_RX_EXT_MESSAGE             24U
@@ -126,8 +129,9 @@ static uint32_t FillGetSoftwareInfoReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
 static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd, uint16_t subData);
 static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
-
-static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo);
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo);
+#endif
 
 bool Leaf_ConfigureChannel(KvaserUSB_Device_t *device) {
     /* sanity check */
@@ -224,8 +228,10 @@ CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserU
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
     }
 #endif
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): properties and capabilities\n", device->name, device->handle);
     PrintDeviceInfo(&device->deviceInfo);  /* note: only for debugging purposes */
-
+#endif
     /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
     (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
     /* get CPU clock frequency (in [MHz]) from software options */
@@ -1644,12 +1650,9 @@ static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uin
     return (uint32_t)buffer[0];
 }
 
-#ifndef OPTION_LEAF_DEVICE_INFO
-#define OPTION_LEAF_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
-#endif
-static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
     assert(deviceInfo);
-#if (OPTION_LEAF_DEVICE_INFO != 0)
     MACCAN_DEBUG_DRIVER("    - card info:\n");
     MACCAN_DEBUG_DRIVER("      - channel count: %x\n", deviceInfo->card.channelCount);
     MACCAN_DEBUG_DRIVER("      - serial no.: %d\n", deviceInfo->card.serialNumber);
@@ -1712,5 +1715,5 @@ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
     MACCAN_DEBUG_DRIVER("      - transceiver status: %x\n", deviceInfo->transceiver.transceiverStatus);
     MACCAN_DEBUG_DRIVER("      - transceiver type: %x\n", deviceInfo->transceiver.transceiverType);
 #endif
+ }
 #endif
-}

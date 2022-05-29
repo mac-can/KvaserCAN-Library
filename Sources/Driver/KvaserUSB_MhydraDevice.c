@@ -58,6 +58,9 @@
 
 #include "MacCAN_Debug.h"
 
+#ifndef OPTION_PRINT_DEVICE_INFO
+#define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
+#endif
 #define ROUTER_HE  0x00U
 #define DYNAMIC_HE  ROUTER_HE
 #define ILLEGAL_HE  0x3EU
@@ -105,9 +108,11 @@ static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd/*, uint32_t extraInfo*/);
 static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination);
 
-static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo);
 static uint8_t Dlc2Len(uint8_t dlc);
-//static uint8_t Len2Dlc(uint8_t len);
+/*static uint8_t Len2Dlc(uint8_t len);  // uncomment when needed */
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo);
+#endif
 
 bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
     /* sanity check */
@@ -214,11 +219,22 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
     }
 #endif
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): properties and capabilities\n", device->name, device->handle);
     PrintDeviceInfo(&device->deviceInfo);  /* note: only for debugging purposes */
-
+#endif
     /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
     (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
     /* get CPU clock frequency (in [MHz]) from software options */
+#if (1)
+    switch (device->deviceInfo.software.swOptions & SWOPTION_CPU_FQ_MASK) {
+        case SWOPTION_80_MHZ_CLK: device->recvData.cpuFreq = 80U; break;
+        case SWOPTION_24_MHZ_CLK: device->recvData.cpuFreq = 24U; break;
+        default:
+            device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
+            break;
+    }
+#else
     switch (device->deviceInfo.software.swOptions & SWOPTION_CAN_CLK_MASK) {
         case SWOPTION_80_MHZ_CAN_CLK: device->recvData.cpuFreq = 80U; break;
         case SWOPTION_24_MHZ_CAN_CLK: device->recvData.cpuFreq = 24U; break;
@@ -226,6 +242,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
             device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
             break;
     }
+#endif
     /* get max. outstanding transmit messages */
     if ((0U < device->deviceInfo.software.maxOutstandingTx) &&
         (device->deviceInfo.software.maxOutstandingTx < MIN(MHYDRA_MAX_OUTSTANDING_TX, 255U)))
@@ -327,7 +344,7 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    /* send request CMD_SET_BUSPARAMS_REQ and wait for response */
+    /* send request CMD_SET_BUSPARAMS_FD_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillSetBusParamsFdReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, params);
     retVal = KvaserUSB_SendRequest(device, buffer, size);
@@ -2140,12 +2157,29 @@ static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uin
     return (uint32_t)HYDRA_CMD_SIZE;
 }
 
-#ifndef OPTION_MHYDRA_DEVICE_INFO
-#define OPTION_MHYDRA_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
+static uint8_t Dlc2Len(uint8_t dlc) {
+    const static uint8_t dlc_table[16] = {
+        0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 12U, 16U, 20U, 24U, 32U, 48U, 64U
+    };
+    return dlc_table[dlc & 0xFU];
+}
+
+#if (0)
+static uint8_t Len2Dlc(uint8_t len) {
+    if(len > 48U) return 0x0FU;
+    if(len > 32U) return 0x0EU;
+    if(len > 24U) return 0x0DU;
+    if(len > 20U) return 0x0CU;
+    if(len > 16U) return 0x0BU;
+    if(len > 12U) return 0x0AU;
+    if(len > 8U) return 0x09U;
+    return len;
+}
 #endif
-static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
+
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
     assert(deviceInfo);
-#if (OPTION_MHYDRA_DEVICE_INFO != 0)
     MACCAN_DEBUG_DRIVER("    - card info:\n");
     MACCAN_DEBUG_DRIVER("      - channel count: %x\n", deviceInfo->card.channelCount);
     MACCAN_DEBUG_DRIVER("      - serial no.: %d\n", deviceInfo->card.serialNumber);
@@ -2230,23 +2264,5 @@ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
     MACCAN_DEBUG_DRIVER("      - transceiver status: %x\n", deviceInfo->transceiver.transceiverStatus);
     MACCAN_DEBUG_DRIVER("      - transceiver type: %x\n", deviceInfo->transceiver.transceiverType);
 #endif
+ }
 #endif
-}
-
-static uint8_t Dlc2Len(uint8_t dlc) {
-    const static uint8_t dlc_table[16] = {
-        0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 12U, 16U, 20U, 24U, 32U, 48U, 64U
-    };
-    return dlc_table[dlc & 0xFU];
-}
-
-//static uint8_t Len2Dlc(uint8_t len) {
-//    if(len > 48U) return 0x0FU;
-//    if(len > 32U) return 0x0EU;
-//    if(len > 24U) return 0x0DU;
-//    if(len > 20U) return 0x0CU;
-//    if(len > 16U) return 0x0BU;
-//    if(len > 12U) return 0x0AU;
-//    if(len > 8U) return 0x09U;
-//    return len;
-//}
