@@ -61,6 +61,9 @@
 #ifndef OPTION_PRINT_DEVICE_INFO
 #define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
 #endif
+#ifndef OPTION_PRINT_BUS_PARAMS
+#define OPTION_PRINT_BUS_PARAMS  1  /* note: set to non-zero value to print bus params */
+#endif
 #define ROUTER_HE  0x00U
 #define DYNAMIC_HE  ROUTER_HE
 #define ILLEGAL_HE  0x3EU
@@ -87,7 +90,9 @@ static CANUSB_Return_t ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer,
 static uint32_t FillMapChannelReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination);
 static uint32_t FillSetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParams_t *params);
 static uint32_t FillSetBusParamsFdReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsFd_t *params);
+static uint32_t FillSetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsTq_t *params);
 static uint32_t FillGetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, bool canFd);
+static uint32_t FillGetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, bool canFd);
 static uint32_t FillSetDriverModeReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_DriverMode_t mode);
 static uint32_t FillGetDriverModeReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination);
 static uint32_t FillGetChipStateReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination);
@@ -326,6 +331,10 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
              * - byte 5: (reserved)
              * - byte 6..31: (not used)
              */
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+                                params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+#endif
             // TODO: handle driver mode
         }
     }
@@ -362,6 +371,57 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
              * - byte 6..31: (not used)
              */
             // TODO: handle driver mode
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u"
+                                                                          " : freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+                                params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp,
+                                params->data.bitRate, params->data.tseg1, params->data.tseg2, params->data.sjw, params->data.noSamp);
+#endif
+        }
+    }
+    return retVal;
+}
+
+CANUSB_Return_t Mhydra_SetBusParamsTq(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsTq_t *params) {
+    CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
+    uint8_t buffer[HYDRA_CMD_SIZE];
+    uint32_t size;
+    uint8_t resp;
+
+    /* sanity check */
+    if (!device || !params)
+        return CANUSB_ERROR_NULLPTR;
+    if (!device->configured)
+        return CANUSB_ERROR_NOTINIT;
+
+    /* send request CMD_SET_BUSPARAMS_TQ_REQ and wait for response */
+    bzero(buffer, HYDRA_CMD_SIZE);
+    size = FillSetBusParamsTqReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, params);
+    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    if (retVal == CANUSB_SUCCESS) {
+        size = HYDRA_CMD_SIZE;
+        resp = CMD_SET_BUSPARAMS_TQ_RESP;
+        retVal = ReadResponse(device, buffer, size, resp, HYDRA_CMD_RESP_TIMEOUT);
+        if (retVal == CANUSB_SUCCESS) {
+            /* command response:
+             * - byte 0: command code
+             * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+             * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+             * - byte 4: status
+             * - byte 5: (reserved)
+             * - byte 6..31: (not used)
+             */
+            // TODO: handle status
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+            if (params->canFd)
+                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u"
+                                                                          " : prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                                    params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp,
+                                    params->data.prop, params->data.phase1, params->data.phase2, params->data.sjw, params->data.brp);
+            else
+                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                                    params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp);
+#endif
         }
     }
     return retVal;
@@ -404,6 +464,10 @@ CANUSB_Return_t Mhydra_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusPar
             params->tseg2 = BUF2UINT8(buffer[9]);
             params->sjw = BUF2UINT8(buffer[10]);
             params->noSamp = BUF2UINT8(buffer[11]);
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+                                params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+#endif
         }
     }
     return retVal;
@@ -472,8 +536,80 @@ CANUSB_Return_t Mhydra_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusP
                     params->data.tseg2 = BUF2UINT8(buffer[9]);
                     params->data.sjw = BUF2UINT8(buffer[10]);
                     params->data.noSamp = BUF2UINT8(buffer[11]);
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+                    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params CAN FD - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u"
+                                                                                  " : freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+                                        params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp,
+                                        params->data.bitRate, params->data.tseg1, params->data.tseg2, params->data.sjw, params->data.noSamp);
+#endif
                 }
             }
+        }
+    }
+    return retVal;
+}
+
+CANUSB_Return_t Mhydra_GetBusParamsTq(KvaserUSB_Device_t *device, KvaserUSB_BusParamsTq_t *params) {
+    CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
+    uint8_t buffer[HYDRA_CMD_SIZE];
+    uint32_t size;
+    uint8_t resp;
+
+    /* sanity check */
+    if (!device || !params)
+        return CANUSB_ERROR_NULLPTR;
+    if (!device->configured)
+        return CANUSB_ERROR_NOTINIT;
+
+    /* send request CMD_GET_BUSPARAMS_TQ_REQ and wait for response */
+    bzero(buffer, HYDRA_CMD_SIZE);
+    size = FillGetBusParamsTqReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, true);  // FIXME: canFd ? true : false
+    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    if (retVal == CANUSB_SUCCESS) {
+        size = HYDRA_CMD_SIZE;
+        resp = CMD_GET_BUSPARAMS_TQ_RESP;
+        retVal = ReadResponse(device, buffer, size, resp, HYDRA_CMD_RESP_TIMEOUT);
+        if (retVal == CANUSB_SUCCESS) {
+            /* command response:
+             * - byte 0: command code
+             * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+             * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+             * - byte 4..5: propagation segment (arbitration phase)
+             * - byte 6..7: phase 1 segment (arbitration phase)
+             * - byte 8..9: phase 2 segment (arbitration phase)
+             * - byte 10..11: synchronous jump width (arbitration phase)
+             * - byte 12..13: bit-rate prescaler (arbitration phase)
+             * - byte 14..15: propagation segment (CAN FD data phase)
+             * - byte 16..17: phase 1 segment (CAN FD data phase)
+             * - byte 18..19: phase 2 segment (CAN FD data phase)
+             * - byte 20..21: synchronous jump width (CAN FD data phase)
+             * - byte 22..23: bit-rate prescaler (CAN FD data phase)
+             * - byte 24: open as CAN FD
+             * - byte 25: status
+             * - byte 26..31: (not used)
+             */
+            params->arbitration.prop = BUF2UINT16(buffer[4]);
+            params->arbitration.phase1 = BUF2UINT16(buffer[6]);
+            params->arbitration.phase2 = BUF2UINT16(buffer[8]);
+            params->arbitration.sjw = BUF2UINT16(buffer[10]);
+            params->arbitration.brp = BUF2UINT16(buffer[12]);
+            params->data.prop = BUF2UINT16(buffer[14]);
+            params->data.phase1 = BUF2UINT16(buffer[16]);
+            params->data.phase2 = BUF2UINT16(buffer[18]);
+            params->data.sjw = BUF2UINT16(buffer[20]);
+            params->data.brp = BUF2UINT16(buffer[22]);
+            params->canFd = buffer[24] ? true : false;
+            // TODO: handle status
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+            if (params->canFd)
+                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u"
+                                                                          " : prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                                    params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp,
+                                    params->data.prop, params->data.phase1, params->data.phase2, params->data.sjw, params->data.brp);
+            else
+                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                                    params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp);
+#endif
         }
     }
     return retVal;
@@ -1665,6 +1801,60 @@ static uint32_t FillSetBusParamsFdReq(uint8_t *buffer, uint32_t maxbyte, uint8_t
     return (uint32_t)HYDRA_CMD_SIZE;
 }
 
+static uint32_t FillSetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsTq_t *params) {
+    assert(buffer);
+    assert(params);
+    assert(maxbyte >= HYDRA_CMD_SIZE);
+    assert(destination < MAX_HE_COUNT);
+    bzero(buffer, maxbyte);
+    /* command request:
+     * - byte 0: command code
+     * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+     * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+     * - byte 4..5: propagation segment (arbitration phase)
+     * - byte 6..7: phase 1 segment (arbitration phase)
+     * - byte 8..9: phase 2 segment (arbitration phase)
+     * - byte 10..11: synchronous jump width (arbitration phase)
+     * - byte 12..13: bit-rate prescaler (arbitration phase)
+     * - byte 14..15: propagation segment (CAN FD data phase)
+     * - byte 16..17: phase 1 segment (CAN FD data phase)
+     * - byte 18..19: phase 2 segment (CAN FD data phase)
+     * - byte 20..21: synchronous jump width (CAN FD data phase)
+     * - byte 22..23: bit-rate prescaler (CAN FD data phase)
+     * - byte 24: open as CAN FD
+     * - byte 25..31: (not used)
+     */
+    uint8_t address = SET_DST(0U, destination);
+    buffer[0] = CMD_SET_BUSPARAMS_TQ_REQ;
+    buffer[1] = UINT8BYTE(address);
+    buffer[2] = UINT8BYTE(0x00);
+    buffer[3] = UINT8BYTE(0x00);
+    /* arguments */
+    buffer[4] =  UINT16LSB(params->arbitration.prop);
+    buffer[5] =  UINT16MSB(params->arbitration.prop);
+    buffer[6] =  UINT16LSB(params->arbitration.phase1);
+    buffer[7] =  UINT16MSB(params->arbitration.phase1);
+    buffer[8] =  UINT16LSB(params->arbitration.phase2);
+    buffer[9] =  UINT16MSB(params->arbitration.phase2);
+    buffer[10] = UINT16LSB(params->arbitration.sjw);
+    buffer[11] = UINT16MSB(params->arbitration.sjw);
+    buffer[12] = UINT16LSB(params->arbitration.brp);
+    buffer[13] = UINT16MSB(params->arbitration.brp);
+    buffer[14] = UINT16LSB(params->data.prop);
+    buffer[15] = UINT16MSB(params->data.prop);
+    buffer[16] = UINT16LSB(params->data.phase1);
+    buffer[17] = UINT16MSB(params->data.phase1);
+    buffer[18] = UINT16LSB(params->data.phase2);
+    buffer[19] = UINT16MSB(params->data.phase2);
+    buffer[20] = UINT16LSB(params->data.sjw);
+    buffer[21] = UINT16MSB(params->data.sjw);
+    buffer[22] = UINT16LSB(params->data.brp);
+    buffer[23] = UINT16MSB(params->data.brp);
+    buffer[24] = UINT8BYTE(params->canFd ? 1 : 0);
+    /* return request length */
+    return (uint32_t)HYDRA_CMD_SIZE;
+}
+
 static uint32_t FillGetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, bool canFd) {
     assert(buffer);
     assert(maxbyte >= HYDRA_CMD_SIZE);
@@ -1680,6 +1870,30 @@ static uint32_t FillGetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t d
      */
     uint8_t address = SET_DST(0U, destination);
     buffer[0] = CMD_GET_BUSPARAMS_REQ;
+    buffer[1] = UINT8BYTE(address);
+    buffer[2] = UINT8BYTE(0x00);
+    buffer[3] = UINT8BYTE(0x00);
+    /* arguments */
+    buffer[4] = UINT8BYTE(canFd ? 1 : 0);
+    /* return request length */
+    return (uint32_t)HYDRA_CMD_SIZE;
+}
+
+static uint32_t FillGetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, bool canFd) {
+    assert(buffer);
+    assert(maxbyte >= HYDRA_CMD_SIZE);
+    assert(destination < MAX_HE_COUNT);
+    bzero(buffer, maxbyte);
+    /* command request:
+     * - byte 0: command code
+     * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+     * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+     * - byte 4: param type (0 = CAN 2.0, 1 = CAN FD)
+     * - byte 5: (reserved)
+     * - byte 6..31: (not used)
+     */
+    uint8_t address = SET_DST(0U, destination);
+    buffer[0] = CMD_GET_BUSPARAMS_TQ_REQ;
     buffer[1] = UINT8BYTE(address);
     buffer[2] = UINT8BYTE(0x00);
     buffer[3] = UINT8BYTE(0x00);

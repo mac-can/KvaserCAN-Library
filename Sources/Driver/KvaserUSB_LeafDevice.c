@@ -59,7 +59,10 @@
 #include "MacCAN_Debug.h"
 
 #ifndef OPTION_PRINT_DEVICE_INFO
-#define OPTION_PRINT_DEVICE_INFO   0   /* note: set to non-zero value to print device information */
+#define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
+#endif
+#ifndef OPTION_PRINT_BUS_PARAMS
+#define OPTION_PRINT_BUS_PARAMS  1  /* note: set to non-zero value to print bus params */
 #endif
 #define LEN_RX_STD_MESSAGE             24U
 #define LEN_TX_STD_MESSAGE             20U
@@ -316,7 +319,12 @@ CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_Bu
     bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
     size = FillSetBusParamsReq(buffer, KVASER_MAX_COMMAND_LENGTH, device->channelNo, params);
     retVal = KvaserUSB_SendRequest(device, buffer, size);
-
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+    if (retVal == CANUSB_SUCCESS) {
+        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+                            params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+    }
+#endif
     return retVal;
 }
 
@@ -354,6 +362,10 @@ CANUSB_Return_t Leaf_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParam
             params->tseg2 = BUF2UINT8(buffer[9]);
             params->sjw = BUF2UINT8(buffer[10]);
             params->noSamp = BUF2UINT8(buffer[11]);
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+                                params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+#endif
         }
     }
     return retVal;

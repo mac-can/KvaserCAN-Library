@@ -183,7 +183,11 @@
 #define CMD_FLUSH_QUEUE_RESP                0x42U
 #define CMD_SET_BUSPARAMS_FD_REQ            0x45U
 #define CMD_SET_BUSPARAMS_FD_RESP           0x46U
+#define CMD_GET_BUSPARAMS_TQ_REQ            0x47U
+#define CMD_SET_BUSPARAMS_TQ_REQ            0x54U
 #define CMD_SET_BUSPARAMS_RESP              0x55U
+#define CMD_GET_BUSPARAMS_TQ_RESP           0x64U
+#define CMD_SET_BUSPARAMS_TQ_RESP           0x8BU
 #define CMD_MAP_CHANNEL_REQ                 0xC8U
 #define CMD_MAP_CHANNEL_RESP                0xC9U
 #define CMD_GET_SOFTWARE_DETAILS_REQ        0xCAU

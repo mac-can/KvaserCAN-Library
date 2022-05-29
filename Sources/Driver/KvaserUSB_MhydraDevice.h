@@ -69,6 +69,8 @@ extern CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const Kva
 extern CANUSB_Return_t Mhydra_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params);
 extern CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsFd_t *params);
 extern CANUSB_Return_t Mhydra_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusParamsFd_t *params);
+extern CANUSB_Return_t Mhydra_SetBusParamsTq(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsTq_t *params);
+extern CANUSB_Return_t Mhydra_GetBusParamsTq(KvaserUSB_Device_t *device, KvaserUSB_BusParamsTq_t *params);
 
 extern CANUSB_Return_t Mhydra_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode);
 extern CANUSB_Return_t Mhydra_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode);

@@ -133,6 +133,24 @@ typedef struct kvaser_bus_params_fd_t_ {/* bus parameter for CAN FD: */
     bool canFd;                         /* - flag: open as CAN FD */
 } KvaserUSB_BusParamsFd_t;
 
+typedef struct kvaser_bus_params_tq_t_ {/* bus parameter (time quanta): */
+    struct tq_arbitration_t_ {          /* - arbitration phase: */
+        uint16_t prop;                  /*   - TQ for propagation segment */
+        uint16_t phase1;                /*   - TQ for phase 1 segment */
+        uint16_t phase2;                /*   - TQ for phase 2 segment */
+        uint16_t sjw;                   /*   - synchronization jump width */
+        uint16_t brp;                   /*   - bit-rate prescaler */
+    } arbitration;
+    struct tq_data_phase_t_ {           /* - data phase (CAN FD): */
+        uint16_t prop;                  /*   - TQ for propagation segment */
+        uint16_t phase1;                /*   - TQ for phase 1 segment */
+        uint16_t phase2;                /*   - TQ for phase 2 segment */
+        uint16_t sjw;                   /*   - synchronization jump width */
+        uint16_t brp;                   /*   - bit-rate prescaler */
+    } data;
+    bool canFd;                         /* - flag: open as CAN FD */
+} KvaserUSB_BusParamsTq_t;
+
 typedef uint8_t KvaserUSB_OpMode_t;     /* operation mode (CAN API V1 compatible) */
 
 typedef uint8_t KvaserUSB_DriverMode_t; /* driver mode (OFF, NORMAL, SILENT) */
