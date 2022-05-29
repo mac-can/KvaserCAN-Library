@@ -71,7 +71,8 @@
 #define TX_ACKNOWLEDGE_UNSUPPORTED  0
 
 //  (§6) define macros for workarounds in CAN Classic operation mode (e.g. TC01_3_WORKARAOUND)
-#define KVASER_BUSPARAMS_WORKAROUND  1
+#define TC11_10_KVASER_BUSPARAMS_WORKAROUND  1  // CAN API issue due to unknown CAN clock and BRP
+#define TC11_10_KVASER_NOSAMP_WORKAROUND  1  // SAM issue (different value from device than set)
 //#define TX0x_y_WORKARAOUND  1
 
 //  (§7) define macro CAN_FD_SUPPORTED when CAN FD operation mode is supported

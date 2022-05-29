@@ -543,6 +543,8 @@
     //        is required when messages are not acknowlegded by the CAN controller.
     CTimer::Delay(TEST_AFTER_BURNER*CTimer::MSEC);
     // @note: the delay depends on the bit-rate (set TEST_AFTER_BURNER in "Settings.h").
+#else
+    CTimer::Delay(100U*CTimer::MSEC);  // [2022-05-28] let the queue finally overflow!
 #endif
     NSLog(@"%d frame(s) sent", i);
     // @- read a message from DUT1 (there should be at least one)
@@ -997,4 +999,4 @@
 }
 @end
 
-// $Id: test_can_read.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_read.mm 1193 2022-05-29 16:26:39Z makemake $  Copyright (c) UV Software, Berlin //

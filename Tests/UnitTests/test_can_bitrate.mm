@@ -600,7 +600,7 @@
         // @-- get bitrate from DUT1 and compare with selected settings
         rc = can_bitrate(handle, &result, NULL);
         XCTAssertEqual(CANERR_NOERROR, rc);
-#if (KVASER_BUSPARAMS_WORKAROUND == 0)
+#if (TC11_10_KVASER_BUSPARAMS_WORKAROUND == 0)
         XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
         XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
 #else
@@ -612,7 +612,9 @@
         XCTAssertEqual(bitrate.btr.nominal.tseg1, result.btr.nominal.tseg1);
         XCTAssertEqual(bitrate.btr.nominal.tseg2, result.btr.nominal.tseg2);
         XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
+#if (TC11_10_KVASER_NOSAMP_WORKAROUND == 0)
         XCTAssertEqual(bitrate.btr.nominal.sam, result.btr.nominal.sam);
+#endif
         // @-- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
         CTester tester;
@@ -646,4 +648,4 @@
 
 @end
 
-// $Id: test_can_bitrate.mm 1088 2022-01-10 21:14:15Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_bitrate.mm 1194 2022-05-29 16:29:45Z makemake $  Copyright (c) UV Software, Berlin //
