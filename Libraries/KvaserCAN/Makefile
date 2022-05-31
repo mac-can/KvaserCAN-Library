@@ -65,7 +65,7 @@ OBJECTS = $(OUTDIR)/KvaserCAN.o \
 	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
 
-ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
+ifeq ($(current_OS),Darwin)	# macOS - libKvaserCAN.dylib
 
 LIBRARY = libKvaserCAN
 
