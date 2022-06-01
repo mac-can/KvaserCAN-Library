@@ -51,7 +51,7 @@
 #include "build_no.h"
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    2
-#define VERSION_PATCH    99
+#define VERSION_PATCH    1
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(__APPLE__)
@@ -129,7 +129,7 @@ typedef struct {                        // Kvaser CAN interface:
 /*  -----------  prototypes  ---------------------------------------------
  */
 static int map_bitrate2busparams(const can_bitrate_t *bitrate, KvaserUSB_BusParams_t *busParams);
-static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, can_bitrate_t *bitrate);
+static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, can_bitrate_t *bitrate, int32_t canClock);
 static int map_bitrate2busparams_fd(const can_bitrate_t *bitrate, KvaserUSB_BusParamsFd_t *busParams);
 static int map_busparams2bitrate_fd(const KvaserUSB_BusParamsFd_t *busParams, can_bitrate_t *bitrate);
 static int lib_parameter(uint16_t param, void *value, size_t nbyte);
@@ -550,12 +550,13 @@ int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed)
     memset(&busParamsFd, 0, sizeof(KvaserUSB_BusParamsFd_t));
     bool fdoe = can[handle].mode.fdoe ? true : false;
     bool brse = can[handle].mode.brse ? true : false;
+    int32_t canClock = (int32_t)can[handle].device.clocks[0];  // FIXME: remove clocks array
 
     // CAN 2.0 operation mode:
     if (!can[handle].mode.fdoe) {
         // get bit-rate settings from device
         if ((rc = KvaserCAN_GetBusParams(&can[handle].device, &busParams)) == CANUSB_SUCCESS) {
-            if ((rc = map_busparams2bitrate(&busParams, &tmpBitrate)) == CANUSB_SUCCESS) {
+            if ((rc = map_busparams2bitrate(&busParams, &tmpBitrate, canClock)) == CANUSB_SUCCESS) {
                 rc = btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed);
             }
         }
@@ -677,21 +678,18 @@ static int map_bitrate2busparams(const can_bitrate_t *bitrate, KvaserUSB_BusPara
     return CANERR_NOERROR;
 }
 
-static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, can_bitrate_t *bitrate)
+static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, can_bitrate_t *bitrate, int32_t canClock)
 {
     // sanity check
     if (!busParams || !bitrate)
         return CANERR_NULLPTR;
 
-    // Kvaser canLib32 doesn't offer the used controller frequency and bit-rate prescaler.
-    // We suppose it's running with 80MHz and calculate the bit-rate prescaler as follows:
+    // (1) brp = frequency / (bit-rate * (1 + tseg1 + tseq2))
     //
-    // (1) brp = 80MHz / (bit-rate * (1 + tseg1 + tseq2))
-    //
-    if (busParams->bitRate <= 0)   // divide-by-zero!
+    if (busParams->bitRate == 0)   // divide-by-zero!
         return CANERR_BAUDRATE;
-    bitrate->btr.frequency = (int32_t)80000000;
-    bitrate->btr.nominal.brp = (uint16_t)(80000000L
+    bitrate->btr.frequency = (int32_t)canClock;
+    bitrate->btr.nominal.brp = (uint16_t)(bitrate->btr.frequency
                              / (busParams->bitRate * (int32_t)(1u + busParams->tseg1 + busParams->tseg2)));
     bitrate->btr.nominal.tseg1 = (uint16_t)busParams->tseg1;
     bitrate->btr.nominal.tseg2 = (uint16_t)busParams->tseg2;
