@@ -1438,7 +1438,7 @@
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
         // @-- start DUT1 with CAN FD bit-rate settings: 250kbps : 2'000kbps
-        BITRATE_250K2M(bitrate);
+        BITRATE_FD_250K2M(bitrate);
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
         // @-- get status of DUT1 and check to be in RUNNING state

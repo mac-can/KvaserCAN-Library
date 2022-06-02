@@ -391,7 +391,7 @@
 
     // @post:
     // @- start DUT1 with configured bit-rate settings
-    if (mode.fdoe) BITRATE_250K2M(bitrate);
+    if (mode.fdoe) BITRATE_FD_250K2M(bitrate);
     // @note: 250kbps : 2'000kbps when CAN FD capable.
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
