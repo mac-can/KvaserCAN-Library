@@ -157,9 +157,7 @@ bool Leaf_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.txAck.maxMsg = LEAF_MAX_OUTSTANDING_TX;
 
     /* set CAN channel operation capabilities from device spec. */
-    device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_FDOE : 0x00U;
-    device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_BRSE : 0x00U;
-    device->opCapability |= KvaserDEV_IsNonIsoCanFdSupported(device->productId) ? CANMODE_NISO : 0x00U;
+    device->opCapability = 0x00U;  /* note: CAN FD not supported by Leaf devices */
     device->opCapability |= KvaserDEV_IsErrorFrameSupported(device->productId) ? CANMODE_ERR : 0x00U;
     device->opCapability |= KvaserDEV_IsSilentModeSupported(device->productId) ? CANMODE_MON : 0x00U;
     device->opCapability |= CANMODE_NXTD;

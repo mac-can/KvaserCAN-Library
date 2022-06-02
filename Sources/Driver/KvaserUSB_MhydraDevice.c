@@ -140,9 +140,10 @@ bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.txAck.maxMsg = MHYDRA_MAX_OUTSTANDING_TX;
 
     /* set CAN channel operation capabilities from device spec. */
+    device->opCapability = 0x00U;
     device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_FDOE : 0x00U;
     device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_BRSE : 0x00U;
-    device->opCapability |= KvaserDEV_IsNonIsoCanFdSupported(device->productId) ? CANMODE_NISO : 0x00U;
+    // TODO: device->opCapability |= KvaserDEV_IsNonIsoCanFdSupported(device->productId) ? CANMODE_NISO : 0x00U;
     device->opCapability |= KvaserDEV_IsErrorFrameSupported(device->productId) ? CANMODE_ERR : 0x00U;
     device->opCapability |= KvaserDEV_IsSilentModeSupported(device->productId) ? CANMODE_MON : 0x00U;
     device->opCapability |= CANMODE_NXTD;
@@ -258,7 +259,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
     device->opCapability &= ~(CANMODE_FDOE | CANMODE_BRSE | CANMODE_NISO);
     device->opCapability |= (device->deviceInfo.software.swOptions & SWOPTION_CANFD_CAP) ? CANMODE_FDOE : 0x00;
     device->opCapability |= (device->deviceInfo.software.swOptions & SWOPTION_CANFD_CAP) ? CANMODE_BRSE : 0x00;
-    device->opCapability |= (device->deviceInfo.software.swOptions & SWOPTION_NONISO_CAP) ? CANMODE_NISO : 0x00;
+    // TODO: device->opCapability |= (device->deviceInfo.software.swOptions & SWOPTION_NONISO_CAP) ? CANMODE_NISO : 0x00;
     /* check requested operation mode */
     if ((opMode & ~device->opCapability)) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): unsupported operation mode (%02x)\n", device->name, device->handle, (opMode & ~device->opCapability));
