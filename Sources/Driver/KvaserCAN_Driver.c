@@ -320,12 +320,12 @@ CANUSB_Return_t KvaserCAN_CanBusOff(KvaserUSB_Device_t *device) {
         case USB_MHYDRA_DRIVER:
             retVal = Mhydra_StopChip(device, KVASER_USB_COMMAND_TIMEOUT);
             if (retVal == CANUSB_SUCCESS)
-                retVal = Mhydra_SetDriverMode(device, DRIVERMODE_NORMAL/*_OFF*/);  // OFF doesn't work
+                retVal = Mhydra_SetDriverMode(device, DRIVERMODE_NORMAL);  /* note: OFF doesn't work */
             break;
         case USB_LEAF_DRIVER:
             retVal = Leaf_StopChip(device, KVASER_USB_COMMAND_TIMEOUT);
             if (retVal == CANUSB_SUCCESS)
-                retVal = Leaf_SetDriverMode(device, DRIVERMODE_OFF);
+                retVal = Leaf_SetDriverMode(device, DRIVERMODE_NORMAL);  /* note: OFF doesn't work */
             break;
         default:
             retVal = CANUSB_ERROR_FATAL;

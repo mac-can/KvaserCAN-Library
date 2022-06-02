@@ -62,7 +62,7 @@
 #define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
 #endif
 #ifndef OPTION_PRINT_BUS_PARAMS
-#define OPTION_PRINT_BUS_PARAMS  1  /* note: set to non-zero value to print bus params */
+#define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
 #endif
 #define ROUTER_HE  0x00U
 #define DYNAMIC_HE  ROUTER_HE
@@ -292,6 +292,7 @@ CANUSB_Return_t Mhydra_TeardownChannel(KvaserUSB_Device_t *device) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
         //goto end_exit;
     }
+    // TODO: set driver mode OFF resp. NORMAL (or remove it from 'Leaf_TeardownChannel')
 //end_exit:
     /* stop the reception loop */
     retVal = KvaserUSB_AbortReception(device);

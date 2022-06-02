@@ -62,7 +62,7 @@
 #define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
 #endif
 #ifndef OPTION_PRINT_BUS_PARAMS
-#define OPTION_PRINT_BUS_PARAMS  1  /* note: set to non-zero value to print bus params */
+#define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
 #endif
 #define LEN_RX_STD_MESSAGE             24U
 #define LEN_TX_STD_MESSAGE             20U
@@ -195,8 +195,8 @@ CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserU
         goto err_init;
     }
     /* set driver mode OFF */
-    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode OFF\n", device->name, device->handle);
-    retVal = Leaf_SetDriverMode(device, DRIVERMODE_OFF);
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode NORMAL\n", device->name, device->handle);
+    retVal = Leaf_SetDriverMode(device, DRIVERMODE_NORMAL);  /* note: OFF doesn't work */
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
         goto err_init;
@@ -288,8 +288,8 @@ CANUSB_Return_t Leaf_TeardownChannel(KvaserUSB_Device_t *device) {
         //goto end_exit;
     }
     /* set driver mode OFF */
-    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode OFF\n", device->name, device->handle);
-    retVal = Leaf_SetDriverMode(device, DRIVERMODE_OFF);
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode NORMAL\n", device->name, device->handle);
+    retVal = Leaf_SetDriverMode(device, DRIVERMODE_NORMAL);  /* note: OFF doesn't work */
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
         //goto end_exit;
