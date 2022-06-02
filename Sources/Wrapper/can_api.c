@@ -51,7 +51,7 @@
 #include "build_no.h"
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    2
-#define VERSION_PATCH    1
+#define VERSION_PATCH    99
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(__APPLE__)
@@ -550,7 +550,7 @@ int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed)
     memset(&busParamsFd, 0, sizeof(KvaserUSB_BusParamsFd_t));
     bool fdoe = can[handle].mode.fdoe ? true : false;
     bool brse = can[handle].mode.brse ? true : false;
-    int32_t canClock = (int32_t)can[handle].device.clocks[0];  // FIXME: remove clocks array
+    int32_t canClock = (int32_t)can[handle].device.recvData.cpuFreq * (int32_t)1000000;
 
     // CAN 2.0 operation mode:
     if (!can[handle].mode.fdoe) {
