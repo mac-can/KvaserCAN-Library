@@ -1657,4 +1657,4 @@
 
 @end
 
-// $Id: test_can_write.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_write.mm 1195 2022-06-02 17:52:37Z makemake $  Copyright (c) UV Software, Berlin //

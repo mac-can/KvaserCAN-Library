@@ -600,10 +600,11 @@
         // @-- get bitrate from DUT1 and compare with selected settings
         rc = can_bitrate(handle, &result, NULL);
         XCTAssertEqual(CANERR_NOERROR, rc);
-#if (TC11_10_KVASER_BUSPARAMS_WORKAROUND == 0)
+#if (TC11_10_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
         XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
         XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
 #else
+        // @note: compare bit-rate settings by time quanta (tq = f_clock / brp)
         if (bitrate.btr.nominal.brp && result.btr.nominal.brp)
             XCTAssertEqual((bitrate.btr.frequency / bitrate.btr.nominal.brp), (result.btr.frequency / result.btr.nominal.brp));
         else
@@ -648,4 +649,4 @@
 
 @end
 
-// $Id: test_can_bitrate.mm 1194 2022-05-29 16:29:45Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_bitrate.mm 1195 2022-06-02 17:52:37Z makemake $  Copyright (c) UV Software, Berlin //
