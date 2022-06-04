@@ -115,8 +115,8 @@ typedef struct kvaser_device_info_t_ {  /* device info: */
     KvaserUSB_CardInfo_t card;          /* - card info */
 //  KvaserUSB_InterfaceInfo_t channel;  /* - channel info */  // TODO: uncomment when fixed
     KvaserUSB_SoftwareInfo_t software;  /* - software info */
-//  KvaserUSB_Capabilities_t capabilities;   /* - channel capability */  // TODO: uncomment when fixed
-//  KvaserUSB_TransceiverInfo_t transceiver; /* - transceiver info */  // TODO: uncomment when fixed
+    KvaserUSB_Capabilities_t capabilities;   /* - channel capability */
+    KvaserUSB_TransceiverInfo_t transceiver; /* - transceiver info */
 } KvaserUSB_DeviceInfo_t;
 
 typedef struct kvaser_bus_params_t_ {   /* bus parameter: */

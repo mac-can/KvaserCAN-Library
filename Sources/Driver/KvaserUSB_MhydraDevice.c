@@ -110,7 +110,7 @@ static uint32_t FillGetCardInfoReq(uint8_t *buffer, uint32_t maxbyte, int8_t dat
 static uint32_t FillGetSoftwareDetailsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t hydraExt);
 static uint32_t FillGetMaxOutstandingTxReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte);
-static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd/*, uint32_t extraInfo*/);
+static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, uint16_t subCmd/*, uint32_t extraInfo*/);
 static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination);
 
 static uint8_t Dlc2Len(uint8_t dlc);
@@ -216,15 +216,15 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
     }
-    retVal = Mhydra_GetCapabilities(device, &device->deviceInfo.capabilities);  // FIXME: returns (-50)
+#endif
+    retVal = Mhydra_GetCapabilities(device, &device->deviceInfo.capabilities);  // FIXME: returns (-50) with U100P
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel capabilities could not be read (%i)\n", device->name, device->handle, retVal);
     }
-    retVal = Mhydra_GetTransceiverInfo(device, &device->deviceInfo.transceiver);  // FIXME: returns (-50)
+    retVal = Mhydra_GetTransceiverInfo(device, &device->deviceInfo.transceiver);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
     }
-#endif
 #if (OPTION_PRINT_DEVICE_INFO != 0)
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): properties and capabilities\n", device->name, device->handle);
     PrintDeviceInfo(&device->deviceInfo);  /* note: only for debugging purposes */
@@ -1244,38 +1244,79 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
         return CANUSB_ERROR_NOTINIT;
 
     /* set default values */
-    capabilities->hasTimeQuanta = 0;
-    capabilities->hasIoApi = 0;
-    capabilities->hasKdi = 0;
-    capabilities->kdiInfo = 0;
-    capabilities->linHybrid = 0;
-    capabilities->hasScript = 0;
-    capabilities->hasRemote = 0;
-    capabilities->hasLogger = 0;
-    capabilities->syncTxFlush = 0;
-    capabilities->singleShot = 0;
-    capabilities->errorCount = 0;
-    capabilities->busStats = 0;
-    capabilities->errorFrame = KvaserDEV_IsErrorFrameSupported(device->productId);
-    capabilities->silentMode = KvaserDEV_IsSilentModeSupported(device->productId);
     capabilities->dummy = 0;
-    
-    /* send request CMD_GET_CAPABILITIES_REQ and wait for response */
-    bzero(buffer, HYDRA_CMD_SIZE);
-    size = FillGetCapabilitiesReq(buffer, HYDRA_CMD_SIZE, CAP_SUB_CMD_SILENT_MODE);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
-    if (retVal == CANUSB_SUCCESS) {
-        size = HYDRA_CMD_SIZE;
-        resp = CMD_GET_CAPABILITIES_RESP;
-        retVal = ReadResponse(device, buffer, size, resp, HYDRA_CMD_RESP_TIMEOUT);
+    capabilities->silentMode = KvaserDEV_IsSilentModeSupported(device->productId);
+    capabilities->errorFrame = KvaserDEV_IsErrorFrameSupported(device->productId);
+    capabilities->busStats = 0;
+    capabilities->errorCount = 0;
+    capabilities->singleShot = 0;
+    capabilities->syncTxFlush = 0;
+    capabilities->hasLogger = 0;
+    capabilities->hasRemote = 0;
+    capabilities->hasScript = 0;
+    capabilities->linHybrid = 0;
+    capabilities->kdiInfo = 0;
+    capabilities->hasKdi = 0;
+    capabilities->hasIoApi = 0;
+    capabilities->hasTimeQuanta = 0;
+
+    /* sub-commands */
+    uint16_t subCmds[14] = {
+        CAP_SUB_CMD_SILENT_MODE,
+        CAP_SUB_CMD_ERRFRAME,
+        CAP_SUB_CMD_BUS_STATS,
+        CAP_SUB_CMD_ERRCOUNT_READ,
+        CAP_SUB_CMD_SINGLE_SHOT,
+        CAP_SUB_CMD_SYNC_TX_FLUSH,
+        CAP_SUB_CMD_HAS_LOGGER,
+        CAP_SUB_CMD_HAS_REMOTE,
+        CAP_SUB_CMD_HAS_SCRIPT,
+        CAP_SUB_CMD_LIN_HYBRID,
+        CAP_SUB_CMD_KDI_INFO,
+        CAP_SUB_CMD_HAS_KDI,
+        CAP_SUB_CMD_HAS_IO_API,
+        CAP_SUB_CMD_HAS_BUSPARAMS_TQ
+    };
+    /* send request CMD_GET_CAPABILITIES_REQ w/ sub-command and wait for response */
+    for (int i = 0; i < 14; i++) {
+        bzero(buffer, HYDRA_CMD_SIZE);
+        size = FillGetCapabilitiesReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, subCmds[i]);
+        retVal = KvaserUSB_SendRequest(device, buffer, size);
         if (retVal == CANUSB_SUCCESS) {
-            /* command response:
-             * - byte 0..3: (header)
-             * - byte 4..5: sub-command
-             * - byte 6..7: status (0=OK, 1=NOT_IMPLEMENTED, 2=UNAVAILABLE)
-             * - byte 8..31: depend on sub-command
-             */
-            // TODO: ...
+            size = HYDRA_CMD_SIZE;
+            resp = CMD_GET_CAPABILITIES_RESP;
+            retVal = ReadResponse(device, buffer, size, resp, HYDRA_CMD_RESP_TIMEOUT);
+            if (retVal == CANUSB_SUCCESS) {
+                /* command response:
+                 * - byte 0..3: (header)
+                 * - byte 4..5: sub-command
+                 * - byte 6..7: status (0=OK, 1=NOT_IMPLEMENTED, 2=UNAVAILABLE)
+                 * - byte 8..31: depend on sub-command
+                 */
+                uint16_t status = BUF2UINT16(buffer[6]);
+                uint32_t mask = BUF2UINT32(buffer[8]);
+                uint32_t value = BUF2UINT32(buffer[12]);
+                if (status == 0) {
+                    switch (subCmds[i]) {
+                        case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SYNC_TX_FLUSH: capabilities->syncTxFlush= (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_LOGGER: capabilities->hasLogger = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_REMOTE: capabilities->hasRemote = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_SCRIPT: capabilities->hasScript = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_LIN_HYBRID: capabilities->linHybrid = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_KDI_INFO: capabilities->kdiInfo = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_KDI: capabilities->hasKdi = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_IO_API: capabilities->hasIoApi = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_BUSPARAMS_TQ: capabilities->hasTimeQuanta = (value & mask) ? 1 : 0; break;
+                        default: /* nothing to do here */ break;
+                    }
+                }
+                // TODO: ...
+            }
         }
     }
     return retVal;
@@ -1366,17 +1407,22 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                     /* event message: update event status */
                     (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->cpuFreq);
                     break;
-                case CMD_GET_BUSPARAMS_RESP:
+                case CMD_GET_BUSPARAMS_RESP:       
                 case CMD_GET_DRIVERMODE_RESP:
                 case CMD_START_CHIP_RESP:
                 case CMD_STOP_CHIP_RESP:
                 case CMD_READ_CLOCK_RESP:
+                case CMD_GET_CARD_INFO_RESP:
+                case CMD_GET_INTERFACE_INFO_RESP:
+                case CMD_GET_SOFTWARE_INFO_RESP:
+                case CMD_GET_BUSLOAD_RESP:
                 case CMD_FLUSH_QUEUE_RESP:
                 case CMD_SET_BUSPARAMS_FD_RESP:
                 case CMD_SET_BUSPARAMS_RESP:
-                case CMD_GET_CARD_INFO_RESP:
-                case CMD_GET_SOFTWARE_INFO_RESP:
-                case CMD_GET_BUSLOAD_RESP:
+                case CMD_GET_CAPABILITIES_RESP:
+                case CMD_GET_TRANSCEIVER_INFO_RESP:
+                case CMD_GET_BUSPARAMS_TQ_RESP:
+                case CMD_SET_BUSPARAMS_TQ_RESP:
                 case CMD_MAP_CHANNEL_RESP:
                 case CMD_GET_SOFTWARE_DETAILS_RESP:
                     /* command response: write packet in the pipe */
@@ -2321,7 +2367,7 @@ static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte) {
     return (uint32_t)HYDRA_CMD_SIZE;
 }
 
-static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd/*, uint32_t extraInfo*/) {
+static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, uint16_t subCmd/*, uint32_t extraInfo*/) {
     assert(buffer);
     assert(maxbyte >= HYDRA_CMD_SIZE);
     bzero(buffer, maxbyte);
@@ -2340,7 +2386,7 @@ static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16
      * - byte 8: analyser no.
      * - byte 9..31: (not used)
      */
-    uint8_t address = SET_DST(0U, ROUTER_HE);
+    uint8_t address = SET_DST(0U, destination);
     buffer[0] = CMD_GET_CAPABILITIES_REQ;
     buffer[1] = UINT8BYTE(address);
     buffer[2] = UINT8BYTE(0x00);
@@ -2397,9 +2443,9 @@ static uint8_t Len2Dlc(uint8_t len) {
  static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
     assert(deviceInfo);
     MACCAN_DEBUG_DRIVER("    - card info:\n");
-    MACCAN_DEBUG_DRIVER("      - channel count: %x\n", deviceInfo->card.channelCount);
+    MACCAN_DEBUG_DRIVER("      - channel count: %d\n", deviceInfo->card.channelCount);
     MACCAN_DEBUG_DRIVER("      - serial no.: %d\n", deviceInfo->card.serialNumber);
-    MACCAN_DEBUG_DRIVER("      - clock resolution: %x\n", deviceInfo->card.clockResolution);
+    MACCAN_DEBUG_DRIVER("      - clock resolution: %d\n", deviceInfo->card.clockResolution);
     time_t mfgDate = (time_t)deviceInfo->card.mfgDate;
     MACCAN_DEBUG_DRIVER("      - manufacturing date: %s", ctime(&mfgDate));
     MACCAN_DEBUG_DRIVER("      - EAN code (LSB first): %x%x%x%x%x-%x%x%x%x%x-%x%x%x%x%x-%x(?)\n",
@@ -2411,33 +2457,33 @@ static uint8_t Len2Dlc(uint8_t len) {
                         (deviceInfo->card.EAN[2] >> 4), (deviceInfo->card.EAN[2] & 0xf),
                         (deviceInfo->card.EAN[1] >> 4), (deviceInfo->card.EAN[1] & 0xf),
                         (deviceInfo->card.EAN[0] >> 4), (deviceInfo->card.EAN[0] & 0xf));
-    MACCAN_DEBUG_DRIVER("      - hardware revision: %x\n", deviceInfo->card.hwRevision);
-    MACCAN_DEBUG_DRIVER("      - USB HS mode: %x\n", deviceInfo->card.usbHsMode);
-    MACCAN_DEBUG_DRIVER("      - hardware type: %x\n", deviceInfo->card.hwType);
-    MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %x\n", deviceInfo->card.canTimeStampRef);
+    MACCAN_DEBUG_DRIVER("      - hardware revision: %d\n", deviceInfo->card.hwRevision);
+    MACCAN_DEBUG_DRIVER("      - USB HS mode: %d\n", deviceInfo->card.usbHsMode);
+    MACCAN_DEBUG_DRIVER("      - hardware type: %d\n", deviceInfo->card.hwType);
+    MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %d\n", deviceInfo->card.canTimeStampRef);
 #if (0)
     MACCAN_DEBUG_DRIVER("    - channel info:\n");  // TODO: activate when fixed
-    MACCAN_DEBUG_DRIVER("      - channel capabilities: %x\n", deviceInfo->channel.channelCapabilities);
-    MACCAN_DEBUG_DRIVER("      - CAN chip type: %x\n", deviceInfo->channel.canChipType);
-    MACCAN_DEBUG_DRIVER("      - CAN chip sub-type: %x\n", deviceInfo->channel.canChipSubType);
+    MACCAN_DEBUG_DRIVER("      - channel capabilities: 0x%x\n", deviceInfo->channel.channelCapabilities);
+    MACCAN_DEBUG_DRIVER("      - CAN chip type: %d\n", deviceInfo->channel.canChipType);
+    MACCAN_DEBUG_DRIVER("      - CAN chip sub-type: %d\n", deviceInfo->channel.canChipSubType);
 #endif
     MACCAN_DEBUG_DRIVER("    - software info/details:\n");
-    MACCAN_DEBUG_DRIVER("      - software options: %x\n", deviceInfo->software.swOptions);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_CONFIG_MODE: %x\n", (deviceInfo->software.swOptions & SWOPTION_CONFIG_MODE) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_AUTO_TX_BUFFER: %x\n", (deviceInfo->software.swOptions & SWOPTION_AUTO_TX_BUFFER) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_BETA: %x\n", (deviceInfo->software.swOptions & SWOPTION_BETA) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_RC: %x\n", (deviceInfo->software.swOptions & SWOPTION_RC) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_BAD_MOOD: %x\n", (deviceInfo->software.swOptions & SWOPTION_BAD_MOOD) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("      - software options: 0x%x\n", deviceInfo->software.swOptions);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CONFIG_MODE: %d\n", (deviceInfo->software.swOptions & SWOPTION_CONFIG_MODE) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_AUTO_TX_BUFFER: %d\n", (deviceInfo->software.swOptions & SWOPTION_AUTO_TX_BUFFER) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_BETA: %d\n", (deviceInfo->software.swOptions & SWOPTION_BETA) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_RC: %d\n", (deviceInfo->software.swOptions & SWOPTION_RC) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_BAD_MOOD: %d\n", (deviceInfo->software.swOptions & SWOPTION_BAD_MOOD) ? 1 : 0);
     MACCAN_DEBUG_DRIVER("        - SWOPTION_XX_MHZ_CLK: %s\n",
                         ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_16_MHZ_CLK) ? "16" :
                         ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_80_MHZ_CLK) ? "80" :
                         ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_24_MHZ_CLK) ? "24" : "XX");
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_TIMEOFFSET_VALID: %x\n", (deviceInfo->software.swOptions & SWOPTION_TIMEOFFSET_VALID) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_CAP_REQ: %x\n", (deviceInfo->software.swOptions & SWOPTION_CAP_REQ) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_DELAY_MSGS (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_DELAY_MSGS) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_USE_HYDRA_EXT (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_USE_HYDRA_EXT) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_CANFD_CAP (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_CANFD_CAP) ? 1 : 0);
-    MACCAN_DEBUG_DRIVER("        - SWOPTION_NONISO_CAP (mhydra): %x\n", (deviceInfo->software.swOptions & SWOPTION_NONISO_CAP) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_TIMEOFFSET_VALID: %d\n", (deviceInfo->software.swOptions & SWOPTION_TIMEOFFSET_VALID) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CAP_REQ: %d\n", (deviceInfo->software.swOptions & SWOPTION_CAP_REQ) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_DELAY_MSGS (mhydra): %d\n", (deviceInfo->software.swOptions & SWOPTION_DELAY_MSGS) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_USE_HYDRA_EXT (mhydra): %d\n", (deviceInfo->software.swOptions & SWOPTION_USE_HYDRA_EXT) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CANFD_CAP (mhydra): %d\n", (deviceInfo->software.swOptions & SWOPTION_CANFD_CAP) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_NONISO_CAP (mhydra): %d\n", (deviceInfo->software.swOptions & SWOPTION_NONISO_CAP) ? 1 : 0);
     MACCAN_DEBUG_DRIVER("        - SWOPTION_XX_MHZ_CAN_CLK (mhydra): %s\n",
                         ((deviceInfo->software.swOptions & SWOPTION_CAN_CLK_MASK) == SWOPTION_80_MHZ_CAN_CLK) ? "80" :
                         ((deviceInfo->software.swOptions & SWOPTION_CAN_CLK_MASK) == SWOPTION_24_MHZ_CAN_CLK) ? "24" : "??");
@@ -2445,8 +2491,8 @@ static uint8_t Len2Dlc(uint8_t len) {
     uint8_t minor = (uint8_t)(deviceInfo->software.firmwareVersion >> 16);
     uint16_t build = (uint16_t)(deviceInfo->software.firmwareVersion >> 0);
     MACCAN_DEBUG_DRIVER("      - firmware version: %u.%u (build %u)\n", major, minor, build);
-    MACCAN_DEBUG_DRIVER("      - max. outstanding Tx: %x\n", deviceInfo->software.maxOutstandingTx);
-    MACCAN_DEBUG_DRIVER("      - software name (hydra only): %x\n", deviceInfo->software.swName);
+    MACCAN_DEBUG_DRIVER("      - max. outstanding Tx: %d\n", deviceInfo->software.maxOutstandingTx);
+    MACCAN_DEBUG_DRIVER("      - software name (hydra only): %d\n", deviceInfo->software.swName);
     MACCAN_DEBUG_DRIVER("      - EAN code (LSB first, hydra only): %x%x%x%x%x-%x%x%x%x%x-%x%x%x%x%x-%x\n",
                         (deviceInfo->software.EAN[7] >> 4), (deviceInfo->software.EAN[7] & 0xf),
                         (deviceInfo->software.EAN[6] >> 4), (deviceInfo->software.EAN[6] & 0xf),
@@ -2457,28 +2503,24 @@ static uint8_t Len2Dlc(uint8_t len) {
                         (deviceInfo->software.EAN[1] >> 4), (deviceInfo->software.EAN[1] & 0xf),
                         (deviceInfo->software.EAN[0] >> 4), (deviceInfo->software.EAN[0] & 0xf));
     MACCAN_DEBUG_DRIVER("      - max. bit-rate (hydra only, otherwise 1Mbit/s): %d\n", deviceInfo->software.maxBitrate);
-#if (0)
-    MACCAN_DEBUG_DRIVER("    - capabilities:\n");  // TODO: activate when fixed
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_BUSPARAMS_TQ (mhydra): %x\n", deviceInfo->capabilities.hasTimeQuanta);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_IO_API (mhydra): %x\n", deviceInfo->capabilities.hasIoApi);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_KDI (mhydra): %x\n", deviceInfo->capabilities.hasKdi);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_KDI_INFO (mhydra): %x\n", deviceInfo->capabilities.kdiInfo);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_LIN_HYBRID (mhydra): %x\n", deviceInfo->capabilities.linHybrid);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_SCRIPT: %x\n", deviceInfo->capabilities.hasScript);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_REMOTE: %x\n", deviceInfo->capabilities.hasRemote);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_LOGGER: %x\n", deviceInfo->capabilities.hasLogger);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SYNC_TX_FLUSH: %x\n", deviceInfo->capabilities.syncTxFlush);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SINGLE_SHOT: %x\n", deviceInfo->capabilities.singleShot);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRCOUNT_READ: %x\n", deviceInfo->capabilities.errorCount);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_BUS_STATS: %x\n", deviceInfo->capabilities.busStats);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %x\n", deviceInfo->capabilities.errorFrame);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SILENT_MODE: %x\n", deviceInfo->capabilities.silentMode);
-#endif
-#if (0)
-    MACCAN_DEBUG_DRIVER("    - transceiver info:\n");  // TODO: activate when fixed
-    MACCAN_DEBUG_DRIVER("      - transceiver capabilities: %x\n", deviceInfo->transceiver.transceiverCapabilities);
-    MACCAN_DEBUG_DRIVER("      - transceiver status: %x\n", deviceInfo->transceiver.transceiverStatus);
-    MACCAN_DEBUG_DRIVER("      - transceiver type: %x\n", deviceInfo->transceiver.transceiverType);
-#endif
+    MACCAN_DEBUG_DRIVER("    - capabilities:\n");
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SILENT_MODE: %d\n", deviceInfo->capabilities.silentMode);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %d\n", deviceInfo->capabilities.errorFrame);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_BUS_STATS: %d\n", deviceInfo->capabilities.busStats);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRCOUNT_READ: %d\n", deviceInfo->capabilities.errorCount);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SINGLE_SHOT: %d\n", deviceInfo->capabilities.singleShot);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SYNC_TX_FLUSH: %d\n", deviceInfo->capabilities.syncTxFlush);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_LOGGER: %d\n", deviceInfo->capabilities.hasLogger);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_REMOTE: %d\n", deviceInfo->capabilities.hasRemote);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_SCRIPT: %d\n", deviceInfo->capabilities.hasScript);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_LIN_HYBRID (mhydra): %d\n", deviceInfo->capabilities.linHybrid);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_KDI_INFO (mhydra): %d\n", deviceInfo->capabilities.kdiInfo);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_KDI (mhydra): %d\n", deviceInfo->capabilities.hasKdi);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_IO_API (mhydra): %d\n", deviceInfo->capabilities.hasIoApi);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_BUSPARAMS_TQ (mhydra): %d\n", deviceInfo->capabilities.hasTimeQuanta);
+    MACCAN_DEBUG_DRIVER("    - transceiver info:\n");
+    MACCAN_DEBUG_DRIVER("      - transceiver capabilities: 0x%x\n", deviceInfo->transceiver.transceiverCapabilities);
+    MACCAN_DEBUG_DRIVER("      - transceiver status: %d\n", deviceInfo->transceiver.transceiverStatus);
+    MACCAN_DEBUG_DRIVER("      - transceiver type: %d\n", deviceInfo->transceiver.transceiverType);
  }
 #endif

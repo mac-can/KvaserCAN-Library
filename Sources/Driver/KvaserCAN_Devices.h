@@ -481,7 +481,7 @@ typedef enum kavser_device_family_t_ {  /* device family: */
     #define USB_LEAF_LITE_V2_CAP_CANFD   false
     #define USB_LEAF_LITE_V2_CAP_NONISO  false
     #define USB_LEAF_LITE_V2_CAP_SILENT_MODE  false  // note: why?
-    #define USB_LEAF_LITE_V2_CAP_ERROR_FRAME  true
+    #define USB_LEAF_LITE_V2_CAP_ERROR_FRAME  false  // note: why?
 #endif
 
 /* Kvaser Mini PCI Express HS:
