@@ -237,6 +237,7 @@ typedef int32_t KvaserUSB_CanClock_t;
 typedef struct kavser_hydra_channel_t_ {/* Hydra device data (Leaf Pro): */
     uint8_t channel2he;                 /* - to map a channel no. to HE (6-bit) */
     uint8_t he2channel;                 /* - to map 6-bit HE to a channel number */
+    uint8_t sysdbg_he;                  /* - to map What? to HE (6-bit) */
 } KvaserUSB_HydraData_t;
 
 typedef struct kvaser_device_t_ {       /* KvaserCAN device: */

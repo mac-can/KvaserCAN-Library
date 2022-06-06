@@ -85,9 +85,11 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
 static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq);
 
 static CANUSB_Return_t MapChannel(KvaserUSB_Device_t *device);
-static CANUSB_Return_t ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer, uint32_t nbyte,
-                                                                uint8_t cmdCode, /*uint8_t transId,*/ uint16_t timeout);
-static uint32_t FillMapChannelReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination);
+static CANUSB_Return_t SendRequest(KvaserUSB_Device_t *device, const uint8_t *buffer, uint32_t nbyte);
+static CANUSB_Return_t ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer, uint32_t nbyte, uint8_t cmdCode, /*uint8_t transId,*/ uint16_t timeout);
+
+static uint32_t FillMapChannelReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
+static uint32_t FillMapChannelSysDbgReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillSetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParams_t *params);
 static uint32_t FillSetBusParamsFdReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsFd_t *params);
 static uint32_t FillSetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsTq_t *params);
@@ -217,7 +219,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
     }
 #endif
-    retVal = Mhydra_GetCapabilities(device, &device->deviceInfo.capabilities);  // FIXME: returns (-50) with U100P
+    retVal = Mhydra_GetCapabilities(device, &device->deviceInfo.capabilities);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel capabilities could not be read (%i)\n", device->name, device->handle, retVal);
     }
@@ -241,6 +243,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
             break;
     }
 #else
+    // TODO: clarify the difference between SWOPTION_CPU_FQ_MASK and SWOPTION_CAN_CLK_MASK
     switch (device->deviceInfo.software.swOptions & SWOPTION_CAN_CLK_MASK) {
         case SWOPTION_80_MHZ_CAN_CLK: device->recvData.cpuFreq = 80U; break;
         case SWOPTION_24_MHZ_CAN_CLK: device->recvData.cpuFreq = 24U; break;
@@ -319,7 +322,7 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
     /* send request CMD_SET_BUSPARAMS_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillSetBusParamsReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, params);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_SET_BUSPARAMS_RESP;
@@ -358,7 +361,7 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
     /* send request CMD_SET_BUSPARAMS_FD_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillSetBusParamsFdReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, params);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_SET_BUSPARAMS_FD_RESP;
@@ -399,7 +402,7 @@ CANUSB_Return_t Mhydra_SetBusParamsTq(KvaserUSB_Device_t *device, const KvaserUS
     /* send request CMD_SET_BUSPARAMS_TQ_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillSetBusParamsTqReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, params);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_SET_BUSPARAMS_TQ_RESP;
@@ -444,7 +447,7 @@ CANUSB_Return_t Mhydra_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusPar
     /* send request CMD_GET_BUSPARAMS_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetBusParamsReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, false);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_BUSPARAMS_RESP;
@@ -490,7 +493,7 @@ CANUSB_Return_t Mhydra_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusP
     /* send request CMD_GET_BUSPARAMS_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetBusParamsReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, false);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_BUSPARAMS_RESP;
@@ -516,7 +519,7 @@ CANUSB_Return_t Mhydra_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusP
             /* send request CMD_GET_BUSPARAMS_REQ (CAN FD) and wait for response */
             bzero(buffer, HYDRA_CMD_SIZE);
             size = FillGetBusParamsReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, true);
-            retVal = KvaserUSB_SendRequest(device, buffer, size);
+            retVal = SendRequest(device, buffer, size);
             if (retVal == CANUSB_SUCCESS) {
                 size = HYDRA_CMD_SIZE;
                 resp = CMD_GET_BUSPARAMS_RESP;
@@ -566,7 +569,7 @@ CANUSB_Return_t Mhydra_GetBusParamsTq(KvaserUSB_Device_t *device, KvaserUSB_BusP
     /* send request CMD_GET_BUSPARAMS_TQ_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetBusParamsTqReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, true);  // FIXME: canFd ? true : false
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_BUSPARAMS_TQ_RESP;
@@ -631,7 +634,7 @@ CANUSB_Return_t Mhydra_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB
     /* send request CMD_SET_DRIVERMODE_REQ w/o response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillSetDriverModeReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, mode);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
 
     return retVal;
 }
@@ -651,7 +654,7 @@ CANUSB_Return_t Mhydra_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_Drive
     /* send request CMD_GET_DRIVERMODE_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetDriverModeReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_DRIVERMODE_RESP;
@@ -687,7 +690,7 @@ CANUSB_Return_t Mhydra_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     /* send request CMD_START_CHIP_RESP and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillStartChipReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_START_CHIP_RESP;
@@ -720,7 +723,7 @@ CANUSB_Return_t Mhydra_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     /* send request CMD_STOP_CHIP_REQ and wait for response (optional) */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillStopChipReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if ((retVal == CANUSB_SUCCESS) && (timeout > 0U)) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_STOP_CHIP_RESP;
@@ -752,7 +755,7 @@ CANUSB_Return_t Mhydra_ResetChip(KvaserUSB_Device_t *device, uint16_t delay) {
     /* send request CMD_RESET_CHIP_REQ w/o response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillResetChipReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if ((retVal == CANUSB_SUCCESS) && (delay > 0U)) {
         usleep((unsigned int)delay * 1000);
     }
@@ -773,7 +776,7 @@ CANUSB_Return_t Mhydra_ResetCard(KvaserUSB_Device_t *device, uint16_t delay) {
     /* send request CMD_RESET_CARD_REQ w/o response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillResetCardReq(buffer, HYDRA_CMD_SIZE);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if ((retVal == CANUSB_SUCCESS) && (delay > 0U)) {
         usleep((unsigned int)delay * 1000);
     }
@@ -794,7 +797,7 @@ CANUSB_Return_t Mhydra_RequestChipState(KvaserUSB_Device_t *device, uint16_t del
     /* send request CMD_GET_CHIP_STATE_REQ w/o response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetChipStateReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if ((retVal == CANUSB_SUCCESS) && (delay > 0U)) {
         usleep((unsigned int)delay * 1000);
     }
@@ -844,7 +847,7 @@ CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_C
     /* send request CMD_EXTENDED[CMD_TX_CAN_MESSAGE_FD] and wait for ackknowledge (optional) */
     bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
     size = FillTxCanMessageReq(buffer, HYDRA_CMD_EXT_SIZE, channel, transId, message);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_EXTENDED;
@@ -913,7 +916,7 @@ CANUSB_Return_t Mhydra_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/)
     /* send request CMD_FLUSH_QUEUE_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillFlushQueueReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, flags);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_FLUSH_QUEUE_RESP;
@@ -947,7 +950,7 @@ CANUSB_Return_t Mhydra_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t de
     /* send request CMD_RESET_ERROR_COUNTER w/o response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillResetErrorCounterReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if ((retVal == CANUSB_SUCCESS) && (delay > 0U)) {
         usleep((unsigned int)delay * 1000);
     }
@@ -968,7 +971,7 @@ CANUSB_Return_t Mhydra_ResetStatistics(KvaserUSB_Device_t *device, uint16_t dela
     /* send request CMD_RESET_STATISTICS w/o response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillResetStatisticsReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if ((retVal == CANUSB_SUCCESS) && (delay > 0U)) {
         usleep((unsigned int)delay * 1000);
     }
@@ -990,7 +993,7 @@ CANUSB_Return_t Mhydra_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
     /* send request CMD_READ_CLOCK_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillReadClockReq(buffer, HYDRA_CMD_SIZE, 0x00U);  // TODO: flags
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_READ_CLOCK_RESP;
@@ -1032,7 +1035,7 @@ CANUSB_Return_t Mhydra_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_
     /* send request CMD_GET_BUSLOAD_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetBusLoadReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_BUSLOAD_RESP;
@@ -1080,7 +1083,7 @@ CANUSB_Return_t Mhydra_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInf
     /* send request CMD_GET_CARD_INFO_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetCardInfoReq(buffer, HYDRA_CMD_SIZE, /*dataLevel*/0);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_CARD_INFO_RESP;
@@ -1137,7 +1140,7 @@ CANUSB_Return_t Mhydra_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_Sof
     /* send request CMD_GET_SOFTWARE_DETAILS_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetSoftwareDetailsReq(buffer, HYDRA_CMD_SIZE, /*hydraExt*/1);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_SOFTWARE_DETAILS_RESP;
@@ -1170,7 +1173,7 @@ CANUSB_Return_t Mhydra_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_Sof
             /* send request CMD_GET_SOFTWARE_INFO_REQ and wait for response */
             bzero(buffer, HYDRA_CMD_SIZE);
             size = FillGetMaxOutstandingTxReq(buffer, HYDRA_CMD_SIZE);
-            retVal = KvaserUSB_SendRequest(device, buffer, size);
+            retVal = SendRequest(device, buffer, size);
             if (retVal == CANUSB_SUCCESS) {
                 size = HYDRA_CMD_SIZE;
                 resp = CMD_GET_SOFTWARE_INFO_RESP;
@@ -1210,7 +1213,7 @@ CANUSB_Return_t Mhydra_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_In
     /* send request CMD_GET_INTERFACE_INFO_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetInterfaceInfoReq(buffer, HYDRA_CMD_SIZE);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_INTERFACE_INFO_RESP;
@@ -1280,8 +1283,8 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
     /* send request CMD_GET_CAPABILITIES_REQ w/ sub-command and wait for response */
     for (int i = 0; i < 14; i++) {
         bzero(buffer, HYDRA_CMD_SIZE);
-        size = FillGetCapabilitiesReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, subCmds[i]);
-        retVal = KvaserUSB_SendRequest(device, buffer, size);
+        size = FillGetCapabilitiesReq(buffer, HYDRA_CMD_SIZE, device->hydraData.sysdbg_he, subCmds[i]);
+        retVal = SendRequest(device, buffer, size);
         if (retVal == CANUSB_SUCCESS) {
             size = HYDRA_CMD_SIZE;
             resp = CMD_GET_CAPABILITIES_RESP;
@@ -1337,7 +1340,7 @@ CANUSB_Return_t Mhydra_GetTransceiverInfo(KvaserUSB_Device_t *device, KvaserUSB_
     /* send request CMD_GET_TRANSCEIVER_INFO_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillGetTransceiverInfoReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_GET_TRANSCEIVER_INFO_RESP;
@@ -1676,7 +1679,7 @@ static CANUSB_Return_t MapChannel(KvaserUSB_Device_t *device) {
     /* send request CMD_MAP_CHANNEL_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillMapChannelReq(buffer, HYDRA_CMD_SIZE, device->channelNo);
-    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    retVal = SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = HYDRA_CMD_SIZE;
         resp = CMD_MAP_CHANNEL_RESP;
@@ -1696,9 +1699,50 @@ static CANUSB_Return_t MapChannel(KvaserUSB_Device_t *device) {
             device->hydraData.he2channel = (uint8_t)(transId & 0xFU);
             // TODO: position = BUF2UINT8(buffer[5]);
             // TODO: flags = BUF2UINT16(buffer[6]);
+
+            /* note: command CMD_GET_CAPABILITIES_REQ requires HE address 'SYSDBG' */
+            bzero(buffer, HYDRA_CMD_SIZE);
+            size = FillMapChannelSysDbgReq(buffer, HYDRA_CMD_SIZE);
+            retVal = SendRequest(device, buffer, size);
+            if (retVal == CANUSB_SUCCESS) {
+                size = HYDRA_CMD_SIZE;
+                resp = CMD_MAP_CHANNEL_RESP;
+                retVal = ReadResponse(device, buffer, size, resp, HYDRA_CMD_RESP_TIMEOUT);
+                if (retVal == CANUSB_SUCCESS) {
+                    /* command response:
+                     * - byte 0: command code
+                     * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+                     * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+                     * - byte 4: HE address
+                     * - byte 5: position (which position)
+                     * - byte 6..7: flags (what kind of flags?)
+                     * - byte 8..31: (not used)
+                     */
+                    device->hydraData.sysdbg_he = BUF2UINT8(buffer[4]);
+                }
+            }
         }
     }
     return retVal;
+}
+
+static CANUSB_Return_t SendRequest(KvaserUSB_Device_t *device, const uint8_t *buffer, uint32_t nbyte) {
+#if (OPTION_DEBUG_HE_ADDRESS != 0)
+    /* command request:
+     * - byte 0: command code
+     * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+     * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+     * - byte 4..31: ...
+     */
+    assert(buffer);
+    UInt8 cmdNo = (UInt8)buffer[0];
+    UInt8 dstAddr = (UInt8)(buffer[1] & 0x3FU);
+    UInt8 srcChannel = (UInt8)((buffer[1] & 0xC0U) >> 2) | (UInt8)((buffer[3] & 0xF0U) >> 4);
+    UInt16 transId = (UInt16)((buffer[3] & 0x0FU) << 8) | (UInt16)buffer[2];
+    MACCAN_LOG_PRINTF("> cmd=%02x dst=%x src=%x transId=%d\n", cmdNo, dstAddr, srcChannel, transId);
+#endif
+    /* note: the callee checks the sanity of the call */
+    return KvaserUSB_SendRequest(device, buffer, nbyte);
 }
 
 static CANUSB_Return_t ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer, uint32_t nbyte, uint8_t cmdCode, uint16_t timeout) {
@@ -1712,22 +1756,24 @@ static CANUSB_Return_t ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer,
     if (nbyte < KVASER_HYDRA_COMMAND_LENGTH)
         return CANUSB_ERROR_ILLPARA;
 
-    /* command response:
-     * - byte 0: command code
-     * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
-     * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
-     * - byte 4..31: data
-     */
+    /* note: mhydra commands are always 32 byte long, the first byte contains the command code */
     do {
         retVal = CANPIP_Read(device->recvData.msgPipe, &buffer[0], KVASER_HYDRA_COMMAND_LENGTH, timeout);
         if (retVal != CANUSB_SUCCESS)
             break;
         // TODO: read extended command (?)
-#if (0)
-        else if (buffer[0] == cmdCode)
-            MACCAN_LOG_WRITE(buffer, nbyte, "!");
-        else
-            MACCAN_LOG_WRITE(buffer, nbyte, "#");
+#if (OPTION_DEBUG_HE_ADDRESS != 0)
+        /* command response:
+         * - byte 0: command code
+         * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+         * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+         * - byte 4..31: data
+         */
+        UInt8 cmdNo = (UInt8)buffer[0];
+        UInt8 dstAddr = (UInt8)(buffer[1] & 0x3FU);
+        UInt8 srcChannel = (UInt8)((buffer[1] & 0xC0U) >> 2) | (UInt8)((buffer[3] & 0xF0U) >> 4);
+        UInt16 transId = (UInt16)((buffer[3] & 0x0FU) << 8) | (UInt16)buffer[2];
+        MACCAN_LOG_PRINTF("< cmd=%02x dst=%x src=%x transId=%d\n", cmdNo, dstAddr, srcChannel, transId);
 #endif
     } while (buffer[0] != cmdCode);
 
@@ -1758,6 +1804,35 @@ static uint32_t FillMapChannelReq(uint8_t *buffer, uint32_t maxbyte, uint8_t cha
     buffer[5] = UINT8BYTE('A');
     buffer[6] = UINT8BYTE('N');
     buffer[20] = UINT8BYTE(channel);
+    /* return request length */
+    return (uint32_t)HYDRA_CMD_SIZE;
+}
+
+static uint32_t FillMapChannelSysDbgReq(uint8_t *buffer, uint32_t maxbyte) {
+    assert(buffer);
+    assert(maxbyte >= HYDRA_CMD_SIZE);
+    bzero(buffer, maxbyte);
+    /* command request:
+     * - byte 0: command code
+     * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+     * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+     * - byte 4..19: name (string "SYSDBG")
+     * - byte 20: channel = 0
+     * - byte 21..31: (not used)
+     */
+    uint8_t address = SET_DST(0U, ROUTER_HE);
+    uint16_t transId = SET_SEQ(0U, 0x0061U);
+    buffer[0] = CMD_MAP_CHANNEL_REQ;
+    buffer[1] = UINT8BYTE(address);
+    buffer[2] = UINT16LSB(transId);
+    buffer[3] = UINT16MSB(transId);
+    /* arguments */
+    buffer[4] = UINT8BYTE('S');
+    buffer[5] = UINT8BYTE('Y');
+    buffer[6] = UINT8BYTE('S');
+    buffer[7] = UINT8BYTE('D');
+    buffer[8] = UINT8BYTE('B');
+    buffer[9] = UINT8BYTE('G');
     /* return request length */
     return (uint32_t)HYDRA_CMD_SIZE;
 }
@@ -2253,7 +2328,7 @@ static uint32_t FillReadClockReq(uint8_t *buffer, uint32_t maxbyte, uint8_t flag
      * - byte 4: (reserved)
      * - byte 5..31: (not used)
      */
-    uint8_t address = SET_DST(0U, ROUTER_HE);
+    uint8_t address = SET_DST(0U, ILLEGAL_HE);
     buffer[0] = CMD_READ_CLOCK_REQ;
     buffer[1] = UINT8BYTE(address);
     buffer[2] = UINT8BYTE(0x00);
@@ -2294,7 +2369,7 @@ static uint32_t FillGetCardInfoReq(uint8_t *buffer, uint32_t maxbyte, int8_t dat
      * - byte 4: data level
      * - byte 5..31: (not used)
      */
-    uint8_t address = SET_DST(0U, ROUTER_HE);
+    uint8_t address = SET_DST(0U, ILLEGAL_HE);
     buffer[0] = CMD_GET_CARD_INFO_REQ;
     buffer[1] = UINT8BYTE(address);
     buffer[2] = UINT8BYTE(0x00);
@@ -2316,7 +2391,7 @@ static uint32_t FillGetSoftwareDetailsReq(uint8_t *buffer, uint32_t maxbyte, uin
      * - byte 4: use Hydra extension
      * - byte 5..31: (not used)
      */
-    uint8_t address = SET_DST(0U, ROUTER_HE);
+    uint8_t address = SET_DST(0U, ILLEGAL_HE);
     buffer[0] = CMD_GET_SOFTWARE_DETAILS_REQ;
     buffer[1] = UINT8BYTE(address);
     buffer[2] = UINT8BYTE(0x00);
@@ -2338,7 +2413,7 @@ static uint32_t FillGetMaxOutstandingTxReq(uint8_t *buffer, uint32_t maxbyte) {
      * - byte 4: (reserved)
      * - byte 5..31: (not used)
      */
-    uint8_t address = SET_DST(0U, ROUTER_HE);
+    uint8_t address = SET_DST(0U, ILLEGAL_HE);
     buffer[0] = CMD_GET_SOFTWARE_INFO_REQ;
     buffer[1] = UINT8BYTE(address);
     buffer[2] = UINT8BYTE(0x00);
@@ -2358,7 +2433,7 @@ static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte) {
      * - byte 4: (reserved)
      * - byte 5..31: (not used)
      */
-    uint8_t address = SET_DST(0U, ROUTER_HE);
+    uint8_t address = SET_DST(0U, ILLEGAL_HE);
     buffer[0] = CMD_GET_INTERFACE_INFO_REQ;
     buffer[1] = UINT8BYTE(address);
     buffer[2] = UINT8BYTE(0x00);
