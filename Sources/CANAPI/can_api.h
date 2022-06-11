@@ -49,9 +49,9 @@
  *
  *  @brief       CAN API V3 for generic CAN Interfaces
  *
- *  @author      $Author: eris $
+ *  @author      $Author: makemake $
  *
- *  @version     $Rev: 1020 $
+ *  @version     $Rev: 1053 $
  *
  *  @defgroup    can_api CAN Interface API, Version 3
  *  @{
@@ -412,8 +412,7 @@ CANAPI int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed);
  *
  *  @param[in]   handle   - handle or library id of the CAN interface, or (-1)
  *  @param[in]   param    - property id to be read or to be written
- *  @param[out]  value    - pointer to a buffer for the value to be read
- *  @param[in]   value    - pointer to a buffer with the value to be written
+ *  @param[in,out]  value    - pointer to a buffer for the value to be read or  with the value to be written
  *  @param[in]   nbyte   -  size of the given buffer in byte
  *
  *  @returns     0 if successful, or a negative value on error.
