@@ -234,7 +234,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
     /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
     (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
     /* get CPU clock frequency (in [MHz]) from software options */
-#if (1)
+#if (0)
     switch (device->deviceInfo.software.swOptions & SWOPTION_CPU_FQ_MASK) {
         case SWOPTION_80_MHZ_CLK: device->recvData.cpuFreq = 80U; break;
         case SWOPTION_24_MHZ_CLK: device->recvData.cpuFreq = 24U; break;
@@ -248,7 +248,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
         case SWOPTION_80_MHZ_CAN_CLK: device->recvData.cpuFreq = 80U; break;
         case SWOPTION_24_MHZ_CAN_CLK: device->recvData.cpuFreq = 24U; break;
         default:
-            device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
+            device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;  // FIXME: Leaf Pro has undefine SWOPTION_CAN_CLK_MASK
             break;
     }
 #endif
