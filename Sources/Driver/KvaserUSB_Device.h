@@ -204,7 +204,7 @@ typedef struct kvaser_endpoints_t_ {    /* USB endpoints: */
 
 typedef CANUSB_AsyncPipe_t KvaserUSB_RecvPipe_t;
 
-typedef uint8_t KvaserUSB_CpuClock_t;
+typedef uint8_t KvaserUSB_Frequency_t;
 
 typedef uint64_t KvaserUSB_CpuTicks_t;
 
@@ -219,7 +219,8 @@ typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
     KvaserUSB_OpMode_t opMode;          /* - demanded CAN operation mode */
     KvaserUSB_EventData_t evData;       /* - asynchronous event data */
     KvaserUSB_Timestamp_t timeRef;      /* - time reference (UTC+0) */
-    KvaserUSB_CpuClock_t cpuFreq;       /* - CPU frequency in [MHz] */
+    KvaserUSB_Frequency_t canClock;     /* - CAN clock in [MHz] */
+    KvaserUSB_Frequency_t timerFreq;    /* - CAN timer in [MHz] */
     struct tx_acknowledge_tag {         /* - Tx acknowledge: */
         uint8_t maxMsg;                 /*   - max. outstanding Tx messages */
         uint8_t cntMsg;                 /*   - number of sent Tx messages */
@@ -274,8 +275,8 @@ extern CANUSB_Return_t KvaserUSB_SendRequest(KvaserUSB_Device_t *device, const u
 extern CANUSB_Return_t KvaserUSB_ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer, uint32_t nbyte,
                                                                           uint8_t cmdCode, /*uint8_t transId,*/ uint16_t timeout);
 
-extern void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq);
-extern uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq);
+extern void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq);
+extern uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq);
 
 #ifdef __cplusplus
 }

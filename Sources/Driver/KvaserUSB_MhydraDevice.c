@@ -81,8 +81,8 @@
 #define MIN(x,y)  (((x) < (y)) ? (x) : (y))
 
 static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size);
-static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq);
-static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq);
+static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency);
+static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency);
 
 static CANUSB_Return_t MapChannel(KvaserUSB_Device_t *device);
 static CANUSB_Return_t SendRequest(KvaserUSB_Device_t *device, const uint8_t *buffer, uint32_t nbyte);
@@ -138,7 +138,8 @@ bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
 
     /* set CAN channel properties and defaults */
     device->channelNo = 0U;  /* note: only one CAN channel */
-    device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
+    device->recvData.canClock = KvaserDEV_GetCanClockInMHz(device->productId);
+    device->recvData.timerFreq = KvaserDEV_GetTimerFreqInMHz(device->productId);
     device->recvData.txAck.maxMsg = MHYDRA_MAX_OUTSTANDING_TX;
 
     /* set CAN channel operation capabilities from device spec. */
@@ -219,38 +220,43 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
     }
 #endif
-    retVal = Mhydra_GetCapabilities(device, &device->deviceInfo.capabilities);
-    if (retVal < 0) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel capabilities could not be read (%i)\n", device->name, device->handle, retVal);
-    }
     retVal = Mhydra_GetTransceiverInfo(device, &device->deviceInfo.transceiver);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
+    }
+    /* get device capabilities (if supported) */
+    if (device->deviceInfo.software.swOptions & SWOPTION_CAP_REQ) {
+        retVal = Mhydra_GetCapabilities(device, &device->deviceInfo.capabilities);
+        if (retVal < 0) {
+            MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel capabilities could not be read (%i)\n", device->name, device->handle, retVal);
+        }
     }
 #if (OPTION_PRINT_DEVICE_INFO != 0)
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): properties and capabilities\n", device->name, device->handle);
     PrintDeviceInfo(&device->deviceInfo);  /* note: only for debugging purposes */
 #endif
-    /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
-    (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
     /* get CPU clock frequency (in [MHz]) from software options */
-#if (0)
-    switch (device->deviceInfo.software.swOptions & SWOPTION_CPU_FQ_MASK) {
-        case SWOPTION_80_MHZ_CLK: device->recvData.cpuFreq = 80U; break;
-        case SWOPTION_24_MHZ_CLK: device->recvData.cpuFreq = 24U; break;
-        default:
-            device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
-            break;
-    }
-#else
-    // TODO: clarify the difference between SWOPTION_CPU_FQ_MASK and SWOPTION_CAN_CLK_MASK
     switch (device->deviceInfo.software.swOptions & SWOPTION_CAN_CLK_MASK) {
-        case SWOPTION_80_MHZ_CAN_CLK: device->recvData.cpuFreq = 80U; break;
-        case SWOPTION_24_MHZ_CAN_CLK: device->recvData.cpuFreq = 24U; break;
+        case SWOPTION_80_MHZ_CAN_CLK: device->recvData.canClock = 80U; break;
+        case SWOPTION_24_MHZ_CAN_CLK: device->recvData.canClock = 24U; break;
         default:
-            device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;  // FIXME: Leaf Pro has undefine SWOPTION_CAN_CLK_MASK
+            device->recvData.canClock = KvaserDEV_GetCanClockInMHz(device->productId);  // FIXME: Leaf Pro has undefine SWOPTION_CAN_CLK_MASK
             break;
     }
+    switch (device->deviceInfo.software.swOptions & SWOPTION_CPU_FQ_MASK) {
+        case SWOPTION_80_MHZ_CLK: device->recvData.timerFreq = 80U; break;
+        case SWOPTION_24_MHZ_CLK: device->recvData.timerFreq = 24U; break;
+        default:
+            device->recvData.timerFreq = KvaserDEV_GetTimerFreqInMHz(device->productId);
+            break;
+    }
+    /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
+    (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);  // TODO: not used yet
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+    MACCAN_DEBUG_DRIVER("    - clocks:\n");
+    MACCAN_DEBUG_DRIVER("      - CAN clock: %u MHz\n", device->recvData.canClock);
+    MACCAN_DEBUG_DRIVER("      - CAN timer: %u MHz\n", device->recvData.timerFreq);
+    MACCAN_DEBUG_DRIVER("      - Time: %u.%04u sec\n", device->recvData.timeRef.tv_sec, device->recvData.timeRef.tv_nsec / 1000000);
 #endif
     /* get max. outstanding transmit messages */
     if ((0U < device->deviceInfo.software.maxOutstandingTx) &&
@@ -1012,9 +1018,9 @@ CANUSB_Return_t Mhydra_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
             ticks |= (uint64_t)BUF2UINT16(buffer[8]) << 32;
             /* note: when software options not read before, assume clock running at 80MHz
              */
-            if (device->recvData.cpuFreq == 0U)
-                device->recvData.cpuFreq = MHYDRA_CPU_FREQUENCY;
-            *nsec = KvaserUSB_NanosecondsFromTicks(ticks, device->recvData.cpuFreq);
+            if (device->recvData.timerFreq == 0U)
+                device->recvData.timerFreq = KvaserDEV_GetTimerFreqInMHz(device->productId);
+            *nsec = KvaserUSB_NanosecondsFromTicks(ticks, device->recvData.timerFreq);
         }
     }
     return retVal;
@@ -1408,7 +1414,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_ERROR_EVENT:
                 case CMD_CAN_ERROR_EVENT:
                     /* event message: update event status */
-                    (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->cpuFreq);
+                    (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->timerFreq);
                     break;
                 case CMD_GET_BUSPARAMS_RESP:       
                 case CMD_GET_DRIVERMODE_RESP:
@@ -1435,7 +1441,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                     switch (hydra->buffer[6]) {
                         case CMD_EXT_RX_MSG_FD:
                             /* received CAN message: decode and enqueue */
-                            if (DecodeMessage(&message, &hydra->buffer[index], nbyte, context->cpuFreq)) {
+                            if (DecodeMessage(&message, &hydra->buffer[index], nbyte, context->timerFreq)) {
                                 /* suppress certain CAN messages depending on the operation mode */
                                 if (message.xtd && (context->opMode & CANMODE_NXTD))
                                     break;
@@ -1446,7 +1452,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                                 (void)CANQUE_Enqueue(context->msgQueue, (void*)&message);
                             } else {
                                 /* there are flags that do not belong to a received CAN message */
-                                (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->cpuFreq);
+                                (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->timerFreq);
                             }
                             break;
                         case CMD_EXT_TX_ACK_FD:
@@ -1480,7 +1486,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
         hydra->length = 0U;
 }
 
-static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
+static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency) {
     uint32_t flags = 0U;
     bool result = false;
 
@@ -1489,7 +1495,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
     if (nbyte < HYDRA_CMD_SIZE)
         return false;
 
-    (void)cpuFreq;  // currently not used
+    (void)frequency;  // currently not used
 
     /* Hydra USB response:
      * - byte 0: command code
@@ -1605,7 +1611,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
     return result;
 }
 
-static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
+static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency) {
     uint8_t length = 0U;
     uint32_t flags = 0U;
     uint64_t ticks = 0ULL;
@@ -1651,9 +1657,9 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     message->brs = (flags & MSGFLAG_BRS) ? 1 : 0;
     message->esi = (flags & MSGFLAG_ESI) ? 1 : 0;
     message->sts = (flags & MSGFLAG_STS) ? 1 : 0;
-    /* time-stamp from 48-bit timer value */
+    /* time-stamp from 64-bit timer value */
     ticks = BUF2UINT64(buffer[24]);
-    KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, cpuFreq);
+    KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, frequency);
     /* note: we only enqueue ordinary CAN messages and error frames.
      *       The flags MSGFLAG_OVERRUN, MSGFLAG_NERR, MSGFLAG_WAKEUP,
      *       MSGFLAG_TX and MSGFLAG_TXRQ are handled by UpdateEventData
@@ -2578,7 +2584,11 @@ static uint8_t Len2Dlc(uint8_t len) {
                         (deviceInfo->software.EAN[1] >> 4), (deviceInfo->software.EAN[1] & 0xf),
                         (deviceInfo->software.EAN[0] >> 4), (deviceInfo->software.EAN[0] & 0xf));
     MACCAN_DEBUG_DRIVER("      - max. bit-rate (hydra only, otherwise 1Mbit/s): %d\n", deviceInfo->software.maxBitrate);
-    MACCAN_DEBUG_DRIVER("    - capabilities:\n");
+    MACCAN_DEBUG_DRIVER("    - transceiver info:\n");
+    MACCAN_DEBUG_DRIVER("      - transceiver capabilities: 0x%x\n", deviceInfo->transceiver.transceiverCapabilities);
+    MACCAN_DEBUG_DRIVER("      - transceiver status: %d\n", deviceInfo->transceiver.transceiverStatus);
+    MACCAN_DEBUG_DRIVER("      - transceiver type: %d\n", deviceInfo->transceiver.transceiverType);
+    MACCAN_DEBUG_DRIVER("    - capabilities (if SWOPTION_CAP_REQ):\n");
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SILENT_MODE: %d\n", deviceInfo->capabilities.silentMode);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %d\n", deviceInfo->capabilities.errorFrame);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_BUS_STATS: %d\n", deviceInfo->capabilities.busStats);
@@ -2593,9 +2603,5 @@ static uint8_t Len2Dlc(uint8_t len) {
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_KDI (mhydra): %d\n", deviceInfo->capabilities.hasKdi);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_IO_API (mhydra): %d\n", deviceInfo->capabilities.hasIoApi);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_BUSPARAMS_TQ (mhydra): %d\n", deviceInfo->capabilities.hasTimeQuanta);
-    MACCAN_DEBUG_DRIVER("    - transceiver info:\n");
-    MACCAN_DEBUG_DRIVER("      - transceiver capabilities: 0x%x\n", deviceInfo->transceiver.transceiverCapabilities);
-    MACCAN_DEBUG_DRIVER("      - transceiver status: %d\n", deviceInfo->transceiver.transceiverStatus);
-    MACCAN_DEBUG_DRIVER("      - transceiver type: %d\n", deviceInfo->transceiver.transceiverType);
  }
 #endif

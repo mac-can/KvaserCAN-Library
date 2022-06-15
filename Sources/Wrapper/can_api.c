@@ -550,7 +550,7 @@ int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed)
     memset(&busParamsFd, 0, sizeof(KvaserUSB_BusParamsFd_t));
     bool fdoe = can[handle].mode.fdoe ? true : false;
     bool brse = can[handle].mode.brse ? true : false;
-    int32_t canClock = (int32_t)can[handle].device.recvData.cpuFreq * (int32_t)1000000;
+    int32_t canClock = (int32_t)can[handle].device.recvData.canClock * (int32_t)1000000;
 
     // CAN 2.0 operation mode:
     if (!can[handle].mode.fdoe) {

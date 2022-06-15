@@ -339,9 +339,9 @@ CANUSB_Return_t KvaserUSB_AbortReception(KvaserUSB_Device_t *device) {
     return retVal;
 }
 
-uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq) {
+uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq) {
     /*
-     *  param[in]   cpuTicks   - 48-bit timer value from device
+     *  param[in]   cpuTicks   - timer value from device
      *  param[in]   cpuFreq    - CPU frequency in [MHz]
      */
     if (cpuFreq == 0) cpuFreq = 1;  // to avoid devide-by-zero!
@@ -349,10 +349,10 @@ uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB
     return ((uint64_t)cpuTicks * (uint64_t)1000) / (uint64_t)cpuFreq;
 }
 
-void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq) {
+void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq) {
     /*
      *  param[out]  timeStamp  - struct timespec (with nanoseconds resolution)
-     *  param[in]   cpuTicks   - 48-bit timer value from device
+     *  param[in]   cpuTicks   - timer value from device (48-bit or 64-bit)
      *  param[in]   cpuFreq    - CPU frequency in [MHz]
      */
     assert(timeStamp);
