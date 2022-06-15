@@ -211,6 +211,8 @@ static const struct kavser_can_device_t_ {
     uint16_t productId;
     KvaserCAN_DeviceFamily_t deviceFamily;
     uint8_t numChannels;
+    uint8_t canClock;
+    uint8_t tmrFreq;
     bool capCanFd;
     bool capNonIso;
     bool capSilentMode;
@@ -298,7 +300,7 @@ static const struct kavser_can_device_t_ {
     #error Device not supported!
 #endif
 #if (OPTION_USB_LEAF_PRO_HS_V2_DEVICE != 0)
-    {USB_LEAF_PRO_HS_V2_PRODUCT_ID, USB_LEAF_PRO_HS_V2_DRV_FAMILY, USB_LEAF_PRO_HS_V2_NUM_CHANNELS, USB_LEAF_PRO_HS_V2_CAP_CANFD, USB_LEAF_PRO_HS_V2_CAP_NONISO, USB_LEAF_PRO_HS_V2_CAP_SILENT_MODE, USB_LEAF_PRO_HS_V2_CAP_ERROR_FRAME},
+    {USB_LEAF_PRO_HS_V2_PRODUCT_ID, USB_LEAF_PRO_HS_V2_DRV_FAMILY, USB_LEAF_PRO_HS_V2_NUM_CHANNELS, USB_LEAF_PRO_HS_V2_CAN_CLOCK, USB_LEAF_PRO_HS_V2_TIMER_FREQ, USB_LEAF_PRO_HS_V2_CAP_CANFD, USB_LEAF_PRO_HS_V2_CAP_NONISO, USB_LEAF_PRO_HS_V2_CAP_SILENT_MODE, USB_LEAF_PRO_HS_V2_CAP_ERROR_FRAME},
 #endif
 #if (OPTION_USB_USBCAN_PRO_2HS_V2_DEVICE != 0)
     #error Device not supported!
@@ -319,7 +321,7 @@ static const struct kavser_can_device_t_ {
     #error Device not supported!
 #endif
 #if (OPTION_USB_HYBRID_PRO_CANLIN_DEVICE != 0)
-    {USB_HYBRID_PRO_CANLIN_PRODUCT_ID, USB_HYBRID_PRO_CANLIN_DRV_FAMILY, USB_HYBRID_PRO_CANLIN_NUM_CHANNELS, USB_HYBRID_PRO_CANLIN_CAP_CANFD, USB_HYBRID_PRO_CANLIN_CAP_NONISO, USB_HYBRID_PRO_CANLIN_CAP_SILENT_MODE, USB_HYBRID_PRO_CANLIN_CAP_ERROR_FRAME},
+    {USB_HYBRID_PRO_CANLIN_PRODUCT_ID, USB_HYBRID_PRO_CANLIN_DRV_FAMILY, USB_HYBRID_PRO_CANLIN_NUM_CHANNELS, USB_HYBRID_PRO_CANLIN_CAN_CLOCK, USB_HYBRID_PRO_CANLIN_TIMER_FREQ, USB_HYBRID_PRO_CANLIN_CAP_CANFD, USB_HYBRID_PRO_CANLIN_CAP_NONISO, USB_HYBRID_PRO_CANLIN_CAP_SILENT_MODE, USB_HYBRID_PRO_CANLIN_CAP_ERROR_FRAME},
 #endif
 #if (OPTION_USB_BLACKBIRD_PRO_HS_V2_DEVICE != 0)
     #error Device not supported!
@@ -331,7 +333,7 @@ static const struct kavser_can_device_t_ {
     #error Device not supported!
 #endif
 #if (OPTION_USB_U100P_DEVICE != 0)
-    {USB_U100P_PRODUCT_ID, USB_U100P_DRV_FAMILY, USB_U100P_NUM_CHANNELS, USB_U100P_CAP_CANFD, USB_U100P_CAP_NONISO, USB_U100P_CAP_SILENT_MODE, USB_U100P_CAP_ERROR_FRAME},
+    {USB_U100P_PRODUCT_ID, USB_U100P_DRV_FAMILY, USB_U100P_NUM_CHANNELS, USB_U100P_CAN_CLOCK, USB_U100P_TIMER_FREQ, USB_U100P_CAP_CANFD, USB_U100P_CAP_NONISO, USB_U100P_CAP_SILENT_MODE, USB_U100P_CAP_ERROR_FRAME},
 #endif
 #if (OPTION_USB_U100S_DEVICE != 0)
     #error Device not supported!
@@ -346,7 +348,7 @@ static const struct kavser_can_device_t_ {
     #error Device not supported!
 #endif
 #if (OPTION_USB_LEAF_LITE_V2_DEVICE != 0)
-    {USB_LEAF_LITE_V2_PRODUCT_ID, USB_LEAF_LITE_V2_DRV_FAMILY, USB_LEAF_LITE_V2_NUM_CHANNELS, USB_LEAF_LITE_V2_CAP_CANFD, USB_LEAF_LITE_V2_CAP_NONISO, USB_LEAF_LITE_V2_CAP_SILENT_MODE, USB_LEAF_LITE_V2_CAP_ERROR_FRAME},
+    {USB_LEAF_LITE_V2_PRODUCT_ID, USB_LEAF_LITE_V2_DRV_FAMILY, USB_LEAF_LITE_V2_NUM_CHANNELS, USB_LEAF_LITE_V2_CAN_CLOCK, USB_LEAF_LITE_V2_TIMER_FREQ, USB_LEAF_LITE_V2_CAP_CANFD, USB_LEAF_LITE_V2_CAP_NONISO, USB_LEAF_LITE_V2_CAP_SILENT_MODE, USB_LEAF_LITE_V2_CAP_ERROR_FRAME},
 #endif
 #if (OPTION_USB_MINI_PCI_EXPRESS_HS_DEVICE != 0)
     #error Device not supported!
@@ -369,7 +371,7 @@ static const struct kavser_can_device_t_ {
 #if (OPTION_USB_OEM_ATI_LEAF_LITE_V2_DEVICE != 0)
     #error Device not supported!
 #endif
-    {0xFFFFU, KVASER_UNKNOWN_DEVICE_FAMILY, 0U, false, false, false, false}
+    {0xFFFFU, KVASER_UNKNOWN_DEVICE_FAMILY, 0U, 0U, 0U, false, false, false, false}
 };
 
 KvaserCAN_DeviceFamily_t KvaserDEV_GetDeviceFamily(uint16_t productId) {
@@ -384,6 +386,22 @@ uint8_t KvaserDEV_GetNumberOfCanChannels(uint16_t productId) {
     for (int i = 0; Kvaser_Devices[i].productId != 0xFFFFU; i++) {
         if (Kvaser_Devices[i].productId == productId)
             return Kvaser_Devices[i].numChannels;
+    }
+    return 0U;
+}
+
+uint8_t KvaserDEV_GetCanClockInMHz(uint16_t productId) {
+    for (int i = 0; Kvaser_Devices[i].productId != 0xFFFFU; i++) {
+        if (Kvaser_Devices[i].productId == productId)
+            return Kvaser_Devices[i].canClock;
+    }
+    return 0U;
+}
+
+uint8_t KvaserDEV_GetTimerFreqInMHz(uint16_t productId) {
+    for (int i = 0; Kvaser_Devices[i].productId != 0xFFFFU; i++) {
+        if (Kvaser_Devices[i].productId == productId)
+            return Kvaser_Devices[i].tmrFreq;
     }
     return 0U;
 }
