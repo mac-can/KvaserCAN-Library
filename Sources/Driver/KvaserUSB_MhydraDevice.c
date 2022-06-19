@@ -256,6 +256,13 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
     MACCAN_DEBUG_DRIVER("    - clocks:\n");
     MACCAN_DEBUG_DRIVER("      - CAN clock: %u MHz\n", device->recvData.canClock);
     MACCAN_DEBUG_DRIVER("      - CAN timer: %u MHz\n", device->recvData.timerFreq);
+    /* get device clock (don't care about the result) */
+    uint64_t nsec = 0U;
+    retVal = Mhydra_ReadClock(device, &nsec);
+    if (retVal < 0) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): device clock could not be read (%i)\n", device->name, device->handle, retVal);
+    }
+    MACCAN_DEBUG_DRIVER("      - Clock: %u.%04u sec\n", (nsec / 1000000000), ((nsec % 1000000000) / 1000000));
     MACCAN_DEBUG_DRIVER("      - Time: %u.%04u sec\n", device->recvData.timeRef.tv_sec, device->recvData.timeRef.tv_nsec / 1000000);
 #endif
     /* get max. outstanding transmit messages */
@@ -1415,6 +1422,10 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_CAN_ERROR_EVENT:
                     /* event message: update event status */
                     (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->timerFreq);
+                    /* on error event: write packet into the pipe */
+                    if (CMD_ERROR_EVENT == hydra->buffer[index]) {
+                        (void)CANPIP_Write(context->msgPipe, &hydra->buffer[index], nbyte);
+                    }
                     break;
                 case CMD_GET_BUSPARAMS_RESP:       
                 case CMD_GET_DRIVERMODE_RESP:
@@ -1434,7 +1445,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_SET_BUSPARAMS_TQ_RESP:
                 case CMD_MAP_CHANNEL_RESP:
                 case CMD_GET_SOFTWARE_DETAILS_RESP:
-                    /* command response: write packet in the pipe */
+                    /* command response: write packet into the pipe */
                     (void)CANPIP_Write(context->msgPipe, &hydra->buffer[index], nbyte);
                     break;
                 case CMD_EXTENDED:
@@ -1781,6 +1792,21 @@ static CANUSB_Return_t ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer,
         UInt16 transId = (UInt16)((buffer[3] & 0x0FU) << 8) | (UInt16)buffer[2];
         MACCAN_LOG_PRINTF("< cmd=%02x dst=%x src=%x transId=%d\n", cmdNo, dstAddr, srcChannel, transId);
 #endif
+        /* error event:
+         * - byte 0: command code
+         * - byte 1: HE address (bit 0..5 = dst, bit 6..7 = src MSB)
+         * - byte 2..3: transaction id. (bit 0..11 = seq, bit 11..15: src LSB)
+         * - byte 4..9: time (48-bit)
+         * - byte 10: (reserved)
+         * - byte 11: error code (see Linux driver)
+         * - byte 12..13; additional information 1
+         * - byte 14..15: additional information 2
+         * - byte 16..31: (not used)
+         */
+        if (buffer[0] == CMD_ERROR_EVENT) {
+            retVal = (CANUSB_Return_t)(-100) - (CANUSB_Return_t)buffer[11];
+            break;
+        }
     } while (buffer[0] != cmdCode);
 
     return retVal;

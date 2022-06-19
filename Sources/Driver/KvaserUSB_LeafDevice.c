@@ -247,12 +247,20 @@ CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserU
             break;
     }
     device->recvData.timerFreq = device->recvData.canClock;
+
     /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
     (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);  // TODO: not used yet
 #if (OPTION_PRINT_DEVICE_INFO != 0)
     MACCAN_DEBUG_DRIVER("    - clocks:\n");
     MACCAN_DEBUG_DRIVER("      - CAN clock: %u MHz\n", device->recvData.canClock);
     MACCAN_DEBUG_DRIVER("      - CAN timer: %u MHz\n", device->recvData.timerFreq);
+    /* get device clock (don't care about the result) */
+    uint64_t nsec = 0U;
+    retVal = Leaf_ReadClock(device, &nsec);  // FIXME: returns (-50)
+    if (retVal < 0) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): device clock could not be read (%i)\n", device->name, device->handle, retVal);
+    }
+    MACCAN_DEBUG_DRIVER("      - Clock: %u.%04u sec\n", (nsec / 1000000000), ((nsec % 1000000000) / 1000000));
     MACCAN_DEBUG_DRIVER("      - Time: %u.%04u sec\n", device->recvData.timeRef.tv_sec, device->recvData.timeRef.tv_nsec / 1000000);
 #endif
     /* get max. outstanding transmit messages */
