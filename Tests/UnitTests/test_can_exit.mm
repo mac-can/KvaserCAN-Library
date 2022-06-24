@@ -411,4 +411,4 @@
 
 @end
 
-// $Id: test_can_exit.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_exit.mm 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //

@@ -1657,4 +1657,4 @@
 
 @end
 
-// $Id: test_can_write.mm 1195 2022-06-02 17:52:37Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_write.mm 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //

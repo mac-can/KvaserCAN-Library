@@ -1303,4 +1303,4 @@ static struct property {
 
 @end
 
-// $Id: test_can_property.mm 1092 2022-01-15 21:14:19Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_property.mm 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //

@@ -71,4 +71,4 @@ public:
 
 #endif // TESTER_H_INCLUDED
 
-// $Id: Tester.h 1083 2022-01-07 07:58:25Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Tester.h 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //

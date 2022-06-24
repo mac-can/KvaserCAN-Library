@@ -118,4 +118,4 @@
 
 #endif // SETTINGS_H_INCLUDED
 
-// $Id: Settings.h 1195 2022-06-02 17:52:37Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Settings.h 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //

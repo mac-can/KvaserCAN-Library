@@ -999,4 +999,4 @@
 }
 @end
 
-// $Id: test_can_read.mm 1193 2022-05-29 16:26:39Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_read.mm 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //

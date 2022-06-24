@@ -1189,67 +1189,67 @@
     }
 }
 
-// @xctest TC03.19: tbd.
+// @xctest TC03.19: Start CAN controller with valid CAN 2.0 bit-rate settings.
 //
 //- (void)testWithValidCan20BitrateSettings {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.20: tbd.
+// @xctest TC03.20: Start CAN controller with invalid CAN 2.0 bit-rate settings.
 //
 //- (void)testWithInvalidCan20BitrateSettings {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.21: tbd.
+// @xctest TC03.21: Re-Start CAN controller with same CAN 2.0 bit-rate settings after it was stopped.
 //
 //- (void)testWithSameCan20BitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.22: tbd.
+// @xctest TC03.22: Re-Start CAN controller with different CAN 2.0 bit-rate settings after it was stopped.
 //
 //- (void)testWithDifferentCan20BitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.23: tbd.
+// @xctest TC03.23: Start CAN controller with valid CAN FD bit-rate settings.
 //
 //- (void)testWithValidCanFdBitrateSettings {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.24: tbd.
+// @xctest TC03.24: Start CAN controller with invalid CAN FD bit-rate settings.
 //
 //- (void)testWithInvalidCanFdBitrateSettings {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.25: tbd.
+// @xctest TC03.25: Re-Start CAN controller with same CAN FD bit-rate settings after it was stopped.
 //
 //- (void)testWithSameCanFdBitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.26: tbd.
+// @xctest TC03.26: Re-Start CAN controller with different CAN FD bit-rate settings after it was stopped.
 //
 //- (void)testWithDifferentCanFdBitrateSettingsAfterCanStopped {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.27: tbd.
+// @xctest TC03.27: Start CAN controller with CiA bit-timing index in CAN FD operation mode.
 //
 //- (void)testWithCan20CiaIndexInCanFdMode {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.28: tbd.
+// @xctest TC03.28: Start CAN controller with CAN 2.0 bit-rate settings in CAN FD operation mode.
 //
 //- (void)testWithCan20BitrateSettingsInCanFdMode {
 //        TODO: insert coin here
 //}
 
-// @xctest TC03.29: tbd.
+// @xctest TC03.29: Start CAN controller with CAN FD bit-rate settings in CAN 2.0 operation mode.
 //
 //- (void)testWithCanFdBitrateSettingsInCan20Mode {
 //        TODO: insert coin here
@@ -1257,4 +1257,4 @@
 
 @end
 
-// $Id: test_can_start.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_start.mm 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //
