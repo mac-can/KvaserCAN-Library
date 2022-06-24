@@ -207,30 +207,35 @@ CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserU
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip state event could not be triggered (%i)\n", device->name, device->handle, retVal);
         goto err_init;
     }
-    /* get device information (don't care about the result) */
+    /* get device information: card, software, interface, transceiver */
     retVal = Leaf_GetCardInfo(device, &device->deviceInfo.card);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): card information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
     }
     retVal = Leaf_GetSoftwareInfo(device, &device->deviceInfo.software);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
     }
 #if (0)
     retVal = Leaf_GetInterfaceInfo(device, &device->deviceInfo.channel);  // FIXME: returns (-50)
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
     }
 #endif
     retVal = Leaf_GetTransceiverInfo(device, &device->deviceInfo.transceiver);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
     }
     /* get device capabilities (if supported) */
     if (device->deviceInfo.software.swOptions & SWOPTION_CAP_REQ) {
         retVal = Leaf_GetCapabilities(device, &device->deviceInfo.capabilities);
         if (retVal < 0) {
             MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel capabilities could not be read (%i)\n", device->name, device->handle, retVal);
+            goto err_init;
         }
     }
 #if (OPTION_PRINT_DEVICE_INFO != 0)
