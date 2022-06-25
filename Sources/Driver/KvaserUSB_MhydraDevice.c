@@ -64,6 +64,9 @@
 #ifndef OPTION_PRINT_BUS_PARAMS
 #define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
 #endif
+#ifndef OPTION_CHECK_BUS_PARAMS
+#define OPTION_CHECK_BUS_PARAMS  1  /* note set zero to disable checking of bus params */
+#endif
 #define ROUTER_HE  0x00U
 #define DYNAMIC_HE  ROUTER_HE
 #define ILLEGAL_HE  0x3EU
@@ -337,6 +340,15 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
+    /* check bus params */
+#if (OPTION_CHECK_BUS_PARAMS != 0)
+    if ((params->bitRate == 0) || (params->bitRate > device->deviceInfo.software.maxBitrate) ||
+        (params->tseg1 == 0) /*|| (params->tseg1 > 255)*/ ||
+        (params->tseg2 == 0) || (params->tseg2 > 127) ||
+        (params->sjw == 0) || (params->sjw > 127) ||
+        (params->noSamp != 1))
+        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+#endif
     /* send request CMD_SET_BUSPARAMS_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillSetBusParamsReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, params);

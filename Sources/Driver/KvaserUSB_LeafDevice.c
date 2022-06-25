@@ -64,6 +64,9 @@
 #ifndef OPTION_PRINT_BUS_PARAMS
 #define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
 #endif
+#ifndef OPTION_CHECK_BUS_PARAMS
+#define OPTION_CHECK_BUS_PARAMS  1  /* note set zero to disable checking of bus params */
+#endif
 #define LEN_RX_STD_MESSAGE             24U
 #define LEN_TX_STD_MESSAGE             20U
 #define LEN_RX_EXT_MESSAGE             24U
@@ -337,6 +340,15 @@ CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_Bu
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
+    /* check bus params */
+#if (OPTION_CHECK_BUS_PARAMS != 0)
+    if ((params->bitRate == 0) || (params->bitRate > device->deviceInfo.software.maxBitrate) ||
+        (params->tseg1 == 0) /*|| (params->tseg1 > 255)*/ ||
+        (params->tseg2 == 0) || (params->tseg2 > 127) ||
+        (params->sjw == 0) || (params->sjw > 127) ||
+        (params->noSamp != 1))
+        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+#endif
     /* send request CMD_SET_BUSPARAMS_REQ w/o response */
     bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
     size = FillSetBusParamsReq(buffer, KVASER_MAX_COMMAND_LENGTH, device->channelNo, params);
