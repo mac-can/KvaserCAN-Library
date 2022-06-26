@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC0.0: Smoke-test
+//
+// @expected CANERR_NOERROR
+//
 - (void)testSmokeTest {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };

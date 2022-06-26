@@ -66,7 +66,7 @@
 
 // @xctest TC03.1: Start CAN controller with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -130,7 +130,7 @@
 
 // @xctest TC03.2: Give a NULL pointer as argument for parameter 'bitrate'
 //
-// @expected: CANERR_NULLPTR
+// @expected CANERR_NULLPTR
 //
 - (void)testWithNullPointerForBitrate {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -188,7 +188,7 @@
 
 // @xctest TC03.3: Start CAN controller when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -240,7 +240,7 @@
 
 // @xctest TC03.4: Start CAN controller when CAN controller is not started
 //
-// @expected: CANERR_ONLINE
+// @expected CANERR_ONLINE
 //
 - (void)testWhenInterfaceStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -298,7 +298,7 @@
 
 // @xctest TC03.5: Start CAN controller when it was stopped before
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -372,7 +372,7 @@
 
 // @xctest TC03.6: Start CAN controller when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -424,7 +424,7 @@
 
 // @xctest TC03.7: Start CAN controller with CiA bit-timing index 0 (1000kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex0 {
     can_bitrate_t bitrate = { CANBTR_INDEX_1M };
@@ -478,7 +478,7 @@
 
 // @xctest TC03.8: Start CAN controller with CiA bit-timing index 1 (800kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 // @note: CiA index 1 (800kbps) is not supported by all CAN controllers.
 //
@@ -536,7 +536,7 @@
 
 // @xctest TC03.9: Start CAN controller with CiA bit-timing index 2 (500kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex2 {
     can_bitrate_t bitrate = { CANBTR_INDEX_500K };
@@ -590,7 +590,7 @@
 
 // @xctest TC03.10: Start CAN controller with CiA bit-timing index 3 (250kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex3 {
     can_bitrate_t bitrate = { CANBTR_INDEX_250K };
@@ -644,7 +644,7 @@
 
 // @xctest TC03.11: Start CAN controller with CiA bit-timing index 4 (125kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex4 {
     can_bitrate_t bitrate = { CANBTR_INDEX_125K };
@@ -698,7 +698,7 @@
 
 // @xctest TC03.12: Start CAN controller with CiA bit-timing index 5 (100kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex5 {
     can_bitrate_t bitrate = { CANBTR_INDEX_100K };
@@ -752,7 +752,7 @@
 
 // @xctest TC03.13: Start CAN controller with CiA bit-timing index 6 (50kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex6 {
     can_bitrate_t bitrate = { CANBTR_INDEX_50K };
@@ -806,7 +806,7 @@
 
 // @xctest TC03.14: Start CAN controller with CiA bit-timing index 7 (20kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex7 {
     can_bitrate_t bitrate = { CANBTR_INDEX_20K };
@@ -860,7 +860,7 @@
 
 // @xctest TC03.15: Start CAN controller with CiA bit-timing index 8 (10kbps)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckCiaIndex8 {
     can_bitrate_t bitrate = { CANBTR_INDEX_10K };
@@ -914,7 +914,7 @@
 
 // @xctest TC03.16: Start CAN controller with invalid CiA bit-timing index
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testCheckInvalidCiaIndex {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1022,7 +1022,7 @@
 
 // @xctest TC03.17: Re-Start CAN controller with the same CiA bit-timing index after it was stopped
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithSameCiaIndexAfterCanStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1102,7 +1102,7 @@
 
 // @xctest TC03.18: Re-Start CAN controller with a different CiA bit-timing index after it was stopped
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithDifferentCiaIndexAfterCanStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1189,7 +1189,7 @@
 
 // @xctest TC03.19: Start CAN controller with valid CAN 2.0 bit-rate settings
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithValidCan20BitrateSettings {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1255,7 +1255,7 @@
 
 // @xctest TC03.20: Start CAN controller with invalid CAN 2.0 bit-rate settings
 //
-// @expected: CANERR_BAUDRATE
+// @expected CANERR_BAUDRATE
 //
 - (void)testWithInvalidCan20BitrateSettings {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1301,8 +1301,10 @@
             case 15: invalid.btr.frequency = 8000000; invalid.btr.nominal.brp = 4; invalid.btr.nominal.tseg1 = 5; invalid.btr.nominal.tseg2 = 2; invalid.btr.nominal.sjw = UINT16_MAX; invalid.btr.nominal.sam = 0; break;
             // field 'sam' invalid
 #if (TC03_20_KVASER_NOSAMP_WORKAROUND == 0)
+            // @issue: only SAM = 0 supported by Kvaser devices (noSamp = 1)
             case 16: invalid.btr.frequency = 8000000; invalid.btr.nominal.brp = 4; invalid.btr.nominal.tseg1 = 5; invalid.btr.nominal.tseg2 = 2; invalid.btr.nominal.sjw = 1; invalid.btr.nominal.sam = 2; break;
 #else
+            // @workaround: tread SAM = 1 as invalid (noSamp = 3)
             case 16: invalid.btr.frequency = 8000000; invalid.btr.nominal.brp = 4; invalid.btr.nominal.tseg1 = 5; invalid.btr.nominal.tseg2 = 2; invalid.btr.nominal.sjw = 1; invalid.btr.nominal.sam = 1; break;
 #endif
             case 17: invalid.btr.frequency = 8000000; invalid.btr.nominal.brp = 4; invalid.btr.nominal.tseg1 = 5; invalid.btr.nominal.tseg2 = 2; invalid.btr.nominal.sjw = 1; invalid.btr.nominal.sam = UINT8_MAX; break;
@@ -1344,7 +1346,7 @@
 
 // @xctest TC03.21: Re-Start CAN controller with same CAN 2.0 bit-rate settings after it was stopped
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithSameCan20BitrateSettingsAfterCanStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1425,7 +1427,7 @@
 
 // @xctest TC03.22: Re-Start CAN controller with different CAN 2.0 bit-rate settings after it was stopped
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithDifferentCan20BitrateSettingsAfterCanStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1514,14 +1516,14 @@
 
 // @xctest TC03.23: Start CAN controller with valid CAN FD bit-rate settings
 //
-// @expected: CANERR_
+// @expected CANERR_
 //
 //- (void)testWithValidCanFdBitrateSettings {
 //    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 //
 //    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
 //        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-//        // TODO: insert coin here
+// @todo:: insert coin here
 //    } else {
 //        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
 //    }
@@ -1529,14 +1531,14 @@
 
 // @xctest TC03.24: Start CAN controller with invalid CAN FD bit-rate settings
 //
-// @expected: CANERR_
+// @expected CANERR_
 //
 //- (void)testWithInvalidCanFdBitrateSettings {
 //    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 //
 //    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
 //        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-//        // TODO: insert coin here
+// @todo:: insert coin here
 //    } else {
 //        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
 //    }
@@ -1544,14 +1546,14 @@
 
 // @xctest TC03.25: Re-Start CAN controller with same CAN FD bit-rate settings after it was stopped
 //
-// @expected: CANERR_
+// @expected CANERR_
 //
 //- (void)testWithSameCanFdBitrateSettingsAfterCanStopped {
 //    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 //
 //    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
 //        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-//        // TODO: insert coin here
+// @todo:: insert coin here
 //    } else {
 //        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
 //    }
@@ -1559,14 +1561,14 @@
 
 // @xctest TC03.26: Re-Start CAN controller with different CAN FD bit-rate settings after it was stopped
 //
-// @expected: CANERR_
+// @expected CANERR_
 //
 //- (void)testWithDifferentCanFdBitrateSettingsAfterCanStopped {
 //    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 //
 //    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
 //        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-//        // TODO: insert coin here
+// @todo:: insert coin here
 //    } else {
 //        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
 //    }
@@ -1574,14 +1576,14 @@
 
 // @xctest TC03.27: Start CAN controller with CiA bit-timing index in CAN FD operation mode
 //
-// @expected: CANERR_
+// @expected CANERR_
 //
 //- (void)testWithCan20CiaIndexInCanFdMode {
 //    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 //
 //    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
 //        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-//        // TODO: insert coin here
+// @todo:: insert coin here
 //    } else {
 //        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
 //    }
@@ -1589,14 +1591,14 @@
 
 // @xctest TC03.28: Start CAN controller with CAN 2.0 bit-rate settings in CAN FD operation mode
 //
-// @expected: CANERR_
+// @expected CANERR_
 //
 //- (void)testWithCan20BitrateSettingsInCanFdMode {
 //    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 //
 //    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
 //        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-//        // TODO: insert coin here
+// @todo:: insert coin here
 //    } else {
 //        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
 //    }
@@ -1604,7 +1606,7 @@
 
 // @xctest TC03.29: Start CAN controller with CAN FD bit-rate settings in CAN 2.0 operation mode
 //
-// @expected: CANERR_BAUDRATE (or CANERR_NOERROR? check CAN API spec.)
+// @expected CANERR_BAUDRATE (or CANERR_NOERROR? check CAN API spec.)
 //
 - (void)testWithCanFdBitrateSettingsInCan20Mode {
     uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
@@ -1643,12 +1645,14 @@
             // @-- start DUT1 with CAN FD bit-rate settings
             rc = can_start(handle, &fd);
 #if (TC03_29_KVASER_FDBITRATE_WORKAROUND == 0)
+            // @issue: if CAN FD bit-rate settings match CAN 2.0 requirement, then they are valid.
             XCTAssertEqual(CANERR_BAUDRATE, rc);
             // @-- get status of DUT1 and check to be in INIT state
             rc = can_status(handle, &status.byte);
             XCTAssertEqual(CANERR_NOERROR, rc);
             XCTAssertTrue(status.can_stopped);
 #else
+            // @workaround: tread them as valid
             XCTAssertEqual(CANERR_NOERROR, rc);
             // @-- get status of DUT1 and check to be in RUNNING state
             rc = can_status(handle, &status.byte);
@@ -1661,6 +1665,7 @@
             rc = can_status(handle, &status.byte);
             XCTAssertEqual(CANERR_NOERROR, rc);
             XCTAssertTrue(status.can_stopped);
+            // @end of workaround
 #endif
         }
         // @post:

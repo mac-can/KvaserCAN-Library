@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC13.1: Get hardware version with invalid interface handle(s).
+// @xctest TC13.1: Get hardware version with invalid interface handle(s)
 //
-// @expected: NULL
+// @expected NULL
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -125,9 +125,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC13.2: Get hardware version when interface is not initialized.
+// @xctest TC13.2: Get hardware version when interface is not initialized
 //
-// @expected: NULL
+// @expected NULL
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -184,9 +184,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC13.3: Get hardware version when interface already shutdown.
+// @xctest TC13.3: Get hardware version when interface already shutdown
 //
-// @expected: NULL
+// @expected NULL
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -237,9 +237,9 @@
     XCTAssertTrue(NULL == string);
 }
 
-// @xctest TC13.4: Query hardware version at any place in a standard sequence (cf. SmokeTest).
+// @xctest TC13.4: Query hardware version at any place in a standard sequence (cf. SmokeTest)
 //
-// @expected: Not NULL
+// @expected a zero-terminated string
 //
 - (void)testAnyPlaceAnyTime {
     can_bitrate_t bitrate = { TEST_BTRINDEX };

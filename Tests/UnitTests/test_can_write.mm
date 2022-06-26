@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC05.1: Send a CAN message with invalid interface handle(s).
+// @xctest TC05.1: Send a CAN message with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -136,9 +136,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.2: Give a NULL pointer as argument for parameter 'message'.
+// @xctest TC05.2: Give a NULL pointer as argument for parameter 'message'
 //
-// @expected: CANERR_NULLPTR
+// @expected CANERR_NULLPTR
 //
 - (void)testWithNullPointerForMessage {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -190,9 +190,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.3: Send a CAN message when interface is not initialized.
+// @xctest TC05.3: Send a CAN message when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -260,9 +260,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.4: Send a CAN message when CAN controller is not started.
+// @xctest TC05.4: Send a CAN message when CAN controller is not started
 //
-// @expected: CANERR_OFFLINE
+// @expected CANERR_OFFLINE
 //
 - (void)testWhenInterfaceNotStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -326,9 +326,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.5: Send a CAN message when CAN controller already stopped.
+// @xctest TC05.5: Send a CAN message when CAN controller already stopped
 //
-// @expected: CANERR_OFFLINE
+// @expected CANERR_OFFLINE
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -392,9 +392,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.6: Send a CAN message when interface already shutdown.
+// @xctest TC05.6: Send a CAN message when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -456,9 +456,9 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-// @xctest TC05.7: Send CAN messages with valid 11-bit identifier and check its correct transmission on receiver side.
+// @xctest TC05.7: Send CAN messages with valid 11-bit identifier and check its correct transmission on receiver side
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithValid11bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -555,9 +555,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.8: Send CAN messages with invalid 11-bit identifier.
+// @xctest TC05.8: Send CAN messages with invalid 11-bit identifier
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testWithInvalid11bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -675,9 +675,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.9: Send CAN messages with valid 29-bit identifier and check its correct transmission on receiver side.
+// @xctest TC05.9: Send CAN messages with valid 29-bit identifier and check its correct transmission on receiver side
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithValid29bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -774,9 +774,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.10: Send CAN messages with invalid 29-bit identifier.
+// @xctest TC05.10: Send CAN messages with invalid 29-bit identifier
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testWithInvalid29bitIdentifier  {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -846,9 +846,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.11: Send CAN messages with valid Data Length Code and check its correct transmission on receiver side.
+// @xctest TC05.11: Send CAN messages with valid Data Length Code and check its correct transmission on receiver side
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithValidDataLengthCode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -945,9 +945,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.12: Send CAN messages with invalid Data Length Code.
+// @xctest TC05.12: Send CAN messages with invalid Data Length Code
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testWithInvalidDataLengthCode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1047,9 +1047,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.13: Send a CAN message with flag XTD when operation mode NXTD is selected (suppress extended frames).
+// @xctest TC05.13: Send a CAN message with flag XTD when operation mode NXTD is selected (suppress extended frames)
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testCheckFlagXtdWhenOperationModeNoXtd {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1133,9 +1133,9 @@
     }
 }
 
-// @xctest TC05.14: Send a CAN message with flag RTR set when operation mode NRTR is selected (suppress remote frames).
+// @xctest TC05.14: Send a CAN message with flag RTR set when operation mode NRTR is selected (suppress remote frames)
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testCheckFlagRtrWhenOperationModeNoRtr {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1219,9 +1219,9 @@
     }
 }
 
-// @xctest TC05.15: Send a CAN FD message with flag FDF set in CAN 2.0 operation mode (FDOE = 0).
+// @xctest TC05.15: Send a CAN FD message with flag FDF set in CAN 2.0 operation mode (FDOE = 0)
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testCheckFlagFdfInCan20OperationMode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1306,9 +1306,9 @@
     }
 }
 
-// @xctest TC05.16: Send a CAN FD message with flag BRS set in CAN 2.0 operation mode (FDOE = 0 and BRSE = 0).
+// @xctest TC05.16: Send a CAN FD message with flag BRS set in CAN 2.0 operation mode (FDOE = 0 and BRSE = 0)
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testCheckFlagBrsInCan20OperationMode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1393,9 +1393,9 @@
     }
 }
 
-// @xctest TC05.17: Send a CAN FD message with flag BRS set in CAN FD operation mode (FDOE = 1) when bit-rate switching is not enabled (BRSE = 0).
+// @xctest TC05.17: Send a CAN FD message with flag BRS set in CAN FD operation mode (FDOE = 1) when bit-rate switching is not enabled (BRSE = 0)
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testCheckFlagBrsWithoutFlagFdf {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1484,9 +1484,9 @@
     }
 }
 
-// @xctest TC05.18: Send a CAN message with flag STS set (status message).
+// @xctest TC05.18: Send a CAN message with flag STS set (status message)
 //
-// @expected: CANERR_ILLPARA
+// @expected CANERR_ILLPARA
 //
 - (void)testCheckFlagSts {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1555,9 +1555,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC05.19: Send a CAN message when the transmitter is busy (transmit queue full).
+// @xctest TC05.19: Send a CAN message when the transmitter is busy (transmit queue full)
 //
-// @expected: CANERR_TX_BUSY
+// @expected CANERR_TX_BUSY
 //
 // @note: flag 'transmitter_busy' is only set when the message is acknowlegded by the CAN controller.
 //

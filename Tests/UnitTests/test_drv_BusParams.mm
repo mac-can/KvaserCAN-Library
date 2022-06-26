@@ -84,9 +84,9 @@
     (void)KvaserCAN_TeardownDriver();
 }
 
-// @xctest TC1.1: ...
+// @xctest TC0.1: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithValidBusParams {
     KvaserUSB_Device_t device = {};
@@ -148,9 +148,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.2: ...
+// @xctest TC0.2: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithAllFieldSetToZero {
     KvaserUSB_Device_t device = {};
@@ -195,9 +195,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.3: ...
+// @xctest TC0.3: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_bitRate_SetToZero {
     KvaserUSB_Device_t device = {};
@@ -259,9 +259,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.4: ...
+// @xctest TC0.4: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_bitRate_SetOnly {
     KvaserUSB_Device_t device = {};
@@ -326,9 +326,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.5: ...
+// @xctest TC0.5: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_tseg1_SetToZero {
     KvaserUSB_Device_t device = {};
@@ -390,9 +390,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.6: ...
+// @xctest TC0.6: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_tseg2_SetToZero {
     KvaserUSB_Device_t device = {};
@@ -454,9 +454,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.7: ...
+// @xctest TC0.7: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_tseg2_Invalid {
     KvaserUSB_Device_t device = {};
@@ -518,9 +518,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.8: ...
+// @xctest TC0.8: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_sjw_SetToZero {
     KvaserUSB_Device_t device = {};
@@ -582,9 +582,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.9: ...
+// @xctest TC0.9: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_sjw_Invalid {
     KvaserUSB_Device_t device = {};
@@ -646,9 +646,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.10: ...
+// @xctest TC0.10: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_noSamp_SetToZero {
     KvaserUSB_Device_t device = {};
@@ -710,9 +710,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.11: ...
+// @xctest TC0.11: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_noSamp_Invalid {
     KvaserUSB_Device_t device = {};
@@ -774,9 +774,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.12: ...
+// @xctest TC0.12: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_noSamp_SetToOne {
     KvaserUSB_Device_t device = {};
@@ -845,9 +845,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.13: ...
+// @xctest TC0.13: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithField_noSamp_SetToThree {
     KvaserUSB_Device_t device = {};
@@ -916,9 +916,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.14: ...
+// @xctest TC0.14: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWhenNotInitialized{
     KvaserUSB_Device_t device = {};
@@ -959,9 +959,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.15: ...
+// @xctest TC0.15: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWhenAlreadyShutdown{
     KvaserUSB_Device_t device = {};
@@ -1001,9 +1001,9 @@
     XCTAssertNotEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.16: ...
+// @xctest TC0.16: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWhileBusOn{
     KvaserUSB_Device_t device = {};
@@ -1056,9 +1056,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.17: ...
+// @xctest TC0.17: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithNullPointerForArgument_device{
     KvaserUSB_Device_t device = {};
@@ -1100,9 +1100,9 @@
     XCTAssertEqual(CANUSB_SUCCESS, retVal);
 }
 
-// @xctest TC1.18: ...
+// @xctest TC0.18: ...
 //
-// @expected: Tbd.
+// @expected Tbd.
 //
 - (void)testWithNullPointerForArgument_params{
     KvaserUSB_Device_t device = {};

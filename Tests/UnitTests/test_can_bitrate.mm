@@ -66,7 +66,7 @@
 
 // @xctest TC11.1: Get CAN bit-rate settings with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -126,7 +126,7 @@
 
 // @xctest TC11.2: Give a NULL pointer as argument for parameter 'bitrate'
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithNullPointerForBitrate {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -181,7 +181,7 @@
 
 // @xctest TC11.3: Give a NULL pointer as argument for parameter 'speed'
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithNullPointerForSpeed {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -235,7 +235,7 @@
 
 // @xctest TC11.4: Give a NULL pointer as argument for parameter 'bitrate' and 'speed'
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithNullPointerForBoth {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -289,7 +289,7 @@
 
 // @xctest TC11.5: Get CAN bit-rate settings when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -347,7 +347,7 @@
 
 // @xctest TC11.6: Get CAN bit-rate settings when interface initialized (but CAN controller not started)
 //
-// @expected: CANERR_OFFLINE
+// @expected CANERR_OFFLINE
 //
 - (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -401,7 +401,7 @@
 
 // @xctest TC11.7: Get CAN bit-rate settings when CAN controller started
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -459,7 +459,7 @@
 
 // @xctest TC11.8: Get CAN bit-rate settings when CAN controller stopped
 //
-// @expected: CANERR_OFFLINE
+// @expected CANERR_OFFLINE
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -513,7 +513,7 @@
 
 // @xctest TC11.9: Get CAN bit-rate settings when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -564,7 +564,7 @@
 
 // @xctest TC11.10: Get CAN bit-rate settings when CAN controller started with various CAN 2.0 bit-rate settings and check for correctness
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithVariousCan20BitrateSettings {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -601,10 +601,11 @@
         rc = can_bitrate(handle, &result, NULL);
         XCTAssertEqual(CANERR_NOERROR, rc);
 #if (TC11_10_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
+        // @issue: if CAN clock unknown on user level, then it is adapted by the wrapper.
         XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
         XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
 #else
-        // @note: compare bit-rate settings by time quanta (tq = f_clock / brp)
+        // @workaround: compare bit-rate settings by time quanta (tq = f_clock / brp)
         if (bitrate.btr.nominal.brp && result.btr.nominal.brp)
             XCTAssertEqual((bitrate.btr.frequency / bitrate.btr.nominal.brp), (result.btr.frequency / result.btr.nominal.brp));
         else
@@ -613,8 +614,11 @@
         XCTAssertEqual(bitrate.btr.nominal.tseg1, result.btr.nominal.tseg1);
         XCTAssertEqual(bitrate.btr.nominal.tseg2, result.btr.nominal.tseg2);
         XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
-#if (TC11_10_KVASER_NOSAMP_WORKAROUND == 0)
+#if (TC11_10_KVASER_NOSAMP == 0)
+        // @issue: only SAM = 0 supported by Kvaser devices (noSamp = 1)
         XCTAssertEqual(bitrate.btr.nominal.sam, result.btr.nominal.sam);
+#else
+        // @workaround: do not compare it
 #endif
         // @-- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
@@ -641,7 +645,7 @@
 
 // @xctest TC11.11: Get CAN bit-rate settings when CAN controller started with various CAN FD bit-rate settings and check for correctness
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithVariousCanFdBitrateSettings {
     uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
@@ -686,10 +690,11 @@
             rc = can_bitrate(handle, &result, NULL);
             XCTAssertEqual(CANERR_NOERROR, rc);
 #if (TC11_11_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
+            // @issue: if CAN clock unknown on user level, then it is adapted by the wrapper.
             XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
             XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
 #else
-            // @note: compare bit-rate settings by time quanta (tq = f_clock / brp)
+            // @workaround: compare nominal bit-rate settings by time quanta (tq = f_clock / brp)
             if (bitrate.btr.nominal.brp && result.btr.nominal.brp)
                 XCTAssertEqual((bitrate.btr.frequency / bitrate.btr.nominal.brp), (result.btr.frequency / result.btr.nominal.brp));
             else
@@ -701,10 +706,11 @@
             // @--- compare data phase settings in bit-rate switching enabled
             if (mode & CANMODE_BRSE) {
 #if (TC11_11_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
+                // @issue: if CAN clock unknown on user level, then it is adapted by the wrapper.
                 XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
                 XCTAssertEqual(bitrate.btr.data.brp, result.btr.data.brp);
 #else
-                // @note: compare bit-rate settings by time quanta (tq = f_clock / brp)
+                // @workaround: compare data phase bit-rate settings by time quanta (tq = f_clock / brp)
                 if (bitrate.btr.data.brp && result.btr.data.brp)
                     XCTAssertEqual((bitrate.btr.frequency / bitrate.btr.data.brp), (result.btr.frequency / result.btr.data.brp));
                 else
