@@ -914,7 +914,7 @@
 
 // @xctest TC03.16: Start CAN controller with invalid CiA bit-timing index
 //
-// @expected CANERR_NOERROR
+// @expected CANERR_BAUDRATE
 //
 - (void)testCheckInvalidCiaIndex {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1191,7 +1191,7 @@
 //
 // @expected CANERR_NOERROR
 //
-- (void)testWithValidCan20BitrateSettings {
+- (void)testCheckValidCan20BitrateSettings {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
@@ -1214,7 +1214,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- start DUT1 with current bit-rate settings
+        // @-- start DUT1 with selected bit-rate settings
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
         // @-- get status of DUT1 and check to be in RUNNING state
@@ -1257,7 +1257,7 @@
 //
 // @expected CANERR_BAUDRATE
 //
-- (void)testWithInvalidCan20BitrateSettings {
+- (void)testCheckInvalidCan20BitrateSettings {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
@@ -1371,7 +1371,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- start DUT1 with current bit-rate settings
+        // @-- start DUT1 with selected bit-rate settings
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
         // @-- get status of DUT1 and check to be in RUNNING state
@@ -1452,7 +1452,7 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- start DUT1 with current bit-rate settings
+        // @-- start DUT1 with selected bit-rate settings
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
         // @-- get status of DUT1 and check to be in RUNNING state
@@ -1516,93 +1516,424 @@
 
 // @xctest TC03.23: Start CAN controller with valid CAN FD bit-rate settings
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR
 //
-//- (void)testWithValidCanFdBitrateSettings {
-//    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
-//
-//    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
-//        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-// @todo:: insert coin here
-//    } else {
-//        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
-//    }
-//}
+- (void)testCheckValidCanFdBitrateSettings {
+    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
+
+    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
+        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
+        can_bitrate_t bitrate = { TEST_BTRINDEX };
+        can_status_t status = { CANSTAT_RESET };
+        int handle = INVALID_HANDLE;
+        int rc = CANERR_FATAL;
+
+        // @test:
+        // @- loop over selected CAN 2.0 bit-rate settings
+        for (int i = 0; i < 8; i++) {
+            switch (i) {
+                case 0: BITRATE_FD_1M(bitrate); mode = CANMODE_FDOE; break;
+                case 1: BITRATE_FD_500K(bitrate); mode = CANMODE_FDOE; break;
+                case 2: BITRATE_FD_250K(bitrate); mode = CANMODE_FDOE; break;
+                case 3: BITRATE_FD_125K(bitrate); mode = CANMODE_FDOE; break;
+                case 4: BITRATE_FD_1M8M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 5: BITRATE_FD_500K4M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 6: BITRATE_FD_250K2M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 7: BITRATE_FD_125K1M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                default: return;
+            }
+            // @-- initialize DUT1 in CAN FD operation mode
+            handle = can_init(DUT1, mode, NULL);
+            XCTAssertLessThanOrEqual(0, handle);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- start DUT1 with selected bit-rate settings
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+            // @-- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+            CTester tester;
+            XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+            XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+#endif
+            // @-- stop/reset DUT1
+            rc = can_reset(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- shutdown DUT1
+            rc = can_exit(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+        }
+    } else {
+        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
+    }
+}
 
 // @xctest TC03.24: Start CAN controller with invalid CAN FD bit-rate settings
 //
-// @expected CANERR_
+// @expected CANERR_BAUDRATE
 //
-//- (void)testWithInvalidCanFdBitrateSettings {
-//    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
-//
-//    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
-//        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-// @todo:: insert coin here
-//    } else {
-//        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
-//    }
-//}
+- (void)testCheckInvalidCanFdBitrateSettings {
+    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
+
+    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
+        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
+        // @todo: insert coin here
+        XCTAssertTrue(false);
+    } else {
+        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
+    }
+}
 
 // @xctest TC03.25: Re-Start CAN controller with same CAN FD bit-rate settings after it was stopped
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR
 //
-//- (void)testWithSameCanFdBitrateSettingsAfterCanStopped {
-//    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
-//
-//    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
-//        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-// @todo:: insert coin here
-//    } else {
-//        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
-//    }
-//}
+- (void)testWithSameCanFdBitrateSettingsAfterCanStopped {
+    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
+
+    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
+        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
+        can_bitrate_t bitrate = { TEST_BTRINDEX };
+        can_status_t status = { CANSTAT_RESET };
+        int handle = INVALID_HANDLE;
+        int rc = CANERR_FATAL;
+
+        // @test:
+        // @- loop over selected CAN 2.0 bit-rate settings
+        for (int i = 0; i < 8; i++) {
+            switch (i) {
+                case 0: BITRATE_FD_1M(bitrate); mode = CANMODE_FDOE; break;
+                case 1: BITRATE_FD_500K(bitrate); mode = CANMODE_FDOE; break;
+                case 2: BITRATE_FD_250K(bitrate); mode = CANMODE_FDOE; break;
+                case 3: BITRATE_FD_125K(bitrate); mode = CANMODE_FDOE; break;
+                case 4: BITRATE_FD_1M8M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 5: BITRATE_FD_500K4M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 6: BITRATE_FD_250K2M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 7: BITRATE_FD_125K1M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                default: return;
+            }
+            // @-- initialize DUT1 in CAN FD operation mode
+            handle = can_init(DUT1, mode, NULL);
+            XCTAssertLessThanOrEqual(0, handle);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- start DUT1 with selected bit-rate settings
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+            // @-- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+            CTester tester;
+            XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+            XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+#endif
+            // @-- stop/reset DUT1
+            rc = can_reset(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            
+            // @-- start DUT1 again with same bit-rate settings
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+            // @-- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+            XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+            XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+#endif
+            // @-- stop/reset DUT1
+            rc = can_reset(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- shutdown DUT1
+            rc = can_exit(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+        }
+    } else {
+        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
+    }
+}
 
 // @xctest TC03.26: Re-Start CAN controller with different CAN FD bit-rate settings after it was stopped
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR
 //
-//- (void)testWithDifferentCanFdBitrateSettingsAfterCanStopped {
-//    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
-//
-//    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
-//        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-// @todo:: insert coin here
-//    } else {
-//        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
-//    }
-//}
+- (void)testWithDifferentCanFdBitrateSettingsAfterCanStopped {
+    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 
-// @xctest TC03.27: Start CAN controller with CiA bit-timing index in CAN FD operation mode
-//
-// @expected CANERR_
-//
-//- (void)testWithCan20CiaIndexInCanFdMode {
-//    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
-//
-//    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
-//        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-// @todo:: insert coin here
-//    } else {
-//        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
-//    }
-//}
+    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
+        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
+        can_bitrate_t bitrate = { TEST_BTRINDEX };
+        can_status_t status = { CANSTAT_RESET };
+        int handle = INVALID_HANDLE;
+        int rc = CANERR_FATAL;
 
-// @xctest TC03.28: Start CAN controller with CAN 2.0 bit-rate settings in CAN FD operation mode
+        // @test:
+        // @- loop over selected CAN FD bit-rate settings
+        for (int i = 0; i < 8; i++) {
+            switch (i) {
+                case 0: BITRATE_FD_1M(bitrate); mode = CANMODE_FDOE; break;
+                case 1: BITRATE_FD_500K(bitrate); mode = CANMODE_FDOE; break;
+                case 2: BITRATE_FD_250K(bitrate); mode = CANMODE_FDOE; break;
+                case 3: BITRATE_FD_125K(bitrate); mode = CANMODE_FDOE; break;
+                case 4: BITRATE_FD_1M8M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 5: BITRATE_FD_500K4M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 6: BITRATE_FD_250K2M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                case 7: BITRATE_FD_125K1M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                default: return;
+            }
+            // @-- initialize DUT1 in CAN FD operation mode
+            handle = can_init(DUT1, mode, NULL);
+            XCTAssertLessThanOrEqual(0, handle);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- start DUT1 with selected bit-rate settings
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+            // @-- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+            CTester tester;
+            XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+            XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+#endif
+            // @-- stop/reset DUT1
+            rc = can_reset(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            
+            // @-- new CAN FD bit-rate settings
+            switch (i) {
+                case 3: BITRATE_FD_1M(bitrate); break;
+                case 2: BITRATE_FD_500K(bitrate); break;
+                case 1: BITRATE_FD_250K(bitrate); break;
+                case 0: BITRATE_FD_125K(bitrate); break;
+                case 7: BITRATE_FD_1M8M(bitrate); break;
+                case 6: BITRATE_FD_500K4M(bitrate); break;
+                case 5: BITRATE_FD_250K2M(bitrate); break;
+                case 4: BITRATE_FD_125K1M(bitrate); break;
+                default: return;
+            }
+            // @-- start DUT1 again with different bit-rate settings
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+            // @-- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+            XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+            XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+#endif
+            // @-- stop/reset DUT1
+            rc = can_reset(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- shutdown DUT1
+            rc = can_exit(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+        }
+    } else {
+        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
+    }
+}
+
+// @xctest TC03.27: Start CAN controller with CiA bit-timing index in CAN FD operation mode w/o bit-rate switching
 //
-// @expected CANERR_
+// @expected CANERR_BAUDRATE
 //
-//- (void)testWithCan20BitrateSettingsInCanFdMode {
-//    uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
+- (void)testWithCiaIndexInCanFdMode {
+    uint8_t mode = CANMODE_FDOE;
+
+    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
+        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
+        can_bitrate_t bitrate = { TEST_BTRINDEX };
+        can_status_t status = { CANSTAT_RESET };
+        int handle = INVALID_HANDLE;
+        int rc = CANERR_FATAL;
+
+        // @pre:
+        // @-- initialize DUT1 in CAN FD operation mode w/o BRSE
+        handle = can_init(DUT1, mode, NULL);
+        XCTAssertLessThanOrEqual(0, handle);
+        // @-- get status of DUT1 and check to be in INIT state
+        rc = can_status(handle, &status.byte);
+        XCTAssertEqual(CANERR_NOERROR, rc);
+        XCTAssertTrue(status.can_stopped);
+        
+        // @test:
+        // @- loop over selected CAN 2.0 bit-timing indexes
+        // @note: pre-defined BTR0BTR1 bit-timing table has 10 entries, index 0 to 9.
+        //        But the index must be given as negative value to 'library.index'!
+        //        Remark: The CiA bit-timing table has only 9 entries!
+#if (BITRATE_5K_UNSUPPORTED != 0)
+        for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
+#else
+        for (SInt32 index = CANBTR_INDEX_1M; index >= -9; index--) {
+#endif
+#if (BITRATE_800K_UNSUPPORTED != 0)
+            // @note: CiA index 1 (800kbps) is not supported by all CAN controllers.
+            if (index == CANBTR_INDEX_800K)
+                continue;
+#endif
+            bitrate.index = index;
+            // @-- try to start DUT1 with selected bit-timing index
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_BAUDRATE, rc);
+        }
+        // @post:
+        BITRATE_FD_1M(bitrate);
+        // @-- start DUT1 with valid bit-rate settings
+        rc = can_start(handle, &bitrate);
+        XCTAssertEqual(CANERR_NOERROR, rc);
+        // @-- get status of DUT1 and check to be in RUNNING state
+        rc = can_status(handle, &status.byte);
+        XCTAssertEqual(CANERR_NOERROR, rc);
+        XCTAssertFalse(status.can_stopped);
+        // @-- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+        CTester tester;
+        XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+        XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+        // @-- get status of DUT1 and check to be in RUNNING state
+        rc = can_status(handle, &status.byte);
+        XCTAssertEqual(CANERR_NOERROR, rc);
+        XCTAssertFalse(status.can_stopped);
+#endif
+        // @-- stop/reset DUT1
+        rc = can_reset(handle);
+        XCTAssertEqual(CANERR_NOERROR, rc);
+        // @-- get status of DUT1 and check to be in INIT state
+        rc = can_status(handle, &status.byte);
+        XCTAssertEqual(CANERR_NOERROR, rc);
+        XCTAssertTrue(status.can_stopped);
+        // @-- shutdown DUT1
+        rc = can_exit(handle);
+        XCTAssertEqual(CANERR_NOERROR, rc);
+    } else {
+        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
+    }
+}
+
+// @xctest TC03.28: Start CAN controller with CAN 2.0 bit-rate settings in CAN FD operation mode w/o bit-rate switching
 //
-//    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
-//        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
-// @todo:: insert coin here
-//    } else {
-//        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
-//    }
-//}
+// @expected CANERR_NOERROR
+//
+- (void)testWithCan20BitrateSettingsInCanFdMode {
+    uint8_t mode = CANMODE_FDOE;
+
+    if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
+        (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
+        can_bitrate_t bitrate = { TEST_BTRINDEX };
+        can_status_t status = { CANSTAT_RESET };
+        int handle = INVALID_HANDLE;
+        int rc = CANERR_FATAL;
+
+        // @test:
+        // @- loop over selected CAN 2.0 bit-rate settings
+        for (int i = 0; i < 4; i++) {
+            switch (i) {
+                case 0: BITRATE_1M(bitrate); break;
+                case 1: BITRATE_500K(bitrate); break;
+                case 2: BITRATE_250K(bitrate); break;
+                case 3: BITRATE_125K(bitrate); break;
+                default: return;
+            }
+            // @-- initialize DUT1 in CAN FD operation mode w/o BRSE
+            handle = can_init(DUT1, mode, NULL);
+            XCTAssertLessThanOrEqual(0, handle);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- start DUT1 with selected bit-rate settings
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+            // @-- send and receive some frames to/from DUT2 (optional)
+#if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)
+            CTester tester;
+            XCTAssertEqual(TEST_FRAMES, tester.SendSomeFrames(handle, DUT2, TEST_FRAMES));
+            XCTAssertEqual(TEST_FRAMES, tester.ReceiveSomeFrames(handle, DUT2, TEST_FRAMES));
+            // @-- get status of DUT1 and check to be in RUNNING state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertFalse(status.can_stopped);
+#endif
+            // @-- stop/reset DUT1
+            rc = can_reset(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            // @-- get status of DUT1 and check to be in INIT state
+            rc = can_status(handle, &status.byte);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+            XCTAssertTrue(status.can_stopped);
+            // @-- shutdown DUT1
+            rc = can_exit(handle);
+            XCTAssertEqual(CANERR_NOERROR, rc);
+        }
+    } else {
+        NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
+    }
+}
 
 // @xctest TC03.29: Start CAN controller with CAN FD bit-rate settings in CAN 2.0 operation mode
 //
@@ -1628,7 +1959,7 @@
         XCTAssertTrue(status.can_stopped);
 
         // @test:
-        // @- loop over selected CAN 2.0 bit-rate settings
+        // @- loop over selected CAN FD bit-rate settings
         for (int i = 0; i < 8; i++) {
             can_bitrate_t fd = {};
             switch (i) {
@@ -1640,7 +1971,7 @@
                 case 5: BITRATE_FD_500K4M(fd); break;
                 case 6: BITRATE_FD_250K2M(fd); break;
                 case 7: BITRATE_FD_125K1M(fd); break;
-               default: return;
+                default: return;
             }
             // @-- start DUT1 with CAN FD bit-rate settings
             rc = can_start(handle, &fd);
