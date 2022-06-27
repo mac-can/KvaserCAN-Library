@@ -221,7 +221,7 @@ CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserU
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
         goto err_init;
     }
-#if (0)
+#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
     retVal = Leaf_GetInterfaceInfo(device, &device->deviceInfo.channel);  // FIXME: returns (-50)
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
@@ -355,7 +355,8 @@ CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_Bu
     retVal = KvaserUSB_SendRequest(device, buffer, size);
 #if (OPTION_PRINT_BUS_PARAMS != 0)
     if (retVal == CANUSB_SUCCESS) {
-        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                            device->name, device->handle,
                             params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
     }
 #endif
@@ -397,7 +398,8 @@ CANUSB_Return_t Leaf_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParam
             params->sjw = BUF2UINT8(buffer[10]);
             params->noSamp = BUF2UINT8(buffer[11]);
 #if (OPTION_PRINT_BUS_PARAMS != 0)
-            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                                device->name, device->handle,
                                 params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
 #endif
         }
@@ -1750,8 +1752,8 @@ static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uin
     MACCAN_DEBUG_DRIVER("      - USB HS mode: %d\n", deviceInfo->card.usbHsMode);
     MACCAN_DEBUG_DRIVER("      - hardware type: %d\n", deviceInfo->card.hwType);
     MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %d\n", deviceInfo->card.canTimeStampRef);
-#if (0)
-    MACCAN_DEBUG_DRIVER("    - channel info:\n");  // TODO: activate when fixed
+#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
+    MACCAN_DEBUG_DRIVER("    - channel info:\n");
     MACCAN_DEBUG_DRIVER("      - channel capabilities: 0x%x\n", deviceInfo->channel.channelCapabilities);
     MACCAN_DEBUG_DRIVER("      - CAN chip type: %d\n", deviceInfo->channel.canChipType);
     MACCAN_DEBUG_DRIVER("      - CAN chip sub-type: %d\n", deviceInfo->channel.canChipSubType);

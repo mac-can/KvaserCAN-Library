@@ -95,7 +95,7 @@ static uint32_t FillMapChannelReq(uint8_t *buffer, uint32_t maxbyte, uint8_t cha
 static uint32_t FillMapChannelSysDbgReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillSetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParams_t *params);
 static uint32_t FillSetBusParamsFdReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsFd_t *params);
-static uint32_t FillSetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsTq_t *params);
+/*static uint32_t FillSetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsTq_t *params);  // TODO: activate when needed */
 static uint32_t FillGetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, bool canFd);
 static uint32_t FillGetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, bool canFd);
 static uint32_t FillSetDriverModeReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_DriverMode_t mode);
@@ -219,7 +219,7 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
         goto err_init;
     }
-#if (0)
+#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
     retVal = Mhydra_GetInterfaceInfo(device, &device->deviceInfo.channel);  // FIXME: returns (-50)
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
@@ -367,7 +367,8 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
              * - byte 6..31: (not used)
              */
 #if (OPTION_PRINT_BUS_PARAMS != 0)
-            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                                device->name, device->handle,
                                 params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
 #endif
             // TODO: handle driver mode
@@ -407,8 +408,9 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
              */
             // TODO: handle driver mode
 #if (OPTION_PRINT_BUS_PARAMS != 0)
-            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u"
-                                                                          " : freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u"
+                                                                          " : bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                                device->name, device->handle,
                                 params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp,
                                 params->data.bitRate, params->data.tseg1, params->data.tseg2, params->data.sjw, params->data.noSamp);
 #endif
@@ -417,6 +419,7 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
     return retVal;
 }
 
+#ifdef BUS_PARAMS_TQ  // TODO: activate when required
 CANUSB_Return_t Mhydra_SetBusParamsTq(KvaserUSB_Device_t *device, const KvaserUSB_BusParamsTq_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
@@ -450,17 +453,20 @@ CANUSB_Return_t Mhydra_SetBusParamsTq(KvaserUSB_Device_t *device, const KvaserUS
 #if (OPTION_PRINT_BUS_PARAMS != 0)
             if (params->canFd)
                 MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u"
-                                                                          " : prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                                                                          " : prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n",
+                                    device->name, device->handle,
                                     params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp,
                                     params->data.prop, params->data.phase1, params->data.phase2, params->data.sjw, params->data.brp);
             else
-                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n",
+                                    device->name, device->handle,
                                     params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp);
 #endif
         }
     }
     return retVal;
 }
+#endif
 
 CANUSB_Return_t Mhydra_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
@@ -500,7 +506,7 @@ CANUSB_Return_t Mhydra_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusPar
             params->sjw = BUF2UINT8(buffer[10]);
             params->noSamp = BUF2UINT8(buffer[11]);
 #if (OPTION_PRINT_BUS_PARAMS != 0)
-            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n", device->name, device->handle,
                                 params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
 #endif
         }
@@ -572,8 +578,9 @@ CANUSB_Return_t Mhydra_GetBusParamsFd(KvaserUSB_Device_t *device, KvaserUSB_BusP
                     params->data.sjw = BUF2UINT8(buffer[10]);
                     params->data.noSamp = BUF2UINT8(buffer[11]);
 #if (OPTION_PRINT_BUS_PARAMS != 0)
-                    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params CAN FD - freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u"
-                                                                                  " : freq=%u tseg1=%u tseg2=%u sjw=%u sam=%u\n", device->name, device->handle,
+                    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u"
+                                                                                  " : bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                                        device->name, device->handle,
                                         params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp,
                                         params->data.bitRate, params->data.tseg1, params->data.tseg2, params->data.sjw, params->data.noSamp);
 #endif
@@ -638,11 +645,13 @@ CANUSB_Return_t Mhydra_GetBusParamsTq(KvaserUSB_Device_t *device, KvaserUSB_BusP
 #if (OPTION_PRINT_BUS_PARAMS != 0)
             if (params->canFd)
                 MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u"
-                                                                          " : prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                                                                          " : prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n",
+                                    device->name, device->handle,
                                     params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp,
                                     params->data.prop, params->data.phase1, params->data.phase2, params->data.sjw, params->data.brp);
             else
-                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n", device->name, device->handle,
+                MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params TQ - prop=%u phase1=%u phase2=%u sjw=%u brp=%u\n",
+                                    device->name, device->handle,
                                     params->arbitration.prop, params->arbitration.phase1, params->arbitration.phase2, params->arbitration.sjw, params->arbitration.brp);
 #endif
         }
@@ -1973,6 +1982,7 @@ static uint32_t FillSetBusParamsFdReq(uint8_t *buffer, uint32_t maxbyte, uint8_t
     return (uint32_t)HYDRA_CMD_SIZE;
 }
 
+#ifdef BUS_PARAMS_TQ  // TODO: activate when required
 static uint32_t FillSetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, const KvaserUSB_BusParamsTq_t *params) {
     assert(buffer);
     assert(params);
@@ -2026,6 +2036,7 @@ static uint32_t FillSetBusParamsTqReq(uint8_t *buffer, uint32_t maxbyte, uint8_t
     /* return request length */
     return (uint32_t)HYDRA_CMD_SIZE;
 }
+#endif
 
 static uint32_t FillGetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, bool canFd) {
     assert(buffer);
@@ -2550,7 +2561,7 @@ static uint8_t Dlc2Len(uint8_t dlc) {
     return dlc_table[dlc & 0xFU];
 }
 
-#if (0)
+#ifdef LEN2DLC  // TODO: activate when required
 static uint8_t Len2Dlc(uint8_t len) {
     if(len > 48U) return 0x0FU;
     if(len > 32U) return 0x0EU;
@@ -2585,7 +2596,7 @@ static uint8_t Len2Dlc(uint8_t len) {
     MACCAN_DEBUG_DRIVER("      - USB HS mode: %d\n", deviceInfo->card.usbHsMode);
     MACCAN_DEBUG_DRIVER("      - hardware type: %d\n", deviceInfo->card.hwType);
     MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %d\n", deviceInfo->card.canTimeStampRef);
-#if (0)
+#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
     MACCAN_DEBUG_DRIVER("    - channel info:\n");  // TODO: activate when fixed
     MACCAN_DEBUG_DRIVER("      - channel capabilities: 0x%x\n", deviceInfo->channel.channelCapabilities);
     MACCAN_DEBUG_DRIVER("      - CAN chip type: %d\n", deviceInfo->channel.canChipType);
