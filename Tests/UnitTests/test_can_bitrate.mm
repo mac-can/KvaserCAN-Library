@@ -74,12 +74,16 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @test:
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
-    // @pre:
+    // @test:
     // @- try to get bit-rate of DUT1 with invalid handle -1
     rc = can_bitrate(INVALID_HANDLE, &bitrate, NULL);
     XCTAssertEqual(CANERR_HANDLE, rc);
@@ -146,6 +150,10 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
 
     // @test:
     // @- get bit-rate of DUT1 with NULL for parameter 'bitrate'
@@ -200,6 +208,10 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
 
     // @test:
     // @- get bit-rate of DUT1 with NULL for speed
@@ -254,6 +266,10 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in RUNNING state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertFalse(status.can_stopped);
 
     // @test:
     // @- get bit-rate of DUT1 with NULL for both
@@ -359,6 +375,10 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
     // @test:
     // @- get bit-rate of DUT1
@@ -409,7 +429,7 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @pre
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -467,7 +487,7 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @pre
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -495,6 +515,10 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
     // @test:
     // @- get bit-rate of DUT1
@@ -521,6 +545,7 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
+    // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
@@ -572,16 +597,21 @@
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
 
-    // @test: 
-    // @- loop over selected CAN 2.0 bit-rate settings
+    // @test: loop over selected CAN 2.0 bit-rate settings
     for (int i = 0; i < 4; i++) {
         switch (i) {
+            // @sub(1): 1Mbps
             case 0: BITRATE_1M(bitrate); break;
+            // @sub(2): 500kbps
             case 1: BITRATE_500K(bitrate); break;
+            // @sub(3): 250kbps
             case 2: BITRATE_250K(bitrate); break;
+            // @sub(4): 125kbps
             case 3: BITRATE_125K(bitrate); break;
-            default: return;
+            default: return;  // Get out of here!
         }
+        NSLog(@"Execute sub-testcase %d:\n", i+1);
+
         can_bitrate_t result = {};
         // @-- initialize DUT1 with configured settings
         handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -650,6 +680,7 @@
 - (void)testWithVariousCanFdBitrateSettings {
     uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
     
+    // @note: this test requires two CAN FD capable devices
     if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
         (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
         can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -657,20 +688,29 @@
         int handle = INVALID_HANDLE;
         int rc = CANERR_FATAL;
 
-        // @test:
-        // @- loop over selected CAN FD bit-rate settings
+        // @test: loop over selected CAN FD bit-rate settings
         for (int i = 0; i < 8; i++) {
             switch (i) {
+                // @sub(1): nominal 1Mbps
                 case 0: BITRATE_FD_1M(bitrate); mode = CANMODE_FDOE; break;
+                // @sub(2): nominal 500kbps
                 case 1: BITRATE_FD_500K(bitrate); mode = CANMODE_FDOE; break;
+                // @sub(3): nominal 250kbps
                 case 2: BITRATE_FD_250K(bitrate); mode = CANMODE_FDOE; break;
+                // @sub(4): nominal 125kbps
                 case 3: BITRATE_FD_125K(bitrate); mode = CANMODE_FDOE; break;
+                // @sub(5): nominal 1Mbps, data phase 8Mbps
                 case 4: BITRATE_FD_1M8M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                // @sub(6): nominal 500kbps, data phase 4Mbps
                 case 5: BITRATE_FD_500K4M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                // @sub(7): nominal 250kbps, data phase 2Mbps
                 case 6: BITRATE_FD_250K2M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
+                // @sub(8): nominal 125kbps, data phase 1Mbps
                 case 7: BITRATE_FD_125K1M(bitrate); mode = (CANMODE_FDOE | CANMODE_BRSE); break;
-               default: return;
+                default: return;  // Get out of here!
             }
+            NSLog(@"Execute sub-testcase %d:\n", i+1);
+
             can_bitrate_t result = {};
             // @-- initialize DUT1 with configured settings
             handle = can_init(DUT1, mode, NULL);
@@ -703,7 +743,7 @@
             XCTAssertEqual(bitrate.btr.nominal.tseg1, result.btr.nominal.tseg1);
             XCTAssertEqual(bitrate.btr.nominal.tseg2, result.btr.nominal.tseg2);
             XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
-            // @--- compare data phase settings in bit-rate switching enabled
+            // @-- compare data phase settings in bit-rate switching enabled
             if (mode & CANMODE_BRSE) {
 #if (TC11_11_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
                 // @issue: if CAN clock unknown on user level, then it is adapted by the wrapper.
