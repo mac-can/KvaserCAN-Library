@@ -340,15 +340,10 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    /* check bus params */
-#if (OPTION_CHECK_BUS_PARAMS != 0)
-    if ((params->bitRate == 0) || (params->bitRate > device->deviceInfo.software.maxBitrate) ||
-        (params->tseg1 == 0) /*|| (params->tseg1 > 255)*/ ||
-        (params->tseg2 == 0) || (params->tseg2 > 127) ||
-        (params->sjw == 0) || (params->sjw > 127) ||
-        (params->noSamp != 1))
+    /* check bus params (noSamp issue) */
+    if (params->noSamp != 1)
         return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
-#endif
+
     /* send request CMD_SET_BUSPARAMS_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
     size = FillSetBusParamsReq(buffer, HYDRA_CMD_SIZE, device->hydraData.channel2he, params);
@@ -366,14 +361,31 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
              * - byte 5: (reserved)
              * - byte 6..31: (not used)
              */
-#if (OPTION_PRINT_BUS_PARAMS != 0)
-            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
-                                device->name, device->handle,
-                                params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
-#endif
             // TODO: handle driver mode
         }
     }
+#if (OPTION_CHECK_BUS_PARAMS != 0)
+    /* read back bus params and compare with written bus params */
+    if (retVal == CANUSB_SUCCESS) {
+        KvaserUSB_BusParams_t actual;
+        retVal = Mhydra_GetBusParams(device, &actual);
+        if (retVal == CANUSB_SUCCESS) {
+            if ((actual.bitRate != params->bitRate) ||
+                (actual.tseg1 != params->tseg1) ||
+                (actual.tseg2 != params->tseg2) ||
+                (actual.sjw != params->sjw ) ||
+                (actual.noSamp != params->noSamp))
+                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+        }
+    }
+#endif
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+    if (retVal == CANUSB_SUCCESS) {
+        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                            device->name, device->handle,
+                            params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+    }
+#endif
     return retVal;
 }
 
@@ -388,6 +400,12 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
         return CANUSB_ERROR_NULLPTR;
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
+
+    /* check bus params (noSamp issue) */
+    if (params->nominal.noSamp != 1)
+        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+    if (params->canFd && (params->data.noSamp != 1))
+        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
 
     /* send request CMD_SET_BUSPARAMS_FD_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
@@ -407,15 +425,44 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
              * - byte 6..31: (not used)
              */
             // TODO: handle driver mode
+        }
+    }
+#if (OPTION_CHECK_BUS_PARAMS != 0)
+    /* read back bus params and compare with written bus params */
+    if (retVal == CANUSB_SUCCESS) {
+        KvaserUSB_BusParamsFd_t actual;
+        retVal = Mhydra_GetBusParamsFd(device, &actual);
+        if (retVal == CANUSB_SUCCESS) {
+            if ((actual.nominal.bitRate != params->nominal.bitRate) ||
+                (actual.nominal.tseg1 != params->nominal.tseg1) ||
+                (actual.nominal.tseg2 != params->nominal.tseg2) ||
+                (actual.nominal.sjw != params->nominal.sjw ) ||
+                (actual.nominal.noSamp != params->nominal.noSamp))
+                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+            if (params->canFd && ((actual.data.bitRate != params->data.bitRate) ||
+                                  (actual.data.tseg1 != params->data.tseg1) ||
+                                  (actual.data.tseg2 != params->data.tseg2) ||
+                                  (actual.data.sjw != params->data.sjw ) ||
+                                  (actual.data.noSamp != params->data.noSamp)))
+                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+
+        }
+    }
+#endif
 #if (OPTION_PRINT_BUS_PARAMS != 0)
+    if (retVal == CANUSB_SUCCESS) {
+        if (params->canFd)
             MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u"
                                                                           " : bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
                                 device->name, device->handle,
                                 params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp,
                                 params->data.bitRate, params->data.tseg1, params->data.tseg2, params->data.sjw, params->data.noSamp);
-#endif
-        }
+        else
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                                device->name, device->handle,
+                                params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp);
     }
+#endif
     return retVal;
 }
 
@@ -1976,7 +2023,7 @@ static uint32_t FillSetBusParamsFdReq(uint8_t *buffer, uint32_t maxbyte, uint8_t
     buffer[20] = UINT8BYTE(params->data.tseg1);
     buffer[21] = UINT8BYTE(params->data.tseg2);
     buffer[22] = UINT8BYTE(params->data.sjw);
-    buffer[23] = UINT8BYTE(1/*params->data.noSamp*/);
+    buffer[23] = UINT8BYTE(params->data.noSamp);
     buffer[24] = UINT8BYTE(params->canFd ? 1 : 0);
     /* return request length */
     return (uint32_t)HYDRA_CMD_SIZE;

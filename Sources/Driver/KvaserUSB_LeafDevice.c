@@ -65,7 +65,7 @@
 #define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
 #endif
 #ifndef OPTION_CHECK_BUS_PARAMS
-#define OPTION_CHECK_BUS_PARAMS  1  /* note set zero to disable checking of bus params */
+#define OPTION_CHECK_BUS_PARAMS  1  /* note set zero to disnable checking of bus params */
 #endif
 #define LEN_RX_STD_MESSAGE             24U
 #define LEN_TX_STD_MESSAGE             20U
@@ -329,6 +329,14 @@ CANUSB_Return_t Leaf_TeardownChannel(KvaserUSB_Device_t *device) {
     return retVal;
 }
 
+#define TSEG1_MIN  1U
+#define TSEG1_MAX  UINT8_MAX
+#define TSEG2_MIN  1U
+#define TSEG2_MAX  127U
+#define SJW_MIN    1U
+#define SJW_MAX    127U
+#define NO_SAMP    1U
+
 CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
@@ -340,19 +348,46 @@ CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_Bu
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    /* check bus params */
-#if (OPTION_CHECK_BUS_PARAMS != 0)
-    if ((params->bitRate == 0) || (params->bitRate > device->deviceInfo.software.maxBitrate) ||
-        (params->tseg1 == 0) /*|| (params->tseg1 > 255)*/ ||
-        (params->tseg2 == 0) || (params->tseg2 > 127) ||
-        (params->sjw == 0) || (params->sjw > 127) ||
-        (params->noSamp != 1))
-        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
-#endif
+//    /* check bus params */
+//#if (OPTION_CHECK_BUS_PARAMS != 0)
+//    /* (§1) 0 < bitRate <= maxBitrate (1'000'000bps) */
+//    if ((params->bitRate == 0) || (params->bitRate > device->deviceInfo.software.maxBitrate))
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//    /* (§2) 1 < (16'000'000 / (bitRate * (1 + tseg1 + tseg2))) <= 256 */  // FIXME: it doesn´t work
+//#if (0)
+//    uint32_t brp = 16000000U / (params->bitRate * (uint32_t)(1U + params->tseg1 + params->tseg2));
+//    if ((brp <= 1U) || (brp > 256U )) //(PScl <= 1 || PScl > 256)
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//#else
+//    if ((params->tseg1 < TSEG1_MIN) || (params->tseg1 > TSEG1_MAX) ||
+//        (params->tseg2 < TSEG2_MIN) || (params->tseg2 > TSEG2_MAX) ||
+//        (params->sjw < SJW_MIN) || (params->sjw > SJW_MAX))
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//#endif
+//    /* (§3) noSamp = 1 */
+//    if (params->noSamp != NO_SAMP)
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//#endif
     /* send request CMD_SET_BUSPARAMS_REQ w/o response */
     bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
     size = FillSetBusParamsReq(buffer, KVASER_MAX_COMMAND_LENGTH, device->channelNo, params);
     retVal = KvaserUSB_SendRequest(device, buffer, size);
+
+#if (OPTION_CHECK_BUS_PARAMS != 0)
+    /* read back bus params and compare with written bus params */
+    if (retVal == CANUSB_SUCCESS) {
+        KvaserUSB_BusParams_t actual;
+        retVal = Leaf_GetBusParams(device, &actual);
+        if (retVal == CANUSB_SUCCESS) {
+            if ((actual.bitRate != params->bitRate) ||
+                (actual.tseg1 != params->tseg1) ||
+                (actual.tseg2 != params->tseg2) ||
+                (actual.sjw != params->sjw ) ||
+                (actual.noSamp != params->noSamp))
+                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+        }
+    }
+#endif
 #if (OPTION_PRINT_BUS_PARAMS != 0)
     if (retVal == CANUSB_SUCCESS) {
         MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
