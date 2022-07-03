@@ -340,9 +340,14 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                        device->name, device->handle,
+                        params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+#endif
     /* check bus params (noSamp issue) */
     if (params->noSamp != 1)
-        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+        return CANUSB_ERROR_ILLPARA;
 
     /* send request CMD_SET_BUSPARAMS_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
@@ -375,15 +380,8 @@ CANUSB_Return_t Mhydra_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_
                 (actual.tseg2 != params->tseg2) ||
                 (actual.sjw != params->sjw ) ||
                 (actual.noSamp != params->noSamp))
-                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+                retVal = CANUSB_ERROR_ILLPARA;
         }
-    }
-#endif
-#if (OPTION_PRINT_BUS_PARAMS != 0)
-    if (retVal == CANUSB_SUCCESS) {
-        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
-                            device->name, device->handle,
-                            params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
     }
 #endif
     return retVal;
@@ -401,11 +399,23 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+    if (params->canFd)
+        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u"
+                                                                      " : bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                            device->name, device->handle,
+                            params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp,
+                            params->data.bitRate, params->data.tseg1, params->data.tseg2, params->data.sjw, params->data.noSamp);
+    else
+        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                            device->name, device->handle,
+                            params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp);
+#endif
     /* check bus params (noSamp issue) */
     if (params->nominal.noSamp != 1)
-        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+        return CANUSB_ERROR_ILLPARA;
     if (params->canFd && (params->data.noSamp != 1))
-        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+        return CANUSB_ERROR_ILLPARA;
 
     /* send request CMD_SET_BUSPARAMS_FD_REQ and wait for response */
     bzero(buffer, HYDRA_CMD_SIZE);
@@ -438,29 +448,15 @@ CANUSB_Return_t Mhydra_SetBusParamsFd(KvaserUSB_Device_t *device, const KvaserUS
                 (actual.nominal.tseg2 != params->nominal.tseg2) ||
                 (actual.nominal.sjw != params->nominal.sjw ) ||
                 (actual.nominal.noSamp != params->nominal.noSamp))
-                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+                retVal = CANUSB_ERROR_ILLPARA;
             if (params->canFd && ((actual.data.bitRate != params->data.bitRate) ||
                                   (actual.data.tseg1 != params->data.tseg1) ||
                                   (actual.data.tseg2 != params->data.tseg2) ||
                                   (actual.data.sjw != params->data.sjw ) ||
                                   (actual.data.noSamp != params->data.noSamp)))
-                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+                retVal = CANUSB_ERROR_ILLPARA;
 
         }
-    }
-#endif
-#if (OPTION_PRINT_BUS_PARAMS != 0)
-    if (retVal == CANUSB_SUCCESS) {
-        if (params->canFd)
-            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u"
-                                                                          " : bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
-                                device->name, device->handle,
-                                params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp,
-                                params->data.bitRate, params->data.tseg1, params->data.tseg2, params->data.sjw, params->data.noSamp);
-        else
-            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params CAN FD - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
-                                device->name, device->handle,
-                                params->nominal.bitRate, params->nominal.tseg1, params->nominal.tseg2, params->nominal.sjw, params->nominal.noSamp);
     }
 #endif
     return retVal;
@@ -1877,7 +1873,26 @@ static CANUSB_Return_t ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer,
          * - byte 16..31: (not used)
          */
         if (buffer[0] == CMD_ERROR_EVENT) {
-            retVal = (CANUSB_Return_t)(-100) - (CANUSB_Return_t)buffer[11];
+            /* map error code (if possible) */
+            switch (buffer[11]) {  // TODO: map firmware error codes
+                case FIRMWARE_ERR_OK:
+                case FIRMWARE_ERR_CAN:
+                case FIRMWARE_ERR_NVRAM_ERROR:
+                case FIRMWARE_ERR_NOPRIV:
+                case FIRMWARE_ERR_ILLEGAL_ADDRESS:
+                case FIRMWARE_ERR_UNKNOWN_CMD:
+                case FIRMWARE_ERR_FATAL:
+                case FIRMWARE_ERR_CHECKSUM_ERROR:
+                case FIRMWARE_ERR_QUEUE_LEVEL:
+                    retVal = (CANUSB_Return_t)(-100) - (CANUSB_Return_t)buffer[11];
+                    break;
+                case FIRMWARE_ERR_PARAMETER:
+                    retVal = (CANUSB_Return_t)CANUSB_ERROR_ILLPARA;
+                    break;
+                default:
+                    retVal = (CANUSB_Return_t)(-100) - (CANUSB_Return_t)buffer[11];
+                    break;
+            }
             break;
         }
     } while (buffer[0] != cmdCode);

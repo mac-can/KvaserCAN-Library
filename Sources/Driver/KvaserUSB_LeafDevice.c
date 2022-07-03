@@ -348,7 +348,14 @@ CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_Bu
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-//    /* check bus params */
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                        device->name, device->handle,
+                        params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+#endif
+    /* check bus params (noSamp issue) */
+    if (params->noSamp != 1)
+        return CANUSB_ERROR_ILLPARA;
 //#if (OPTION_CHECK_BUS_PARAMS != 0)
 //    /* (§1) 0 < bitRate <= maxBitrate (1'000'000bps) */
 //    if ((params->bitRate == 0) || (params->bitRate > device->deviceInfo.software.maxBitrate))
@@ -372,7 +379,6 @@ CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_Bu
     bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
     size = FillSetBusParamsReq(buffer, KVASER_MAX_COMMAND_LENGTH, device->channelNo, params);
     retVal = KvaserUSB_SendRequest(device, buffer, size);
-
 #if (OPTION_CHECK_BUS_PARAMS != 0)
     /* read back bus params and compare with written bus params */
     if (retVal == CANUSB_SUCCESS) {
@@ -384,15 +390,8 @@ CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_Bu
                 (actual.tseg2 != params->tseg2) ||
                 (actual.sjw != params->sjw ) ||
                 (actual.noSamp != params->noSamp))
-                retVal = CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+                retVal = CANUSB_ERROR_ILLPARA;
         }
-    }
-#endif
-#if (OPTION_PRINT_BUS_PARAMS != 0)
-    if (retVal == CANUSB_SUCCESS) {
-        MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
-                            device->name, device->handle,
-                            params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
     }
 #endif
     return retVal;
