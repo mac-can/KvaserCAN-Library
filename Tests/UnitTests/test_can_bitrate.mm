@@ -731,11 +731,11 @@
             rc = can_bitrate(handle, &result, NULL);
             XCTAssertEqual(CANERR_NOERROR, rc);
 #if (TC11_11_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
-            // @issue: if CAN clock unknown on user level, then it is adapted by the wrapper.
+            // @issue: if CAN clock unknown on user level then it is adapted by the wrapper.
             XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
             XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
 #else
-            // @workaround: compare nominal bit-rate settings by time quanta (tq = f_clock / brp)
+            // @workaround: compare nominal bit-rate settings by time quanta (tq = f_clock / brp).
             if (bitrate.btr.nominal.brp && result.btr.nominal.brp)
                 XCTAssertEqual((bitrate.btr.frequency / bitrate.btr.nominal.brp), (result.btr.frequency / result.btr.nominal.brp));
             else
@@ -747,11 +747,11 @@
             // @-- compare data phase settings in bit-rate switching enabled
             if (mode & CANMODE_BRSE) {
 #if (TC11_11_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
-                // @issue: if CAN clock unknown on user level, then it is adapted by the wrapper.
+                // @issue: if CAN clock unknown on user level then it is adapted by the wrapper.
                 XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
                 XCTAssertEqual(bitrate.btr.data.brp, result.btr.data.brp);
 #else
-                // @workaround: compare data phase bit-rate settings by time quanta (tq = f_clock / brp)
+                // @workaround: compare data phase bit-rate settings by time quanta (tq = f_clock / brp).
                 if (bitrate.btr.data.brp && result.btr.data.brp)
                     XCTAssertEqual((bitrate.btr.frequency / bitrate.btr.data.brp), (result.btr.frequency / result.btr.data.brp));
                 else
@@ -761,10 +761,15 @@
                 XCTAssertEqual(bitrate.btr.data.tseg2, result.btr.data.tseg2);
                 XCTAssertEqual(bitrate.btr.data.sjw, result.btr.data.sjw);
             } else {
+#if (TC11_11_KVASER_DATAPHASE_WORKAROUND == 0)
+                // @issue: if TSeg1 or TSeg2 above their limits then they are adapted by the wrapper.
                 XCTAssertEqual(result.btr.nominal.brp, result.btr.data.brp);
                 XCTAssertEqual(result.btr.nominal.tseg1, result.btr.data.tseg1);
                 XCTAssertEqual(result.btr.nominal.tseg2, result.btr.data.tseg2);
                 XCTAssertEqual(result.btr.nominal.sjw, result.btr.data.sjw);
+#else
+                // @workaround: do not check data phase bit-rate settings.
+#endif
            }
             // @-- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0) && (SEND_WITH_NONE_DEFAULT_BAUDRATE != 0)

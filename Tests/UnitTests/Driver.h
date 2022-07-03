@@ -100,6 +100,7 @@
 
 //  (§10) define macros for workarounds in CAN FD operation mode (e.g. TC01_3_WORKARAOUND)
 #define TC11_11_KVASER_BUSPARAMS_WORKAROUND  TC11_10_KVASER_BUSPARAMS_WORKAROUND
+#define TC11_11_KVASER_DATAPHASE_WORKAROUND  1  // U100P issue (data phase bit-rate settings must be valid)
 #define TC03_24_KVASER_NOSAMP_WORKAROUND     TC03_20_KVASER_NOSAMP_WORKAROUND
 //#define TX0x_y_WORKARAOUND  1
 

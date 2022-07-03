@@ -52,8 +52,8 @@
 #import "Timer.h"
 
 //  Device under Test (2 devices required)
-#define DUT1  (SInt32)CAN_DEVICE1
-#define DUT2  (SInt32)CAN_DEVICE2
+#define DUT1  (SInt32)CAN_DEVICE2
+#define DUT2  (SInt32)CAN_DEVICE1
 
 //  Default operation mode and bit-rate settings
 #define TEST_CANMODE  CANMODE_DEFAULT
