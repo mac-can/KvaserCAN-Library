@@ -736,7 +736,8 @@ static int map_bitrate2busparams_fd(const can_bitrate_t *bitrate, bool fdoe, boo
     busParams->nominal.noSamp = (uint16_t)((bitrate->btr.nominal.sam != 0) ? 3 : 1);  // SJA1000: single or triple sampling
     //busParams->nominal.syncmode = (uint16_t)0;
 
-    if (brse) {
+    // data phase settings: either by flag BRSE or all fields of data phase set to valid values
+    if (brse || (bitrate->btr.data.brp && bitrate->btr.data.tseg1 && bitrate->btr.data.tseg2 && bitrate->btr.data.sjw)) {
         if ((bitrate->btr.data.brp < CANBTR_DATA_BRP_MIN) || (CANBTR_DATA_BRP_MAX < bitrate->btr.data.brp))
             return CANERR_BAUDRATE;
         if ((bitrate->btr.data.tseg1 < CANBTR_DATA_TSEG1_MIN) || (CANBTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
@@ -757,13 +758,20 @@ static int map_bitrate2busparams_fd(const can_bitrate_t *bitrate, bool fdoe, boo
         busParams->data.noSamp = (uint16_t)1;
         //busParams->data.syncmode = (uint16_t)0;
     } else {
-        // data phase uses same bus params as arbitration phase
+        // use same bus params for data phase as for arbitration phase
         busParams->data.bitRate = (int32_t)busParams->nominal.bitRate;
         busParams->data.tseg1 = (uint16_t)busParams->nominal.tseg1;
         busParams->data.tseg2 = (uint16_t)busParams->nominal.tseg2;
         busParams->data.sjw = (uint16_t)busParams->nominal.sjw;
         busParams->data.noSamp = (uint16_t)1;
         //busParams->data.syncmode = (uint16_t)0;
+        
+        // in case tseg1 or tseg2 are above their limits: devide them all by 2 (U100P fix)
+        while ((busParams->data.tseg1 > CANBTR_DATA_TSEG1_MAX) || (busParams->data.tseg2 > CANBTR_DATA_TSEG2_MAX)) {
+            busParams->data.tseg1 /= 2;
+            busParams->data.tseg2 /= 2;
+            busParams->data.sjw /= 2;
+        }
     }
     // operate in CAN FD mode
     busParams->canFd = fdoe;
