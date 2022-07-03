@@ -673,6 +673,7 @@
     }
 }
 
+#if (CAN_FD_SUPPORTED != 0)
 // @xctest TC11.11: Get CAN bit-rate settings when CAN controller started with various CAN FD bit-rate settings and check for correctness
 //
 // @expected CANERR_NOERROR
@@ -790,6 +791,7 @@
         NSLog(@"Test case skipped: CAN FD operation mode not supported by at least one device.");
     }
 }
+#endif
 
 @end
 
