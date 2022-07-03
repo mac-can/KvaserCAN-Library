@@ -630,7 +630,7 @@
         // @-- get bitrate from DUT1 and compare with selected settings
         rc = can_bitrate(handle, &result, NULL);
         XCTAssertEqual(CANERR_NOERROR, rc);
-#if (TC11_10_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
+#if (TC11_10_ISSUE_KVASER_BUSPARAMS == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
         // @issue: if CAN clock unknown on user level, then it is adapted by the wrapper.
         XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
         XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
@@ -730,7 +730,7 @@
             // @-- get bitrate from DUT1 and compare with selected settings
             rc = can_bitrate(handle, &result, NULL);
             XCTAssertEqual(CANERR_NOERROR, rc);
-#if (TC11_11_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
+#if (TC11_11_ISSUE_KVASER_BUSPARAMS == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
             // @issue: if CAN clock unknown on user level then it is adapted by the wrapper.
             XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
             XCTAssertEqual(bitrate.btr.nominal.brp, result.btr.nominal.brp);
@@ -746,7 +746,7 @@
             XCTAssertEqual(bitrate.btr.nominal.sjw, result.btr.nominal.sjw);
             // @-- compare data phase settings in bit-rate switching enabled
             if (mode & CANMODE_BRSE) {
-#if (TC11_11_KVASER_BUSPARAMS_WORKAROUND == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
+#if (TC11_11_ISSUE_KVASER_BUSPARAMS == 0) && (COMPARE_BITRATE_BY_TIME_QUANTA == 0)
                 // @issue: if CAN clock unknown on user level then it is adapted by the wrapper.
                 XCTAssertEqual(bitrate.btr.frequency, result.btr.frequency);
                 XCTAssertEqual(bitrate.btr.data.brp, result.btr.data.brp);
@@ -761,7 +761,7 @@
                 XCTAssertEqual(bitrate.btr.data.tseg2, result.btr.data.tseg2);
                 XCTAssertEqual(bitrate.btr.data.sjw, result.btr.data.sjw);
             } else {
-#if (TC11_11_KVASER_DATAPHASE_WORKAROUND == 0)
+#if (TC11_11_ISSUE_KVASER_DATAPHASE == 0)
                 // @issue: if TSeg1 or TSeg2 above their limits then they are adapted by the wrapper.
                 XCTAssertEqual(result.btr.nominal.brp, result.btr.data.brp);
                 XCTAssertEqual(result.btr.nominal.tseg1, result.btr.data.tseg1);
@@ -800,4 +800,4 @@
 
 @end
 
-// $Id: test_can_bitrate.mm 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_bitrate.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

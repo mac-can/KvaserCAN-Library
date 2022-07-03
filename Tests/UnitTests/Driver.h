@@ -75,11 +75,10 @@
 #define BITRATE_5K_UNSUPPORTED  0
 #define TX_ACKNOWLEDGE_UNSUPPORTED  0
 
-//  (§6) define macros for workarounds in CAN Classic operation mode (e.g. TC01_3_WORKARAOUND)
-#define TC11_10_KVASER_BUSPARAMS_WORKAROUND  1  // CAN API issue (unknown CAN clock and BRP)
-#define TC11_10_KVASER_NOSAMP_WORKAROUND     1  // SAM issue (different value from device than set)
-#define TC03_20_KVASER_NOSAMP_WORKAROUND     1  // SAM issue (only noSamp = 1 is accexped device)
-//#define TX0x_y_WORKARAOUND  1
+//  (§6) define macros for workarounds in CAN Classic operation mode (e.g. TC01_3_ISSUE)
+#define TC11_10_ISSUE_KVASER_BUSPARAMS  1  // CAN API issue (unknown CAN clock and BRP)
+#define TC03_20_ISSUE_KVASER_NOSAMP     1  // SAM issue (only noSamp = 1 is accexped device)
+//#define TX0x_y_ISSUE  1
 
 //  (§7) define macro CAN_FD_SUPPORTED if CAN FD operation mode is supported
 #define CAN_FD_SUPPORTED 1
@@ -98,11 +97,11 @@
 //  ($9) define macros for unsupported features in CAN FD operation mode
 //#define BITRATE_SWITCHING_UNSUPPORTED  0
 
-//  (§10) define macros for workarounds in CAN FD operation mode (e.g. TC01_3_WORKARAOUND)
-#define TC11_11_KVASER_BUSPARAMS_WORKAROUND  TC11_10_KVASER_BUSPARAMS_WORKAROUND
-#define TC11_11_KVASER_DATAPHASE_WORKAROUND  1  // U100P issue (data phase bit-rate settings must be valid)
-#define TC03_24_KVASER_NOSAMP_WORKAROUND     TC03_20_KVASER_NOSAMP_WORKAROUND
-//#define TX0x_y_WORKARAOUND  1
+//  (§10) define macros for workarounds in CAN FD operation mode (e.g. TC01_3_ISSUE)
+#define TC11_11_ISSUE_KVASER_BUSPARAMS  TC11_10_ISSUE_KVASER_BUSPARAMS
+#define TC11_11_ISSUE_KVASER_DATAPHASE  1  // U100P issue (data phase bit-rate settings must be valid)
+#define TC03_24_ISSUE_KVASER_NOSAMP     TC03_20_ISSUE_KVASER_NOSAMP
+//#define TX0x_y_ISSUE  1
 
 #endif // CAN_FD_SUPPORTED
 #endif // DRIVER_H_INCLUDED
