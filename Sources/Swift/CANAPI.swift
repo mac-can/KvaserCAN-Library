@@ -54,12 +54,12 @@
 
     @author   $Author: makemake $
 
-    @version  $Rev: 1042 $
+    @version  $Rev: 1063 $
  */
 import Foundation
 import CCanApi
 
-private let version = (major: 0, minor: 3, patch: 0)
+private let version = (major: 0, minor: 3, patch: 1)
 
 public class CanApi {
     private lazy var handle: CInt = -1  // CAN interface handle
@@ -315,10 +315,10 @@ public class CanApi {
         public struct Flags: OptionSet {
             // message flags as option set
             public static let StandardFrame = Flags([])
-            public static let ExtendedFrame = Mode(rawValue: 0x01)
-            public static let RemoteFrame = Mode(rawValue: 0x02)
-            public static let CanFdLongFrame = Mode(rawValue: 0x04)
-            public static let CanFdFastFrame = Mode(rawValue: 0x08)
+            public static let ExtendedFrame = Flags(rawValue: 0x01)
+            public static let RemoteFrame = Flags(rawValue: 0x02)
+            public static let CanFdLongFrame = Flags(rawValue: 0x04)
+            public static let CanFdFastFrame = Flags(rawValue: 0x08)
             // message flags from C interface
             public init(rawValue: UInt8) {
                 self.rawValue = rawValue
@@ -1030,4 +1030,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1042 2022-02-16 18:16:45Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1063 2022-07-03 18:21:52Z makemake $  Copyright (c) UV Software, Berlin //
