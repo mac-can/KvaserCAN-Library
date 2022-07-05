@@ -1,6 +1,6 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
+ *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
  *  Copyright (c) 2021-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
@@ -1496,7 +1496,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                         (void)CANPIP_Write(context->msgPipe, &hydra->buffer[index], nbyte);
                     }
                     break;
-                case CMD_GET_BUSPARAMS_RESP:       
+                case CMD_GET_BUSPARAMS_RESP:
                 case CMD_GET_DRIVERMODE_RESP:
                 case CMD_START_CHIP_RESP:
                 case CMD_STOP_CHIP_RESP:

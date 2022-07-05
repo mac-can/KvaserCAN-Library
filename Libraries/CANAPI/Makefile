@@ -1,5 +1,5 @@
 #
-#	CAN Interface API, Version 3 (for Kvaser CAN Leaf Interfaces)
+#	CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 #
 #	Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.

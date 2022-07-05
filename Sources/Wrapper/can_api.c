@@ -1,6 +1,6 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  CAN Interface API, Version 3 (for Kvaser CAN Leaf Interfaces)
+ *  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
  *
  *  Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
@@ -50,8 +50,8 @@
  */
 #include "build_no.h"
 #define VERSION_MAJOR    0
-#define VERSION_MINOR    2
-#define VERSION_PATCH    99
+#define VERSION_MINOR    3
+#define VERSION_PATCH    0
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(__APPLE__)
@@ -59,7 +59,7 @@
 #else
 #error Unsupported architecture
 #endif
-static const char version[] = "CAN API V3 for Kvaser CAN Leaf Interfaces, Version " VERSION_STRING;
+static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " VERSION_STRING;
 
 /*  -----------  includes  -----------------------------------------------
  */
@@ -591,7 +591,7 @@ int can_property(int handle, uint16_t param, void *value, uint32_t nbyte)
         return lib_parameter(param, value, (size_t)nbyte);
     }
     // note: library is initialized and handle is valid
-    
+
     if (!can[handle].device.configured) // must be an opened handle
         return CANERR_HANDLE;
     // note: device properties must be queried with a valid handle
@@ -765,7 +765,7 @@ static int map_bitrate2busparams_fd(const can_bitrate_t *bitrate, bool fdoe, boo
         busParams->data.sjw = (uint16_t)busParams->nominal.sjw;
         busParams->data.noSamp = (uint16_t)1;
         //busParams->data.syncmode = (uint16_t)0;
-        
+
         // in case tseg1 or tseg2 are above their limits: devide them all by 2 (U100P fix)
         while ((busParams->data.tseg1 > CANBTR_DATA_TSEG1_MAX) || (busParams->data.tseg2 > CANBTR_DATA_TSEG2_MAX)) {
             busParams->data.tseg1 /= 2;
