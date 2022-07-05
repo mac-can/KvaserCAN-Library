@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC15.1: Query CAN API version number at any place in a standard sequence (cf. SmokeTest).
+// @xctest TC15.1: Query CAN API version number at any place in a standard sequence (cf. SmokeTest)
 //
-// @expected: Not NULL
+// @expected a zero-terminated string
 //
 - (void)testAnyPlaceAnyTime {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -129,4 +129,4 @@
 
 @end
 
-// $Id: test_can_version.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_version.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

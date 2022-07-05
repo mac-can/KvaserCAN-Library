@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC10.1: Get CAN bus load with invalid interface handle(s).
+// @xctest TC10.1: Get CAN bus load with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -125,9 +125,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.2: Give a NULL pointer as argument for parameter 'load'.
+// @xctest TC10.2: Give a NULL pointer as argument for parameter 'load'
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithNullPointerForLoad {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -185,9 +185,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.3: Give a NULL pointer as argument for parameter 'status'.
+// @xctest TC10.3: Give a NULL pointer as argument for parameter 'status'
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithNullPointerForStatus {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -246,9 +246,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.4: Give a NULL pointer as argument for parameter 'load' and 'status'.
+// @xctest TC10.4: Give a NULL pointer as argument for parameter 'load' and 'status'
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithNullPointerForBoth {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -306,9 +306,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.5: Get CAN bus load when interface is not initialized.
+// @xctest TC10.5: Get CAN bus load when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -365,9 +365,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.6: Get CAN bus load when interface initialized (but CAN controller not started).
+// @xctest TC10.6: Get CAN bus load when interface initialized (but CAN controller not started)
 //
-// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+// @expected CANERR_NOERROR and status bit 'can_stopped' = 1
 //
 - (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -427,9 +427,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.7: Get CAN bus load when CAN controller started.
+// @xctest TC10.7: Get CAN bus load when CAN controller started
 //
-// @expected: CANERR_NOERROR and status bit 'can_stopped' = 0
+// @expected CANERR_NOERROR and status bit 'can_stopped' = 0
 //
 - (void)testWhenInterfaceStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -482,9 +482,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.8: Get CAN bus load when CAN controller stopped.
+// @xctest TC10.8: Get CAN bus load when CAN controller stopped
 //
-// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+// @expected CANERR_NOERROR and status bit 'can_stopped' = 1
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -544,9 +544,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC10.9: Get CAN bus load when interface already shutdown.
+// @xctest TC10.9: Get CAN bus load when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -599,46 +599,60 @@
 
 // @xctest TC10.10: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusBusOff {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 // @xctest TC10.11: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusWarningLevel {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 // @xctest TC10.12: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusBusBrror {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 // @xctest TC10.13: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusTransmitterBusy {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 // @xctest TC10.14: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusReceiverEmpty {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 // @xctest TC10.15: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusMessageLost {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 // @xctest TC10.16: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusQueueOverrun {
-//        TODO: insert coin here
+// @todo: insert coin here
 //}
 
 @end
 
-// $Id: test_can_busload.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_busload.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

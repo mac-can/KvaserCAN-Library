@@ -77,7 +77,7 @@
 
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     3
-#define VERSION_PATCH     0
+#define VERSION_PATCH     2
 
 /*#define OPTION_MACCAN_MULTICHANNEL  0  !* set globally: 0 = only one channel on multi-channel devices */
 /*#define OPTION_MACCAN_PIPE_TIMEOUT  0  !* set globally: 0 = do not use xxxPipeTO variant (e.g. macOS < 10.15) */
@@ -175,7 +175,7 @@ CANUSB_Return_t CANUSB_Initialize(void){
         goto error_initialize;
 
     /* wait for the driver being loaded (by the created thread) or timed out*/
-    MACCAN_DEBUG_CORE("    Loading the MacCAN driver...\n");
+    MACCAN_DEBUG_INFO("    Loading the MacCAN driver...\n");
     now = time(NULL);
     do {
         usleep(1000);
@@ -191,7 +191,6 @@ error_initialize:
         (void)pthread_mutex_destroy(&usbDevice[index].ptMutex);
     /* the driver has not been loaded! */
     fInitialized = false;
-    //return (-10000) + rc;
     return CANUSB_ERROR_NOTINIT;
 }
 
@@ -203,7 +202,7 @@ CANUSB_Return_t CANUSB_Teardown(void){
         return CANUSB_ERROR_NOTINIT;
 
     /* "Mr. Gorbachev, tear down this wall!" */
-    MACCAN_DEBUG_CORE("    Release the MacCAN driver...\n");
+    MACCAN_DEBUG_INFO("    Release the MacCAN driver...\n");
     assert(pthread_cancel(usbDriver.ptThread) == 0);
     usleep(54945);
 
@@ -612,7 +611,7 @@ CANUSB_AsyncPipe_t CANUSB_CreatePipeAsync(CANUSB_Handle_t handle, UInt8 pipeRef,
     bzero(asyncPipe, sizeof(struct usb_pipe_t_));
     asyncPipe->handle = CANUSB_INVALID_HANDLE;
     /* create a double buffer for USB data transfer */
-    MACCAN_DEBUG_DRIVER("        - Double buffer each of size %u bytes for endpoint #%u\n", bufferSize, pipeRef);
+    MACCAN_DEBUG_CORE("        - Double buffer each of size %u bytes for endpoint #%u\n", bufferSize, pipeRef);
     if ((asyncPipe->buffer.data[0] = malloc(bufferSize)) &&
         (asyncPipe->buffer.data[1] = malloc(bufferSize))) {
         asyncPipe->buffer.size = (UInt32)bufferSize;
@@ -838,7 +837,7 @@ CANUSB_Index_t CANUSB_GetFirstDevice(void){
         return CANUSB_INVALID_INDEX;
 
     /* get the first registered device, if any */
-    if (idxDevice != 0)
+    // if (idxDevice != 0)  // note: logically equivalent
         idxDevice = 0;
     while (idxDevice < CANUSB_MAX_DEVICES) {
         if (usbDevice[idxDevice].fPresent &&
@@ -1897,5 +1896,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1090 2022-01-11 09:53:17Z haumea $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1199 2022-06-19 19:02:00Z makemake $ *** (c) UV Software, Berlin ***
  */

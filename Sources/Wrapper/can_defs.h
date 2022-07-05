@@ -1,6 +1,6 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  CAN Interface API, Version 3 (for Kvaser CAN Leaf Interface)
+ *  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
  *
  *  Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.

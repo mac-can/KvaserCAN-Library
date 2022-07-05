@@ -64,6 +64,10 @@
     (void)can_exit(CANKILL_ALL);
 }
 
+// @xctest TC0.0: Smoke-test
+//
+// @expected CANERR_NOERROR
+//
 - (void)testSmokeTest {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
@@ -121,4 +125,4 @@
 
 @end
 
-// $Id: Testing.mm 1075 2022-01-04 22:00:43Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Testing.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

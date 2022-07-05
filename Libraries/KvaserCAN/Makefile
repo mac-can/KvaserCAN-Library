@@ -1,5 +1,5 @@
 #
-#	CAN Interface API, Version 3 (for Kvaser CAN Leaf Interfaces)
+#	CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 #
 #	Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
@@ -54,30 +54,31 @@ HOME_DIR = ../..
 SOURCE_DIR = $(HOME_DIR)/Sources
 CANAPI_DIR = $(HOME_DIR)/Sources/CANAPI
 MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
-KVASER_DIR = $(HOME_DIR)/Sources/Driver
+DRIVER_DIR = $(HOME_DIR)/Sources/Driver
 WRAPPER_DIR = $(HOME_DIR)/Sources/Wrapper
 
-OBJECTS = $(OUTDIR)/KvaserCAN.o \
-	$(OUTDIR)/KvaserCAN_Driver.o $(OUTDIR)/KvaserUSB_Device.o \
-	$(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
-	$(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
-	$(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
+OBJECTS = $(OUTDIR)/KvaserCAN.o $(OUTDIR)/KvaserCAN_Driver.o \
+	$(OUTDIR)/KvaserCAN_Devices.o $(OUTDIR)/KvaserUSB_Device.o \
+	$(OUTDIR)/KvaserUSB_LeafDevice.o $(OUTDIR)/KvaserUSB_MhydraDevice.o \
+	$(OUTDIR)/MacCAN_Devices.o $(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_Debug.o \
+	$(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
 	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
 
-ifeq ($(current_OS),Darwin)	# macOS - libKvaserCAN.dylib
+ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
 
-LIBRARY = libKvaserCAN
+PROJECT = KvaserCAN
+LIBRARY = lib$(PROJECT)
 
 MAJOR = 0
-MINOR = 2
-PATCH = 1
+MINOR = 3
+PATCH = 0
 
-VERSION = $(MAJOR).$(MINOR).$(PATCH)
+VERSION = $(MAJOR).$(MINOR)
 TARGET  = $(LIBRARY).$(VERSION).dylib
 STATIC  = $(LIBRARY).a
 
-INSTALL_NAME = $(TARGET)
+INSTALL_NAME = @rpath/$(TARGET)
 CURRENT_VERSION = $(MAJOR).$(MINOR).$(PATCH)
 COMPATIBILITY_VERSION = $(MAJOR).$(MINOR).0
 
@@ -102,11 +103,11 @@ DEFINES = -DOPTION_KVASERCAN_DYLIB=1 \
 HEADERS = -I$(SOURCE_DIR) \
 	-I$(CANAPI_DIR) \
 	-I$(MACCAN_DIR) \
-	-I$(KVASER_DIR) \
+	-I$(DRIVER_DIR) \
 	-I$(WRAPPER_DIR)
 
-CFLAGS += -O2 -Wall -Wno-parentheses \
-	-fno-strict-aliasing \
+CFLAGS += -O2 -Wall -Wextra -Wno-parentheses \
+	-fmessage-length=0 -fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -119,9 +120,9 @@ LIBRARIES =
 LDFLAGS  += -lpthread \
 	-nostartfiles -dynamiclib -fvisibility=hidden \
 	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation \
-	-install_name $(INSTALL_NAME) \
-	-current_version $(CURRENT_VERSION) \
-	-compatibility_version $(COMPATIBILITY_VERSION)
+	-Wl,-install_name,$(INSTALL_NAME) \
+	-Wl,-current_version,$(CURRENT_VERSION) \
+	-Wl,-compatibility_version,$(COMPATIBILITY_VERSION)
 
 LTFLAGS += -static
 
@@ -130,13 +131,14 @@ CFLAGS += -arch arm64 -arch x86_64
 CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
-endif
 
 
 CXX = clang++
 CC = clang
 LD = clang++
 LT = libtool
+endif
+
 RM = rm -f
 CP = cp -f
 LN = ln -s
@@ -179,7 +181,7 @@ pristine:
 
 install:
 	@echo "Copying library file..."
-	$(CP) $(TARGET) $(INSTALL)
+	$(RM) $(INSTALL)/$(TARGET); $(CP) $(TARGET) $(INSTALL)
 ifeq ($(current_OS),Darwin)
 	$(RM) $(INSTALL)/$(LIBRARY).dylib ; $(LN) $(INSTALL)/$(TARGET) $(INSTALL)/$(LIBRARY).dylib
 endif
@@ -188,19 +190,19 @@ endif
 $(OUTDIR)/KvaserCAN.o: $(SOURCE_DIR)/KvaserCAN.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/KvaserCAN_Driver.o: $(KVASER_DIR)/KvaserCAN_Driver.c
+$(OUTDIR)/KvaserCAN_Driver.o: $(DRIVER_DIR)/KvaserCAN_Driver.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/KvaserUSB_Device.o: $(KVASER_DIR)/KvaserUSB_Device.c
+$(OUTDIR)/KvaserCAN_Devices.o: $(DRIVER_DIR)/KvaserCAN_Devices.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/LeafLight.o: $(KVASER_DIR)/LeafLight.c
+$(OUTDIR)/KvaserUSB_Device.o: $(DRIVER_DIR)/KvaserUSB_Device.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/LeafPro.o: $(KVASER_DIR)/LeafPro.c
+$(OUTDIR)/KvaserUSB_LeafDevice.o: $(DRIVER_DIR)/KvaserUSB_LeafDevice.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/MacCAN_Debug.o: $(MACCAN_DIR)/MacCAN_Debug.c
+$(OUTDIR)/KvaserUSB_MhydraDevice.o: $(DRIVER_DIR)/KvaserUSB_MhydraDevice.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/MacCAN_Devices.o: $(MACCAN_DIR)/MacCAN_Devices.c
@@ -213,6 +215,9 @@ $(OUTDIR)/MacCAN_MsgQueue.o: $(MACCAN_DIR)/MacCAN_MsgQueue.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/MacCAN_MsgPipe.o: $(MACCAN_DIR)/MacCAN_MsgPipe.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
+$(OUTDIR)/MacCAN_Debug.o: $(MACCAN_DIR)/MacCAN_Debug.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.c

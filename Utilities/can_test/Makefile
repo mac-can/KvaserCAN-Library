@@ -1,7 +1,7 @@
 #
-#	CAN Tester for Kvaser CAN Leaf Interfaces
+#	CAN Tester for Kvaser CAN Interfaces
 #
-#	Copyright (C) 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (C) 2020-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #
 #	This program is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/Timer.o $(BINDIR)/libKvaserCAN.a
 
 ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
 
-VERSION = 0
+VERSION = 0.3.0
 
 TARGET  = can_test
 

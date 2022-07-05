@@ -1,6 +1,6 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
+ *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
  *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
@@ -46,12 +46,27 @@
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "KvaserUSB_Device.h"
+#include "KvaserCAN_Devices.h"
 #include "MacCAN_Debug.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
+
+static KvaserUSB_DriverType_t GetUsbDriverType(uint16_t productId) {
+    switch (KvaserDEV_GetDeviceFamily(productId)) {
+        /* ---  driver for Leaf devices  --- */
+        case KVASER_USB_LEAF_DEVICE_FAMILY:
+            return USB_LEAF_DRIVER;
+        /* ---  driver for Mhydra devices  --- */
+        case KVASER_USB_MHYDRA_DEVICE_FAMILY:
+            return USB_MHYDRA_DRIVER;
+        /* ---  unknown/unsupported devices  --- */
+        default:
+            return USB_UNKNOWN_DRIVER;
+    }
+}
 
 static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_CanChannel_t channel, KvaserUSB_Device_t *device) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
@@ -71,6 +86,10 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
     if ((retVal = CANUSB_GetDeviceReleaseNo(handle, &device->releaseNo)) < 0)
         return retVal;
 
+    /* determine driver type (Leaf or Mhydra device) */
+    if ((device->driverType = GetUsbDriverType(device->productId)) >= USB_UNKNOWN_DRIVER)
+        return CANUSB_ERROR_NOTSUPP;
+
     /* get number of CAN channels from device */
     if ((retVal = CANUSB_GetDeviceNumCanChannels(handle, &device->numChannels)) < 0)
         return retVal;
@@ -84,7 +103,7 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
     if ((retVal = CANUSB_GetInterfaceNumEndpoints(handle, &device->endpoints.numEndpoints)) < 0)
         return retVal;
     /* get endpoint properties from device */
-    // FIXME: Nah, nah, there's gotta be something better!
+    // TODO: Nah, nah, there's gotta be something better!
     for (uint8_t i = 1U; (i <= device->endpoints.numEndpoints) && (i < (1U + (KVASER_MAX_CAN_CHANNELS * 2U))); i++) {
         if (CANUSB_GetInterfaceEndpointDirection(handle, i, &dir) < 0)
             return retVal;
@@ -107,10 +126,10 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
         }
     }
     /* set device name, vendor name and website (zero-terminated strings) */
-    if (CANUSB_GetDeviceName(handle, device->name, KVASER_MAX_NAME_LENGTH) < 0)
-        strncpy(device->name, "(unkown)", KVASER_MAX_NAME_LENGTH);
-    strncpy(device->vendor, KVASER_NAME, KVASER_MAX_NAME_LENGTH);
-    strncpy(device->website, KVASER_WEBSITE, KVASER_MAX_NAME_LENGTH);
+    if (CANUSB_GetDeviceName(handle, device->name, KVASER_MAX_STRING_LENGTH) < 0)
+        strncpy(device->name, "(unkown)", KVASER_MAX_STRING_LENGTH);
+    strncpy(device->vendor, KVASER_COMPANY_NAME, KVASER_MAX_STRING_LENGTH);
+    strncpy(device->website, KVASER_WEBSITE_URL, KVASER_MAX_STRING_LENGTH);
 
     /* the USB handle and the CAN channel number are valid now,
      * but the configuration must be confirmed for the device! */
@@ -240,7 +259,7 @@ CANUSB_Return_t KvaserUSB_SendRequest(KvaserUSB_Device_t *device, const uint8_t 
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    retVal = CANUSB_WritePipe(device->handle, device->endpoints.bulkOut.pipeRef, buffer, nbyte, 0U);  // FIXME: time-out
+    retVal = CANUSB_WritePipe(device->handle, device->endpoints.bulkOut.pipeRef, buffer, nbyte, 0U);  // note: time-out only used if OPTION_MACCAN_PIPE_TIMEOUT enabled
     if (retVal == CANUSB_SUCCESS)
         MACCAN_LOG_WRITE((uint8_t*)buffer, nbyte, ">");
     else
@@ -320,9 +339,9 @@ CANUSB_Return_t KvaserUSB_AbortReception(KvaserUSB_Device_t *device) {
     return retVal;
 }
 
-uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq) {
+uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq) {
     /*
-     *  param[in]   cpuTicks   - 48-bit timer value from device
+     *  param[in]   cpuTicks   - timer value from device
      *  param[in]   cpuFreq    - CPU frequency in [MHz]
      */
     if (cpuFreq == 0) cpuFreq = 1;  // to avoid devide-by-zero!
@@ -330,10 +349,10 @@ uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB
     return ((uint64_t)cpuTicks * (uint64_t)1000) / (uint64_t)cpuFreq;
 }
 
-void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq) {
+void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq) {
     /*
      *  param[out]  timeStamp  - struct timespec (with nanoseconds resolution)
-     *  param[in]   cpuTicks   - 48-bit timer value from device
+     *  param[in]   cpuTicks   - timer value from device (48-bit or 64-bit)
      *  param[in]   cpuFreq    - CPU frequency in [MHz]
      */
     assert(timeStamp);

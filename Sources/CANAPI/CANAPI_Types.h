@@ -51,7 +51,7 @@
  *
  *  @author      $Author: haumea $
  *
- *  @version     $Rev: 1036 $
+ *  @version     $Rev: 1044 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -84,7 +84,11 @@ extern "C" {
  *         with CAN 2.0 frame format only (e.g. in the build environment).
  */
 #if (OPTION_CAN_2_0_ONLY != 0)
-#warning Compilation with legacy CAN 2.0 frame format!
+#ifdef _MSC_VER
+#pragma message ( "Compilation with with legacy CAN 2.0 frame format!" )
+#else
+#warning Compilation with with legacy CAN 2.0 frame format!
+#endif
 #endif
 
 /*  -----------  defines  ------------------------------------------------

@@ -41,13 +41,15 @@ let package = Package(
                 "CANAPI/LICENSE.GPL-3.0-or-later",
                 "Swift/CANAPI.swift",
                 "Swift/KvaserCAN.swift",
+                "Kvaser/*.*",
                 "include/README.md"
             ],
             sources: [
                 "Driver/KvaserCAN_Driver.c",
                 "Driver/KvaserUSB_Device.c",
-                "Driver/LeafLight.c",
-                "Driver/LeafPro.c",
+                "Driver/KvaserUSB_LeafDevice.c",
+                "Driver/KvaserUSB_MhydraDevice.c",
+                "Driver/KvaserCAN_Devices.c",
                 "Wrapper/can_api.c",
                 "MacCAN/MacCAN_MsgPipe.c",
                 "MacCAN/MacCAN_MsgQueue.c",

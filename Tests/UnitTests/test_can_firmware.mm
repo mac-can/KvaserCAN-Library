@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC14.1: Get firmware version with invalid interface handle(s).
+// @xctest TC14.1: Get firmware version with invalid interface handle(s)
 //
-// @expected: NULL
+// @expected NULL
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -125,9 +125,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC14.2: Get firmware version when interface is not initialized.
+// @xctest TC14.2: Get firmware version when interface is not initialized
 //
-// @expected: NULL
+// @expected NULL
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -184,9 +184,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC14.3: Get firmware version when interface already shutdown.
+// @xctest TC14.3: Get firmware version when interface already shutdown
 //
-// @expected: NULL
+// @expected NULL
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -237,9 +237,9 @@
     XCTAssertTrue(NULL == string);
 }
 
-// @xctest TC14.4: Query firmware version at any place in a standard sequence (cf. SmokeTest).
+// @xctest TC14.4: Query firmware version at any place in a standard sequence (cf. SmokeTest)
 //
-// @expected: Not NULL
+// @expected a zero-terminated string
 //
 - (void)testAnyPlaceAnyTime {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -296,4 +296,4 @@
 
 @end
 
-// $Id: test_can_firmware.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_firmware.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

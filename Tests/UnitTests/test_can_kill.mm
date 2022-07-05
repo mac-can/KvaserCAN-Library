@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC07.1: Signal interface with invalid interface handle(s).
+// @xctest TC07.1: Signal interface with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -126,9 +126,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC07.2: Signal interface when it is not initialized.
+// @xctest TC07.2: Signal interface when it is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -185,9 +185,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC07.3: Signal interface when it is initializes (but CAN controller not started).
+// @xctest TC07.3: Signal interface when it is initializes (but CAN controller not started)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceInitialized {
     can_status_t status = { CANSTAT_RESET };
@@ -243,9 +243,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC07.4: Signal interface when CAN controller is started.
+// @xctest TC07.4: Signal interface when CAN controller is started
 //
-// @expected: CANERR_NOERROR.
+// @expected CANERR_NOERROR.
 //
 - (void)testWhenInterfaceStarted {
     can_status_t status = { CANSTAT_RESET };
@@ -302,9 +302,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC07.5: Signal interface after CAN controller is stopped.
+// @xctest TC07.5: Signal interface after CAN controller is stopped
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStopped {
     can_status_t status = { CANSTAT_RESET };
@@ -361,9 +361,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC07.6: Signal interface when already shutdown.
+// @xctest TC07.6: Signal interface when already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -413,9 +413,9 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-// @xctest TC07.7: Signal all initialized interfaces at once.
+// @xctest TC07.7: Signal all initialized interfaces at once
 //
-// @expected: CANERR_NOERROR.
+// @expected CANERR_NOERROR.
 //
 - (void)testSignalAllInterfaces {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -486,4 +486,4 @@
 
 @end
 
-// $Id: test_can_kill.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_kill.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

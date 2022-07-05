@@ -1,9 +1,9 @@
 #!/bin/sh
 echo "/*  -- Do not commit this file --" > Sources/build_no.h
 echo " *" >> Sources/build_no.h
-echo " *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces" >> Sources/build_no.h
+echo " *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces" >> Sources/build_no.h
 echo " *" >> Sources/build_no.h
-echo " *  Copyright (c) 2020-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)" >> Sources/build_no.h
+echo " *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)" >> Sources/build_no.h
 echo " *  All rights reserved." >> Sources/build_no.h
 echo " *" >> Sources/build_no.h
 echo " *  This file is part of MacCAN-KvaserCAN." >> Sources/build_no.h

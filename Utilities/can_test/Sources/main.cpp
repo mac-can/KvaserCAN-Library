@@ -1,6 +1,6 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  CAN Tester for Kvaser CAN Leaf Interfaces
+//  CAN Tester for Kvaser CAN Interfaces
 //
 //  Copyright (c) 2007,2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //
@@ -34,7 +34,7 @@
 #else
 #error Unsupported architecture
 #endif
-static const char APPLICATION[] = "CAN Tester for Kvaser CAN Leaf Interfaces, Version " VERSION_STRING;
+static const char APPLICATION[] = "CAN Tester for Kvaser CAN Interfaces, Version " VERSION_STRING;
 static const char COPYRIGHT[]   = "Copyright (c) 2007,2020-2022 by Uwe Vogt, UV Software, Berlin";
 static const char WARRANTY[]    = "This program comes with ABSOLUTELY NO WARRANTY!\n\n" \
                                   "This is free software, and you are welcome to redistribute it\n" \

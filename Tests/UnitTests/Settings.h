@@ -52,8 +52,8 @@
 #import "Timer.h"
 
 //  Device under Test (2 devices required)
-#define DUT1  (SInt32)CAN_DEVICE1
-#define DUT2  (SInt32)CAN_DEVICE2
+#define DUT1  (SInt32)CAN_DEVICE2
+#define DUT2  (SInt32)CAN_DEVICE1
 
 //  Default operation mode and bit-rate settings
 #define TEST_CANMODE  CANMODE_DEFAULT
@@ -84,6 +84,9 @@
 //  - enable/disable exiting loops over properties on error
 //    note: enable this option to debug a failing property.
 #define EXIT_PROPERTY_LOOP_ON_ERROR  0  /// default = disabled
+//  - enable/disable comparision of bit-rate settings by time quanta
+//    note: tq = f_clock / brp  (cf. Kvaser CAN bus parameter).
+#define COMPARE_BITRATE_BY_TIME_QUANTA  0  /// default = disabled
 
 //  Settings for time-stamp accuracy:
 //  - time-stamp test with 10ms transmission delay
@@ -115,4 +118,4 @@
 
 #endif // SETTINGS_H_INCLUDED
 
-// $Id: Settings.h 1084 2022-01-07 13:31:39Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Settings.h 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

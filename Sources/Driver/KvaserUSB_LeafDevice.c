@@ -1,6 +1,6 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
+ *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
  *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
@@ -45,7 +45,8 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "LeafLight.h"
+#include "KvaserUSB_LeafDevice.h"
+#include "KvaserCAN_Devices.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -57,6 +58,15 @@
 
 #include "MacCAN_Debug.h"
 
+#ifndef OPTION_PRINT_DEVICE_INFO
+#define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
+#endif
+#ifndef OPTION_PRINT_BUS_PARAMS
+#define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
+#endif
+#ifndef OPTION_CHECK_BUS_PARAMS
+#define OPTION_CHECK_BUS_PARAMS  1  /* note set zero to disnable checking of bus params */
+#endif
 #define LEN_RX_STD_MESSAGE             24U
 #define LEN_TX_STD_MESSAGE             20U
 #define LEN_RX_EXT_MESSAGE             24U
@@ -94,12 +104,16 @@
 #define LEN_TX_ACKNOWLEDGE             12U
 #define LEN_CAN_ERROR_EVENT            16U
 #define LEN_LOG_MESSAGE                24U
+#define LEN_GET_CAPABILITIES_REQ        8U
+#define LEN_GET_CAPABILITIES_RESP      16U
+#define LEN_GET_TRANSCEIVER_INFO_REQ    4U
+#define LEN_GET_TRANSCEIVER_INFO_RESP  12U
 
 #define MIN(x,y)  (((x) < (y)) ? (x) : (y))
 
 static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size);
-static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq);
-static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq);
+static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency);
+static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency);
 
 static uint32_t FillSetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel, const KvaserUSB_BusParams_t *params);
 static uint32_t FillGetBusParamsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
@@ -119,22 +133,13 @@ static uint32_t FillGetBusLoadReq(uint8_t *buffer, uint32_t maxbyte, uint8_t cha
 static uint32_t FillGetCardInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t dataLevel);
 static uint32_t FillGetSoftwareInfoReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
+static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd, uint16_t subData);
+static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo);
+#endif
 
-void LeafLight_GetOperationCapability(KvaserUSB_OpMode_t *opMode) {
-    if (opMode) {
-        *opMode = 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_FDOE ? CANMODE_FDOE : 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_BRSE ? CANMODE_BRSE : 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_NISO ? CANMODE_NISO : 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_SHRD ? CANMODE_SHRD : 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_NXTD ? CANMODE_NXTD : 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_NRTR ? CANMODE_NRTR : 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_ERR ? CANMODE_ERR : 0x00U;
-        *opMode |= LEAF_LIGHT_MODE_MON ? CANMODE_MON : 0x00U;
-    }
-}
-
-bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
+bool Leaf_ConfigureChannel(KvaserUSB_Device_t *device) {
     /* sanity check */
     if (!device)
         return false;
@@ -142,20 +147,25 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
         return false;
     if (device->handle == CANUSB_INVALID_HANDLE)
         return false;
-    if (device->productId != LEAF_LIGHT_PRODUCT_ID)
+    if (device->driverType != USB_LEAF_DRIVER)
         return false;
-    if (device->numChannels != LEAF_LIGHT_NUM_CHANNELS)
+    if (device->numChannels != LEAF_NUM_CHANNELS)  // TODO: multi-channel devices
         return false;
-    if (device->endpoints.numEndpoints != LEAF_LIGHT_NUM_ENDPOINTS)
+    if (device->endpoints.numEndpoints != LEAF_NUM_ENDPOINTS)
         return false;
 
     /* set CAN channel properties and defaults */
     device->channelNo = 0U;  /* note: only one CAN channel */
-    device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
-    device->recvData.txAck.maxMsg = LEAF_LIGHT_MAX_OUTSTANDING_TX;
-    LeafLight_GetOperationCapability(&device->opCapability);
-    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
-    device->clocks[1] = (int32_t)-1;
+    device->recvData.canClock = KvaserDEV_GetCanClockInMHz(device->productId);
+    device->recvData.timerFreq = KvaserDEV_GetTimerFreqInMHz(device->productId);
+    device->recvData.txAck.maxMsg = LEAF_MAX_OUTSTANDING_TX;
+
+    /* set CAN channel operation capabilities from device spec. */
+    device->opCapability = 0x00U;  /* note: CAN FD not supported by Leaf devices */
+    device->opCapability |= KvaserDEV_IsErrorFrameSupported(device->productId) ? CANMODE_ERR : 0x00U;
+    device->opCapability |= KvaserDEV_IsSilentModeSupported(device->productId) ? CANMODE_MON : 0x00U;
+    device->opCapability |= CANMODE_NXTD;
+    device->opCapability |= CANMODE_NRTR;
 
     /* Gotcha! */
     device->configured = true;
@@ -163,7 +173,7 @@ bool LeafLight_ConfigureChannel(KvaserUSB_Device_t *device) {
     return device->configured;
 }
 
-CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode) {
+CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserUSB_OpMode_t opMode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -172,78 +182,120 @@ CANUSB_Return_t LeafLight_InitializeChannel(KvaserUSB_Device_t *device, const Kv
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
-    /* check requested operation mode */
-    if ((opMode & ~device->opCapability)) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): unsupported operation mode (%02x)\n", device->name, device->handle, (opMode & ~device->opCapability));
-        return CANUSB_ERROR_ILLPARA;  /* [2021-05-30]: cf. CAN API V3 function 'can_test' */
-    }
     MACCAN_DEBUG_DRIVER("    Initializing %s driver...\n", device->name);
-    /* stop chip (go bus OFF) */
-    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): stop chip (go bus OFF)\n", device->name, device->handle);
-    retVal = LeafLight_StopChip(device, 0U);  /* 0 = don't wait for response */
-    if (retVal < 0) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
-        goto end_init;
-    }
-    /* set driver mode OFF */
-    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode OFF\n", device->name, device->handle);
-    retVal = LeafLight_SetDriverMode(device, DRIVERMODE_OFF);
-    if (retVal < 0) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
-        goto end_init;
-    }
-    /* trigger chip state event */
-    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): trigger chip state event\n", device->name, device->handle);
-    retVal = LeafLight_RequestChipState(device, 0U);  /* 0 = no delay */
-    if (retVal != CANUSB_SUCCESS) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip state event could not be triggered (%i)\n", device->name, device->handle, retVal);
-        goto end_init;
-    }
     /* start the reception loop */
     retVal = KvaserUSB_StartReception(device, ReceptionCallback);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): reception loop could not be started (%i)\n", device->name, device->handle, retVal);
         goto end_init;
     }
-    /* get device information (don't care about the result) */
-    retVal = LeafLight_GetCardInfo(device, &device->deviceInfo.card);
+    /* stop chip (go bus OFF) */
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): stop chip (go bus OFF)\n", device->name, device->handle);
+    retVal = Leaf_StopChip(device, 0U);  /* 0 = don't wait for response */
+    if (retVal < 0) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
+    }
+    /* set driver mode OFF */
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode NORMAL\n", device->name, device->handle);
+    retVal = Leaf_SetDriverMode(device, DRIVERMODE_NORMAL);  /* note: OFF doesn't work */
+    if (retVal < 0) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
+    }
+    /* trigger chip state event */
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): trigger chip state event\n", device->name, device->handle);
+    retVal = Leaf_RequestChipState(device, 0U);  /* 0 = no delay */
+    if (retVal != CANUSB_SUCCESS) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip state event could not be triggered (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
+    }
+    /* get device information: card, software, interface, transceiver */
+    retVal = Leaf_GetCardInfo(device, &device->deviceInfo.card);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): card information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
     }
-    retVal = LeafLight_GetSoftwareInfo(device, &device->deviceInfo.software);
+    retVal = Leaf_GetSoftwareInfo(device, &device->deviceInfo.software);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
     }
-    /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
-    (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);
+#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
+    retVal = Leaf_GetInterfaceInfo(device, &device->deviceInfo.channel);  // FIXME: returns (-50)
+    if (retVal < 0) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
+    }
+#endif
+    retVal = Leaf_GetTransceiverInfo(device, &device->deviceInfo.transceiver);
+    if (retVal < 0) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
+        goto err_init;
+    }
+    /* get device capabilities (if supported) */
+    if (device->deviceInfo.software.swOptions & SWOPTION_CAP_REQ) {
+        retVal = Leaf_GetCapabilities(device, &device->deviceInfo.capabilities);
+        if (retVal < 0) {
+            MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel capabilities could not be read (%i)\n", device->name, device->handle, retVal);
+            goto err_init;
+        }
+    }
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): properties and capabilities\n", device->name, device->handle);
+    PrintDeviceInfo(&device->deviceInfo);  /* note: only for debugging purposes */
+#endif
     /* get CPU clock frequency (in [MHz]) from software options */
     switch (device->deviceInfo.software.swOptions & SWOPTION_CPU_FQ_MASK) {
-        case SWOPTION_16_MHZ_CLK: device->recvData.cpuFreq = 16U; break;
-        case SWOPTION_32_MHZ_CLK: device->recvData.cpuFreq = 32U; break;
-        case SWOPTION_24_MHZ_CLK: device->recvData.cpuFreq = 24U; break;
+        case SWOPTION_16_MHZ_CLK: device->recvData.canClock = 16U; break;
+        case SWOPTION_32_MHZ_CLK: device->recvData.canClock = 32U; break;
+        case SWOPTION_24_MHZ_CLK: device->recvData.canClock = 24U; break;
         default:
-            device->recvData.cpuFreq = LEAF_LIGHT_CPU_FREQUENCY;
+            device->recvData.canClock = KvaserDEV_GetCanClockInMHz(device->productId);
             break;
     }
-#if (0)
-    // TODO: list a possible CAN clocks and rework the bus params accordingly
-    device->clocks[0] = (int32_t)device->recvData.cpuFreq * (int32_t)1000000;
-    device->clocks[1] = (int32_t)-1;
+    device->recvData.timerFreq = device->recvData.canClock;
+
+    /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
+    (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);  // TODO: not used yet
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+    MACCAN_DEBUG_DRIVER("    - clocks:\n");
+    MACCAN_DEBUG_DRIVER("      - CAN clock: %u MHz\n", device->recvData.canClock);
+    MACCAN_DEBUG_DRIVER("      - CAN timer: %u MHz\n", device->recvData.timerFreq);
+    /* get device clock (don't care about the result) */
+    uint64_t nsec = 0U;
+    retVal = Leaf_ReadClock(device, &nsec);  // FIXME: returns (-50)
+    if (retVal < 0) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): device clock could not be read (%i)\n", device->name, device->handle, retVal);
+    }
+    MACCAN_DEBUG_DRIVER("      - Clock: %u.%04u sec\n", (nsec / 1000000000), ((nsec % 1000000000) / 1000000));
+    MACCAN_DEBUG_DRIVER("      - Time: %u.%04u sec\n", device->recvData.timeRef.tv_sec, device->recvData.timeRef.tv_nsec / 1000000);
 #endif
     /* get max. outstanding transmit messages */
     if ((0U < device->deviceInfo.software.maxOutstandingTx) &&
-        (device->deviceInfo.software.maxOutstandingTx < MIN(LEAF_LIGHT_MAX_OUTSTANDING_TX, 255U)))
+        (device->deviceInfo.software.maxOutstandingTx < MIN(LEAF_MAX_OUTSTANDING_TX, 255U)))
         device->recvData.txAck.maxMsg = (uint8_t)device->deviceInfo.software.maxOutstandingTx;
     else
-        device->recvData.txAck.maxMsg = (uint8_t)MIN(LEAF_LIGHT_MAX_OUTSTANDING_TX, 255U);
+        device->recvData.txAck.maxMsg = (uint8_t)MIN(LEAF_MAX_OUTSTANDING_TX, 255U);
+    /* update capabilities from software options (in case of wrong configuration) */
+    device->opCapability &= ~(CANMODE_FDOE | CANMODE_BRSE | CANMODE_NISO);  /* note: CAN FD not supported by Leaf devices */
+    /* check requested operation mode */
+    if ((opMode & ~device->opCapability)) {
+        MACCAN_DEBUG_ERROR("+++ %s (device #%u): unsupported operation mode (%02x)\n", device->name, device->handle, (opMode & ~device->opCapability));
+        retVal = CANUSB_ERROR_ILLPARA;  /* note: cf. CAN API V3 function 'can_test' */
+        goto err_init;
+    }
     /* store demanded CAN operation mode*/
     device->recvData.opMode = opMode;
     retVal = CANUSB_SUCCESS;
 end_init:
     return retVal;
+err_init:
+    (void)KvaserUSB_AbortReception(device);
+    return retVal;
 }
 
-CANUSB_Return_t LeafLight_TeardownChannel(KvaserUSB_Device_t *device) {
+CANUSB_Return_t Leaf_TeardownChannel(KvaserUSB_Device_t *device) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -255,14 +307,14 @@ CANUSB_Return_t LeafLight_TeardownChannel(KvaserUSB_Device_t *device) {
     MACCAN_DEBUG_DRIVER("    Teardown %s driver...\n", device->name);
     /* stop chip (go bus OFF) */
     MACCAN_DEBUG_DRIVER(">>> %s (device #%u): stop chip (go bus OFF)\n", device->name, device->handle);
-    retVal = LeafLight_StopChip(device, 0U);  /* 0 = don't wait for response */
+    retVal = Leaf_StopChip(device, 0U);  /* 0 = don't wait for response */
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): chip could not be stopped (%i)\n", device->name, device->handle, retVal);
         //goto end_exit;
     }
     /* set driver mode OFF */
-    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode OFF\n", device->name, device->handle);
-    retVal = LeafLight_SetDriverMode(device, DRIVERMODE_OFF);
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set driver mode NORMAL\n", device->name, device->handle);
+    retVal = Leaf_SetDriverMode(device, DRIVERMODE_NORMAL);  /* note: OFF doesn't work */
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): driver mode could not be set (%i)\n", device->name, device->handle, retVal);
         //goto end_exit;
@@ -277,7 +329,15 @@ CANUSB_Return_t LeafLight_TeardownChannel(KvaserUSB_Device_t *device) {
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params) {
+#define TSEG1_MIN  1U
+#define TSEG1_MAX  UINT8_MAX
+#define TSEG2_MIN  1U
+#define TSEG2_MAX  127U
+#define SJW_MIN    1U
+#define SJW_MAX    127U
+#define NO_SAMP    1U
+
+CANUSB_Return_t Leaf_SetBusParams(KvaserUSB_Device_t *device, const KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -288,15 +348,56 @@ CANUSB_Return_t LeafLight_SetBusParams(KvaserUSB_Device_t *device, const KvaserU
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+    MACCAN_DEBUG_DRIVER(">>> %s (device #%u): set bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                        device->name, device->handle,
+                        params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+#endif
+    /* check bus params (noSamp issue) */
+    if (params->noSamp != 1)
+        return CANUSB_ERROR_ILLPARA;
+//#if (OPTION_CHECK_BUS_PARAMS != 0)
+//    /* (§1) 0 < bitRate <= maxBitrate (1'000'000bps) */
+//    if ((params->bitRate == 0) || (params->bitRate > device->deviceInfo.software.maxBitrate))
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//    /* (§2) 1 < (16'000'000 / (bitRate * (1 + tseg1 + tseg2))) <= 256 */  // FIXME: it doesn´t work
+//#if (0)
+//    uint32_t brp = 16000000U / (params->bitRate * (uint32_t)(1U + params->tseg1 + params->tseg2));
+//    if ((brp <= 1U) || (brp > 256U )) //(PScl <= 1 || PScl > 256)
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//#else
+//    if ((params->tseg1 < TSEG1_MIN) || (params->tseg1 > TSEG1_MAX) ||
+//        (params->tseg2 < TSEG2_MIN) || (params->tseg2 > TSEG2_MAX) ||
+//        (params->sjw < SJW_MIN) || (params->sjw > SJW_MAX))
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//#endif
+//    /* (§3) noSamp = 1 */
+//    if (params->noSamp != NO_SAMP)
+//        return CANUSB_ERROR_ILLPARA;  // TODO: define a better error code
+//#endif
     /* send request CMD_SET_BUSPARAMS_REQ w/o response */
     bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
     size = FillSetBusParamsReq(buffer, KVASER_MAX_COMMAND_LENGTH, device->channelNo, params);
     retVal = KvaserUSB_SendRequest(device, buffer, size);
-
+#if (OPTION_CHECK_BUS_PARAMS != 0)
+    /* read back bus params and compare with written bus params */
+    if (retVal == CANUSB_SUCCESS) {
+        KvaserUSB_BusParams_t actual;
+        retVal = Leaf_GetBusParams(device, &actual);
+        if (retVal == CANUSB_SUCCESS) {
+            if ((actual.bitRate != params->bitRate) ||
+                (actual.tseg1 != params->tseg1) ||
+                (actual.tseg2 != params->tseg2) ||
+                (actual.sjw != params->sjw ) ||
+                (actual.noSamp != params->noSamp))
+                retVal = CANUSB_ERROR_ILLPARA;
+        }
+    }
+#endif
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params) {
+CANUSB_Return_t Leaf_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_BusParams_t *params) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -330,12 +431,17 @@ CANUSB_Return_t LeafLight_GetBusParams(KvaserUSB_Device_t *device, KvaserUSB_Bus
             params->tseg2 = BUF2UINT8(buffer[9]);
             params->sjw = BUF2UINT8(buffer[10]);
             params->noSamp = BUF2UINT8(buffer[11]);
+#if (OPTION_PRINT_BUS_PARAMS != 0)
+            MACCAN_DEBUG_DRIVER(">>> %s (device #%u): get bus params - bitRate=%u tseg1=%u tseg2=%u sjw=%u noSamp=%u\n",
+                                device->name, device->handle,
+                                params->bitRate, params->tseg1, params->tseg2, params->sjw, params->noSamp);
+#endif
         }
     }
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode) {
+CANUSB_Return_t Leaf_SetDriverMode(KvaserUSB_Device_t *device, const KvaserUSB_DriverMode_t mode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -354,7 +460,7 @@ CANUSB_Return_t LeafLight_SetDriverMode(KvaserUSB_Device_t *device, const Kvaser
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode) {
+CANUSB_Return_t Leaf_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_DriverMode_t *mode) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -386,7 +492,7 @@ CANUSB_Return_t LeafLight_GetDriverMode(KvaserUSB_Device_t *device, KvaserUSB_Dr
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
+CANUSB_Return_t Leaf_StartChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -415,7 +521,7 @@ CANUSB_Return_t LeafLight_StartChip(KvaserUSB_Device_t *device, uint16_t timeout
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
+CANUSB_Return_t Leaf_StopChip(KvaserUSB_Device_t *device, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -444,7 +550,7 @@ CANUSB_Return_t LeafLight_StopChip(KvaserUSB_Device_t *device, uint16_t timeout)
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetChip(KvaserUSB_Device_t *device, uint16_t delay)  {
+CANUSB_Return_t Leaf_ResetChip(KvaserUSB_Device_t *device, uint16_t delay)  {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -465,7 +571,7 @@ CANUSB_Return_t LeafLight_ResetChip(KvaserUSB_Device_t *device, uint16_t delay) 
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetCard(KvaserUSB_Device_t *device, uint16_t delay) {
+CANUSB_Return_t Leaf_ResetCard(KvaserUSB_Device_t *device, uint16_t delay) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -486,7 +592,7 @@ CANUSB_Return_t LeafLight_ResetCard(KvaserUSB_Device_t *device, uint16_t delay) 
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay)  {
+CANUSB_Return_t Leaf_RequestChipState(KvaserUSB_Device_t *device, uint16_t delay)  {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -507,7 +613,7 @@ CANUSB_Return_t LeafLight_RequestChipState(KvaserUSB_Device_t *device, uint16_t 
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout) {
+CANUSB_Return_t Leaf_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -569,7 +675,7 @@ CANUSB_Return_t LeafLight_SendMessage(KvaserUSB_Device_t *device, const KvaserUS
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout) {
+CANUSB_Return_t Leaf_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanMessage_t *message, uint16_t timeout) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -584,7 +690,7 @@ CANUSB_Return_t LeafLight_ReadMessage(KvaserUSB_Device_t *device, KvaserUSB_CanM
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/) {
+CANUSB_Return_t Leaf_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags*/) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -618,7 +724,7 @@ CANUSB_Return_t LeafLight_FlushQueue(KvaserUSB_Device_t *device/*, uint8_t flags
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay) {
+CANUSB_Return_t Leaf_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t delay) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -639,7 +745,7 @@ CANUSB_Return_t LeafLight_ResetErrorCounter(KvaserUSB_Device_t *device, uint16_t
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay) {
+CANUSB_Return_t Leaf_ResetStatistics(KvaserUSB_Device_t *device, uint16_t delay) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -660,7 +766,7 @@ CANUSB_Return_t LeafLight_ResetStatistics(KvaserUSB_Device_t *device, uint16_t d
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
+CANUSB_Return_t Leaf_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -692,15 +798,15 @@ CANUSB_Return_t LeafLight_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) 
             ticks |= (uint64_t)BUF2UINT16(buffer[8]) << 32;
             /* note: when software options not read before, assume clock running at 24MHz
              */
-            if (device->recvData.cpuFreq == 0U)
-                device->recvData.cpuFreq = 24U;
-            *nsec = KvaserUSB_NanosecondsFromTicks(ticks, device->recvData.cpuFreq);
+            if (device->recvData.timerFreq == 0U)
+                device->recvData.timerFreq = KvaserDEV_GetTimerFreqInMHz(device->productId);
+            *nsec = KvaserUSB_NanosecondsFromTicks(ticks, device->recvData.timerFreq);
         }
     }
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load) {
+CANUSB_Return_t Leaf_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLoad_t *load) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -745,7 +851,7 @@ CANUSB_Return_t LeafLight_GetBusLoad(KvaserUSB_Device_t *device, KvaserUSB_BusLo
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, uint8_t dataLevel*/) {
+CANUSB_Return_t Leaf_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_CardInfo_t *info/*, uint8_t dataLevel*/) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -804,7 +910,7 @@ CANUSB_Return_t LeafLight_GetCardInfo(KvaserUSB_Device_t *device, KvaserUSB_Card
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info) {
+CANUSB_Return_t Leaf_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_SoftwareInfo_t *info) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -841,7 +947,7 @@ CANUSB_Return_t LeafLight_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_
     return retVal;
 }
 
-CANUSB_Return_t LeafLight_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info) {
+CANUSB_Return_t Leaf_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
     uint32_t size;
@@ -879,12 +985,124 @@ CANUSB_Return_t LeafLight_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB
     return retVal;
 }
 
+CANUSB_Return_t Leaf_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Capabilities_t *capabilities) {
+    CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
+    uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
+    uint32_t size;
+    uint8_t resp;
+
+    /* sanity check */
+    if (!device || !capabilities)
+        return CANUSB_ERROR_NULLPTR;
+    if (!device->configured)
+        return CANUSB_ERROR_NOTINIT;
+
+    /* set default values */
+    capabilities->dummy = 0;
+    capabilities->silentMode = KvaserDEV_IsSilentModeSupported(device->productId);
+    capabilities->errorFrame = KvaserDEV_IsErrorFrameSupported(device->productId);
+    capabilities->busStats = 0;
+    capabilities->errorCount = 0;
+    capabilities->singleShot = 0;
+    capabilities->syncTxFlush = 0;
+    capabilities->hasLogger = 0;
+    capabilities->hasRemote = 0;
+    capabilities->hasScript = 0;
+
+    /* sub-commands */
+    uint16_t subCmds[9] = {
+        CAP_SUB_CMD_SILENT_MODE,
+        CAP_SUB_CMD_ERRFRAME,
+        CAP_SUB_CMD_BUS_STATS,
+        CAP_SUB_CMD_ERRCOUNT_READ,
+        CAP_SUB_CMD_SINGLE_SHOT,
+        CAP_SUB_CMD_SYNC_TX_FLUSH,
+        CAP_SUB_CMD_HAS_LOGGER,
+        CAP_SUB_CMD_HAS_REMOTE,
+        CAP_SUB_CMD_HAS_SCRIPT
+    };
+    /* send request CMD_GET_CAPABILITIES_REQ w/ sub-command and wait for response */
+    for (int i = 0; i < 9; i++) {
+        bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
+        size = FillGetCapabilitiesReq(buffer, KVASER_MAX_COMMAND_LENGTH, subCmds[i], 0x00);  // TODO: subData?
+        retVal = KvaserUSB_SendRequest(device, buffer, size);
+        if (retVal == CANUSB_SUCCESS) {
+            size = LEN_GET_CAPABILITIES_RESP;
+            resp = CMD_GET_CAPABILITIES_RESP;
+            retVal = KvaserUSB_ReadResponse(device, buffer, size, resp, KVASER_USB_COMMAND_TIMEOUT);
+            if (retVal == CANUSB_SUCCESS) {
+                /* command response:
+                 * - byte 0..3: (header)
+                 * - byte 4..5: sub-command
+                 * - byte 6..7: status (0=OK, 1=NOT_IMPLEMENTED, 2=UNAVAILABLE)
+                 * - byte 8..11: mask
+                 * - byte 12..15: value
+                 */
+                uint16_t status = BUF2UINT16(buffer[6]);
+                uint32_t mask = BUF2UINT32(buffer[8]);
+                uint32_t value = BUF2UINT32(buffer[12]);
+                if (status == 0) {
+                    switch (subCmds[i]) {
+                        // TODO: clarify what´s the meaning of 'mask' and 'value'
+                        case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SYNC_TX_FLUSH: capabilities->syncTxFlush= (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_LOGGER: capabilities->hasLogger = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_REMOTE: capabilities->hasRemote = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_SCRIPT: capabilities->hasScript = (value & mask) ? 1 : 0; break;
+                        default: /* nothing to do here */ break;
+                    }
+                }
+            }
+        }
+    }
+    return retVal;
+}
+
+CANUSB_Return_t Leaf_GetTransceiverInfo(KvaserUSB_Device_t *device, KvaserUSB_TransceiverInfo_t *info) {
+    CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
+    uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
+    uint32_t size;
+    uint8_t resp;
+
+    /* sanity check */
+    if (!device || !info)
+        return CANUSB_ERROR_NULLPTR;
+    if (!device->configured)
+        return CANUSB_ERROR_NOTINIT;
+
+    /* send request CMD_GET_TRANSCEIVER_INFO_REQ and wait for response */
+    bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
+    size = FillGetTransceiverInfoReq(buffer, KVASER_MAX_COMMAND_LENGTH, device->channelNo);
+    retVal = KvaserUSB_SendRequest(device, buffer, size);
+    if (retVal == CANUSB_SUCCESS) {
+        size = LEN_GET_TRANSCEIVER_INFO_RESP;
+        resp = CMD_GET_TRANSCEIVER_INFO_RESP;
+        retVal = KvaserUSB_ReadResponse(device, buffer, size, resp, KVASER_USB_COMMAND_TIMEOUT);
+        if (retVal == CANUSB_SUCCESS) {
+            /* command response:
+             * - byte 0..3: (header)
+             * - byte 4..7: transceiver capabilities
+             * - byte 8: transceiver status
+             * - byte 9: transceiver type
+             * - byte 10+11: (not used)
+             */
+            info->transceiverCapabilities = BUF2UINT32(buffer[4]);
+            info->transceiverStatus = BUF2UINT8(buffer[8]);
+            info->transceiverType = BUF2UINT8(buffer[9]);
+        }
+    }
+    return retVal;
+}
+
 static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
     KvaserUSB_RecvData_t *context = (KvaserUSB_RecvData_t*)refCon;
     KvaserUSB_CanMessage_t message;
     UInt32 index = 0U;
     UInt32 nbyte;
-
 
     assert(refCon);
     assert(buffer);
@@ -916,7 +1134,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_ERROR_EVENT:
                 case CMD_CAN_ERROR_EVENT:
                     /* event message: update event status */
-                    (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->cpuFreq);
+                    (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->timerFreq);
                     break;
                 case CMD_GET_BUSPARAMS_RESP:
                 case CMD_GET_DRIVERMODE_RESP:
@@ -924,15 +1142,18 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                 case CMD_STOP_CHIP_RESP:
                 case CMD_READ_CLOCK_RESP:
                 case CMD_GET_CARD_INFO_RESP:
+                case CMD_GET_INTERFACE_INFO_RESP:
                 case CMD_GET_SOFTWARE_INFO_RESP:
                 case CMD_GET_BUSLOAD_RESP:
                 case CMD_FILO_FLUSH_QUEUE_RESP:
+                case CMD_GET_CAPABILITIES_RESP:
+                case CMD_GET_TRANSCEIVER_INFO_RESP:
                     /* command response: write packet into the pipe */
                     (void)CANPIP_Write(context->msgPipe, &buffer[index], nbyte);
                     break;
                 case CMD_LOG_MESSAGE:
                     /* logged CAN message: decode and enqueue */
-                    if (DecodeMessage(&message, &buffer[index], nbyte, context->cpuFreq)) {
+                    if (DecodeMessage(&message, &buffer[index], nbyte, context->timerFreq)) {
                         /* suppress certain CAN messages depending on the operation mode */
                         if (message.xtd && (context->opMode & CANMODE_NXTD))
                             break;
@@ -943,7 +1164,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                         (void)CANQUE_Enqueue(context->msgQueue, (void*)&message);
                     } else {
                         /* there are flags that do not belong to a received CAN message */
-                        (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->cpuFreq);
+                        (void)UpdateEventData(&context->evData, &buffer[index], nbyte, context->timerFreq);
                     }
                     break;
                 case CMD_TX_ACKNOWLEDGE:
@@ -966,7 +1187,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
     }
 }
 
-static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
+static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency) {
     bool result = false;
 
     if (!event || !buffer)
@@ -974,7 +1195,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
     if (nbyte < KVASER_MIN_COMMAND_LENGTH)
         return false;
 
-    (void)cpuFreq;  // currently not used
+    (void)frequency;  // currently not used
 
     switch (buffer[1]) {
         case CMD_ERROR_EVENT:
@@ -1075,7 +1296,7 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
     return result;
 }
 
-static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_CpuClock_t cpuFreq) {
+static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency) {
     uint64_t ticks = 0ULL;
     bool result = false;
 
@@ -1109,7 +1330,7 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     ticks |= (uint64_t)BUF2UINT16(buffer[4]) << 0;
     ticks |= (uint64_t)BUF2UINT16(buffer[6]) << 16;
     ticks |= (uint64_t)BUF2UINT16(buffer[8]) << 32;
-    KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, cpuFreq);
+    KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, frequency);
     /* note: we only enqueue ordinary CAN messages and error frames.
      *       The flags MSGFLAG_OVERRUN, MSGFLAG_NERR, MSGFLAG_WAKEUP,
      *       MSGFLAG_TX and MSGFLAG_TXRQ are handled by UpdateEventData
@@ -1320,7 +1541,7 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t c
      * - byte 18: (not used)
      * - byte 19: flags
      */
-    buffer[0] = message->xtd ? LEN_TX_EXT_MESSAGE : LEN_TX_STD_MESSAGE;
+    buffer[0] = LEN_TX_STD_MESSAGE; // note: LEN_TX_EXT_MESSAGE == LEN_TX_STD_MESSAGE
     buffer[1] = message->xtd ? CMD_TX_EXT_MESSAGE : CMD_TX_STD_MESSAGE;
     buffer[2] = UINT8BYTE(channel);
     buffer[3] = UINT8BYTE(transId);
@@ -1498,3 +1719,111 @@ static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8
     /* return request length */
     return (uint32_t)buffer[0];
 }
+
+static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd, uint16_t subData) {
+    assert(buffer);
+    assert(maxbyte >= LEN_GET_CAPABILITIES_REQ);
+    bzero(buffer, maxbyte);
+    /* command request:
+     * - byte 0: command length
+     * - byte 1: command code
+     * - byte 2..3: (not used)
+     * - byte 4..5: sub-command
+     * - byte 6..7: sub-data (not used)
+     *        or
+     * - byte 6..7: sub-data = channel
+     */
+    buffer[0] = LEN_GET_CAPABILITIES_REQ;
+    buffer[1] = CMD_GET_CAPABILITIES_REQ;
+    buffer[2] = UINT8BYTE(0x00);
+    buffer[3] = UINT8BYTE(0x00);
+    /* arguments (depend on sub-command) */
+    buffer[4] = UINT16LSB(subCmd);
+    buffer[5] = UINT16MSB(subCmd);
+    buffer[6] = UINT16LSB(subData);
+    buffer[7] = UINT16MSB(subData);
+    /* return request length */
+    return (uint32_t)buffer[0];
+}
+
+static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel) {
+    assert(buffer);
+    assert(maxbyte >= LEN_GET_TRANSCEIVER_INFO_REQ);
+    bzero(buffer, maxbyte);
+    /* command request:
+     * - byte 0: command length
+     * - byte 1: command code
+     * - byte 2: transaction id.
+     * - byte 3: channel
+     */
+    buffer[0] = LEN_GET_TRANSCEIVER_INFO_REQ;
+    buffer[1] = CMD_GET_TRANSCEIVER_INFO_REQ;
+    buffer[2] = CMD_GET_TRANSCEIVER_INFO_REQ;
+    buffer[3] = UINT8BYTE(channel);
+    /* return request length */
+    return (uint32_t)buffer[0];
+}
+
+#if (OPTION_PRINT_DEVICE_INFO != 0)
+ static void PrintDeviceInfo(const KvaserUSB_DeviceInfo_t *deviceInfo) {
+    assert(deviceInfo);
+    MACCAN_DEBUG_DRIVER("    - card info:\n");
+    MACCAN_DEBUG_DRIVER("      - channel count: %d\n", deviceInfo->card.channelCount);
+    MACCAN_DEBUG_DRIVER("      - serial no.: %d\n", deviceInfo->card.serialNumber);
+    MACCAN_DEBUG_DRIVER("      - clock resolution: %d\n", deviceInfo->card.clockResolution);
+    time_t mfgDate = (time_t)deviceInfo->card.mfgDate;
+    MACCAN_DEBUG_DRIVER("      - manufacturing date: %s", ctime(&mfgDate));
+    MACCAN_DEBUG_DRIVER("      - EAN code (LSB first): %x%x%x%x%x-%x%x%x%x%x-%x%x%x%x%x-%x\n",
+                        (deviceInfo->card.EAN[7] >> 4), (deviceInfo->card.EAN[7] & 0xf),
+                        (deviceInfo->card.EAN[6] >> 4), (deviceInfo->card.EAN[6] & 0xf),
+                        (deviceInfo->card.EAN[5] >> 4), (deviceInfo->card.EAN[5] & 0xf),
+                        (deviceInfo->card.EAN[4] >> 4), (deviceInfo->card.EAN[4] & 0xf),
+                        (deviceInfo->card.EAN[3] >> 4), (deviceInfo->card.EAN[3] & 0xf),
+                        (deviceInfo->card.EAN[2] >> 4), (deviceInfo->card.EAN[2] & 0xf),
+                        (deviceInfo->card.EAN[1] >> 4), (deviceInfo->card.EAN[1] & 0xf),
+                        (deviceInfo->card.EAN[0] >> 4), (deviceInfo->card.EAN[0] & 0xf));
+    MACCAN_DEBUG_DRIVER("      - hardware revision: %d\n", deviceInfo->card.hwRevision);
+    MACCAN_DEBUG_DRIVER("      - USB HS mode: %d\n", deviceInfo->card.usbHsMode);
+    MACCAN_DEBUG_DRIVER("      - hardware type: %d\n", deviceInfo->card.hwType);
+    MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %d\n", deviceInfo->card.canTimeStampRef);
+#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
+    MACCAN_DEBUG_DRIVER("    - channel info:\n");
+    MACCAN_DEBUG_DRIVER("      - channel capabilities: 0x%x\n", deviceInfo->channel.channelCapabilities);
+    MACCAN_DEBUG_DRIVER("      - CAN chip type: %d\n", deviceInfo->channel.canChipType);
+    MACCAN_DEBUG_DRIVER("      - CAN chip sub-type: %d\n", deviceInfo->channel.canChipSubType);
+#endif
+    MACCAN_DEBUG_DRIVER("    - software info/details:\n");
+    MACCAN_DEBUG_DRIVER("      - software options: 0x%x\n", deviceInfo->software.swOptions);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CONFIG_MODE: %d\n", (deviceInfo->software.swOptions & SWOPTION_CONFIG_MODE) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_AUTO_TX_BUFFER: %d\n", (deviceInfo->software.swOptions & SWOPTION_AUTO_TX_BUFFER) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_BETA: %d\n", (deviceInfo->software.swOptions & SWOPTION_BETA) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_RC: %d\n", (deviceInfo->software.swOptions & SWOPTION_RC) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_BAD_MOOD: %d\n", (deviceInfo->software.swOptions & SWOPTION_BAD_MOOD) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_XX_MHZ_CLK: %s\n",
+                        ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_16_MHZ_CLK) ? "16" :
+                        ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_32_MHZ_CLK) ? "32" :
+                        ((deviceInfo->software.swOptions & SWOPTION_CPU_FQ_MASK) == SWOPTION_24_MHZ_CLK) ? "24" : "XX");
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_TIMEOFFSET_VALID: %d\n", (deviceInfo->software.swOptions & SWOPTION_TIMEOFFSET_VALID) ? 1 : 0);
+    MACCAN_DEBUG_DRIVER("        - SWOPTION_CAP_REQ: %d\n", (deviceInfo->software.swOptions & SWOPTION_CAP_REQ) ? 1 : 0);
+    uint8_t major = (uint8_t)(deviceInfo->software.firmwareVersion >> 24);
+    uint8_t minor = (uint8_t)(deviceInfo->software.firmwareVersion >> 16);
+    uint16_t build = (uint16_t)(deviceInfo->software.firmwareVersion >> 0);
+    MACCAN_DEBUG_DRIVER("      - firmware version: %u.%u (build %u)\n", major, minor, build);
+    MACCAN_DEBUG_DRIVER("      - max. outstanding Tx: %d\n", deviceInfo->software.maxOutstandingTx);
+    MACCAN_DEBUG_DRIVER("      - max. bit-rate (hydra only, otherwise 1Mbit/s): %d\n", deviceInfo->software.maxBitrate);
+    MACCAN_DEBUG_DRIVER("    - transceiver info:\n");
+    MACCAN_DEBUG_DRIVER("      - transceiver capabilities: 0x%x\n", deviceInfo->transceiver.transceiverCapabilities);
+    MACCAN_DEBUG_DRIVER("      - transceiver status: %d\n", deviceInfo->transceiver.transceiverStatus);
+    MACCAN_DEBUG_DRIVER("      - transceiver type: %d\n", deviceInfo->transceiver.transceiverType);
+    MACCAN_DEBUG_DRIVER("    - capabilities (if SWOPTION_CAP_REQ):\n");
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SILENT_MODE: %d\n", deviceInfo->capabilities.silentMode);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %d\n", deviceInfo->capabilities.errorFrame);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_BUS_STATS: %d\n", deviceInfo->capabilities.busStats);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRCOUNT_READ: %d\n", deviceInfo->capabilities.errorCount);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SINGLE_SHOT: %d\n", deviceInfo->capabilities.singleShot);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SYNC_TX_FLUSH: %d\n", deviceInfo->capabilities.syncTxFlush);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_LOGGER: %d\n", deviceInfo->capabilities.hasLogger);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_REMOTE: %d\n", deviceInfo->capabilities.hasRemote);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_HAS_SCRIPT: %d\n", deviceInfo->capabilities.hasScript);
+ }
+#endif

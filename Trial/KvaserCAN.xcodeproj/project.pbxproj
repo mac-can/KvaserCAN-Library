@@ -15,10 +15,10 @@
 		0FD97E3425D1C06400C8A7C7 /* KvaserUSB_Device.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3325D1C06400C8A7C7 /* KvaserUSB_Device.c */; };
 		0FD97E3B25D1EA1300C8A7C7 /* MacCAN_MsgQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3925D1EA1300C8A7C7 /* MacCAN_MsgQueue.c */; };
 		0FD97E3C25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3A25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c */; };
-		0FDA0A7525D2F67700E50E4B /* LeafLight.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7325D2F67700E50E4B /* LeafLight.c */; };
+		0FDA0A7525D2F67700E50E4B /* KvaserUSB_LeafDevice.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7325D2F67700E50E4B /* KvaserUSB_LeafDevice.c */; };
 		0FDA0A7A25D3200A00E50E4B /* KvaserCAN_Driver.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */; };
 		0FDA0A7F25D33EF700E50E4B /* KvaserCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */; };
-		0FEABC1125E8340400DD9ADB /* LeafPro.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FEABC0F25E8340400DD9ADB /* LeafPro.c */; };
+		0FEABC1125E8340400DD9ADB /* KvaserUSB_MhydraDevice.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FEABC0F25E8340400DD9ADB /* KvaserUSB_MhydraDevice.c */; };
 		44999ABB278CDDFF00C466E9 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 44999AB5278CDDFF00C466E9 /* Timer.cpp */; };
 		44999ABC278CDDFF00C466E9 /* Tester.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 44999AB6278CDDFF00C466E9 /* Tester.cpp */; };
 		44999ABD278CDDFF00C466E9 /* Testing.mm in Sources */ = {isa = PBXBuildFile; fileRef = 44999ABA278CDDFF00C466E9 /* Testing.mm */; };
@@ -30,8 +30,8 @@
 		44999AC3278CDE2100C466E9 /* MacCAN_MsgPipe.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3A25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c */; };
 		44999AC4278CDE2500C466E9 /* MacCAN_MsgQueue.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3925D1EA1300C8A7C7 /* MacCAN_MsgQueue.c */; };
 		44999AC5278CDE2900C466E9 /* KvaserUSB_Device.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FD97E3325D1C06400C8A7C7 /* KvaserUSB_Device.c */; };
-		44999AC6278CDE2F00C466E9 /* LeafLight.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7325D2F67700E50E4B /* LeafLight.c */; };
-		44999AC7278CDE3300C466E9 /* LeafPro.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FEABC0F25E8340400DD9ADB /* LeafPro.c */; };
+		44999AC6278CDE2F00C466E9 /* KvaserUSB_LeafDevice.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7325D2F67700E50E4B /* KvaserUSB_LeafDevice.c */; };
+		44999AC7278CDE3300C466E9 /* KvaserUSB_MhydraDevice.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FEABC0F25E8340400DD9ADB /* KvaserUSB_MhydraDevice.c */; };
 		44999AC8278CDE3900C466E9 /* KvaserCAN_Driver.c in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */; };
 		44999AC9278CDE3E00C466E9 /* KvaserCAN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */; };
 		44999AD9278CDEB400C466E9 /* test_can_start.mm in Sources */ = {isa = PBXBuildFile; fileRef = 44999ACA278CDEB400C466E9 /* test_can_start.mm */; };
@@ -49,7 +49,11 @@
 		44999AE5278CDEB400C466E9 /* test_can_write.mm in Sources */ = {isa = PBXBuildFile; fileRef = 44999AD6278CDEB400C466E9 /* test_can_write.mm */; };
 		44999AE6278CDEB400C466E9 /* test_can_read.mm in Sources */ = {isa = PBXBuildFile; fileRef = 44999AD7278CDEB400C466E9 /* test_can_read.mm */; };
 		44999AE7278CDEB400C466E9 /* test_can_reset.mm in Sources */ = {isa = PBXBuildFile; fileRef = 44999AD8278CDEB400C466E9 /* test_can_reset.mm */; };
+		44B99293286F934C0086DCE3 /* test_drv_BusParamsFd.mm in Sources */ = {isa = PBXBuildFile; fileRef = 44B99292286F934C0086DCE3 /* test_drv_BusParamsFd.mm */; };
+		44BFB8E5285E3A5700037DEF /* test_drv_BusParams.mm in Sources */ = {isa = PBXBuildFile; fileRef = 44BFB8E4285E3A5700037DEF /* test_drv_BusParams.mm */; };
 		44CC011F277BB95200EF9361 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 44CC011E277BB91100EF9361 /* main.cpp */; };
+		44CF180E283E90C000A747B5 /* KvaserCAN_Devices.c in Sources */ = {isa = PBXBuildFile; fileRef = 44CF180D283E90C000A747B5 /* KvaserCAN_Devices.c */; };
+		44CF180F283E90C000A747B5 /* KvaserCAN_Devices.c in Sources */ = {isa = PBXBuildFile; fileRef = 44CF180D283E90C000A747B5 /* KvaserCAN_Devices.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -90,14 +94,14 @@
 		0FD97E3825D1EA1300C8A7C7 /* MacCAN_MsgQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_MsgQueue.h; path = ../Sources/MacCAN/MacCAN_MsgQueue.h; sourceTree = "<group>"; };
 		0FD97E3925D1EA1300C8A7C7 /* MacCAN_MsgQueue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_MsgQueue.c; path = ../Sources/MacCAN/MacCAN_MsgQueue.c; sourceTree = "<group>"; };
 		0FD97E3A25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_MsgPipe.c; path = ../Sources/MacCAN/MacCAN_MsgPipe.c; sourceTree = "<group>"; };
-		0FDA0A7325D2F67700E50E4B /* LeafLight.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafLight.c; path = ../Sources/Driver/LeafLight.c; sourceTree = "<group>"; };
-		0FDA0A7425D2F67700E50E4B /* LeafLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafLight.h; path = ../Sources/Driver/LeafLight.h; sourceTree = "<group>"; };
+		0FDA0A7325D2F67700E50E4B /* KvaserUSB_LeafDevice.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserUSB_LeafDevice.c; path = ../Sources/Driver/KvaserUSB_LeafDevice.c; sourceTree = "<group>"; };
+		0FDA0A7425D2F67700E50E4B /* KvaserUSB_LeafDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserUSB_LeafDevice.h; path = ../Sources/Driver/KvaserUSB_LeafDevice.h; sourceTree = "<group>"; };
 		0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserCAN_Driver.c; path = ../Sources/Driver/KvaserCAN_Driver.c; sourceTree = "<group>"; };
 		0FDA0A7925D3200A00E50E4B /* KvaserCAN_Driver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Driver.h; path = ../Sources/Driver/KvaserCAN_Driver.h; sourceTree = "<group>"; };
 		0FDA0A7D25D33EF700E50E4B /* KvaserCAN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = KvaserCAN.cpp; path = ../Sources/KvaserCAN.cpp; sourceTree = "<group>"; };
 		0FDA0A7E25D33EF700E50E4B /* KvaserCAN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN.h; path = ../Sources/KvaserCAN.h; sourceTree = "<group>"; };
-		0FEABC0F25E8340400DD9ADB /* LeafPro.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = LeafPro.c; path = ../Sources/Driver/LeafPro.c; sourceTree = "<group>"; };
-		0FEABC1025E8340400DD9ADB /* LeafPro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LeafPro.h; path = ../Sources/Driver/LeafPro.h; sourceTree = "<group>"; };
+		0FEABC0F25E8340400DD9ADB /* KvaserUSB_MhydraDevice.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserUSB_MhydraDevice.c; path = ../Sources/Driver/KvaserUSB_MhydraDevice.c; sourceTree = "<group>"; };
+		0FEABC1025E8340400DD9ADB /* KvaserUSB_MhydraDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserUSB_MhydraDevice.h; path = ../Sources/Driver/KvaserUSB_MhydraDevice.h; sourceTree = "<group>"; };
 		44999AAC278CDD1200C466E9 /* Testing.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Testing.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		44999AB4278CDDFF00C466E9 /* Settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Settings.h; path = ../Tests/UnitTests/Settings.h; sourceTree = "<group>"; };
 		44999AB5278CDDFF00C466E9 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = ../Tests/UnitTests/Timer.cpp; sourceTree = "<group>"; };
@@ -121,7 +125,11 @@
 		44999AD6278CDEB400C466E9 /* test_can_write.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = test_can_write.mm; path = ../Tests/UnitTests/test_can_write.mm; sourceTree = "<group>"; };
 		44999AD7278CDEB400C466E9 /* test_can_read.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = test_can_read.mm; path = ../Tests/UnitTests/test_can_read.mm; sourceTree = "<group>"; };
 		44999AD8278CDEB400C466E9 /* test_can_reset.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = test_can_reset.mm; path = ../Tests/UnitTests/test_can_reset.mm; sourceTree = "<group>"; };
+		44B99292286F934C0086DCE3 /* test_drv_BusParamsFd.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = test_drv_BusParamsFd.mm; path = ../Tests/UnitTests/test_drv_BusParamsFd.mm; sourceTree = "<group>"; };
+		44BFB8E4285E3A5700037DEF /* test_drv_BusParams.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = test_drv_BusParams.mm; path = ../Tests/UnitTests/test_drv_BusParams.mm; sourceTree = "<group>"; };
 		44CC011E277BB91100EF9361 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
+		44CF180C283E90C000A747B5 /* KvaserCAN_Devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Devices.h; path = ../Sources/Driver/KvaserCAN_Devices.h; sourceTree = "<group>"; };
+		44CF180D283E90C000A747B5 /* KvaserCAN_Devices.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserCAN_Devices.c; path = ../Sources/Driver/KvaserCAN_Devices.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -185,10 +193,12 @@
 				0FD97E3225D1C06400C8A7C7 /* KvaserUSB_Common.h */,
 				0FD97E3325D1C06400C8A7C7 /* KvaserUSB_Device.c */,
 				0FD97E3125D1C06400C8A7C7 /* KvaserUSB_Device.h */,
-				0FDA0A7325D2F67700E50E4B /* LeafLight.c */,
-				0FDA0A7425D2F67700E50E4B /* LeafLight.h */,
-				0FEABC0F25E8340400DD9ADB /* LeafPro.c */,
-				0FEABC1025E8340400DD9ADB /* LeafPro.h */,
+				0FDA0A7325D2F67700E50E4B /* KvaserUSB_LeafDevice.c */,
+				0FDA0A7425D2F67700E50E4B /* KvaserUSB_LeafDevice.h */,
+				0FEABC0F25E8340400DD9ADB /* KvaserUSB_MhydraDevice.c */,
+				0FEABC1025E8340400DD9ADB /* KvaserUSB_MhydraDevice.h */,
+				44CF180D283E90C000A747B5 /* KvaserCAN_Devices.c */,
+				44CF180C283E90C000A747B5 /* KvaserCAN_Devices.h */,
 				0FDA0A7825D3200A00E50E4B /* KvaserCAN_Driver.c */,
 				0FDA0A7925D3200A00E50E4B /* KvaserCAN_Driver.h */,
 				0F9FFFBC25D3BCDB00497D0A /* KvaserCAN_Defines.h */,
@@ -205,6 +215,8 @@
 			children = (
 				44999AB9278CDDFF00C466E9 /* Driver.h */,
 				44999AB4278CDDFF00C466E9 /* Settings.h */,
+				44BFB8E4285E3A5700037DEF /* test_drv_BusParams.mm */,
+				44B99292286F934C0086DCE3 /* test_drv_BusParamsFd.mm */,
 				44999AD5278CDEB400C466E9 /* test_can_bitrate.mm */,
 				44999AD2278CDEB400C466E9 /* test_can_busload.mm */,
 				44999ACD278CDEB400C466E9 /* test_can_exit.mm */,
@@ -319,6 +331,7 @@
 			files = (
 				0FD97E3B25D1EA1300C8A7C7 /* MacCAN_MsgQueue.c in Sources */,
 				0FDA0A7A25D3200A00E50E4B /* KvaserCAN_Driver.c in Sources */,
+				44CF180E283E90C000A747B5 /* KvaserCAN_Devices.c in Sources */,
 				0FD97E2425D1BB3C00C8A7C7 /* MacCAN_Debug.c in Sources */,
 				0FD97E2E25D1BB9E00C8A7C7 /* can_btr.c in Sources */,
 				0FDA0A7F25D33EF700E50E4B /* KvaserCAN.cpp in Sources */,
@@ -328,8 +341,8 @@
 				0F84AA45268BA44F00DA70C3 /* can_api.c in Sources */,
 				0FD97E3425D1C06400C8A7C7 /* KvaserUSB_Device.c in Sources */,
 				44CC011F277BB95200EF9361 /* main.cpp in Sources */,
-				0FDA0A7525D2F67700E50E4B /* LeafLight.c in Sources */,
-				0FEABC1125E8340400DD9ADB /* LeafPro.c in Sources */,
+				0FDA0A7525D2F67700E50E4B /* KvaserUSB_LeafDevice.c in Sources */,
+				0FEABC1125E8340400DD9ADB /* KvaserUSB_MhydraDevice.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,13 +352,15 @@
 			files = (
 				44999AC1278CDE1700C466E9 /* MacCAN_Devices.c in Sources */,
 				44999ABD278CDDFF00C466E9 /* Testing.mm in Sources */,
+				44CF180F283E90C000A747B5 /* KvaserCAN_Devices.c in Sources */,
 				44999ADB278CDEB400C466E9 /* test_can_hardware.mm in Sources */,
 				44999AC4278CDE2500C466E9 /* MacCAN_MsgQueue.c in Sources */,
 				44999ABE278CDE0B00C466E9 /* can_api.c in Sources */,
 				44999AE1278CDEB400C466E9 /* test_can_busload.mm in Sources */,
+				44BFB8E5285E3A5700037DEF /* test_drv_BusParams.mm in Sources */,
 				44999AE0278CDEB400C466E9 /* test_can_test.mm in Sources */,
 				44999ADE278CDEB400C466E9 /* test_can_kill.mm in Sources */,
-				44999AC6278CDE2F00C466E9 /* LeafLight.c in Sources */,
+				44999AC6278CDE2F00C466E9 /* KvaserUSB_LeafDevice.c in Sources */,
 				44999ADD278CDEB400C466E9 /* test_can_status.mm in Sources */,
 				44999AC3278CDE2100C466E9 /* MacCAN_MsgPipe.c in Sources */,
 				44999AC5278CDE2900C466E9 /* KvaserUSB_Device.c in Sources */,
@@ -363,10 +378,11 @@
 				44999AE6278CDEB400C466E9 /* test_can_read.mm in Sources */,
 				44999ADA278CDEB400C466E9 /* test_can_firmware.mm in Sources */,
 				44999AC2278CDE1D00C466E9 /* MacCAN_IOUsbKit.c in Sources */,
+				44B99293286F934C0086DCE3 /* test_drv_BusParamsFd.mm in Sources */,
 				44999ADC278CDEB400C466E9 /* test_can_exit.mm in Sources */,
 				44999ABB278CDDFF00C466E9 /* Timer.cpp in Sources */,
 				44999AE4278CDEB400C466E9 /* test_can_bitrate.mm in Sources */,
-				44999AC7278CDE3300C466E9 /* LeafPro.c in Sources */,
+				44999AC7278CDE3300C466E9 /* KvaserUSB_MhydraDevice.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

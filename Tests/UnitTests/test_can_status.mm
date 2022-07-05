@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC09.1: Get CAN controller status with invalid interface handle(s).
+// @xctest TC09.1: Get CAN controller status with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -124,9 +124,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC09.2: Give a NULL pointer as argument for parameter 'status'.
+// @xctest TC09.2: Give a NULL pointer as argument for parameter 'status'
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithNullPointerForStatus {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -184,9 +184,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC09.3: Get CAN controller status when interface is not initialized.
+// @xctest TC09.3: Get CAN controller status when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -242,9 +242,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC09.4: Get CAN controller status when interface initialized (but CAN controller not started).
+// @xctest TC09.4: Get CAN controller status when interface initialized (but CAN controller not started)
 //
-// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+// @expected CANERR_NOERROR and status bit 'can_stopped' = 1
 //
 - (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -293,9 +293,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC09.5: Get CAN controller status when CAN controller started.
+// @xctest TC09.5: Get CAN controller status when CAN controller started
 //
-// @expected: CANERR_NOERROR and status bit 'can_stopped' = 0
+// @expected CANERR_NOERROR and status bit 'can_stopped' = 0
 //
 - (void)testWhenInterfaceStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -343,9 +343,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC09.6: Get CAN controller status when CAN controller stopped.
+// @xctest TC09.6: Get CAN controller status when CAN controller stopped
 //
-// @expected: CANERR_NOERROR and status bit 'can_stopped' = 1
+// @expected CANERR_NOERROR and status bit 'can_stopped' = 1
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -394,9 +394,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC09.7: Get CAN controller status when interface already shutdown.
+// @xctest TC09.7: Get CAN controller status when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -448,46 +448,60 @@
 
 // @xctest TC09.8: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusBusOff {
-//        TODO: insert coin here
+// @todo:: insert coin here
 //}
 
 // @xctest TC09.9: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusWarningLevel {
-//        TODO: insert coin here
+// @todo:: insert coin here
 //}
 
 // @xctest TC09.10: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusBusBrror {
-//        TODO: insert coin here
+// @todo:: insert coin here
 //}
 
 // @xctest TC09.11: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusTransmitterBusy {
-//        TODO: insert coin here
+// @todo:: insert coin here
 //}
 
 // @xctest TC09.12: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusReceiverEmpty {
-//        TODO: insert coin here
+// @todo:: insert coin here
 //}
 
 // @xctest TC09.13: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusMessageLost {
-//        TODO: insert coin here
+// @todo:: insert coin here
 //}
 
 // @xctest TC09.14: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenStatusQueueOverrun {
-//        TODO: insert coin here
+// @todo:: insert coin here
 //}
 
 @end
 
-// $Id: test_can_status.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_status.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

@@ -68,7 +68,7 @@
 CANPIP_MsgPipe_t CANPIP_Create(void) {
     CANPIP_MsgPipe_t msgPipe = NULL;
 
-    MACCAN_DEBUG_DRIVER("        - Message pipe of size %u bytes\n", PIPE_BUF);
+    MACCAN_DEBUG_CORE("        - Message pipe of size %u bytes\n", PIPE_BUF);
     if ((msgPipe = (CANPIP_MsgPipe_t)malloc(sizeof(struct msg_pipe_t_))) == NULL) {
         MACCAN_DEBUG_ERROR("+++ Unable to create message pipe (NULL pointer)\n");
         return NULL;
@@ -169,5 +169,5 @@ CANPIP_Return_t CANPIP_Read(CANPIP_MsgPipe_t msgPipe, void *buffer, size_t maxby
     return retVal;
 }
 
-/* * $Id: MacCAN_MsgPipe.c 1001 2021-05-25 17:57:49Z eris $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgPipe.c 1199 2022-06-19 19:02:00Z makemake $ *** (c) UV Software, Berlin ***
  */

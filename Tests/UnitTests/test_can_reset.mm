@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC06.1: Stop CAN controller with invalid interface handle(s).
+// @xctest TC06.1: Stop CAN controller with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -136,9 +136,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC06.2: Stop CAN controller when interface is not initialized.
+// @xctest TC06.2: Stop CAN controller when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -194,9 +194,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC06.3: Stop CAN controller when interface initialized (but CAN controller not started).
+// @xctest TC06.3: Stop CAN controller when interface initialized (but CAN controller not started)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -258,9 +258,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC06.4: Stop CAN controller when it was stopped before.
+// @xctest TC06.4: Stop CAN controller when it was stopped before
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -322,9 +322,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC06.5: Stop CAN controller when interface already shutdown.
+// @xctest TC06.5: Stop CAN controller when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -376,4 +376,4 @@
 
 @end
 
-// $Id: test_can_reset.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_reset.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

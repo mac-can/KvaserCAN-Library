@@ -64,9 +64,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC01.1: Probe interface when not initialized.
+// @xctest TC01.1: Probe interface when not initialized
 //
-// @expected: CANERR_NOERROR and interface state CANBRD_PRESENT
+// @expected CANERR_NOERROR and interface state CANBRD_PRESENT
 //
 - (void)testWhenInterfaceNotOccupied {
     int state = CANBRD_NOT_TESTABLE;
@@ -79,9 +79,9 @@
     XCTAssertEqual(CANBRD_PRESENT, state);
 }
 
-// @xctest TC01.2: Probe interface when already initialized (by own process).
+// @xctest TC01.2: Probe interface when already initialized (by own process)
 //
-// @expected: CANERR_NOERROR and interface state CANBRD_OCCUPIED
+// @expected CANERR_NOERROR and interface state CANBRD_OCCUPIED
 //
 - (void)testWhenInterfaceOccupiedByOwnProcess {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -147,9 +147,9 @@
     XCTAssertEqual(CANBRD_PRESENT, state);
 }
 
-// @xctest TC01.3: Probe interface when used by another process.
+// @xctest TC01.3: Probe interface when used by another process
 //
-// @expected: CANERR_NOERROR and interface state CANBRD_OCCUPIED
+// @expected CANERR_NOERROR and interface state CANBRD_OCCUPIED
 //
 - (void)testWhenInterfaceOccupiedByAnotherProcess {
     // @note: this scenario is not testable:
@@ -160,7 +160,7 @@
 
 // @xctest TC01.4: Probe interface with valid channel number(s).
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWithValidChannelNo {
     SInt32 channel = INVALID_HANDLE;
@@ -182,9 +182,9 @@
     }
 }
 
-// @xctest TC01.5: Probe interface with invalid channel number(s).
+// @xctest TC01.5: Probe interface with invalid channel number(s)
 //
-// @expected: CANERR_NOTINIT or CANERR_VENDOR
+// @expected CANERR_NOTINIT or CANERR_VENDOR
 //
 - (void)testWithInvalidChannelNo {
     int state = CANBRD_NOT_TESTABLE;
@@ -216,9 +216,9 @@
     //        Therefore, no assumptions can be made for positive values!
 }
 
-// @xctest TC01.6: Probe interface with its full operation mode capability.
+// @xctest TC01.6: Probe interface with its full operation mode capability
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testOperationModeCapability {
     can_mode_t capa = { CANMODE_DEFAULT };
@@ -244,9 +244,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC01.7: Probe interface with operation mode bit MON set (listen-only mode).
+// @xctest TC01.7: Probe interface with operation mode bit MON set (listen-only mode)
 //
-// @expected: CANERR_NOERROR or CANERR_ILLPARA if listen-only mode is not supported
+// @expected CANERR_NOERROR or CANERR_ILLPARA if listen-only mode is not supported
 //
 - (void)testMonitorModeEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
@@ -277,9 +277,9 @@
 
 }
 
-// @xctest TC01.8: Probe interface with operation mode bit ERR set (error frame reception).
+// @xctest TC01.8: Probe interface with operation mode bit ERR set (error frame reception)
 //
-// @expected: CANERR_NOERROR or CANERR_ILLPARA if error frame reception is not supported
+// @expected CANERR_NOERROR or CANERR_ILLPARA if error frame reception is not supported
 //
 - (void)testErrorFramesEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
@@ -309,9 +309,9 @@
     }
 }
 
-// @xctest TC01.9: Probe interface with operation mode bit NRTR set (suppress remote frames).
+// @xctest TC01.9: Probe interface with operation mode bit NRTR set (suppress remote frames)
 //
-// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of remote frames is not supported
+// @expected CANERR_NOERROR or CANERR_ILLPARA if suppressing of remote frames is not supported
 //
 - (void)testRemoteFramesDisableEnable {
     can_mode_t capa = { CANMODE_DEFAULT };
@@ -341,9 +341,9 @@
     }
 }
 
-// @xctest TC01.10: Probe interface with operation mode bit NXTD set (suppress extended frames).
+// @xctest TC01.10: Probe interface with operation mode bit NXTD set (suppress extended frames)
 //
-// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of extended frames is not supported
+// @expected CANERR_NOERROR or CANERR_ILLPARA if suppressing of extended frames is not supported
 //
 - (void)testExtendedFramesDisableEnable {
     can_mode_t capa = { CANMODE_DEFAULT };
@@ -373,9 +373,9 @@
     }
 }
 
-// @xctest TC01.11: Probe interface with operation mode bit FDOE set (CAN FD operation enabled).
+// @xctest TC01.11: Probe interface with operation mode bit FDOE set (CAN FD operation enabled)
 //
-// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode is not supported
+// @expected CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode is not supported
 //
 - (void)testCanFdOperationEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
@@ -406,9 +406,9 @@
     }
 }
 
-// @xctest TC01.12: Probe interface with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled).
+// @xctest TC01.12: Probe interface with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled)
 //
-// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode or bit-rate switching is not supported
+// @expected CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode or bit-rate switching is not supported
 //
 - (void)testBitrateSwitchingEnableDisable {
     can_mode_t capa = { CANMODE_DEFAULT };
@@ -452,4 +452,4 @@
 
 @end
 
-// $Id: test_can_test.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_test.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

@@ -1,6 +1,6 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
+ *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
  *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
@@ -51,16 +51,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define KVASER_NAME  "Kvaser AB, Sweden"
-#define KVASER_WEBSITE  "https://www.kvaser.com"
-
 #define KVASER_VENDOR_ID  0xBFDU
-#define KVASER_LEAF_PRO_ID  0x107U
-#define KVASER_LEAF_LIGHT_ID  0x120U
+#define KVASER_COMPANY_NAME  "Kvaser AB, Sweden"
+#define KVASER_WEBSITE_URL  "https://www.kvaser.com"
 
-#define KVASER_MAX_CAN_CLOCKS    1U
+/* ---  general defines  ---
+ */
 #define KVASER_MAX_CAN_CHANNELS  1U
-#define KVASER_MAX_NAME_LENGTH  32U
+#define KVASER_MAX_STRING_LENGTH  32U
 
 #define KVASER_MIN_COMMAND_LENGTH  4U
 #define KVASER_MAX_COMMAND_LENGTH  32U
@@ -75,7 +73,6 @@
 #define KVASER_HYDRA_RETENTION_SIZE 1024U /* 2 times max. packet size */
 
 #define KVASER_RECEIVE_QUEUE_SIZE  65536U
-
 
 /* ---  general CAN data types and defines  ---
  */
@@ -186,7 +183,11 @@
 #define CMD_FLUSH_QUEUE_RESP                0x42U
 #define CMD_SET_BUSPARAMS_FD_REQ            0x45U
 #define CMD_SET_BUSPARAMS_FD_RESP           0x46U
+#define CMD_GET_BUSPARAMS_TQ_REQ            0x47U
+#define CMD_SET_BUSPARAMS_TQ_REQ            0x54U
 #define CMD_SET_BUSPARAMS_RESP              0x55U
+#define CMD_GET_BUSPARAMS_TQ_RESP           0x64U
+#define CMD_SET_BUSPARAMS_TQ_RESP           0x8BU
 #define CMD_MAP_CHANNEL_REQ                 0xC8U
 #define CMD_MAP_CHANNEL_RESP                0xC9U
 #define CMD_GET_SOFTWARE_DETAILS_REQ        0xCAU
@@ -340,6 +341,28 @@
 #define SWOPTION_USE_HYDRA_EXT             0x200L
 #define SWOPTION_CANFD_CAP                 0x400L
 #define SWOPTION_NONISO_CAP                0x800L
+#define SWOPTION_80_MHZ_CAN_CLK           0x2000L
+#define SWOPTION_24_MHZ_CAN_CLK           0x4000L
+#define SWOPTION_CAN_CLK_MASK             0x6000L
+
+/*  for CMD_GET_CAPABILITIES_REQ: */
+#define CAP_SUB_CMD_DUMMY_NOT_IMPLEMENTED      0U
+#define CAP_SUB_CMD_DUMMY_UNAVAILABLE          1U
+#define CAP_SUB_CMD_SILENT_MODE                2U
+#define CAP_SUB_CMD_ERRFRAME                   3U
+#define CAP_SUB_CMD_BUS_STATS                  4U
+#define CAP_SUB_CMD_ERRCOUNT_READ              5U
+#define CAP_SUB_CMD_SINGLE_SHOT                6U
+#define CAP_SUB_CMD_SYNC_TX_FLUSH              7U
+#define CAP_SUB_CMD_HAS_LOGGER                 8U
+#define CAP_SUB_CMD_HAS_REMOTE                 9U
+#define CAP_SUB_CMD_HAS_SCRIPT                10U
+// Hydra devices:
+#define CAP_SUB_CMD_LIN_HYBRID                11U
+#define CAP_SUB_CMD_KDI_INFO                  12U
+#define CAP_SUB_CMD_HAS_KDI                   13U
+#define CAP_SUB_CMD_HAS_IO_API                14U
+#define CAP_SUB_CMD_HAS_BUSPARAMS_TQ          15U
 
 /*  for CMD_SET_AUTO_TX_REQ and _RESP: */
 #define AUTOTXBUFFER_CMD_GET_INFO              1U

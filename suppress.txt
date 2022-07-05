@@ -1,2 +1,5 @@
 missingIncludeSystem
 unusedFunction
+variableScope
+unusedPrivateFunction
+missingOverride

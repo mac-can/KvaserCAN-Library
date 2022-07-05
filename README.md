@@ -1,11 +1,11 @@
-### macOS&reg; User-Space Driver for CAN Leaf Interfaces from Kvaser
+### macOS&reg; User-Space Driver for USB CAN Interfaces from Kvaser
 
 _Copyright &copy; 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
 # Running CAN and CAN FD on Mac&reg;
 
 _Running CAN and CAN FD on Mac_ is the mission of the MacCAN project.
-The macOS driver for CAN Leaf interfaces from [Kvaser](https://www.kvaser.com) is based on _MacCAN-Core_ which is an abstraction (or rather a wrapper) of Apple´s IOUsbKit to create USB user-space drivers for CAN interfaces from various vendors under macOS.
+The macOS driver for USB CAN interfaces from [Kvaser](https://www.kvaser.com) is based on _MacCAN-Core_ which is an abstraction (or rather a wrapper) of Apple´s IOUsbKit to create USB user-space drivers for CAN interfaces from various vendors under macOS.
 
 ## MacCAN-KvaserCAN
 
@@ -120,38 +120,38 @@ Type `can_test --help` to display all program options.
 
 ### Target Platform
 
-- macOS 11.0 and later (Intel and Apple silicon)
+- macOS 11.0 and later (Intel x64 and Apple silicon)
 
 ### Development Environment
 
 #### macOS Monterey
 
-- macOS Monterey (12.1) on a Mac mini (M1, 2020)
-- Apple clang version 13.0.0 (clang-1300.0.29.30)
-- Xcode Version 13.2.1 (13C100)
+- macOS Monterey (12.4) on a Mac mini (M1, 2020)
+- Apple clang version 13.1.6 (clang-1316.0.21.2.5)
+- Xcode Version 13.4.1 (13F100)
 
 #### macOS Big Sur
 
-- macOS Big Sur (11.6.3) on a MacBook Pro (2019)
+- macOS Big Sur (11.6.7) on a MacBook Pro (2019)
 - Apple clang version 13.0.0 (clang-1300.0.29.30)
 - Xcode Version 13.2.1 (13C100)
-
-#### macOS High Sierra
-
-- macOS High Sierra (10.13.6) on a MacBook Pro (late 2011)
-- Apple LLVM version 10.0.0 (clang-1000.11.45.5)
-- Xcode Version 10.1 (10B61)
 
 ### Supported CAN Hardware
 
 - Kvaser Leaf Light v2 (EAN: 73-30130-00685-0)
 - Kvaser Leaf Pro HS v2 (EAN: 73-30130-00843-4)
+- Kvaser U100P (EAN: 73-30130-01174-8)
+
+Since version 0.3 theoretically all (single-channel) CAN interfaces from the device family *Leaf Interfaces* (CAN 2.0 interfaces, e.g. Leaf Light v2) and from the device family *Mhydra Interfaces* (CAN FD interfaces, e.g. U100P) are supported.
+To add a new CAN USB interface from Kvaser, only its USB ProductID and some device specific attributes have to be entered or enabled in the module `KvaserCAN_Devices`.
+
+Note: _The CAN interfaces listed above are the ones that are enabled and have been tested._
 
 ### Testing
 
-The XCode project for the trial program includes a xctest target with one test suite for each CAN API V3 **C** interface function.
+The Xcode project for the trial program includes an xctest target with one test suite for each CAN API V3 **C** interface function.
 To run the test suites or single test cases two CAN devices are required.
-General test settings can be change in the file `Settings.h`.
+General test settings can be adapted in the file `Settings.h`.
 
 ## Known Bugs and Caveats
 
@@ -163,10 +163,6 @@ General test settings can be change in the file `Settings.h`.
 
 A CAN API V3 compatible Wrapper Library for Windows is also available.
 It is build upon Kvaser´s CANlib DLL and can be downloaded from / cloned at [GitHub](https://github.com/uv-software/KvaserCAN-Wrapper).
-
-### MacCAN-Core Repo
-
-The MacCAN-Core sources are maintained in a SVN repo to synchronized them between the different MacCAN driver repos.
 
 ### Dual-License
 

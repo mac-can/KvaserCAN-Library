@@ -1,5 +1,5 @@
 #
-#	CAN Interface API, Version 3 (for Kvaser CAN Leaf Interfaces)
+#	CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 #
 #	Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
@@ -57,26 +57,28 @@ MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
 DRIVER_DIR = $(HOME_DIR)/Sources/Driver
 WRAPPER_DIR = $(HOME_DIR)/Sources/Wrapper
 
-OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o $(OUTDIR)/KvaserUSB_Device.o \
-	$(OUTDIR)/LeafLight.o $(OUTDIR)/LeafPro.o \
-	$(OUTDIR)/MacCAN_Devices.o $(OUTDIR)/MacCAN_Debug.o \
-	$(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
+OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o \
+	$(OUTDIR)/KvaserCAN_Devices.o $(OUTDIR)/KvaserUSB_Device.o \
+	$(OUTDIR)/KvaserUSB_LeafDevice.o $(OUTDIR)/KvaserUSB_MhydraDevice.o \
+	$(OUTDIR)/MacCAN_Devices.o $(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_Debug.o \
+	$(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
 	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
 
-ifeq ($(current_OS),Darwin)	# macOS - libUVCANKVL.dylib
+ifeq ($(current_OS),Darwin) # macOS - libUVCANKVL.dylib
 
-LIBRARY = libUVCANKVL
+PROJECT = UVCANKVL
+LIBRARY = lib$(PROJECT)
 
 MAJOR = 0
-MINOR = 2
-PATCH = 1
+MINOR = 3
+PATCH = 0
 
-VERSION = $(MAJOR).$(MINOR).$(PATCH)
+VERSION = $(MAJOR).$(MINOR)
 TARGET  = $(LIBRARY).$(VERSION).dylib
 STATIC  = $(LIBRARY).a
 
-INSTALL_NAME = $(TARGET)
+INSTALL_NAME = @rpath/$(TARGET)
 CURRENT_VERSION = $(MAJOR).$(MINOR).$(PATCH)
 COMPATIBILITY_VERSION = $(MAJOR).$(MINOR).0
 
@@ -103,8 +105,8 @@ HEADERS = -I$(SOURCE_DIR) \
 	-I$(DRIVER_DIR) \
 	-I$(WRAPPER_DIR)
 
-CFLAGS += -O2 -Wall -Wno-parentheses \
-	-fno-strict-aliasing \
+CFLAGS += -O2 -Wall -Wextra -Wno-parentheses \
+	-fmessage-length=0 -fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -117,9 +119,9 @@ LIBRARIES =
 LDFLAGS  += -lpthread \
 	-nostartfiles -dynamiclib -fvisibility=hidden \
 	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation \
-	-install_name $(INSTALL_NAME) \
-	-current_version $(CURRENT_VERSION) \
-	-compatibility_version $(COMPATIBILITY_VERSION)
+	-Wl,-install_name,$(INSTALL_NAME) \
+	-Wl,-current_version,$(CURRENT_VERSION) \
+	-Wl,-compatibility_version,$(COMPATIBILITY_VERSION)
 
 LTFLAGS += -static
 
@@ -128,13 +130,14 @@ CFLAGS += -arch arm64 -arch x86_64
 CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
-endif
 
 
 CXX = clang++
 CC = clang
 LD = clang
 LT = libtool
+endif
+
 RM = rm -f
 CP = cp -f
 LN = ln -s
@@ -176,7 +179,7 @@ pristine:
 
 install:
 	@echo "Copying library file..."
-	$(CP) $(TARGET) $(INSTALL)
+	$(RM) $(INSTALL)/$(TARGET); $(CP) $(TARGET) $(INSTALL)
 ifeq ($(current_OS),Darwin)
 	$(RM) $(INSTALL)/$(LIBRARY).dylib ; $(LN) $(INSTALL)/$(TARGET) $(INSTALL)/$(LIBRARY).dylib
 endif
@@ -185,13 +188,16 @@ endif
 $(OUTDIR)/KvaserCAN_Driver.o: $(DRIVER_DIR)/KvaserCAN_Driver.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
+$(OUTDIR)/KvaserCAN_Devices.o: $(DRIVER_DIR)/KvaserCAN_Devices.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
 $(OUTDIR)/KvaserUSB_Device.o: $(DRIVER_DIR)/KvaserUSB_Device.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/LeafLight.o: $(DRIVER_DIR)/LeafLight.c
+$(OUTDIR)/KvaserUSB_LeafDevice.o: $(DRIVER_DIR)/KvaserUSB_LeafDevice.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/LeafPro.o: $(DRIVER_DIR)/LeafPro.c
+$(OUTDIR)/KvaserUSB_MhydraDevice.o: $(DRIVER_DIR)/KvaserUSB_MhydraDevice.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/MacCAN_Devices.o: $(MACCAN_DIR)/MacCAN_Devices.c

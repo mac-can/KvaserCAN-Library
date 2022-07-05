@@ -1,5 +1,5 @@
 #
-#	KvaserCAN - macOS User-Space Driver and SDK for Kvaser USB CAN Interfaces
+#	KvaserCAN - macOS User-Space Driver and SDK for Kvaser CAN Interfaces
 #
 #	Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.

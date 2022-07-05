@@ -22,15 +22,24 @@
 //#define SECOND_CHANNEL
 #define ISSUE_198   (0)
 
-#define BITRATE_DEFAULT(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=8; x.btr.nominal.tseg1= 31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=2; } while(0)
-#define BITRATE_125K1M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1=31; x.btr.data.tseg2=8; x.btr.data.sjw=2; } while(0)
-#define BITRATE_250K2M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=2; } while(0)
-#define BITRATE_500K4M(x)   do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1= 7; x.btr.data.tseg2=2; x.btr.data.sjw=2; } while(0)
-#define BITRATE_1M8M(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.data.brp=2; x.btr.data.tseg1= 3; x.btr.data.tseg2=1; x.btr.data.sjw=1; } while(0)
-#define BITRATE_125K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_250K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=127; x.btr.nominal.tseg2=32; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_500K(x)     do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw= 8; } while(0)
-#define BITRATE_1M(x)       do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1= 31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; } while(0)
+#define BITRATE_1M(x)         do{ x.btr.frequency=8000000; x.btr.nominal.brp= 1; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_800K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 1; x.btr.nominal.tseg1= 7; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_500K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 2; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_250K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 4; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_125K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 4; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_100K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 5; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_50K(x)        do{ x.btr.frequency=8000000; x.btr.nominal.brp=10; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_20K(x)        do{ x.btr.frequency=8000000; x.btr.nominal.brp=25; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_10K(x)        do{ x.btr.frequency=8000000; x.btr.nominal.brp=50; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
+
+#define BITRATE_FD_1M(x)      do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_FD_500K(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_FD_250K(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_FD_125K(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=8; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; } while(0)
+#define BITRATE_FD_1M8M(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.nominal.sam=0; x.btr.data.brp=1; x.btr.data.tseg1= 7; x.btr.data.tseg2=2; x.btr.data.sjw=1; } while(0)
+#define BITRATE_FD_500K4M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1= 7; x.btr.data.tseg2=2; x.btr.data.sjw=2; } while(0)
+#define BITRATE_FD_250K2M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=4; } while(0)
+#define BITRATE_FD_125K1M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=8; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1=31; x.btr.data.tseg2=8; x.btr.data.sjw=8; } while(0)
 
 #define OPTION_NO   (0)
 #define OPTION_YES  (1)
@@ -123,19 +132,28 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "BD:6") || !strcmp(argv[i], "BD:50")) bitrate.index = CANBTR_INDEX_50K;
         if (!strcmp(argv[i], "BD:7") || !strcmp(argv[i], "BD:20")) bitrate.index = CANBTR_INDEX_20K;
         if (!strcmp(argv[i], "BD:8") || !strcmp(argv[i], "BD:10")) bitrate.index = CANBTR_INDEX_10K;
+        if (!strcmp(argv[i], "BD:1M")) BITRATE_1M(bitrate);
+        if (!strcmp(argv[i], "BD:800K")) BITRATE_800K(bitrate);
+        if (!strcmp(argv[i], "BD:500K")) BITRATE_500K(bitrate);
+        if (!strcmp(argv[i], "BD:250K")) BITRATE_250K(bitrate);
+        if (!strcmp(argv[i], "BD:125K")) BITRATE_125K(bitrate);
+        if (!strcmp(argv[i], "BD:100K")) BITRATE_100K(bitrate);
+        if (!strcmp(argv[i], "BD:50K")) BITRATE_50K(bitrate);
+        if (!strcmp(argv[i], "BD:20K")) BITRATE_20K(bitrate);
+        if (!strcmp(argv[i], "BD:10K")) BITRATE_10K(bitrate);
         /* CAN FD operation */
         if (!strcmp(argv[i], "CANFD") || !strcmp(argv[i], "FD")) opMode.fdoe = 1;
         if (!strcmp(argv[i], "FDF")) opMode.fdoe = 1;
         if (!strcmp(argv[i], "BRS")) opMode.brse = 1;
         /* bit rate (CAN FD) */
-        if (!strcmp(argv[i], "BR:125K1M")) BITRATE_125K1M(bitrate);
-        if (!strcmp(argv[i], "BR:250K2M")) BITRATE_250K2M(bitrate);
-        if (!strcmp(argv[i], "BR:500K4M")) BITRATE_500K4M(bitrate);
-        if (!strcmp(argv[i], "BR:1M8M")) BITRATE_1M8M(bitrate);
-        if (!strcmp(argv[i], "BR:125K")) BITRATE_125K(bitrate);
-        if (!strcmp(argv[i], "BR:250K")) BITRATE_250K(bitrate);
-        if (!strcmp(argv[i], "BR:500K")) BITRATE_500K(bitrate);
-        if (!strcmp(argv[i], "BR:1M")) BITRATE_1M(bitrate);
+        if (!strcmp(argv[i], "BR:125K1M")) BITRATE_FD_125K1M(bitrate);
+        if (!strcmp(argv[i], "BR:250K2M")) BITRATE_FD_250K2M(bitrate);
+        if (!strcmp(argv[i], "BR:500K4M")) BITRATE_FD_500K4M(bitrate);
+        if (!strcmp(argv[i], "BR:1M8M")) BITRATE_FD_1M8M(bitrate);
+        if (!strcmp(argv[i], "BR:125K")) BITRATE_FD_125K(bitrate);
+        if (!strcmp(argv[i], "BR:250K")) BITRATE_FD_250K(bitrate);
+        if (!strcmp(argv[i], "BR:500K")) BITRATE_FD_500K(bitrate);
+        if (!strcmp(argv[i], "BR:1M")) BITRATE_FD_1M(bitrate);
         /* asynchronous IO */
         if (!strcmp(argv[i], "POLLING")) timeout = 0U;
         if (!strcmp(argv[i], "BLOCKING")) timeout = CANREAD_INFINITE;

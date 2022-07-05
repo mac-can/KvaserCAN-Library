@@ -121,7 +121,7 @@ static struct property {
 
 // @xctest TC12.1.1: Get library property values with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandleFromLibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -216,7 +216,7 @@ static struct property {
 //
 // @todo: rework this
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandleFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -309,7 +309,7 @@ static struct property {
 
 // @xctest TC12.2: Give a NULL pointer as argument for parameter 'value'
 //
-// @expected: CANERR_NULLPTR and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
+// @expected CANERR_NULLPTR and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
 //
 - (void)testWithNullPointerForValue {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -380,7 +380,7 @@ static struct property {
 
 // @xctest TC12.3.1: Get library property values with invalid value for parameter 'param'
 //
-// @expected: CANERR_NOTSUPP
+// @expected CANERR_NOTSUPP
 //
 - (void)testWithInvalidParmeterValueFromLibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -438,7 +438,7 @@ static struct property {
 
 // @xctest TC12.3.2: Get device property values with invalid value for parameter 'param'
 //
-// @expected: CANERR_NOTSUPP
+// @expected CANERR_NOTSUPP
 //
 - (void)testWithInvalidParmeterValueFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -496,7 +496,7 @@ static struct property {
 
 // @xctest TC12.4.1: Get library property values with wrong parameter size (too small)
 //
-// @expected: CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
+// @expected CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
 //
 - (void)testWithWrongParameterSizeFromLibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -568,7 +568,7 @@ static struct property {
 
 // @xctest TC12.4.2: Get device property values with wrong parameter size (too small)
 //
-// @expected: CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
+// @expected CANERR_ILLPARA and CANERR_NOERROR for parameter CANPROP_SET_FIRST_CHANNEL and CANPROP_SET_NEXT_CHANNEL
 //
 - (void)testWithWrongParameterSizeFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -640,7 +640,7 @@ static struct property {
 
 // @xctest TC12.5.1: Get library property values when interface is not initialized
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceNotInitializedFromLibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -705,7 +705,7 @@ static struct property {
 
 // @xctest TC12.5.2: Get device property values when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitializedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -770,7 +770,7 @@ static struct property {
 
 // @xctest TC12.6.1: Get library property values when interface initialized (but CAN controller not started)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceInitializedFromLibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -837,7 +837,7 @@ static struct property {
 
 // @xctest TC12.6.2: Get device property values when interface initialized (but CAN controller not started)
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceInitializedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -904,7 +904,7 @@ static struct property {
 
 // @xctest TC12.7.1: Get library property values when CAN controller started
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStartedFromLibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -972,7 +972,7 @@ static struct property {
 
 // @xctest TC12.7.2: Get device property values when CAN controller started
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStartedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1039,7 +1039,7 @@ static struct property {
 
 // @xctest TC12.8.1: Get library property values when CAN controller stoppe
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStoppedFromlibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1106,7 +1106,7 @@ static struct property {
 
 // @xctest TC12.8.2: Get device property values when CAN controller stopped
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceStoppedFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1173,7 +1173,7 @@ static struct property {
 
 // @xctest TC12.9.1: Get library property values when interface already shutdown
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testWhenInterfaceShutdownFromlibrary {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1238,7 +1238,7 @@ static struct property {
 
 // @xctest TC12.9.2: Get device property values when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdownFromDevice {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1303,4 +1303,4 @@ static struct property {
 
 @end
 
-// $Id: test_can_property.mm 1092 2022-01-15 21:14:19Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_property.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //

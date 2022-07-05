@@ -1,6 +1,6 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
+ *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
  *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
@@ -54,6 +54,12 @@
 #include "MacCAN_MsgQueue.h"
 #include "MacCAN_MsgPipe.h"
 
+typedef enum kavser_driver_type_t_ {    /* driver type: */
+    USB_LEAF_DRIVER,                    /* - driver for Leaf devices */
+    USB_MHYDRA_DRIVER,                  /* - driver for Mhydra devices */
+    USB_UNKNOWN_DRIVER                  /* - unknown/unsupported (last entry) */
+} KvaserUSB_DriverType_t;
+
 typedef struct kvaser_card_info_t_  {   /* card info: */
     uint8_t  channelCount;              /* - channel count */
     uint32_t serialNumber;              /* - serial no. */
@@ -81,16 +87,42 @@ typedef struct kvaser_software_info_t_ {  /* software info/details: */
     uint32_t maxBitrate;                /* - max. bit-rate (hydra only, otherwise 1Mbit/s)*/
 } KvaserUSB_SoftwareInfo_t;
 
+typedef struct kvaser_capabilities_t_ { /* channel capabilities: */
+    uint16_t hasTimeQuanta : 1;         /* - CAP_SUB_CMD_HAS_BUSPARAMS_TQ (mhydra) */
+    uint16_t hasIoApi : 1;              /* - CAP_SUB_CMD_HAS_IO_API (mhydra) */
+    uint16_t hasKdi : 1;                /* - CAP_SUB_CMD_HAS_KDI (mhydra) */
+    uint16_t kdiInfo : 1;               /* - CAP_SUB_CMD_KDI_INFO (mhydra) */
+    uint16_t linHybrid : 1;             /* - CAP_SUB_CMD_LIN_HYBRID (mhydra) */
+    uint16_t hasScript : 1;             /* - CAP_SUB_CMD_HAS_SCRIPT */
+    uint16_t hasRemote : 1;             /* - CAP_SUB_CMD_HAS_REMOTE */
+    uint16_t hasLogger : 1;             /* - CAP_SUB_CMD_HAS_LOGGER */
+    uint16_t syncTxFlush : 1;           /* - CAP_SUB_CMD_SYNC_TX_FLUSH */
+    uint16_t singleShot : 1;            /* - CAP_SUB_CMD_SINGLE_SHOT */
+    uint16_t errorCount : 1;            /* - CAP_SUB_CMD_ERRCOUNT_READ */
+    uint16_t busStats : 1;              /* - CAP_SUB_CMD_BUS_STATS */
+    uint16_t errorFrame : 1;            /* - CAP_SUB_CMD_ERRFRAME */
+    uint16_t silentMode : 1;            /* - CAP_SUB_CMD_SILENT_MODE */
+    uint16_t dummy : 2;
+} KvaserUSB_Capabilities_t;
+
+typedef struct kvaser_transceiver_info_t_ {  /* transceiver info: */
+    uint32_t transceiverCapabilities;   /* - capabilities */
+    uint8_t  transceiverStatus;         /* - status */
+    uint8_t  transceiverType;           /* - type */
+} KvaserUSB_TransceiverInfo_t;
+
 typedef struct kvaser_device_info_t_ {  /* device info: */
     KvaserUSB_CardInfo_t card;          /* - card info */
-//  KvaserUSB_InterfaceInfo_t channel;  /* - channel info */
+//  KvaserUSB_InterfaceInfo_t channel;  /* - channel info */  // TODO: uncomment when fixed
     KvaserUSB_SoftwareInfo_t software;  /* - software info */
+    KvaserUSB_Capabilities_t capabilities;   /* - channel capability */
+    KvaserUSB_TransceiverInfo_t transceiver; /* - transceiver info */
 } KvaserUSB_DeviceInfo_t;
 
 typedef struct kvaser_bus_params_t_ {   /* bus parameter: */
     uint32_t bitRate;                   /* - bit rate (in [Hz]) */
     uint8_t  tseg1;                     /* - time segment 1 */
-    uint8_t  tseg2;                     /* - time segment 1 */
+    uint8_t  tseg2;                     /* - time segment 2 */
     uint8_t  sjw;                       /* - synchronization jump width */
     uint8_t  noSamp;                    /* - number of sample points */
 } KvaserUSB_BusParams_t;
@@ -100,6 +132,24 @@ typedef struct kvaser_bus_params_fd_t_ {/* bus parameter for CAN FD: */
     KvaserUSB_BusParams_t data;         /* - data phase bit-rate settings */
     bool canFd;                         /* - flag: open as CAN FD */
 } KvaserUSB_BusParamsFd_t;
+
+typedef struct kvaser_bus_params_tq_t_ {/* bus parameter (time quanta): */
+    struct tq_arbitration_t_ {          /* - arbitration phase: */
+        uint16_t prop;                  /*   - TQ for propagation segment */
+        uint16_t phase1;                /*   - TQ for phase 1 segment */
+        uint16_t phase2;                /*   - TQ for phase 2 segment */
+        uint16_t sjw;                   /*   - synchronization jump width */
+        uint16_t brp;                   /*   - bit-rate prescaler */
+    } arbitration;
+    struct tq_data_phase_t_ {           /* - data phase (CAN FD): */
+        uint16_t prop;                  /*   - TQ for propagation segment */
+        uint16_t phase1;                /*   - TQ for phase 1 segment */
+        uint16_t phase2;                /*   - TQ for phase 2 segment */
+        uint16_t sjw;                   /*   - synchronization jump width */
+        uint16_t brp;                   /*   - bit-rate prescaler */
+    } data;
+    bool canFd;                         /* - flag: open as CAN FD */
+} KvaserUSB_BusParamsTq_t;
 
 typedef uint8_t KvaserUSB_OpMode_t;     /* operation mode (CAN API V1 compatible) */
 
@@ -154,7 +204,7 @@ typedef struct kvaser_endpoints_t_ {    /* USB endpoints: */
 
 typedef CANUSB_AsyncPipe_t KvaserUSB_RecvPipe_t;
 
-typedef uint8_t KvaserUSB_CpuClock_t;
+typedef uint8_t KvaserUSB_Frequency_t;
 
 typedef uint64_t KvaserUSB_CpuTicks_t;
 
@@ -169,7 +219,8 @@ typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
     KvaserUSB_OpMode_t opMode;          /* - demanded CAN operation mode */
     KvaserUSB_EventData_t evData;       /* - asynchronous event data */
     KvaserUSB_Timestamp_t timeRef;      /* - time reference (UTC+0) */
-    KvaserUSB_CpuClock_t cpuFreq;       /* - CPU frequency in [MHz] */
+    KvaserUSB_Frequency_t canClock;     /* - CAN clock in [MHz] */
+    KvaserUSB_Frequency_t timerFreq;    /* - CAN timer in [MHz] */
     struct tx_acknowledge_tag {         /* - Tx acknowledge: */
         uint8_t maxMsg;                 /*   - max. outstanding Tx messages */
         uint8_t cntMsg;                 /*   - number of sent Tx messages */
@@ -187,6 +238,7 @@ typedef int32_t KvaserUSB_CanClock_t;
 typedef struct kavser_hydra_channel_t_ {/* Hydra device data (Leaf Pro): */
     uint8_t channel2he;                 /* - to map a channel no. to HE (6-bit) */
     uint8_t he2channel;                 /* - to map 6-bit HE to a channel number */
+    uint8_t sysdbg_he;                  /* - to map What? to HE (6-bit) */
 } KvaserUSB_HydraData_t;
 
 typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
@@ -199,12 +251,12 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     KvaserUSB_CanChannel_t numChannels; /* - number of CAN channels */
     KvaserUSB_CanChannel_t channelNo;   /* - active CAN channel on device */
     KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capability */
-    KvaserUSB_CanClock_t clocks[KVASER_MAX_CAN_CLOCKS+1]; /* - CAN clocks (in [Hz]) */
     KvaserUSB_DeviceInfo_t deviceInfo;  /* - device information (hw, sw, etc.) */
-    KvaserUSB_HydraData_t hydraData;    /* - Hydra device data (Leaf Pro) */
-    char name[KVASER_MAX_NAME_LENGTH+1];  /* - device name (zero-terminated string) */
-    char vendor[KVASER_MAX_NAME_LENGTH+1];/* - vendor name (zero-terminated string) */
-    char website[KVASER_MAX_NAME_LENGTH+1];/*- vendor website (zero-terminated string) */
+    KvaserUSB_DriverType_t driverType;  /* - driver type (Leaf or Mhydra device) */
+    KvaserUSB_HydraData_t hydraData;    /* - Hydra device data (e.g. Leaf Pro HS v2) */
+    char name[KVASER_MAX_STRING_LENGTH+1];   /* - device name (zero-terminated string) */
+    char vendor[KVASER_MAX_STRING_LENGTH+1]; /* - vendor name (zero-terminated string) */
+    char website[KVASER_MAX_STRING_LENGTH+1];/* - vendor website (zero-terminated string) */
     bool configured;                    /* - to indicate the structure's validity */
 } KvaserUSB_Device_t;
 
@@ -223,8 +275,8 @@ extern CANUSB_Return_t KvaserUSB_SendRequest(KvaserUSB_Device_t *device, const u
 extern CANUSB_Return_t KvaserUSB_ReadResponse(KvaserUSB_Device_t *device, uint8_t *buffer, uint32_t nbyte,
                                                                           uint8_t cmdCode, /*uint8_t transId,*/ uint16_t timeout);
 
-extern void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq);
-extern uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_CpuClock_t cpuFreq);
+extern void KvaserUSB_TimestampFromTicks(KvaserUSB_Timestamp_t *timeStamp, KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq);
+extern uint64_t KvaserUSB_NanosecondsFromTicks(KvaserUSB_CpuTicks_t cpuTicks, KvaserUSB_Frequency_t cpuFreq);
 
 #ifdef __cplusplus
 }

@@ -70,9 +70,9 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC04.1: Read a CAN message with invalid interface handle(s).
+// @xctest TC04.1: Read a CAN message with invalid interface handle(s)
 //
-// @expected: CANERR_HANDLE
+// @expected CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -127,9 +127,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC04.2: Give a NULL pointer as argument for parameter 'message'.
+// @xctest TC04.2: Give a NULL pointer as argument for parameter 'message'
 //
-// @expected: CANERR_NULLPTR
+// @expected CANERR_NULLPTR
 //
 - (void)testWithNullPointerForMessage {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -181,9 +181,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC04.3: Read a CAN message when interface is not initialized.
+// @xctest TC04.3: Read a CAN message when interface is not initialized
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -240,9 +240,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC04.4: Read a CAN message when CAN controller is not started.
+// @xctest TC04.4: Read a CAN message when CAN controller is not started
 //
-// @expected: CANERR_OFFLINE
+// @expected CANERR_OFFLINE
 //
 - (void)testWhenInterfaceNotStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -295,9 +295,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC04.5: Read a CAN message when CAN controller already stopped.
+// @xctest TC04.5: Read a CAN message when CAN controller already stopped
 //
-// @expected: CANERR_OFFLINE
+// @expected CANERR_OFFLINE
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -350,9 +350,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC04.6: Read a CAN message when interface already shutdown.
+// @xctest TC04.6: Read a CAN message when interface already shutdown
 //
-// @expected: CANERR_NOTINIT
+// @expected CANERR_NOTINIT
 //
 - (void)testWhenInterfaceShutdown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -403,9 +403,9 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-// @xctest TC04.7: Read a CAN message when reception queue is empty.
+// @xctest TC04.7: Read a CAN message when reception queue is empty
 //
-// @expected: CANERR_RX_EMPTY
+// @expected CANERR_RX_EMPTY
 //
 - (void)testWhenReceiveQueueIsEmpty {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -464,9 +464,9 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
 }
 
-// @xctest TC04.8: Read a CAN message from reception queue after overrun.
+// @xctest TC04.8: Read a CAN message from reception queue after overrun
 //
-// @expected: CANERR_NOERROR, but status bit 'queue_overrun' = 1
+// @expected CANERR_NOERROR, but status bit 'queue_overrun' = 1
 //
 - (void)testWhenReceiveQueueIsFull {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -543,6 +543,8 @@
     //        is required when messages are not acknowlegded by the CAN controller.
     CTimer::Delay(TEST_AFTER_BURNER*CTimer::MSEC);
     // @note: the delay depends on the bit-rate (set TEST_AFTER_BURNER in "Settings.h").
+#else
+    CTimer::Delay(100U*CTimer::MSEC);  // [2022-05-28] let the queue finally overflow!
 #endif
     NSLog(@"%d frame(s) sent", i);
     // @- read a message from DUT1 (there should be at least one)
@@ -594,14 +596,15 @@
 
 // @xctest TC04.9: tbd.
 //
+// @expected CANERR_
+//
 //- (void)testWhenMessageLost {
-//        TODO: insert coin here
-//        FIXME: How to loose a message?
+// @todo: How to loose a message?
 //
 
-// @xctest TC04.10: Measure time-stamp accuracy of the device.
+// @xctest TC04.10: Measure time-stamp accuracy of the device
 //
-// @expected: CANERR_NOERROR
+// @expected CANERR_NOERROR
 //
 - (void)testTimestampAccuracy {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -997,4 +1000,4 @@
 }
 @end
 
-// $Id: test_can_read.mm 1086 2022-01-09 20:01:00Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_read.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
