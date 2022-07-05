@@ -1,6 +1,6 @@
-### macOS&reg; User-Space Driver for CAN Leaf Interfaces from Kvaser
+### macOS&reg; User-Space Driver for USB CAN Interfaces from Kvaser
 
-_Copyright &copy; 2020-2021  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
+_Copyright &copy; 2020-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
 _All rights reserved._
 
 # Deployment
@@ -13,15 +13,19 @@ _All rights reserved._
 
 ### Preparation
 
-1. Update the CAN API V3 sources in `$(PROJROOT)/Sources/CANAPI` from SVN repo
-   when required and commit them with commit comment:
-  - `Update CAN API V3 sources to rev. `_nnn_ \
-    `- `_list of major changes_
-2. Update the MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN` from SVN repo
+1. Update the MacCAN-Core sources in `$(PROJROOT)/Sources/MacCAN` from SVN repo
    when required and commit them with commit comment:
   - `Update MacCAN-Core sources to rev. `_nnn_ \
     `- `_list of major changes_
-3. Check and update the version and date information in the following files:
+2. Update the CAN API V3 sources in `$(PROJROOT)/Sources/CANAPI` from SVN repo
+   when required and commit them with commit comment:
+  - `Update CAN API V3 sources to rev. `_nnn_ \
+    `- `_list of major changes_
+3. Update the CAN API V3 Testing sources in `$(PROJROOT)/Tests/UnitTests` from SVN repo
+   when required and commit them with commit comment:
+  - `Update CAN API V3 Testing sources to rev. `_nnn_ \
+    `- `_list of major changes_
+4. Check and update the version and date information in the following files:
   - `$(PROJROOT)/Sources/KvaserCAN.h`
   - `$(PROJROOT)/Sources/KvaserCAN.cpp`
   - `$(PROJROOT)/Sources/Wrapper/can_api.c`
@@ -42,17 +46,23 @@ _All rights reserved._
   - _If there are uncommitted changes then commit them or revert them._
 2. Open the trial program with Xcode and run a code analysis.
   - _**There should not be any serious finding.**_
-  - _If there are findings then fix them or create an issue in the repo._
-3. Run the `Makefile` in the project root directory.
+  - _If there are findings then fix them or create an issue in  the repo._
+3. Select the Xcode Testing target and run all test cases (two device are required):
+  - _**There should be no failed test case.**_
+  - _If there are failed tests then fix the root cause or create an issue in the repo._
+8. Open the SPM configuration with Xcode and check for errors:
+  - _**There should be absolute no package manager error!**_
+  - _If there are package manager warnings then think twice._
+4. Run the `Makefile` in the project root directory with option `BINARY=UNIVERSAL`.
   - _**There should be absolute no compiler or linker error!**_
-  - _If there are compiler or linker warnings then think twice._
-4. Try out the trial program with different options.
+  - _If there are compiler or linker warnings then really think twice._
+5. Try out the trial program with different options.
   - _**There should be no crash, hangup, or any other error.**_
   - _If there is an error then fix it or create an issue in the repo._
-5. Try out the utilities with different options.
+6. Try out the utilities with different options.
   - _**There should be no crash, hangup, or any other error.**_
   - _If there is an error then fix it or create an issue in the repo._
-6. Build and try out the examples (repair them when necessary);
+7. Build and try out the examples (repair them when necessary);
   - `$(PROJROOT)/Examples/C++`
   - `$(PROJROOT)/Examples/Python`
   - `$(PROJROOT)/Examples/Swift`
@@ -61,7 +71,7 @@ _All rights reserved._
 
 1. Update the `README.md` (e.g. development environment, supported devices, etc.).
 2. Push the feature branch onto the remote repo.
-3. Create a pull request and name it somehow like '**Release Candidate #**_n_'.
+3. Create a pull request and name it somehow like '**Release Candidate _n_**'.
 4. Review the changes and wait for Travis CI build result.
 5. Merge the feature branch into the default branch.
 
@@ -73,7 +83,7 @@ _All rights reserved._
 2. Double check all version numbers again (see above).
 3. Run the `Makefile` in the project root directory:
   - `uv-pc013mac:KvaserCAN eris$ make pristine`
-  - `uv-pc013mac:KvaserCAN eris$ make all`
+  - `uv-pc013mac:KvaserCAN eris$ make BINARY=UNIVERSAL`
   - `uv-pc013mac:KvaserCAN eris$ make test`
   - `uv-pc013mac:KvaserCAN eris$ sudo make install`
 4. Update and build the CAN API V3 Loader Library:
@@ -85,11 +95,11 @@ _All rights reserved._
   - `uv-pc013mac:macOS eris$ make all`
 6. Run the CAN API V3 GoogleTest with the CAN Leaf Pro device:
   - `uv-pc013mac:macOS eris$ ./can_testing --can_path=/Users/eris/Projects/CAN/API/json/ --can_dut1="Kvaser CAN Channel 0" --can_dut2="Kvaser CAN Channel 1"  --gtest_output=xml:TestReport_LeafPro.xml --gtest_filter=-SmokeTest.* --sunnyday_traffic=2048` [...]
-  - _If there is any error then **stop** here or create an issue for each error in the repo._
+  - _If there is any error then **stop** here and create an issue for each error in the repo._
   - Copy the test report into the binaries directory `$(PROJROOT)/Binaries`.
 7. Run the CAN API V3 GoogleTest with the CAN Leaf Light device:
   - `uv-pc013mac:macOS eris$ ./can_testing --can_path=/Users/eris/Projects/CAN/API/json/ --can_dut1="Kvaser CAN Channel 1" --can_dut2="Kvaser CAN Channel 0"  --gtest_output=xml:TestReport_LeafLight.xml --gtest_filter=-SmokeTest.* --sunnyday_traffic=2048` [...]
-  - _If there is any error then **stop** here or create an issue for each error in the repo._
+  - _If there is any error then **stop** here and create an issue for each error in the repo._
   - Copy the test report into the binaries directory `$(PROJROOT)/Binaries`.
 8. Pack the artifacts into a .zip-archive, e.g. `artifacts.zip`:
   - `$(PROJROOT)/Binaries/*.*`

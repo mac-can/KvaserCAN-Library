@@ -16,6 +16,8 @@ Deployment.pdf
 checker.txt
 Binaries
 Includes
+CANlib
+Debug
 .vscode
 null.d
 *.log
