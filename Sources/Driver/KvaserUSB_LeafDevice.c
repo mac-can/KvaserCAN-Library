@@ -132,7 +132,6 @@ static uint32_t FillReadClockReq(uint8_t *buffer, uint32_t maxbyte, uint8_t flag
 static uint32_t FillGetBusLoadReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
 static uint32_t FillGetCardInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t dataLevel);
 static uint32_t FillGetSoftwareInfoReq(uint8_t *buffer, uint32_t maxbyte);
-static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
 static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd, uint16_t subData);
 static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel);
 #if (OPTION_PRINT_DEVICE_INFO != 0)
@@ -221,13 +220,6 @@ CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserU
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
         goto err_init;
     }
-#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
-    retVal = Leaf_GetInterfaceInfo(device, &device->deviceInfo.channel);  // FIXME: returns (-50)
-    if (retVal < 0) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
-        goto err_init;
-    }
-#endif
     retVal = Leaf_GetTransceiverInfo(device, &device->deviceInfo.transceiver);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
@@ -947,6 +939,7 @@ CANUSB_Return_t Leaf_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_Softw
     return retVal;
 }
 
+#ifdef INTERFACE_INFO  // TODO: remove this (not implemented by any device)
 CANUSB_Return_t Leaf_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[KVASER_MAX_COMMAND_LENGTH];
@@ -984,6 +977,7 @@ CANUSB_Return_t Leaf_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_Inte
     }
     return retVal;
 }
+#endif
 
 CANUSB_Return_t Leaf_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Capabilities_t *capabilities) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
@@ -1706,6 +1700,7 @@ static uint32_t FillGetSoftwareInfoReq(uint8_t *buffer, uint32_t maxbyte) {
     return (uint32_t)buffer[0];
 }
 
+#ifdef INTERFACE_INFO  // TODO: remove this (not implemented by any device)
 static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t channel) {
     assert(buffer);
     assert(maxbyte >= LEN_GET_INTERFACE_INFO_REQ);
@@ -1723,6 +1718,7 @@ static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8
     /* return request length */
     return (uint32_t)buffer[0];
 }
+#endif
 
 static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint16_t subCmd, uint16_t subData) {
     assert(buffer);
@@ -1790,12 +1786,6 @@ static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uin
     MACCAN_DEBUG_DRIVER("      - USB HS mode: %d\n", deviceInfo->card.usbHsMode);
     MACCAN_DEBUG_DRIVER("      - hardware type: %d\n", deviceInfo->card.hwType);
     MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %d\n", deviceInfo->card.canTimeStampRef);
-#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
-    MACCAN_DEBUG_DRIVER("    - channel info:\n");
-    MACCAN_DEBUG_DRIVER("      - channel capabilities: 0x%x\n", deviceInfo->channel.channelCapabilities);
-    MACCAN_DEBUG_DRIVER("      - CAN chip type: %d\n", deviceInfo->channel.canChipType);
-    MACCAN_DEBUG_DRIVER("      - CAN chip sub-type: %d\n", deviceInfo->channel.canChipSubType);
-#endif
     MACCAN_DEBUG_DRIVER("    - software info/details:\n");
     MACCAN_DEBUG_DRIVER("      - software options: 0x%x\n", deviceInfo->software.swOptions);
     MACCAN_DEBUG_DRIVER("        - SWOPTION_CONFIG_MODE: %d\n", (deviceInfo->software.swOptions & SWOPTION_CONFIG_MODE) ? 1 : 0);

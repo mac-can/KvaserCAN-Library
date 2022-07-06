@@ -71,10 +71,10 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
             *state = retVal > 0 ? CANUSB_BOARD_OCCUPIED : CANUSB_BOARD_AVAILABLE;
         retVal = CANUSB_SUCCESS;
     }
-    /* get operation capability of the appropriate CAN controller */
+    /* get operation capabilities of the appropriate CAN controller */
     /* note: we cannot ask the device itself because it is not initialized at this point
-     *       and we cannot/will not initialize it only to read its operation capability.
-     *       so we have to take the preconfigured operation capability properties.
+     *       and we cannot/will not initialize it only to read its operation capabilities.
+     *       so we have to take the preconfigured operation capabilities properties.
      */
     opCapa |= KvaserDEV_IsCanFdSupported(productId) ? CANMODE_FDOE : 0x00U;
     opCapa |= KvaserDEV_IsCanFdSupported(productId) ? CANMODE_BRSE : 0x00U;
@@ -83,7 +83,7 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
     opCapa |= KvaserDEV_IsSilentModeSupported(productId) ? CANMODE_MON : 0x00U;
     opCapa |= CANMODE_NXTD;
     opCapa |= CANMODE_NRTR;
-    /* check given operation mode against the operation capability */
+    /* check given operation mode against the operation capabilities */
     if ((opMode & ~opCapa) != 0) {
         retVal = CANUSB_ERROR_ILLPARA;
     }
