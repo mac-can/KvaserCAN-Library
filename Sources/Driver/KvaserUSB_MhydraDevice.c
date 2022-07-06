@@ -65,7 +65,7 @@
 #define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
 #endif
 #ifndef OPTION_CHECK_BUS_PARAMS
-#define OPTION_CHECK_BUS_PARAMS  1  /* note set zero to disable checking of bus params */
+#define OPTION_CHECK_BUS_PARAMS  1  /* note set to zero to disable checking of bus params */
 #endif
 #define ROUTER_HE  0x00U
 #define DYNAMIC_HE  ROUTER_HE
@@ -1377,30 +1377,34 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
                  * - byte 4..5: sub-command
                  * - byte 6..7: status (0=OK, 1=NOT_IMPLEMENTED, 2=UNAVAILABLE)
                  * - byte 8..31: depend on sub-command
+                 *   for mask & value responses:
+                 * - byte 8..11: mask (bit 0 = CAN1, bit 1 = CAN2, etc.)
+                 * - byte 12..15: value (bit 0 = CAN1, bit 1 = CAN2, etc.)
                  */
                 uint16_t status = BUF2UINT16(buffer[6]);
                 uint32_t mask = BUF2UINT32(buffer[8]);
                 uint32_t value = BUF2UINT32(buffer[12]);
+                uint32_t channel = (uint32_t)0x1U << device->channelNo;
                 if (status == 0) {
                     switch (subCmds[i]) {
-                        case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_SYNC_TX_FLUSH: capabilities->syncTxFlush= (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_LOGGER: capabilities->hasLogger = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_REMOTE: capabilities->hasRemote = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_SCRIPT: capabilities->hasScript = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_LIN_HYBRID: capabilities->linHybrid = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_KDI_INFO: capabilities->kdiInfo = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_KDI: capabilities->hasKdi = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_IO_API: capabilities->hasIoApi = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_BUSPARAMS_TQ: capabilities->hasTimeQuanta = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SYNC_TX_FLUSH: capabilities->syncTxFlush= ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_LOGGER: capabilities->hasLogger = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_REMOTE: capabilities->hasRemote = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_SCRIPT: capabilities->hasScript = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_LIN_HYBRID: capabilities->linHybrid = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_KDI_INFO: capabilities->kdiInfo = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_KDI: capabilities->hasKdi = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_IO_API: capabilities->hasIoApi = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_BUSPARAMS_TQ: capabilities->hasTimeQuanta = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         default: /* nothing to do here */ break;
                     }
                 }
-                // TODO: ...
+                // TODO: decode other stuff if needed (i.e. loggerType, hwStatus, remoteInfo etc.)
             }
         }
     }
