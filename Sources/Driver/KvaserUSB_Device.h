@@ -76,7 +76,7 @@ typedef struct kvaser_interface_info_t_ { /* channel info: */
     uint32_t channelCapabilities;       /* - channel capabilities */
     uint8_t  canChipType;               /* - CAN chip type */
     uint8_t  canChipSubType;            /* - CAN chip sub-type */
-} KvaserUSB_InterfaceInfo_t;
+} KvaserUSB_InterfaceInfo_t;            // note: not implemented by any device
 
 typedef struct kvaser_software_info_t_ {  /* software info/details: */
     uint32_t swOptions;                 /* - software options */
@@ -113,9 +113,8 @@ typedef struct kvaser_transceiver_info_t_ {  /* transceiver info: */
 
 typedef struct kvaser_device_info_t_ {  /* device info: */
     KvaserUSB_CardInfo_t card;          /* - card info */
-//  KvaserUSB_InterfaceInfo_t channel;  /* - channel info */  // TODO: uncomment when fixed
     KvaserUSB_SoftwareInfo_t software;  /* - software info */
-    KvaserUSB_Capabilities_t capabilities;   /* - channel capability */
+    KvaserUSB_Capabilities_t capabilities;   /* - channel capabilities */
     KvaserUSB_TransceiverInfo_t transceiver; /* - transceiver info */
 } KvaserUSB_DeviceInfo_t;
 
@@ -250,7 +249,7 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     KvaserUSB_RecvData_t recvData;      /* - pipe w/ CAN message queue */
     KvaserUSB_CanChannel_t numChannels; /* - number of CAN channels */
     KvaserUSB_CanChannel_t channelNo;   /* - active CAN channel on device */
-    KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capability */
+    KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capabilities */
     KvaserUSB_DeviceInfo_t deviceInfo;  /* - device information (hw, sw, etc.) */
     KvaserUSB_DriverType_t driverType;  /* - driver type (Leaf or Mhydra device) */
     KvaserUSB_HydraData_t hydraData;    /* - Hydra device data (e.g. Leaf Pro HS v2) */

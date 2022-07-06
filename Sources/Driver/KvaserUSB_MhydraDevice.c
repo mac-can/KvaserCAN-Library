@@ -65,7 +65,7 @@
 #define OPTION_PRINT_BUS_PARAMS  0  /* note: set to non-zero value to print bus params */
 #endif
 #ifndef OPTION_CHECK_BUS_PARAMS
-#define OPTION_CHECK_BUS_PARAMS  1  /* note set zero to disable checking of bus params */
+#define OPTION_CHECK_BUS_PARAMS  1  /* note set to zero to disable checking of bus params */
 #endif
 #define ROUTER_HE  0x00U
 #define DYNAMIC_HE  ROUTER_HE
@@ -114,7 +114,6 @@ static uint32_t FillGetBusLoadReq(uint8_t *buffer, uint32_t maxbyte, uint8_t des
 static uint32_t FillGetCardInfoReq(uint8_t *buffer, uint32_t maxbyte, int8_t dataLevel);
 static uint32_t FillGetSoftwareDetailsReq(uint8_t *buffer, uint32_t maxbyte, uint8_t hydraExt);
 static uint32_t FillGetMaxOutstandingTxReq(uint8_t *buffer, uint32_t maxbyte);
-static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte);
 static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, uint16_t subCmd/*, uint32_t extraInfo*/);
 static uint32_t FillGetTransceiverInfoReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination);
 
@@ -219,13 +218,6 @@ CANUSB_Return_t Mhydra_InitializeChannel(KvaserUSB_Device_t *device, const Kvase
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): firmware information could not be read (%i)\n", device->name, device->handle, retVal);
         goto err_init;
     }
-#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
-    retVal = Mhydra_GetInterfaceInfo(device, &device->deviceInfo.channel);  // FIXME: returns (-50)
-    if (retVal < 0) {
-        MACCAN_DEBUG_ERROR("+++ %s (device #%u): channel information could not be read (%i)\n", device->name, device->handle, retVal);
-        goto err_init;
-    }
-#endif
     retVal = Mhydra_GetTransceiverInfo(device, &device->deviceInfo.transceiver);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): transceiver information could not be read (%i)\n", device->name, device->handle, retVal);
@@ -1278,6 +1270,7 @@ CANUSB_Return_t Mhydra_GetSoftwareInfo(KvaserUSB_Device_t *device, KvaserUSB_Sof
     return retVal;
 }
 
+#ifdef INTERFACE_INFO  // TODO: remove this (not implemented by any device)
 CANUSB_Return_t Mhydra_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_InterfaceInfo_t *info) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     uint8_t buffer[HYDRA_CMD_SIZE];
@@ -1315,6 +1308,7 @@ CANUSB_Return_t Mhydra_GetInterfaceInfo(KvaserUSB_Device_t *device, KvaserUSB_In
     }
     return retVal;
 }
+#endif
 
 CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Capabilities_t *capabilities) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
@@ -1377,30 +1371,34 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
                  * - byte 4..5: sub-command
                  * - byte 6..7: status (0=OK, 1=NOT_IMPLEMENTED, 2=UNAVAILABLE)
                  * - byte 8..31: depend on sub-command
+                 *   for mask & value responses:
+                 * - byte 8..11: mask (bit 0 = CAN1, bit 1 = CAN2, etc.)
+                 * - byte 12..15: value (bit 0 = CAN1, bit 1 = CAN2, etc.)
                  */
                 uint16_t status = BUF2UINT16(buffer[6]);
                 uint32_t mask = BUF2UINT32(buffer[8]);
                 uint32_t value = BUF2UINT32(buffer[12]);
+                uint32_t channel = (uint32_t)0x1U << device->channelNo;
                 if (status == 0) {
                     switch (subCmds[i]) {
-                        case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_SYNC_TX_FLUSH: capabilities->syncTxFlush= (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_LOGGER: capabilities->hasLogger = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_REMOTE: capabilities->hasRemote = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_SCRIPT: capabilities->hasScript = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_LIN_HYBRID: capabilities->linHybrid = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_KDI_INFO: capabilities->kdiInfo = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_KDI: capabilities->hasKdi = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_IO_API: capabilities->hasIoApi = (value & mask) ? 1 : 0; break;
-                        case CAP_SUB_CMD_HAS_BUSPARAMS_TQ: capabilities->hasTimeQuanta = (value & mask) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_SYNC_TX_FLUSH: capabilities->syncTxFlush= ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_LOGGER: capabilities->hasLogger = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_REMOTE: capabilities->hasRemote = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_SCRIPT: capabilities->hasScript = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_LIN_HYBRID: capabilities->linHybrid = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_KDI_INFO: capabilities->kdiInfo = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_KDI: capabilities->hasKdi = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_IO_API: capabilities->hasIoApi = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_HAS_BUSPARAMS_TQ: capabilities->hasTimeQuanta = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         default: /* nothing to do here */ break;
                     }
                 }
-                // TODO: ...
+                // TODO: decode other stuff if needed (i.e. loggerType, hwStatus, remoteInfo etc.)
             }
         }
     }
@@ -2544,6 +2542,7 @@ static uint32_t FillGetMaxOutstandingTxReq(uint8_t *buffer, uint32_t maxbyte) {
     return (uint32_t)HYDRA_CMD_SIZE;
 }
 
+#ifdef INTERFACE_INFO  // TODO: remove this (not implemented by any device)
 static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte) {
     assert(buffer);
     assert(maxbyte >= HYDRA_CMD_SIZE);
@@ -2563,6 +2562,7 @@ static uint32_t FillGetInterfaceInfoReq(uint8_t *buffer, uint32_t maxbyte) {
     /* return request length */
     return (uint32_t)HYDRA_CMD_SIZE;
 }
+#endif
 
 static uint32_t FillGetCapabilitiesReq(uint8_t *buffer, uint32_t maxbyte, uint8_t destination, uint16_t subCmd/*, uint32_t extraInfo*/) {
     assert(buffer);
@@ -2658,12 +2658,6 @@ static uint8_t Len2Dlc(uint8_t len) {
     MACCAN_DEBUG_DRIVER("      - USB HS mode: %d\n", deviceInfo->card.usbHsMode);
     MACCAN_DEBUG_DRIVER("      - hardware type: %d\n", deviceInfo->card.hwType);
     MACCAN_DEBUG_DRIVER("      - CAN time-stamp reference: %d\n", deviceInfo->card.canTimeStampRef);
-#ifdef GET_INTERFACE_INFO  // TODO: activate when fixed
-    MACCAN_DEBUG_DRIVER("    - channel info:\n");  // TODO: activate when fixed
-    MACCAN_DEBUG_DRIVER("      - channel capabilities: 0x%x\n", deviceInfo->channel.channelCapabilities);
-    MACCAN_DEBUG_DRIVER("      - CAN chip type: %d\n", deviceInfo->channel.canChipType);
-    MACCAN_DEBUG_DRIVER("      - CAN chip sub-type: %d\n", deviceInfo->channel.canChipSubType);
-#endif
     MACCAN_DEBUG_DRIVER("    - software info/details:\n");
     MACCAN_DEBUG_DRIVER("      - software options: 0x%x\n", deviceInfo->software.swOptions);
     MACCAN_DEBUG_DRIVER("        - SWOPTION_CONFIG_MODE: %d\n", (deviceInfo->software.swOptions & SWOPTION_CONFIG_MODE) ? 1 : 0);
