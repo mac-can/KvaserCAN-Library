@@ -256,15 +256,15 @@ CANUSB_Return_t Leaf_InitializeChannel(KvaserUSB_Device_t *device, const KvaserU
     }
     device->recvData.timerFreq = device->recvData.canClock;
 
-    /* get reference time (amount of time in seconds and nanoseconds since the Epoch) */
-    (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);  // TODO: not used yet
+    /* get reference time (amount of time in seconds and nanoseconds since start of the Epoch) */
+    (void)clock_gettime(CLOCK_REALTIME, &device->recvData.timeRef);  // FIXME: Y2K38 issue, but not used yet
 #if (OPTION_PRINT_DEVICE_INFO != 0)
     MACCAN_DEBUG_DRIVER("    - clocks:\n");
     MACCAN_DEBUG_DRIVER("      - CAN clock: %u MHz\n", device->recvData.canClock);
     MACCAN_DEBUG_DRIVER("      - CAN timer: %u MHz\n", device->recvData.timerFreq);
     /* get device clock (don't care about the result) */
     uint64_t nsec = 0U;
-    retVal = Leaf_ReadClock(device, &nsec);  // FIXME: returns (-50)
+    retVal = Leaf_ReadClock(device, &nsec);
     if (retVal < 0) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): device clock could not be read (%i)\n", device->name, device->handle, retVal);
     }
@@ -780,7 +780,7 @@ CANUSB_Return_t Leaf_ReadClock(KvaserUSB_Device_t *device, uint64_t *nsec) {
 
     /* send request CMD_READ_CLOCK_REQ and wait for response */
     bzero(buffer, KVASER_MAX_COMMAND_LENGTH);
-    size = FillReadClockReq(buffer, KVASER_MAX_COMMAND_LENGTH, READ_CLOCK_NOW);
+    size = FillReadClockReq(buffer, KVASER_MAX_COMMAND_LENGTH, 0x00U); // note: READ_CLOCK_NOW is not supported
     retVal = KvaserUSB_SendRequest(device, buffer, size);
     if (retVal == CANUSB_SUCCESS) {
         size = LEN_READ_CLOCK_RESP;
