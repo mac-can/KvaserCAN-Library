@@ -1,6 +1,6 @@
 ### macOS&reg; User-Space Driver for USB CAN Interfaces from Kvaser
 
-_Copyright &copy; 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
+_Copyright &copy; 2020-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
 # Running CAN and CAN FD on Mac&reg;
 
@@ -76,7 +76,7 @@ public:
 
 ### Build Targets
 
-_Important note_: To build any of the following build targets run the `build_no.sh` script to generate a pseudo build number.
+_Important note_: To build any of the following build targets run the script `build_no.sh` to generate a pseudo build number.
 ```
 uv-pc013mac:~ eris$ cd ~/Projects/MacCAN/KvaserCAN
 uv-pc013mac:KvaserCAN eris$ ./build_no.sh
