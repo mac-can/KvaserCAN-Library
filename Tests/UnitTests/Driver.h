@@ -71,8 +71,10 @@
 #define BITRATE_10K(x)   do{ x.btr.frequency=8000000; x.btr.nominal.brp=50; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
 
 //  ($5) define macros for unsupported features in CAN Classic operation mode (at least BITRATE_800K_UNSUPPORTED, ..)
-#define BITRATE_800K_UNSUPPORTED  0
-#define BITRATE_5K_UNSUPPORTED  0
+#define FEATURE_BITRATE_800K  1
+#define FEATURE_BITRATE_IDX_5K  1
+#define FEATURE_BITRATE_FD_SAM  1
+#define FEATURE_BITRATE_FD_SJA1000  1
 #define TX_ACKNOWLEDGE_UNSUPPORTED  0
 
 //  (§6) define macros for workarounds in CAN Classic operation mode (e.g. TC01_3_ISSUE)

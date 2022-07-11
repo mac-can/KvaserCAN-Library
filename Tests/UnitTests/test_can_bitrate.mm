@@ -598,7 +598,7 @@
     int rc = CANERR_FATAL;
 
     // @test: loop over selected CAN 2.0 bit-rate settings
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
         switch (i) {
             // @sub(1): 1Mbps
             case 0: BITRATE_1M(bitrate); break;
@@ -608,6 +608,14 @@
             case 2: BITRATE_250K(bitrate); break;
             // @sub(4): 125kbps
             case 3: BITRATE_125K(bitrate); break;
+            // @sub(5): 100kbps
+            case 4: BITRATE_100K(bitrate); break;
+            // @sub(6): 50kbps
+            case 5: BITRATE_50K(bitrate); break;
+            // @sub(7): 20kbps
+            case 6: BITRATE_20K(bitrate); break;
+            // @sub(8): 10kbps
+            case 7: BITRATE_10K(bitrate); break;
             default: return;  // Get out of here!
         }
         NSLog(@"Execute sub-testcase %d:\n", i+1);
@@ -763,10 +771,10 @@
             } else {
 #if (TC11_11_ISSUE_KVASER_DATAPHASE == 0)
                 // @issue: if TSeg1 or TSeg2 above their limits then they are adapted by the wrapper.
-                XCTAssertEqual(result.btr.nominal.brp, result.btr.data.brp);
-                XCTAssertEqual(result.btr.nominal.tseg1, result.btr.data.tseg1);
-                XCTAssertEqual(result.btr.nominal.tseg2, result.btr.data.tseg2);
-                XCTAssertEqual(result.btr.nominal.sjw, result.btr.data.sjw);
+                XCTAssertEqual(bitrate.btr.data.brp, result.btr.data.brp);
+                XCTAssertEqual(bitrate.btr.data.tseg1, result.btr.data.tseg1);
+                XCTAssertEqual(bitrate.btr.data.tseg2, result.btr.data.tseg2);
+                XCTAssertEqual(bitrate.btr.data.sjw, result.btr.data.sjw);
 #else
                 // @workaround: do not check data phase bit-rate settings.
 #endif
