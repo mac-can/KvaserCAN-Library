@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -53,7 +53,12 @@
 
 @end
 
-#define MAX_PROPERTIES  33
+#ifndef CAN_FD_SUPPORTED
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
+#warning CAN_FD_SUPPORTED not set, default=FEATURE_SUPPORTED
+#endif
+
+#define MAX_PROPERTIES  34
 
 #define LIB_PARAM  true
 #define DRV_PARAM  false
@@ -91,6 +96,7 @@ static struct property {
     { CANPROP_GET_BUSLOAD         , sizeof(uint16_t),        DRV_PARAM, GETTER, REQUIRED },  // current bus load of the CAN controller (uint16_t)
     { CANPROP_GET_NUM_CHANNELS    , sizeof(uint8_t),         DRV_PARAM, GETTER, OPTIONAL },  // numbers of CAN channels on the CAN interface (uint8_t)
     { CANPROP_GET_CAN_CHANNEL     , sizeof(uint8_t),         DRV_PARAM, GETTER, OPTIONAL },  // active CAN channel on the CAN interface (uint8_t)
+    { CANPROP_GET_CAN_CLOCK       , sizeof(int32_t),         DRV_PARAM, GETTER, OPTIONAL },  // frequency of the CAN controller clock in [Hz] (int32_t)
     { CANPROP_GET_TX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, GETTER, REQUIRED },  // total number of sent messages (uint64_t)
     { CANPROP_GET_RX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, GETTER, REQUIRED },  // total number of reveiced messages (uint64_t)
     { CANPROP_GET_ERR_COUNTER     , sizeof(uint64_t),        DRV_PARAM, GETTER, REQUIRED },  // total number of reveiced error frames (uint64_t)
@@ -135,12 +141,16 @@ static struct property {
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
     // @test:
     // @- loop over all library properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (properties[i].isLibParam && !properties[i].isSetParam) {
-            // @-- read library property from DUT1 with invalid handle -1
+            // @-- read library property from DUT1 with invalid handle -1 (should succeed)
             rc = can_property(INVALID_HANDLE, properties[i].param, (void*)value, properties[i].nbyte);
             XCTAssertTrue((rc == CANERR_NOERROR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
             // @-- exit loop when failed
@@ -230,12 +240,16 @@ static struct property {
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
     // @test:
     // @- loop over all device properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (!properties[i].isLibParam && !properties[i].isSetParam) {
-            // @-- read device property from DUT1 with invalid handle -1
+            // @-- read device property from DUT1 with invalid handle -1 (should fail)
             rc = can_property(INVALID_HANDLE, properties[i].param, (void*)value, properties[i].nbyte);
             XCTAssertTrue((rc == CANERR_HANDLE) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
             // @-- exit loop when failed
@@ -393,7 +407,11 @@ static struct property {
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
     // @test:
     // @- try to get library property from DUT1 with invalid parameter value 768
     rc = can_property(INVALID_HANDLE, CANPROP_SET_VENDOR_PROP+CANPROP_VENDOR_PROP_RANGE, value, CANPROP_MAX_BUFFER_SIZE);
@@ -451,7 +469,11 @@ static struct property {
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
     // @test:
     // @- try to get device property from DUT1 with invalid parameter value 768
     rc = can_property(handle, CANPROP_SET_VENDOR_PROP+CANPROP_VENDOR_PROP_RANGE, value, CANPROP_MAX_BUFFER_SIZE);
@@ -510,18 +532,22 @@ static struct property {
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
     // @test
     // @- loop over all properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (properties[i].isLibParam && !properties[i].isSetParam) {
             // @-- read library property from DUT1 with wrong size (too small)
-            rc = can_property(INVALID_HANDLE, properties[i].param, (void*)value, 0U);  // FIXME: none string properties (size - 1)
+            rc = can_property(INVALID_HANDLE, properties[i].param, (void*)value, 0U);  // TODO: none string properties (size - 1)
             if ((properties[i].param != CANPROP_SET_FIRST_CHANNEL) && (properties[i].param != CANPROP_SET_NEXT_CHANNEL)) {
-                XCTAssertTrue((rc == CANERR_ILLPARA) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
+                XCTAssertTrue((rc == CANERR_ILLPARA) || (rc <= CANERR_VENDOR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
                 // @-- exit loop when failed
 #if (EXIT_PROPERTY_LOOP_ON_ERROR != 0)
-                if (!((rc == CANERR_ILLPARA) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP))))
+                if (!((rc == CANERR_ILLPARA) || (rc <= CANERR_VENDOR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP))))
                     break;
 #endif
             } else {
@@ -588,12 +614,12 @@ static struct property {
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (!properties[i].isSetParam) {
             // @-- read property from DUT1 with wrong size (too small)
-            rc = can_property(handle, properties[i].param, (void*)value, 0U);  // FIXME: none string properties (size - 1)
+            rc = can_property(handle, properties[i].param, (void*)value, 0U);  // TODO: none string properties (size - 1)
             if ((properties[i].param != CANPROP_SET_FIRST_CHANNEL) && (properties[i].param != CANPROP_SET_NEXT_CHANNEL)) {
-                XCTAssertTrue((rc == CANERR_ILLPARA) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
+                XCTAssertTrue((rc == CANERR_ILLPARA) || (rc <= CANERR_VENDOR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
                 // @-- exit loop when failed
 #if (EXIT_PROPERTY_LOOP_ON_ERROR != 0)
-                if (!((rc == CANERR_ILLPARA) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP))))
+                if (!((rc == CANERR_ILLPARA) || (rc <= CANERR_VENDOR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP))))
                     break;
 #endif
             } else {
@@ -655,7 +681,7 @@ static struct property {
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (properties[i].isLibParam && !properties[i].isSetParam) {
             // @-- read library property from DUT1 when not initialized (should succeed)
-            rc = can_property(0, properties[i].param, (void*)value, properties[i].nbyte);
+            rc = can_property(DUT1, properties[i].param, (void*)value, properties[i].nbyte);
             XCTAssertTrue((rc == CANERR_NOERROR) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
             // @-- exit loop when failed
 #if (EXIT_PROPERTY_LOOP_ON_ERROR != 0)
@@ -720,7 +746,7 @@ static struct property {
     for (i = 0; i < MAX_PROPERTIES; i++) {
         if (!properties[i].isLibParam && !properties[i].isSetParam) {
             // @-- read device property from DUT1 when not initialized (should fail)
-            rc = can_property(0, properties[i].param, (void*)value, properties[i].nbyte);
+            rc = can_property(DUT1, properties[i].param, (void*)value, properties[i].nbyte);
             XCTAssertTrue((rc == CANERR_NOTINIT) || (!properties[i].isRequired && (rc == CANERR_NOTSUPP)));
             // @-- exit loop when failed
 #if (EXIT_PROPERTY_LOOP_ON_ERROR != 0)
@@ -784,7 +810,11 @@ static struct property {
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
     // @test
     // @- loop over all properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
@@ -851,7 +881,11 @@ static struct property {
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
+
     // @test
     // @- loop over all properties
     for (i = 0; i < MAX_PROPERTIES; i++) {
@@ -1303,4 +1337,4 @@ static struct property {
 
 @end
 
-// $Id: test_can_property.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_property.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //

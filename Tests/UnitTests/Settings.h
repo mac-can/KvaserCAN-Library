@@ -52,8 +52,8 @@
 #import "Timer.h"
 
 //  Device under Test (2 devices required)
-#define DUT1  (SInt32)CAN_DEVICE2
-#define DUT2  (SInt32)CAN_DEVICE1
+#define DUT1  (SInt32)CAN_DEVICE1
+#define DUT2  (SInt32)CAN_DEVICE2
 
 //  Default operation mode and bit-rate settings
 #define TEST_CANMODE  CANMODE_DEFAULT
@@ -72,7 +72,7 @@
 //  - number of CAN frames to be send until queue overrun
 //    note: maybe delay for buffered transmission required.
 #define TEST_QUEUE_FULL  65536  /// default = 65'536
-#if (TX_ACKNOWLEDGE_UNSUPPORTED != 0)
+#if (FEATURE_WRITE_ACKNOWLEDGED == 0)
 #define TEST_AFTER_BURNER  3000  /// default = 3000 (in [ms])
 #endif
 //  - enable/disable sending of CAN frames during sunnyday scenarios
@@ -114,9 +114,39 @@
 #define TIMESTAMP_UPPER_0MS  25000  /// approx. time @ 5kbps
 
 //  Useful stuff:
+//  - invalid interface handle
 #define INVALID_HANDLE  (-1)
+//  - SJA1000 BTR0BTR1 bit-timing table has 10 entries, CiA table only 9
 #define SJA1000_INDEX_5K  (CANBTR_INDEX_10K-1)
+
+//  Conditional compilation:
+//  - enabling/disabling of test cases
+#define TESTCASE_ENABLED  1
+#define TESTCASE_DISABLED  0
+//  - feature support of driver implementations
+#define FEATURE_SUPPORTED  1
+#define FEATURE_UNSUPPORTED  0
+//  - enabling/disabling of workarounds
+#define WORKAROUND_ENABLED  1
+#define WORKAROUND_DISABLED  0
+
+//  PCBUSB-Library specific:
+#if (PCBUSB_INIT_DELAY_WORKAROUND != WORKAROUND_DISABLED)
+//  - When initializing two PCAN-USB devices then a delay of 100ms is required
+//    before sending messages. The receiver swallows the first few (issue #291)
+#define PCBUSB_INIT_DELAY()  do { CTimer::Delay(100U*CTimer::MSEC); } while(0)
+#else
+#define PCBUSB_INIT_DELAY()  while(0)
+#endif
+#if (PCBUSB_QXMTFULL_WORKAROUND != WORKAROUND_DISABLED)
+//  - Up to now no solution found to catch QXMTFULL event when sending a lot of
+//    messages back to back with buffered transfer (no acknowledge, issue #101)
+#define PCBUSB_QXMT_DELAY()  do { CTimer::Delay(3U*CTimer::MSEC); } while(0)
+#else
+#define PCBUSB_QXMT_DELAY()  while(0)
+#endif
+
 
 #endif // SETTINGS_H_INCLUDED
 
-// $Id: Settings.h 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Settings.h 1076 2022-07-17 16:39:09Z makemake $  Copyright (c) UV Software, Berlin //

@@ -49,6 +49,11 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
+#ifndef CAN_FD_SUPPORTED
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
+#warning CAN_FD_SUPPORTED not set, default=FEATURE_SUPPORTED
+#endif
+
 @interface test_can_kill : XCTestCase
 
 @end
@@ -454,6 +459,8 @@
     rc = can_status(handle2, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
+    // @issue(PeakCAN): a delay of 100ms is required here
+    PCBUSB_INIT_DELAY();
     // @todo: start a thread for DUT2 with blocking read
 
     // @test:
@@ -486,4 +493,4 @@
 
 @end
 
-// $Id: test_can_kill.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_kill.mm 1076 2022-07-17 16:39:09Z makemake $  Copyright (c) UV Software, Berlin //

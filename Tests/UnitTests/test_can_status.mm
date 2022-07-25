@@ -49,6 +49,11 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
+#ifndef CAN_FD_SUPPORTED
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
+#warning CAN_FD_SUPPORTED not set, default=FEATURE_SUPPORTED
+#endif
+
 @interface test_can_status : XCTestCase
 
 @end
@@ -78,6 +83,10 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
     // @test:
     // @- try to get status with invalid handle -1
@@ -195,14 +204,8 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to get status of DUT1 with invalid handle -1
-    rc = can_status(INVALID_HANDLE, &status.byte);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get status of DUT1 with invalid handle INT32_MIN
-    rc = can_status(INT32_MIN, &status.byte);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to get status of DUT1 with invalid handle INT32_MAX
-    rc = can_status(INT32_MAX, &status.byte);
+    // @- try to get status of DUT1
+    rc = can_status(DUT1, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
     // @post:
@@ -256,6 +259,10 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
     // @test:
     // @- get status of DUT1 and check to be in INIT state
@@ -446,62 +453,70 @@
     XCTAssertEqual(CANERR_NOTINIT, rc);
 }
 
-// @xctest TC09.8: tbd.
+// @xctest TC09.8: Get CAN controller status when in bus off state
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR but status flag 'bus_off' set
 //
 //- (void)testWhenStatusBusOff {
-// @todo:: insert coin here
+// @todo: insert coin here
 //}
 
-// @xctest TC09.9: tbd.
+// @xctest TC09.9: Get CAN controller status when warning level reached
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR but status flag 'warning_level' set
 //
 //- (void)testWhenStatusWarningLevel {
-// @todo:: insert coin here
+// @todo: insert coin here
 //}
 
-// @xctest TC09.10: tbd.
+// @xctest TC09.10: Get CAN controller status when errors on bus
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR but status flag 'bus_error' set
 //
 //- (void)testWhenStatusBusBrror {
-// @todo:: insert coin here
+// @todo: insert coin here
 //}
 
-// @xctest TC09.11: tbd.
+// @xctest TC09.11: Get CAN controller status when transmitter is busy
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR but status flag 'transmitter_busy' set
 //
 //- (void)testWhenStatusTransmitterBusy {
-// @todo:: insert coin here
+// @todo: insert coin here
+//
+// @note: already covered by TC05.19 (Send a CAN message when transmitter is busy)
 //}
 
-// @xctest TC09.12: tbd.
+// @xctest TC09.12: Get CAN controller status when reception queue is empty
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR but status flag 'receiver_empty' set
 //
 //- (void)testWhenStatusReceiverEmpty {
-// @todo:: insert coin here
+// @todo: insert coin here
+//
+// @note: already covered by TC04.7 (Read a CAN message when reception queue is empty)
 //}
 
-// @xctest TC09.13: tbd.
+// @xctest TC09.13: Get CAN controller status after message lost
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR but status flag 'message_lost' set
 //
 //- (void)testWhenStatusMessageLost {
-// @todo:: insert coin here
+// @todo: insert coin here
+//
+// @note: already covered by TC04.9 (Read a CAN message after message lost)
 //}
 
-// @xctest TC09.14: tbd.
+// @xctest TC09.14: Get CAN controller status after reception queue overrun
 //
-// @expected CANERR_
+// @expected CANERR_NOERROR but status flag 'queue_overrun' set
 //
 //- (void)testWhenStatusQueueOverrun {
-// @todo:: insert coin here
+// @todo: insert coin here
+//
+// @note: already covered by TC04.8 (Read a CAN message from reception queue after overrun)
 //}
 
 @end
 
-// $Id: test_can_status.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_status.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //

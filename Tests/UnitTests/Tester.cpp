@@ -79,9 +79,8 @@ int CTester::SendSomeFrames(int handle, int32_t channel, int frames, uint32_t ca
     retVal = StartController(bitrate);
     if (retVal != CTester::NoError)
         goto exitSendSomeFrames;
-#if (PCBUSB_INIT_DELAY_WORKAROUND  != 0)
-    CTimer::Delay(100U*CTimer::MSEC);
-#endif
+    PCBUSB_INIT_DELAY();
+
     trmMessage.id = canId;
     trmMessage.fdf = opMode.fdoe ? 1 : 0;
     trmMessage.brs = opMode.brse ? 1 : 0;
@@ -108,9 +107,7 @@ int CTester::SendSomeFrames(int handle, int32_t channel, int frames, uint32_t ca
         } while (retVal == CANERR_TX_BUSY);
         if (retVal != CANERR_NOERROR)
             goto exitSendSomeFrames;
-#if (PCBUSB_QXMTFULL_WORKAROUND  != 0)
-        CTimer::Delay((uint32_t)(3U*CTimer::MSEC));
-#endif
+        PCBUSB_QXMT_DELAY();
         memset(&rcvMessage, 0, sizeof(can_message_t));
         if ((retVal = ReadMessage(rcvMessage, 0U)) == CTester::NoError) {
             if (rcvMessage.sts)
@@ -173,9 +170,8 @@ int CTester::ReceiveSomeFrames(int handle, int32_t channel, int frames, uint32_t
     retVal = StartController(bitrate);
     if (retVal != CTester::NoError)
         goto exitReceiveSomeFrames;
-#if (PCBUSB_INIT_DELAY_WORKAROUND  != 0)
-    CTimer::Delay(100U*CTimer::MSEC);
-#endif
+    PCBUSB_INIT_DELAY();
+
     trmMessage.id = canId;
     trmMessage.fdf = opMode.fdoe ? 1 : 0;
     trmMessage.brs = opMode.brse ? 1 : 0;
@@ -202,9 +198,7 @@ int CTester::ReceiveSomeFrames(int handle, int32_t channel, int frames, uint32_t
         } while (retVal == CTester::TransmitterBusy);
         if (retVal != CTester::NoError)
             goto exitReceiveSomeFrames;
-#if (PCBUSB_QXMTFULL_WORKAROUND  != 0)
-        CTimer::Delay((uint32_t)(3U*CTimer::MSEC));
-#endif
+        PCBUSB_QXMT_DELAY();
         memset(&rcvMessage, 0, sizeof(can_message_t));
         if ((retVal = can_read(handle, &rcvMessage, 0U)) == CANERR_NOERROR) {
             if (rcvMessage.sts)
@@ -296,4 +290,4 @@ int CTester::CheckReceivedData(const CANAPI_Message_t &message, uint64_t &expect
     return rc;
 }
 
-// $Id: Tester.cpp 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //
+// $Id: Tester.cpp 1076 2022-07-17 16:39:09Z makemake $  Copyright (c) UV Software, Berlin //
