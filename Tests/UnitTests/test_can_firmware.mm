@@ -79,6 +79,10 @@
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
+    // @- get status of DUT1 and check to be in INIT state
+    rc = can_status(handle, &status.byte);
+    XCTAssertEqual(CANERR_NOERROR, rc);
+    XCTAssertTrue(status.can_stopped);
 
     // @test:
     // @- try to get version of DUT1 with invalid handle -1
@@ -137,14 +141,8 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to get version of DUT1 with invalid handle -1
-    string = can_firmware(INVALID_HANDLE);
-    XCTAssertTrue(NULL == string);
-    // @- try to get version of DUT1 with invalid handle INT32_MIN
-    string = can_firmware(INT32_MIN);
-    XCTAssertTrue(NULL == string);
-    // @- try to get version of DUT1 with invalid handle INT32_MAX
-    string = can_firmware(INT32_MAX);
+    // @- try to get version of DUT1
+    string = can_firmware(DUT1);
     XCTAssertTrue(NULL == string);
 
     // @post:
@@ -296,4 +294,4 @@
 
 @end
 
-// $Id: test_can_firmware.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_firmware.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //

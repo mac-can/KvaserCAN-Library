@@ -49,6 +49,12 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
+#ifndef CAN_FD_SUPPORTED
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
+#warning CAN_FD_SUPPORTED not set, default=FEATURE_SUPPORTED
+#endif
+
+
 @interface test_can_init : XCTestCase
 
 @end
@@ -613,7 +619,7 @@
         rc = can_property(handle, CANPROP_GET_OP_MODE, (void*)&mode.byte, sizeof(UInt8));
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertEqual(CANMODE_FDOE, mode.byte);
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
         // @todo: try to send & receive some CAN FD long frames
 #endif
         // @- shutdown DUT1
@@ -657,7 +663,7 @@
         rc = can_property(handle, CANPROP_GET_OP_MODE, (void*)&mode.byte, sizeof(UInt8));
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertEqual(CANMODE_FDOE | CANMODE_BRSE, mode.byte);
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
         // @todo: try to send & receive some CAN FD fast frames
 #endif
         // @- shutdown DUT1
@@ -677,4 +683,4 @@
 
 @end
 
-// $Id: test_can_init.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_init.mm 1073 2022-07-16 13:06:44Z makemake $  Copyright (c) UV Software, Berlin //

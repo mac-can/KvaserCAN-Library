@@ -52,6 +52,7 @@
 //         set define 'CDriverCAN' to your MacCAN Driver Under Test
 //         and adapt the driver specific test settings there
 #include "Driver.h"
+#include "Settings.h"
 
 class CTester : CDriverCAN {
 public:
@@ -71,4 +72,4 @@ public:
 
 #endif // TESTER_H_INCLUDED
 
-// $Id: Tester.h 1060 2022-06-24 16:26:58Z eris $  Copyright (c) UV Software, Berlin //
+// $Id: Tester.h 1075 2022-07-17 13:44:06Z makemake $  Copyright (c) UV Software, Berlin //

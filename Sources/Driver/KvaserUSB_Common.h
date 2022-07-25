@@ -57,8 +57,8 @@
 
 /* ---  general defines  ---
  */
-#define KVASER_MAX_CAN_CHANNELS  1U
-#define KVASER_MAX_STRING_LENGTH  32U
+#define KVASER_MAX_CAN_CHANNELS  1U  // TODO: set to 5 for multi-channel devices
+#define KVASER_MAX_STRING_LENGTH  256U
 
 #define KVASER_MIN_COMMAND_LENGTH  4U
 #define KVASER_MAX_COMMAND_LENGTH  32U

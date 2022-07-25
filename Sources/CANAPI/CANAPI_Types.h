@@ -49,9 +49,9 @@
  *
  *  @brief       CAN API V3 for generic CAN Interfaces - Data Types and Defines
  *
- *  @author      $Author: haumea $
+ *  @author      $Author: makemake $
  *
- *  @version     $Rev: 1044 $
+ *  @version     $Rev: 1082 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -177,6 +177,8 @@ extern "C" {
 #define CANBTR_NOMINAL_TSEG2_MAX  128U  /**< max. time segment 2 (after SP) */
 #define CANBTR_NOMINAL_SJW_MIN      1U  /**< min. syncronization jump width */
 #define CANBTR_NOMINAL_SJW_MAX    128U  /**< max. syncronization jump width */
+#define CANBTR_NOMINAL_SAM_SINGLE   0U  /**< single: the bus is sampled once */
+#define CANBTR_NOMINAL_SAM_TRIPLE   1U  /**< triple: the bus is sampled three times */
 /** @} */
 
 /** @name  CAN FD Data Bit-rate Settings
@@ -190,6 +192,7 @@ extern "C" {
 #define CANBTR_DATA_TSEG2_MAX      16U  /**< max. time segment 2 (after SP) */
 #define CANBTR_DATA_SJW_MIN         1U  /**< min. syncronization jump width */
 #define CANBTR_DATA_SJW_MAX        16U  /**< max. syncronization jump width */
+#define CANBTR_DATA_SAM_UNDEFINED   0U  /**< number of samples not defined for CAN FD */
 /** @} */
 
 /** @name  SJA1000 Bit-rate Settings (CAN 2.0 only)
@@ -203,8 +206,8 @@ extern "C" {
 #define CANBTR_SJA1000_TSEG2_MAX    8U  /**< max. time segment 2 (after SP) */
 #define CANBTR_SJA1000_SJW_MIN      1U  /**< min. syncronization jump width */
 #define CANBTR_SJA1000_SJW_MAX      4U  /**< max. syncronization jump width */
-#define CANBTR_SJA1000_SAM_MIN      0U  /**< single: the bus is sampled once */
-#define CANBTR_SJA1000_SAM_MAX      1U  /**< triple: the bus is sampled three times */
+#define CANBTR_SJA1000_SAM_SINGLE   0U  /**< single: the bus is sampled once */
+#define CANBTR_SJA1000_SAM_TRIPLE   1U  /**< triple: the bus is sampled three times */
 /** @} */
 
 /** @name  CAN Mode Flags
@@ -309,6 +312,7 @@ extern "C" {
 #define CANPROP_GET_BUSLOAD         20U /**< current bus load of the CAN controller (uint16_t) */
 #define CANPROP_GET_NUM_CHANNELS    21U /**< numbers of CAN channels on the CAN interface (uint8_t) */
 #define CANPROP_GET_CAN_CHANNEL     22U /**< active CAN channel on the CAN interface (uint8_t) */
+#define CANPROP_GET_CAN_CLOCK       23U /**< frequency of the CAN controller clock in [Hz] (int32_t) */
 #define CANPROP_GET_TX_COUNTER      24U /**< total number of sent messages (uint64_t) */
 #define CANPROP_GET_RX_COUNTER      25U /**< total number of received messages (uint64_t) */
 #define CANPROP_GET_ERR_COUNTER     26U /**< total number of received error frames (uint64_t) */
@@ -389,6 +393,7 @@ extern "C" {
 #define CANPROP_GET_VENDOR_PROP    256U /**< offset to get a vendor-specific property value (void*) */
 #define CANPROP_SET_VENDOR_PROP    512U /**< offset to set a vendor-specific property value (void*) */
 #define CANPROP_VENDOR_PROP_RANGE  256U /**< range for vendor-specific property values */
+#define CANPROP_DRIVER_SPECIFIC 0x8000U /**< offset for driver-specific property values */
 #define CANPROP_MAX_BUFFER_SIZE    256U /**< max. buffer size for property values */
 #define CANPROP_MAX_STRING_LENGTH 1024U /**< max. length of a formatted message */
 /* - -  aliases (legacy names)  - - - - - - - - - - - - - - - - - - - - */

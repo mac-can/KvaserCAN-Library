@@ -57,7 +57,7 @@
  *
  *  @author      $Author: makemake $
  *
- *  @version     $Rev: 1052 $
+ *  @version     $Rev: 1082 $
  *
  *  @addtogroup  can_btr
  *  @{
@@ -147,6 +147,59 @@ static const btr_sja1000_t sja1000_btr0btr1[BTR_SJA1000_MAX_INDEX] = {
 /*  -----------  functions  ----------------------------------------------
  */
 
+int btr_check_bitrate(const btr_bitrate_t *bitrate, bool fdoe, bool brse)
+{
+    if (!bitrate)                       // check for null-pointer
+        return BTRERR_NULLPTR;
+
+    if (bitrate->index <= 0) {          // CAN 2.0 bit-rate index
+        if (-BTR_SJA1000_MAX_INDEX >= bitrate->index)
+            return BTRERR_BAUDRATE;
+    }
+    else {                              // CAN bit-rate settings
+        if ((bitrate->btr.nominal.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
+            return BTRERR_BAUDRATE;
+        if ((bitrate->btr.nominal.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
+            return BTRERR_BAUDRATE;
+        if ((bitrate->btr.nominal.tseg2 < BTR_NOMINAL_TSEG2_MIN) || (BTR_NOMINAL_TSEG2_MAX < bitrate->btr.nominal.tseg2))
+            return BTRERR_BAUDRATE;
+        if ((bitrate->btr.nominal.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
+            return BTRERR_BAUDRATE;
+#if (OPTION_CAN_2_0_ONLY != 0)
+        if ((bitrate->btr.nominal.sam != BTR_NOMINAL_SAM_SINGLE) && (BTR_NOMINAL_SAM_TRIPLE != bitrate->btr.nominal.sam))
+            return BTRERR_BAUDRATE;
+#else
+        if (fdoe) {                     //   CAN FD
+            if (brse) {                 //     bit-rate switching enabled
+                if ((bitrate->btr.data.brp < BTR_DATA_BRP_MIN) || (BTR_DATA_BRP_MAX < bitrate->btr.data.brp))
+                    return BTRERR_BAUDRATE;
+                if ((bitrate->btr.data.tseg1 < BTR_DATA_TSEG1_MIN) || (BTR_DATA_TSEG1_MAX < bitrate->btr.data.tseg1))
+                    return BTRERR_BAUDRATE;
+                if ((bitrate->btr.data.tseg2 < BTR_DATA_TSEG2_MIN) || (BTR_DATA_TSEG2_MAX < bitrate->btr.data.tseg2))
+                    return BTRERR_BAUDRATE;
+                if ((bitrate->btr.data.sjw < BTR_DATA_SJW_MIN) || (BTR_DATA_SJW_MAX < bitrate->btr.data.sjw))
+                    return BTRERR_BAUDRATE;
+            }
+            else if (bitrate->btr.data.brp && bitrate->btr.data.tseg1 && bitrate->btr.data.tseg2 && bitrate->btr.data.sjw) {
+                if ((bitrate->btr.data.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.data.brp))
+                    return BTRERR_BAUDRATE;
+                if ((bitrate->btr.data.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.data.tseg1))
+                    return BTRERR_BAUDRATE;
+                if ((bitrate->btr.data.tseg2 < BTR_NOMINAL_TSEG2_MIN) || (BTR_NOMINAL_TSEG2_MAX < bitrate->btr.data.tseg2))
+                    return BTRERR_BAUDRATE;
+                if ((bitrate->btr.data.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.data.sjw))
+                    return BTRERR_BAUDRATE;
+            }
+        }
+        else {                          //   CAN 2.0: check SAM
+            if ((bitrate->btr.nominal.sam != BTR_NOMINAL_SAM_SINGLE) && (BTR_NOMINAL_SAM_TRIPLE != bitrate->btr.nominal.sam))
+                return BTRERR_BAUDRATE;
+        }
+#endif
+    }
+    return BTRERR_NOERROR;
+}
+
 int btr_bitrate2speed(const btr_bitrate_t *bitrate, bool fdoe, bool brse, btr_speed_t *speed)
 {
     btr_bitrate_t temporary;            // bit-rate settings
@@ -162,6 +215,7 @@ int btr_bitrate2speed(const btr_bitrate_t *bitrate, bool fdoe, bool brse, btr_sp
         fdoe = brse = data = false;     //   could not be CAN FD!
     }
     else {                              // CAN bit-rate settings
+#if (OPTION_CANBTR_CHECK_BITRATE != 0)
         if ((bitrate->btr.nominal.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
             return BTRERR_BAUDRATE;
         if ((bitrate->btr.nominal.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
@@ -170,7 +224,10 @@ int btr_bitrate2speed(const btr_bitrate_t *bitrate, bool fdoe, bool brse, btr_sp
             return BTRERR_BAUDRATE;
         if ((bitrate->btr.nominal.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
             return BTRERR_BAUDRATE;
-#if (OPTION_CAN_2_0_ONLY == 0)
+#if (OPTION_CAN_2_0_ONLY != 0)
+        if ((bitrate->btr.nominal.sam != BTR_NOMINAL_SAM_SINGLE) && (BTR_NOMINAL_SAM_TRIPLE != bitrate->btr.nominal.sam))
+            return BTRERR_BAUDRATE;
+#else
         if (fdoe) {                     //   CAN FD
             if (brse) {                 //     bit-rate switching enabled
                 if ((bitrate->btr.data.brp < BTR_DATA_BRP_MIN) || (BTR_DATA_BRP_MAX < bitrate->btr.data.brp))
@@ -195,6 +252,11 @@ int btr_bitrate2speed(const btr_bitrate_t *bitrate, bool fdoe, bool brse, btr_sp
                     return BTRERR_BAUDRATE;
             }
         }
+        else {                          //   CAN 2.0: check SAM
+            if ((bitrate->btr.nominal.sam != BTR_NOMINAL_SAM_SINGLE) && (BTR_NOMINAL_SAM_TRIPLE != bitrate->btr.nominal.sam))
+                return BTRERR_BAUDRATE;
+        }
+#endif
 #endif
         memcpy(&temporary, bitrate, sizeof(btr_bitrate_t));
     }
@@ -307,6 +369,7 @@ int btr_bitrate2string(const btr_bitrate_t *bitrate, bool brse, btr_string_t str
             return rc;
     }
     else {                              // CAN FD bit-rate settings
+#if (OPTION_CANBTR_CHECK_BITRATE != 0)
         if ((bitrate->btr.nominal.brp < BTR_NOMINAL_BRP_MIN) || (BTR_NOMINAL_BRP_MAX < bitrate->btr.nominal.brp))
             return BTRERR_BAUDRATE;
         if ((bitrate->btr.nominal.tseg1 < BTR_NOMINAL_TSEG1_MIN) || (BTR_NOMINAL_TSEG1_MAX < bitrate->btr.nominal.tseg1))
@@ -315,6 +378,8 @@ int btr_bitrate2string(const btr_bitrate_t *bitrate, bool brse, btr_string_t str
             return BTRERR_BAUDRATE;
         if ((bitrate->btr.nominal.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.nominal.sjw))
             return BTRERR_BAUDRATE;
+//        if ((bitrate->btr.nominal.sam != BTR_NOMINAL_SAM_SINGLE) && (BTR_NOMINAL_SAM_TRIPLE != bitrate->btr.nominal.sam))
+//            return BTRERR_BAUDRATE;
 #if (OPTION_CAN_2_0_ONLY == 0)
         if (brse) {                 //     bit-rate switching enabled
             if ((bitrate->btr.data.brp < BTR_DATA_BRP_MIN) || (BTR_DATA_BRP_MAX < bitrate->btr.data.brp))
@@ -338,6 +403,7 @@ int btr_bitrate2string(const btr_bitrate_t *bitrate, bool brse, btr_string_t str
             if ((bitrate->btr.data.sjw < BTR_NOMINAL_SJW_MIN) || (BTR_NOMINAL_SJW_MAX < bitrate->btr.data.sjw))
                 return BTRERR_BAUDRATE;
         }
+#endif
 #endif
         memcpy(&temporary, bitrate, sizeof(btr_bitrate_t));
     }
@@ -381,7 +447,7 @@ int btr_bitrate2sja1000(const btr_bitrate_t *bitrate, btr_sja1000_t *btr0btr1)
         return BTRERR_BAUDRATE;
     if ((bitrate->btr.nominal.brp < BTR_SJA1000_BRP_MIN) || (BTR_SJA1000_BRP_MAX < bitrate->btr.nominal.brp))
         return BTRERR_BAUDRATE;
-    if (/*(bitrate->btr.nominal.sam < BTR_SJA1000_SAM_MIN) ||*/ (BTR_SJA1000_SAM_MAX < bitrate->btr.nominal.sam))
+    if ((bitrate->btr.nominal.sam != BTR_SJA1000_SAM_SINGLE) && (BTR_SJA1000_SAM_TRIPLE != bitrate->btr.nominal.sam))
         return BTRERR_BAUDRATE;
     if ((bitrate->btr.nominal.tseg2 < BTR_SJA1000_TSEG2_MIN) || (BTR_SJA1000_TSEG2_MAX < bitrate->btr.nominal.tseg2))
         return BTRERR_BAUDRATE;
@@ -592,10 +658,10 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
             else
                 return BTRERR_BAUDRATE;
         }
-        // nom_sam: (none)
+        // nom_sam: 0,1 or 1,3
         else if (!strcasecmp(key, "nom_sam")) {
 #if (0)
-            if ((BTR_NOMINAL_SAM_MIN <= tmp) && (tmp <= BTR_NOMINAL_SAM_MAX))
+            if ((BTR_NOMINAL_SAM_SINGLE == tmp) || (tmp == BTR_NOMINAL_SAM_TRIPLE))
                 temporary.btr.nominal.sam = (uint8_t)tmp;
             else
                 return BTRERR_BAUDRATE;

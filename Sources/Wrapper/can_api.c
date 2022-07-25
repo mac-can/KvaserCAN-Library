@@ -51,7 +51,7 @@
 #include "build_no.h"
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    3
-#define VERSION_PATCH    0
+#define VERSION_PATCH    1
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(__APPLE__)
@@ -313,7 +313,6 @@ int can_start(int handle, const can_bitrate_t *bitrate)
     int rc = CANERR_FATAL;              // return value
 
     can_bitrate_t tmpBitrate;           // bit-rate settings
-    can_speed_t tmpSpeed;               // transmission speed
     KvaserUSB_BusParams_t busParams;    // Kvaser bus parameter
     KvaserUSB_BusParamsFd_t busParamsFd;// Kvaser FD bus parameter
 
@@ -329,7 +328,6 @@ int can_start(int handle, const can_bitrate_t *bitrate)
         return CANERR_ONLINE;
 
     memcpy(&tmpBitrate, bitrate, sizeof(can_bitrate_t));
-    memset(&tmpSpeed, 0, sizeof(can_speed_t));
     memset(&busParams, 0, sizeof(KvaserUSB_BusParams_t));
     memset(&busParamsFd, 0, sizeof(KvaserUSB_BusParamsFd_t));
     bool fdoe = can[handle].mode.fdoe ? true : false;
@@ -344,7 +342,7 @@ int can_start(int handle, const can_bitrate_t *bitrate)
                 return CANERR_BAUDRATE;
         } else {
             // note: bit-rate settings are checked by the conversion function
-            if (btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed) < 0)
+            if (btr_check_bitrate(&tmpBitrate, fdoe, brse) < 0)
                 return CANERR_BAUDRATE;
         }
         // (b) convert bit-rate settings to Kvaser bus parameter
@@ -361,7 +359,7 @@ int can_start(int handle, const can_bitrate_t *bitrate)
             return CANERR_BAUDRATE;
         } else {
             // note: bit-rate settings are checked by the conversion function
-            if (btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed) < 0)
+            if (btr_check_bitrate(&tmpBitrate, fdoe, brse) < 0)
                 return CANERR_BAUDRATE;
         }
         // (b) convert bit-rate settings to Kvaser bus parameter
@@ -974,6 +972,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint16_t)
     case CANPROP_GET_NUM_CHANNELS:      // numbers of CAN channels on the CAN interface (uint8_t)
     case CANPROP_GET_CAN_CHANNEL:       // active CAN channel on the CAN interface (uint8_t)
+    case CANPROP_GET_CAN_CLOCK:         // frequency of the CAN controller clock in [Hz] (int32_t)
     case CANPROP_GET_TX_COUNTER:        // total number of sent messages (uint64_t)
     case CANPROP_GET_RX_COUNTER:        // total number of reveiced messages (uint64_t)
     case CANPROP_GET_ERR_COUNTER:       // total number of reveiced error frames (uint64_t)
@@ -999,7 +998,6 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
     can_bitrate_t bitrate;
     can_speed_t speed;
     uint8_t status;
-    uint8_t load;
 
     assert(IS_HANDLE_VALID(handle));    // just to make sure
 
@@ -1072,11 +1070,12 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
         break;
     case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint16_t)
         if (nbyte >= sizeof(uint8_t)) {
-            if ((rc = can_busload(handle, &load, NULL)) == CANERR_NOERROR) {
+            KvaserUSB_BusLoad_t load = 0U;
+            if ((rc = KvaserCAN_GetBusLoad(&can[handle].device, &load)) == CANERR_NOERROR) {
                 if (nbyte > sizeof(uint8_t))
-                    *(uint16_t*)value = (uint16_t)load * 100U;  // 0 - 10000 ==> 0.00% - 100.00%
+                    *(uint16_t*)value = (uint16_t)load;       // 0..10000 ==> 0%..100%
                 else
-                    *(uint8_t*)value = (uint8_t)load;           // 0  -  100 ==> 0.00% - 100.00%
+                    *(uint8_t*)value = (uint8_t)load / 100U;  // 0..100 (legacy resolution)
                 rc = CANERR_NOERROR;
             }
         }
@@ -1090,6 +1089,12 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_CAN_CHANNEL:       // active CAN channel on the CAN interface (uint8_t)
         if (nbyte >= sizeof(uint8_t)) {
             *(uint8_t*)value = (uint8_t)can[handle].device.channelNo;
+            rc = CANERR_NOERROR;
+        }
+        break;
+    case CANPROP_GET_CAN_CLOCK:         // frequency of the CAN controller clock in [Hz] (int32_t)
+        if (nbyte >= sizeof(int32_t)) {
+            *(int32_t*)value = (int32_t)can[handle].device.recvData.canClock * 1000000;
             rc = CANERR_NOERROR;
         }
         break;

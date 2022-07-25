@@ -49,6 +49,11 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
+#ifndef CAN_FD_SUPPORTED
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
+#warning CAN_FD_SUPPORTED not set, default=FEATURE_SUPPORTED
+#endif
+
 @interface test_can_reset : XCTestCase
 
 @end
@@ -147,14 +152,8 @@
     int rc = CANERR_FATAL;
 
     // @test:
-    // @- try to stop DUT1 with invalid handle -1
-    rc = can_reset(INVALID_HANDLE);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to stop DUT1 with invalid handle INT32_MIN
-    rc = can_reset(INT32_MIN);
-    XCTAssertEqual(CANERR_NOTINIT, rc);
-    // @- try to stop DUT1 with invalid handle INT32_MAX
-    rc = can_reset(INT32_MAX);
+    // @- try to stop DUT1
+    rc = can_reset(DUT1);
     XCTAssertEqual(CANERR_NOTINIT, rc);
 
     // @post:
@@ -376,4 +375,4 @@
 
 @end
 
-// $Id: test_can_reset.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_reset.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //

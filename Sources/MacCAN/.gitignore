@@ -1,3 +1,6 @@
 .svn/
-MacCAN.h
-MacCAN.cpp
+doc/
+# R.I.P. CMacCAN
+MacCAN.*
+# TODO: driver-independent type for CAN messages
+MacCAN_Types.h

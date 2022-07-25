@@ -1,7 +1,8 @@
+//  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later
 //
 //  KvaserCAN - macOS User-Space Driver for Kvaser CAN Leaf Interfaces
 //
-//  Copyright (C) 2021-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2021-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -59,7 +60,16 @@
 #define CAN_DEVICE1  KVASER_CAN_CHANNEL0
 #define CAN_DEVICE2  KVASER_CAN_CHANNEL1
 
-//  (§4) define macros for CAN Classic bit-rate settings (at least BITRATE_1M, BITRATE_500K, BITRATE_250K, BITRATE_125K, BITRATE_100K, BITRATE_50K, BITRATE_20K, BITRATE_10K)
+//  ($4) define macros for unsupported features (at least the mandatory macros, cf. compiler warnings)
+#define FEATURE_BITRATE_800K  FEATURE_SUPPORTED
+#define FEATURE_BITRATE_SAM   FEATURE_SUPPORTED
+#define FEATURE_BITRATE_SJA1000  FEATURE_SUPPORTED
+#define FEATURE_BITRATE_FD_SAM   FEATURE_SUPPORTED
+#define FEATURE_BITRATE_FD_SJA1000  FEATURE_SUPPORTED
+#define FEATURE_WRITE_ACKNOWLEDGED  FEATURE_SUPPORTED
+#define FEATURE_STATUS_BIT_QUE_OVR  FEATURE_SUPPORTED
+
+//  (§5) define macros for CAN Classic bit-rate settings (at least BITRATE_1M, BITRATE_500K, BITRATE_250K, BITRATE_125K, BITRATE_100K, BITRATE_50K, BITRATE_20K, BITRATE_10K)
 #define BITRATE_1M(x)    do{ x.btr.frequency=8000000; x.btr.nominal.brp= 1; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
 #define BITRATE_800K(x)  do{ x.btr.frequency=8000000; x.btr.nominal.brp= 1; x.btr.nominal.tseg1= 7; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
 #define BITRATE_500K(x)  do{ x.btr.frequency=8000000; x.btr.nominal.brp= 2; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
@@ -70,18 +80,13 @@
 #define BITRATE_20K(x)   do{ x.btr.frequency=8000000; x.btr.nominal.brp=25; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
 #define BITRATE_10K(x)   do{ x.btr.frequency=8000000; x.btr.nominal.brp=50; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
 
-//  ($5) define macros for unsupported features in CAN Classic operation mode (at least BITRATE_800K_UNSUPPORTED, ..)
-#define BITRATE_800K_UNSUPPORTED  0
-#define BITRATE_5K_UNSUPPORTED  0
-#define TX_ACKNOWLEDGE_UNSUPPORTED  0
-
 //  (§6) define macros for workarounds in CAN Classic operation mode (e.g. TC01_3_ISSUE)
-#define TC11_10_ISSUE_KVASER_BUSPARAMS  1  // CAN API issue (unknown CAN clock and BRP)
-#define TC03_20_ISSUE_KVASER_NOSAMP     1  // SAM issue (only noSamp = 1 is accexped device)
-//#define TX0x_y_ISSUE  1
+#define TC11_10_ISSUE_KVASER_BUSPARAMS  WORKAROUND_ENABLED  // CAN API issue (unknown CAN clock and BRP)
+#define TC03_20_ISSUE_KVASER_NOSAMP     WORKAROUND_ENABLED  // SAM issue (only noSamp = 1 is accepted)
+//#define TC0x_y_ISSUE_  WORKAROUND_ENABLED
 
 //  (§7) define macro CAN_FD_SUPPORTED if CAN FD operation mode is supported
-#define CAN_FD_SUPPORTED 1
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
 
 //  (§8) define macros for CAN FD bit-rate settings (at least BITRATE_FD_1M8M, BITRATE_FD_500K4M, BITRATE_FD_250K2M, BITRATE_FD_125K1M, BITRATE_FD_1M, BITRATE_FD_500K, BITRATE_FD_250K, BITRATE_FD_125K)
 #define BITRATE_FD_1M(x)      do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.nominal.sam=0; } while(0)
@@ -93,17 +98,14 @@
 #define BITRATE_FD_250K2M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=4; } while(0)
 #define BITRATE_FD_125K1M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=8; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1=31; x.btr.data.tseg2=8; x.btr.data.sjw=8; } while(0)
 
-#if (CAN_FD_SUPPORTED != 0)
-//  ($9) define macros for unsupported features in CAN FD operation mode
-//#define BITRATE_SWITCHING_UNSUPPORTED  0
-
-//  (§10) define macros for workarounds in CAN FD operation mode (e.g. TC01_3_ISSUE)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
+//  (§9) define macros for workarounds in CAN FD operation mode (e.g. TC01_3_ISSUE)
 #define TC11_11_ISSUE_KVASER_BUSPARAMS  TC11_10_ISSUE_KVASER_BUSPARAMS
-#define TC11_11_ISSUE_KVASER_DATAPHASE  1  // U100P issue (data phase bit-rate settings must be valid)
+#define TC11_11_ISSUE_KVASER_DATAPHASE  WORKAROUND_ENABLED  // U100P issue (data phase bit-rate settings must be valid)
 #define TC03_24_ISSUE_KVASER_NOSAMP     TC03_20_ISSUE_KVASER_NOSAMP
-//#define TX0x_y_ISSUE  1
+//#define TC0x_y_ISSUE_  WORKAROUND_ENABLED
 
 #endif // CAN_FD_SUPPORTED
 #endif // DRIVER_H_INCLUDED
 
-// $Id: Template.h 1035 2021-12-21 12:03:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Template.h 1073 2022-07-16 13:06:44Z makemake $  Copyright (c) UV Software, Berlin //

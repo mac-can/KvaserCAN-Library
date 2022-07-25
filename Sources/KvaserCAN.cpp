@@ -46,24 +46,12 @@
 //  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "build_no.h"
-#ifdef _MSC_VER
-#define VERSION_MAJOR    0
-#define VERSION_MINOR    2
-#define VERSION_PATCH    2
-#else
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    3
-#define VERSION_PATCH    0
-#endif
+#define VERSION_PATCH    1
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
-#if defined(_WIN64)
-#define PLATFORM        "x64"
-#elif defined(_WIN32)
-#define PLATFORM        "x86"
-#elif defined(__linux__)
-#define PLATFORM        "Linux"
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
 #define PLATFORM        "macOS"
 #else
 #error Unsupported architecture
@@ -174,7 +162,7 @@ bool CKvaserCAN::GetNextChannel(SChannelInfo &info, void *param) {
             ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
             // we know the library id and its vendor already
             info.m_nLibraryId = KVASER_LIB_ID;
-            strncpy(info.m_szVendorName, KVASER_LIB_VENDOR, CANPROP_MAX_BUFFER_SIZE-1);
+            strncpy(info.m_szVendorName, KVASER_LIB_VENDOR, CANPROP_MAX_BUFFER_SIZE - 1);
             result = true;
         }
     }

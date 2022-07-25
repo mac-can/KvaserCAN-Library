@@ -80,6 +80,9 @@ test:
 check:
 	$(MAKE) -C Trial $@ 2> checker.txt
 
+xctest:
+	$(MAKE) -C Trial $@
+
 build_no:
 	@./build_no.sh
 	@cat Sources/build_no.h

@@ -49,6 +49,36 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
+#ifndef CAN_FD_SUPPORTED
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
+#warning CAN_FD_SUPPORTED not set, default=FEATURE_SUPPORTED
+#endif
+
+#ifndef FEATURE_BITRATE_800K
+#define FEATURE_BITRATE_800K  FEATURE_SUPPORTED
+#warning FEATURE_BITRATE_800K not set, default=FEATURE_SUPPORTED
+#endif
+
+#ifndef FEATURE_BITRATE_SJA1000
+#define FEATURE_BITRATE_SJA1000  FEATURE_SUPPORTED
+#warning FEATURE_BITRATE_SJA1000 not set, default=FEATURE_SUPPORTED
+#endif
+
+#ifndef FEATURE_BITRATE_SAM
+#define FEATURE_BITRATE_SAM  FEATURE_SUPPORTED
+#warning FEATURE_BITRATE_SAM not set, default=FEATURE_SUPPORTED
+#endif
+
+#ifndef FEATURE_BITRATE_FD_SAM
+#define FEATURE_BITRATE_FD_SAM  FEATURE_UNSUPPORTED
+#warning FEATURE_BITRATE_FD_SAM not set, default=FEATURE_UNSUPPORTED
+#endif
+
+#ifndef FEATURE_BITRATE_FD_SJA1000
+#define FEATURE_BITRATE_FD_SJA1000  FEATURE_UNSUPPORTED
+#warning FEATURE_BITRATE_FD_SJA1000 not set, default=FEATURE_UNSUPPORTED
+#endif
+
 #define NOM_BRP_MIN    CANBTR_NOMINAL_BRP_MIN
 #define NOM_BRP_MAX    CANBTR_NOMINAL_BRP_MAX
 #define NOM_TSEG1_MIN  CANBTR_NOMINAL_TSEG1_MIN
@@ -216,7 +246,7 @@
 
     // @test:
     // @- try to start DUT1 with configured bit-rate settings
-    rc = can_start(handle, &bitrate);
+    rc = can_start(DUT1, &bitrate);
     XCTAssertEqual(CANERR_NOTINIT, rc);
     
     // @post:
@@ -446,7 +476,7 @@
 //
 // @expected CANERR_NOERROR
 //
-- (void)testCheckValidCiaIndexex {
+- (void)testCheckValidCiaIndex {
     can_bitrate_t bitrate = { CANBTR_INDEX_1M };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
@@ -456,26 +486,45 @@
     // @note: pre-defined BTR0BTR1 bit-timing table has 10 entries, index 0 to 9.
     // @      But the index must be given as negative value to 'bitrate.index'!
     // @      Remark: The CiA bit-timing table has only 9 entries!
-#if (BITRATE_5K_UNSUPPORTED != 0)
-    for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
-#else
-    for (SInt32 index = CANBTR_INDEX_1M; index >= -9; index--) {
-#endif
-        // @sub(1): CiA index 0 (1Mbps)
-        // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
-        // @sub(3): CiA index 2 (500kbps)
-        // @sub(4): CiA index 3 (250kbps)
-        // @sub(5): CiA index 4 (125kbps)
-        // @sub(6): CiA index 5 (100kbps)
-        // @sub(7): CiA index 6 (50kbps)
-        // @sub(8): CiA index 7 (20kbps)
-        // @sub(9): CiA index 8 (10kbps)
-        // @sub(10):    index 9 (5kbps, not supported by CAN API implementations)
-#if (BITRATE_800K_UNSUPPORTED != 0)
-        if (index == CANBTR_INDEX_800K)
+    for (int i = 0; i < 10; i++) {
+        switch (i) {
+            // @sub(1): CiA index 0 (1Mbps)
+            case 0: bitrate.index = CANBTR_INDEX_1M; break;
+            // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
+            case 1: bitrate.index = CANBTR_INDEX_800K; break;
+            // @sub(3): CiA index 2 (500kbps)
+            case 2: bitrate.index = CANBTR_INDEX_500K; break;
+            // @sub(4): CiA index 3 (250kbps)
+            case 3: bitrate.index = CANBTR_INDEX_250K; break;
+            // @sub(5): CiA index 4 (125kbps)
+            case 4: bitrate.index = CANBTR_INDEX_125K; break;
+            // @sub(6): CiA index 5 (100kbps)
+            case 5: bitrate.index = CANBTR_INDEX_100K; break;
+            // @sub(7): CiA index 6 (50kbps)
+            case 6: bitrate.index = CANBTR_INDEX_50K; break;
+            // @sub(8): CiA index 7 (20kbps)
+            case 7: bitrate.index = CANBTR_INDEX_20K; break;
+            // @sub(9): CiA index 8 (10kbps)
+            case 8: bitrate.index = CANBTR_INDEX_10K; break;
+            // @sub(10):    index 9 (5kbps, not supported by all CAN API SDK's)
+            case 9: bitrate.index = SJA1000_INDEX_5K; break;
+            default: return;  // Get out of here!
+        }
+#if (FEATURE_BITRATE_800K != FEATURE_SUPPORTED)
+        if (bitrate.index == CANBTR_INDEX_800K)
             continue;
 #endif
-        NSLog(@"Execute sub-testcase %d:\n", 1-index);
+#if (FEATURE_BITRATE_SJA1000 != FEATURE_SUPPORTED)
+        if (bitrate.index == SJA1000_INDEX_5K)
+            continue;
+#endif
+#if (TC03_7_ISSUE_TOUCAN_BITRATE_10K == WORKAROUND_ENABLED)
+        if (bitrate.index == CANBTR_INDEX_10K) {
+            NSLog(@"Sub-testcase %d skipped due to known hardware bug\n", i+1);
+            continue;
+        }
+#endif
+        NSLog(@"Execute sub-testcase %d:\n", i+1);
 
         // @pre:
         // @-- initialize DUT1 in CAN 2.0 operation mode
@@ -487,7 +536,6 @@
         XCTAssertTrue(status.can_stopped);
 
         // @test:
-        bitrate.index = index;
         // @-- start DUT1 with selected index from CiA table
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -545,13 +593,13 @@
     // @      Remark: The CiA bit-timing table has only 9 entries!
     // @note: Positive values represent the CAN clock in Hertz, but there will
     // @      be probably no clock below 10 Hertz (or above 999'999'999 Hertz).
-    for (int i = 0; i < 15; i++) {
+    for (int i = 0; i < 14; i++) {
         switch (i) {
             // @sub(1): invalid index -10
-#if (BITRATE_5K_UNSUPPORTED == 0)
-            case 0: bitrate.index = -10; break;
+#if (FEATURE_BITRATE_SJA1000 == FEATURE_SUPPORTED)
+            case 0: bitrate.index = SJA1000_INDEX_5K - 1; break;
 #else
-            case 0: bitrate.index = -9; break;
+            case 0: bitrate.index = CANBTR_INDEX_10K - 1; break;
 #endif
             // @sub(2): invalid index INT8_MIN
             case 1: bitrate.index = INT8_MIN; break;
@@ -578,7 +626,7 @@
             // @sub(13): invalid index 8
             case 12: bitrate.index = CANBDR_10; XCTAssertEqual(8, bitrate.index); break;
             // @sub(14): invalid index INT32_MAX
-            case 14: bitrate.index = INT32_MAX; break;
+            case 13: bitrate.index = INT32_MAX; break;
             default: return;  // Get out of here!
         }
         NSLog(@"Execute sub-testcase %d:\n", i+1);
@@ -635,28 +683,46 @@
     // @note: pre-defined BTR0BTR1 bit-timing table has 10 entries, index 0 to 9.
     // @      But the index must be given as negative value to 'bitrate.index'!
     // @      Remark: The CiA bit-timing table has only 9 entries!
-#if (BITRATE_5K_UNSUPPORTED != 0)
-    for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
-#else
-    for (SInt32 index = CANBTR_INDEX_1M; index >= -9; index--) {
-#endif
-        // @sub(1): CiA index 0 (1Mbps)
-        // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
-        // @sub(3): CiA index 2 (500kbps)
-        // @sub(4): CiA index 3 (250kbps)
-        // @sub(5): CiA index 4 (125kbps)
-        // @sub(6): CiA index 5 (100kbps)
-        // @sub(7): CiA index 6 (50kbps)
-        // @sub(8): CiA index 7 (20kbps)
-        // @sub(9): CiA index 8 (10kbps)
-        // @sub(10):    index 9 (5kbps, not supported by CAN API implementations)
-#if (BITRATE_800K_UNSUPPORTED != 0)
-        if (index == CANBTR_INDEX_800K)
+    for (int i = 0; i < 10; i++) {
+        switch (i) {
+            // @sub(1): CiA index 0 (1Mbps)
+            case 0: bitrate.index = CANBTR_INDEX_1M; break;
+            // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
+            case 1: bitrate.index = CANBTR_INDEX_800K; break;
+            // @sub(3): CiA index 2 (500kbps)
+            case 2: bitrate.index = CANBTR_INDEX_500K; break;
+            // @sub(4): CiA index 3 (250kbps)
+            case 3: bitrate.index = CANBTR_INDEX_250K; break;
+            // @sub(5): CiA index 4 (125kbps)
+            case 4: bitrate.index = CANBTR_INDEX_125K; break;
+            // @sub(6): CiA index 5 (100kbps)
+            case 5: bitrate.index = CANBTR_INDEX_100K; break;
+            // @sub(7): CiA index 6 (50kbps)
+            case 6: bitrate.index = CANBTR_INDEX_50K; break;
+            // @sub(8): CiA index 7 (20kbps)
+            case 7: bitrate.index = CANBTR_INDEX_20K; break;
+            // @sub(9): CiA index 8 (10kbps)
+            case 8: bitrate.index = CANBTR_INDEX_10K; break;
+            // @sub(10):    index 9 (5kbps, not supported by all CAN API SDK's)
+            case 9: bitrate.index = SJA1000_INDEX_5K; break;
+            default: return;  // Get out of here!
+        }
+#if (FEATURE_BITRATE_800K != FEATURE_SUPPORTED)
+        if (bitrate.index == CANBTR_INDEX_800K)
             continue;
 #endif
-        NSLog(@"Execute sub-testcase %d:\n", 1-index);
+#if (FEATURE_BITRATE_SJA1000 != FEATURE_SUPPORTED)
+        if (bitrate.index == SJA1000_INDEX_5K)
+            continue;
+#endif
+#if (TC03_17_ISSUE_TOUCAN_BITRATE_10K == WORKAROUND_ENABLED)
+        if (bitrate.index == CANBTR_INDEX_10K) {
+            NSLog(@"Sub-testcase %d skipped due to known hardware bug\n", i+1);
+            continue;
+        }
+#endif
+        NSLog(@"Execute sub-testcase %d:\n", i+1);
 
-        bitrate.index = index;
         // @-- initialize DUT1 in CAN 2.0 operation mode
         handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
         XCTAssertLessThanOrEqual(0, handle);
@@ -729,23 +795,40 @@
     int rc = CANERR_FATAL;
 
     // @test: loop over CiA bit-timing table indexes 0 to 8
-    for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
-        // @sub(1): CiA index 0 (1Mbps)
-        // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
-        // @sub(3): CiA index 2 (500kbps)
-        // @sub(4): CiA index 3 (250kbps)
-        // @sub(5): CiA index 4 (125kbps)
-        // @sub(6): CiA index 5 (100kbps)
-        // @sub(7): CiA index 6 (50kbps)
-        // @sub(8): CiA index 7 (20kbps)
-        // @sub(9): CiA index 8 (10kbps)
-#if (BITRATE_800K_UNSUPPORTED != 0)
-        if (index == CANBTR_INDEX_800K)
+    for (int i = 0; i < 9; i++) {
+        switch (i) {
+            // @sub(1): CiA index 0 (1Mbps)
+            case 0: bitrate.index = CANBTR_INDEX_1M; break;
+            // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
+            case 1: bitrate.index = CANBTR_INDEX_800K; break;
+            // @sub(3): CiA index 2 (500kbps)
+            case 2: bitrate.index = CANBTR_INDEX_500K; break;
+            // @sub(4): CiA index 3 (250kbps)
+            case 3: bitrate.index = CANBTR_INDEX_250K; break;
+            // @sub(5): CiA index 4 (125kbps)
+            case 4: bitrate.index = CANBTR_INDEX_125K; break;
+            // @sub(6): CiA index 5 (100kbps)
+            case 5: bitrate.index = CANBTR_INDEX_100K; break;
+            // @sub(7): CiA index 6 (50kbps)
+            case 6: bitrate.index = CANBTR_INDEX_50K; break;
+            // @sub(8): CiA index 7 (20kbps)
+            case 7: bitrate.index = CANBTR_INDEX_20K; break;
+            // @sub(9): CiA index 8 (10kbps)
+            case 8: bitrate.index = CANBTR_INDEX_10K; break;
+            default: return;  // Get out of here!
+        }
+#if (FEATURE_BITRATE_800K != FEATURE_SUPPORTED)
+        if (bitrate.index == CANBTR_INDEX_800K)
             continue;
 #endif
-        NSLog(@"Execute sub-testcase %d:\n", 1-index);
+#if (TC03_18_ISSUE_TOUCAN_BITRATE_10K == WORKAROUND_ENABLED)
+        if (bitrate.index == CANBTR_INDEX_10K) {
+            NSLog(@"Sub-testcase %d skipped due to known hardware bug\n", i+1);
+            continue;
+        }
+#endif
+        NSLog(@"Execute sub-testcase %d:\n", i+1);
 
-        bitrate.index = index;
         // @-- initialize DUT1 in CAN 2.0 operation mode
         handle = can_init(DUT1, CANMODE_DEFAULT, NULL);
         XCTAssertLessThanOrEqual(0, handle);
@@ -779,12 +862,26 @@
         XCTAssertTrue(status.can_stopped);
 
         // @-- new CiA bit-timing table index = 8 - old
-        bitrate.index = CANBTR_INDEX_10K - index;
-#if (BITRATE_800K_UNSUPPORTED != 0)
-        // @note: CiA index 1 (800kbps) is not supported by all CAN controllers.
-        if ((CANBTR_INDEX_20K <= index) && (index <= CANBTR_INDEX_500K))
-            bitrate.index -= 1;
+        switch (i) {
+            case 8: bitrate.index = CANBTR_INDEX_1M; break;
+#if (FEATURE_BITRATE_800K == FEATURE_SUPPORTED)
+            case 7: bitrate.index = CANBTR_INDEX_800K; break;
+#else
+            case 7: bitrate.index = CANBTR_INDEX_500K; break;
 #endif
+            case 6: bitrate.index = CANBTR_INDEX_500K; break;
+            case 5: bitrate.index = CANBTR_INDEX_250K; break;
+            case 4: bitrate.index = CANBTR_INDEX_125K; break;
+            case 3: bitrate.index = CANBTR_INDEX_100K; break;
+            case 2: bitrate.index = CANBTR_INDEX_50K; break;
+            case 1: bitrate.index = CANBTR_INDEX_20K; break;
+#if (TC03_18_ISSUE_TOUCAN_BITRATE_10K != WORKAROUND_ENABLED)
+            case 0: bitrate.index = CANBTR_INDEX_10K; break;
+#else
+            case 0: bitrate.index = CANBTR_INDEX_20K; break;
+#endif
+            default: return;  // Get out of here!
+        }
         // @-- start DUT1 again with a different bit-rate settings
         rc = can_start(handle, &bitrate);
         XCTAssertEqual(CANERR_NOERROR, rc);
@@ -825,7 +922,8 @@
     int rc = CANERR_FATAL;
 
     // @test: loop over selected CAN 2.0 bit-rate settings
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
+        memset(&bitrate, 0, sizeof(can_bitrate_t));
         switch (i) {
             // @sub(1): 1Mbps
             case 0: BITRATE_1M(bitrate); break;
@@ -835,8 +933,22 @@
             case 2: BITRATE_250K(bitrate); break;
             // @sub(4): 125kbps
             case 3: BITRATE_125K(bitrate); break;
+            // @sub(5): 100kbps
+            case 4: BITRATE_100K(bitrate); break;
+            // @sub(6): 50kbps
+            case 5: BITRATE_50K(bitrate); break;
+            // @sub(7): 20kbps
+            case 6: BITRATE_20K(bitrate); break;
+            // @sub(8): 10kbps
+            case 7: BITRATE_10K(bitrate); break;
             default: return;  // Get out of here!
         }
+#if (TC03_19_ISSUE_TOUCAN_BITRATE_10K == WORKAROUND_ENABLED)
+        if (i == 7) {
+            NSLog(@"Sub-testcase %d skipped due to known hardware bug\n", i+1);
+            continue;
+        }
+#endif
         NSLog(@"Execute sub-testcase %d:\n", i+1);
 
         // @-- initialize DUT1 in CAN 2.0 operation mode
@@ -897,6 +1009,7 @@
 
     // @test: loop over selected CAN 2.0 bit-rate settings
     for (int i = 0; i < 18; i++) {
+        memset(&bitrate, 0, sizeof(can_bitrate_t));
         BITRATE_250K(bitrate);
         switch (i) {
             // @sub(1): set all fields to 0 (note: 'frequency' == 0 is CiA Index 0, set to 1 instead)
@@ -931,18 +1044,22 @@
             case 14: bitrate.btr.nominal.sjw = NOM_SJW_MAX+1; break;
             // @sub(16): set field 'sjw' to UINT16_MAX
             case 15: bitrate.btr.nominal.sjw = UINT16_MAX; break;
-            // @sub(17): set field 'sam' to 2
-#if (TC03_20_ISSUE_KVASER_NOSAMP == 0)
-            // @issue: only SAM = 0 supported by Kvaser devices (noSamp = 1)
+            // @sub(17): set field 'sam' to 2 (note: SAM not supported by all CAN controller)
+#if (TC03_20_ISSUE_KVASER_NOSAMP != WORKAROUND_ENABLED)
+            // @issue(KvaserCAN): only SAM = 0 supported by Kvaser devices (noSamp = 1)
             case 16: bitrate.btr.nominal.sam = 2; break;
 #else
             // @workaround: tread SAM = 1 as invalid (noSamp = 3)
             case 16: bitrate.btr.nominal.sam = 1; break;
 #endif
-            // @sub(18): set field 'sam' to UINT8_MAX
+            // @sub(18): set field 'sam' to UINT8_MAX (note: SAM not supported by all CAN controller)
             case 17: bitrate.btr.nominal.sam = UINT8_MAX; break;
             default: return;  // Get out of here!
         }
+#if (FEATURE_BITRATE_SAM != FEATURE_SUPPORTED)
+        if ((i == 16) || (i == 17))
+            continue;
+#endif
         NSLog(@"Execute sub-testcase %d:\n", i+1);
 
         // @-- try to start DUT1 with invalid CAN 2.0 bit-rate settings
@@ -957,6 +1074,7 @@
             (void)can_reset(handle);
     }
     // @post:
+    memset(&bitrate, 0, sizeof(can_bitrate_t));
     BITRATE_250K(bitrate);
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -994,7 +1112,8 @@
     int rc = CANERR_FATAL;
 
     // @test: loop over selected CAN 2.0 bit-rate settings
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
+        memset(&bitrate, 0, sizeof(can_bitrate_t));
         switch (i) {
             // @sub(1): 1Mbps
             case 0: BITRATE_1M(bitrate); break;
@@ -1004,8 +1123,22 @@
             case 2: BITRATE_250K(bitrate); break;
             // @sub(4): 125kbps
             case 3: BITRATE_125K(bitrate); break;
+            // @sub(5): 100kbps
+            case 4: BITRATE_100K(bitrate); break;
+            // @sub(6): 50kbps
+            case 5: BITRATE_50K(bitrate); break;
+            // @sub(7): 20kbps
+            case 6: BITRATE_20K(bitrate); break;
+            // @sub(8): 10kbps
+            case 7: BITRATE_10K(bitrate); break;
             default: return;  // Get out of here!
         }
+#if (TC03_21_ISSUE_TOUCAN_BITRATE_10K == WORKAROUND_ENABLED)
+        if (i == 7) {
+            NSLog(@"Sub-testcase %d skipped due to known hardware bug\n", i+1);
+            continue;
+        }
+#endif
         NSLog(@"Execute sub-testcase %d:\n", i+1);
 
         // @-- initialize DUT1 in CAN 2.0 operation mode
@@ -1080,7 +1213,8 @@
     int rc = CANERR_FATAL;
 
     // @test: loop over selected CAN 2.0 bit-rate settings
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 8; i++) {
+        memset(&bitrate, 0, sizeof(can_bitrate_t));
         switch (i) {
             // @sub(1): 1Mbps
             case 0: BITRATE_1M(bitrate); break;
@@ -1090,8 +1224,22 @@
             case 2: BITRATE_250K(bitrate); break;
             // @sub(4): 125kbps
             case 3: BITRATE_125K(bitrate); break;
+            // @sub(5): 100kbps
+            case 4: BITRATE_100K(bitrate); break;
+            // @sub(6): 50kbps
+            case 5: BITRATE_50K(bitrate); break;
+            // @sub(7): 20kbps
+            case 6: BITRATE_20K(bitrate); break;
+            // @sub(8): 10kbps
+            case 7: BITRATE_10K(bitrate); break;
             default: return;  // Get out of here!
         }
+#if (TC03_22_ISSUE_TOUCAN_BITRATE_10K == WORKAROUND_ENABLED)
+        if (i == 7) {
+            NSLog(@"Sub-testcase %d skipped due to known hardware bug\n", i+1);
+            continue;
+        }
+#endif
         NSLog(@"Execute sub-testcase %d:\n", i+1);
 
         // @-- initialize DUT1 in CAN 2.0 operation mode
@@ -1127,11 +1275,20 @@
         XCTAssertTrue(status.can_stopped);
 
         // @-- new CAN 2.0 bit-rate settings
+        memset(&bitrate, 0, sizeof(can_bitrate_t));
         switch (i) {
-            case 3: BITRATE_1M(bitrate); break;
-            case 2: BITRATE_500K(bitrate); break;
-            case 1: BITRATE_250K(bitrate); break;
-            case 0: BITRATE_125K(bitrate); break;
+            case 7: BITRATE_1M(bitrate); break;
+            case 6: BITRATE_500K(bitrate); break;
+            case 5: BITRATE_250K(bitrate); break;
+            case 4: BITRATE_125K(bitrate); break;
+            case 3: BITRATE_100K(bitrate); break;
+            case 2: BITRATE_50K(bitrate); break;
+            case 1: BITRATE_20K(bitrate); break;
+#if (TC03_22_ISSUE_TOUCAN_BITRATE_10K != WORKAROUND_ENABLED)
+            case 0: BITRATE_10K(bitrate); break;
+#else
+            case 0: BITRATE_20K(bitrate); break;
+#endif
             default: return;  // Get out of here!
         }
         // @-- start DUT1 again with different bit-rate settings
@@ -1163,7 +1320,7 @@
     }
 }
 
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 // @xctest TC03.23: Start CAN controller with valid CAN FD bit-rate settings
 //
 // @expected CANERR_NOERROR
@@ -1171,6 +1328,7 @@
 - (void)testCheckValidCanFdBitrateSettings {
     uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 
+    // @note: this test requires two CAN FD capable devices!
     if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
         (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
         can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1180,6 +1338,7 @@
 
         // @test: loop over selected CAN FD bit-rate settings
         for (int i = 0; i < 8; i++) {
+            memset(&bitrate, 0, sizeof(can_bitrate_t));
             switch (i) {
                 // @sub(1): nominal 1Mbps (mode FDOE)
                 case 0: BITRATE_FD_1M(bitrate); mode = CANMODE_FDOE; break;
@@ -1242,7 +1401,7 @@
 }
 #endif
 
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 // @xctest TC03.24: Start CAN controller with invalid CAN FD bit-rate settings
 //
 // @expected CANERR_BAUDRATE
@@ -1250,7 +1409,7 @@
 - (void)testCheckInvalidCanFdBitrateSettings {
     uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 
-    // @note: this test requires two CAN FD capable devices
+    // @note: this test requires two CAN FD capable devices!
     if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
         (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
         can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1268,7 +1427,12 @@
         XCTAssertTrue(status.can_stopped);
 
         // @test: loop over invalid CAN FD bit-rate settings
-        for (int i = 0; i < 30; i++) {
+#if (FEATURE_BITRATE_FD_SAM == FEATURE_UNSUPPORTED)
+        for (int i = 0; i < 28; i++) {  // @note: CAN FD does not specify number-of-samples attribute,
+#else
+        for (int i = 0; i < 30; i++) {  // @      but some drivers define the field SAM for CAN FD.
+#endif
+            memset(&bitrate, 0, sizeof(can_bitrate_t));
             BITRATE_FD_250K2M(bitrate);
             switch (i) {
                 // @sub(1): set all fields to 0 (note: 'frequency' == 0 is CiA Index 0, set to 1 instead)
@@ -1307,40 +1471,42 @@
                 case 14: bitrate.btr.nominal.sjw = NOM_SJW_MAX+1; break;
                 // @sub(16): set field 'sjw' to UINT16_MAX
                 case 15: bitrate.btr.nominal.sjw = UINT16_MAX; break;
-                // @sub(17): set field 'sam' to 2
-#if (TC03_24_ISSUE_KVASER_NOSAMP == 0)
-                // @issue: only SAM = 0 supported by Kvaser devices (noSamp = 1)
-                case 16: bitrate.btr.nominal.sam = 2; break;
-#else
+                // @sub(17): set field 'data.brp' to 0
+                case 16: bitrate.btr.data.brp = 0; break;
+                // @sub(18): set field 'data.brp' to 1025
+                case 17: bitrate.btr.data.brp = DATA_BRP_MAX+1; break;
+                // @sub(19): set field 'data.brp' to UINT16_MAX
+                case 18: bitrate.btr.data.brp = UINT16_MAX; break;
+                // @sub(20): set field 'data.tseg1' to 0
+                case 19: bitrate.btr.data.tseg1 = 0; break;
+                // @sub(21): set field 'data.tseg1' to 33
+                case 20: bitrate.btr.data.tseg1 = DATA_TSEG1_MAX+1; break;
+                // @sub(22): set field 'data.tseg1' to UINT16_MAX
+                case 21: bitrate.btr.data.tseg1 = UINT16_MAX; break;
+                // @sub(23): set field 'data.tseg2' to 0
+                case 22: bitrate.btr.data.tseg2 = 0; break;
+                // @sub(24): set field 'data.tseg2' to 17
+                case 23: bitrate.btr.data.tseg2 = DATA_TSEG2_MAX+1; break;
+                // @sub(25): set field 'data.tseg2' to UINT16_MAX
+                case 24: bitrate.btr.data.tseg2 = UINT16_MAX; break;
+                // @sub(26): set field 'data.sjw' to 0
+                case 25: bitrate.btr.data.sjw = 0; break;
+                // @sub(27): set field 'data.sjw' to 17
+                case 26: bitrate.btr.data.sjw = DATA_SJW_MAX+1; break;
+                // @sub(28): set field 'data.sjw' to UINT16_MAX
+                case 27: bitrate.btr.data.sjw = UINT16_MAX; break;
+#if (FEATURE_BITRATE_FD_SAM != FEATURE_SUPPORTED)
+                // @sub(29): set field 'sam' to 2 (optional)
+    #if (TC03_24_ISSUE_KVASER_NOSAMP != WORKAROUND_ENABLED)
+                // @issue(KvaserCAN): only SAM = 0 supported by Kvaser devices (noSamp = 1)
+                case 28: bitrate.btr.nominal.sam = 2; break;
+    #else
                 // @workaround: tread SAM = 1 as invalid (noSamp = 3)
-                case 16: bitrate.btr.nominal.sam = 1; break;
+                case 28: bitrate.btr.nominal.sam = 1; break;
+    #endif
+                // @sub(30): set field 'sam' to UINT8_MAX (optional)
+                case 29: bitrate.btr.nominal.sam = UINT8_MAX; break;
 #endif
-                // @sub(18): set field 'sam' to UINT8_MAX
-                case 17: bitrate.btr.nominal.sam = UINT8_MAX; break;
-                // @sub(19): set field 'data.brp' to 0
-                case 18: bitrate.btr.data.brp = 0; break;
-                // @sub(20): set field 'data.brp' to 1025
-                case 19: bitrate.btr.data.brp = DATA_BRP_MAX+1; break;
-                // @sub(21): set field 'data.brp' to UINT16_MAX
-                case 20: bitrate.btr.data.brp = UINT16_MAX; break;
-                // @sub(22): set field 'data.tseg1' to 0
-                case 21: bitrate.btr.data.tseg1 = 0; break;
-                // @sub(23): set field 'data.tseg1' to 33
-                case 22: bitrate.btr.data.tseg1 = DATA_TSEG1_MAX+1; break;
-                // @sub(24): set field 'data.tseg1' to UINT16_MAX
-                case 23: bitrate.btr.data.tseg1 = UINT16_MAX; break;
-                // @sub(25): set field 'data.tseg2' to 0
-                case 24: bitrate.btr.data.tseg2 = 0; break;
-                // @sub(26): set field 'data.tseg2' to 17
-                case 25: bitrate.btr.data.tseg2 = DATA_TSEG2_MAX+1; break;
-                // @sub(27): set field 'data.tseg2' to UINT16_MAX
-                case 26: bitrate.btr.data.tseg2 = UINT16_MAX; break;
-                // @sub(28): set field 'data.sjw' to 0
-                case 27: bitrate.btr.data.sjw = 0; break;
-                // @sub(29): set field 'data.sjw' to 17
-                case 28: bitrate.btr.data.sjw = DATA_SJW_MAX+1; break;
-                // @sub(30): set field 'data.sjw' to UINT16_MAX
-                case 29: bitrate.btr.data.sjw = UINT16_MAX; break;
                 default: return;  // Get out of here!
             }
             NSLog(@"Execute sub-testcase %d:\n", i+1);
@@ -1357,6 +1523,7 @@
                 (void)can_reset(handle);
         }
         // @post:
+        memset(&bitrate, 0, sizeof(can_bitrate_t));
         BITRATE_FD_250K2M(bitrate);
         // @- start DUT1 with valid CAN FD bit-rate settings
         rc = can_start(handle, &bitrate);
@@ -1388,7 +1555,7 @@
 }
 #endif
     
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 // @xctest TC03.25: Re-Start CAN controller with same CAN FD bit-rate settings after it was stopped
 //
 // @expected CANERR_NOERROR
@@ -1396,7 +1563,7 @@
 - (void)testWithSameCanFdBitrateSettingsAfterCanStopped {
     uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 
-    // @note: this test requires two CAN FD capable devices
+    // @note: this test requires two CAN FD capable devices!
     if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
         (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
         can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1406,6 +1573,7 @@
 
         // @test: loop over selected CAN FD bit-rate settings
         for (int i = 0; i < 8; i++) {
+            memset(&bitrate, 0, sizeof(can_bitrate_t));
             switch (i) {
                 // @sub(1): nominal 1Mbps (mode FDOE)
                 case 0: BITRATE_FD_1M(bitrate); mode = CANMODE_FDOE; break;
@@ -1492,7 +1660,7 @@
 }
 #endif
 
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 // @xctest TC03.26: Re-Start CAN controller with different CAN FD bit-rate settings after it was stopped
 //
 // @expected CANERR_NOERROR
@@ -1500,7 +1668,7 @@
 - (void)testWithDifferentCanFdBitrateSettingsAfterCanStopped {
     uint8_t mode = (CANMODE_FDOE | CANMODE_BRSE);
 
-    // @note: this test requires two CAN FD capable devices
+    // @note: this test requires two CAN FD capable devices!
     if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
         (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
         can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1510,6 +1678,7 @@
 
         // @test: loop over selected CAN FD bit-rate settings
         for (int i = 0; i < 8; i++) {
+            memset(&bitrate, 0, sizeof(can_bitrate_t));
             switch (i) {
                 // @sub(1): nominal 1Mbps (mode FDOE)
                 case 0: BITRATE_FD_1M(bitrate); mode = CANMODE_FDOE; break;
@@ -1564,6 +1733,7 @@
             XCTAssertTrue(status.can_stopped);
             
             // @-- new CAN FD bit-rate settings
+            memset(&bitrate, 0, sizeof(can_bitrate_t));
             switch (i) {
                 case 3: BITRATE_FD_1M(bitrate); break;
                 case 2: BITRATE_FD_500K(bitrate); break;
@@ -1608,7 +1778,7 @@
 }
 #endif
     
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 // @xctest TC03.27: Start CAN controller with CiA bit-timing index in CAN FD operation mode w/o bit-rate switching
 //
 // @expected CANERR_BAUDRATE
@@ -1616,7 +1786,7 @@
 - (void)testWithCiaIndexInCanFdMode {
     uint8_t mode = CANMODE_FDOE;
 
-    // @note: this test requires two CAN FD capable devices
+    // @note: this test requires two CAN FD capable devices!
     if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
         (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
         can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1637,28 +1807,40 @@
         // @note: pre-defined BTR0BTR1 bit-timing table has 10 entries, index 0 to 9.
         // @      But the index must be given as negative value to 'bitrate.index'!
         // @      Remark: The CiA bit-timing table has only 9 entries!
-#if (BITRATE_5K_UNSUPPORTED != 0)
-        for (SInt32 index = CANBTR_INDEX_1M; index >= CANBTR_INDEX_10K; index--) {
-#else
-        for (SInt32 index = CANBTR_INDEX_1M; index >= -9; index--) {
-#endif
-            // @sub(1): CiA index 0 (1Mbps)
-            // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
-            // @sub(3): CiA index 2 (500kbps)
-            // @sub(4): CiA index 3 (250kbps)
-            // @sub(5): CiA index 4 (125kbps)
-            // @sub(6): CiA index 5 (100kbps)
-            // @sub(7): CiA index 6 (50kbps)
-            // @sub(8): CiA index 7 (20kbps)
-            // @sub(9): CiA index 8 (10kbps)
-            // @sub(10):    index 9 (5kbps, not supported by CAN API implementations)
-#if (BITRATE_800K_UNSUPPORTED != 0)
-            if (index == CANBTR_INDEX_800K)
+        for (int i = 0; i < 10; i++) {
+            switch (i) {
+                // @sub(1): CiA index 0 (1Mbps)
+                case 0: bitrate.index = CANBTR_INDEX_1M; break;
+                // @sub(2): CiA index 1 (800kbps, not supported by all CAN controllers)
+                case 1: bitrate.index = CANBTR_INDEX_800K; break;
+                // @sub(3): CiA index 2 (500kbps)
+                case 2: bitrate.index = CANBTR_INDEX_500K; break;
+                // @sub(4): CiA index 3 (250kbps)
+                case 3: bitrate.index = CANBTR_INDEX_250K; break;
+                // @sub(5): CiA index 4 (125kbps)
+                case 4: bitrate.index = CANBTR_INDEX_125K; break;
+                // @sub(6): CiA index 5 (100kbps)
+                case 5: bitrate.index = CANBTR_INDEX_100K; break;
+                // @sub(7): CiA index 6 (50kbps)
+                case 6: bitrate.index = CANBTR_INDEX_50K; break;
+                // @sub(8): CiA index 7 (20kbps)
+                case 7: bitrate.index = CANBTR_INDEX_20K; break;
+                // @sub(9): CiA index 8 (10kbps)
+                case 8: bitrate.index = CANBTR_INDEX_10K; break;
+                // @sub(10):    index 9 (5kbps, not supported by all CAN API SDK's)
+                case 9: bitrate.index = SJA1000_INDEX_5K; break;
+                default: return;  // Get out of here!
+            }
+#if (FEATURE_BITRATE_800K != FEATURE_SUPPORTED)
+            if (bitrate.index == CANBTR_INDEX_800K)
                 continue;
 #endif
-            NSLog(@"Execute sub-testcase %d:\n", 1-index);
+#if (FEATURE_BITRATE_SJA1000 != FEATURE_SUPPORTED)
+            if (bitrate.index == SJA1000_INDEX_5K)
+                continue;
+#endif
+            NSLog(@"Execute sub-testcase %d:\n", i+1);
 
-            bitrate.index = index;
             // @-- try to start DUT1 with selected bit-timing index
             rc = can_start(handle, &bitrate);
             XCTAssertEqual(CANERR_BAUDRATE, rc);
@@ -1671,6 +1853,7 @@
                 (void)can_reset(handle);
         }
         // @post:
+        memset(&bitrate, 0, sizeof(can_bitrate_t));
         BITRATE_FD_1M(bitrate);
         // @- start DUT1 with valid bit-rate settings
         rc = can_start(handle, &bitrate);
@@ -1705,7 +1888,7 @@
 }
 #endif
     
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 // @xctest TC03.28: Start CAN controller with CAN 2.0 bit-rate settings in CAN FD operation mode w/o bit-rate switching
 //
 // @expected CANERR_NOERROR
@@ -1713,7 +1896,7 @@
 - (void)testWithCan20BitrateSettingsInCanFdMode {
     uint8_t mode = CANMODE_FDOE;
 
-    // @note: this test requires two CAN FD capable devices
+    // @note: this test requires two CAN FD capable devices!
     if ((can_test(DUT1, mode, NULL, NULL) == CANERR_NOERROR) &&
         (can_test(DUT2, mode, NULL, NULL) == CANERR_NOERROR)) {
         can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1723,6 +1906,7 @@
 
         // @test: loop over selected CAN 2.0 bit-rate settings
         for (int i = 0; i < 4; i++) {
+            memset(&bitrate, 0, sizeof(can_bitrate_t));
             switch (i) {
                 // @sub(1): 1Mbps
                 case 0: BITRATE_1M(bitrate); break;
@@ -1732,6 +1916,16 @@
                 case 2: BITRATE_250K(bitrate); break;
                 // @sub(4): 125kbps
                 case 3: BITRATE_125K(bitrate); break;
+#if (0)         // @note: lower bit-rates might lead to invalid prescaler
+                // @sub(5): 100kbps (skipped)
+                case 4: BITRATE_100K(bitrate); break;
+                // @sub(6): 50kbps (skipped)
+                case 5: BITRATE_50K(bitrate); break;
+                // @sub(7): 20kbps (skipped)
+                case 6: BITRATE_20K(bitrate); break;
+                // @sub(8): 10kbps (skipped)
+                case 7: BITRATE_10K(bitrate); break;
+#endif
                 default: return;  // Get out of here!
             }
             NSLog(@"Execute sub-testcase %d:\n", i+1);
@@ -1743,6 +1937,13 @@
             rc = can_status(handle, &status.byte);
             XCTAssertEqual(CANERR_NOERROR, rc);
             XCTAssertTrue(status.can_stopped);
+#if (FEATURE_BITRATE_FD_SJA1000 == FEATURE_UNSUPPORTED)
+            // @note: SJA1000 BTROBTR1 bit-timing is defined for CAN 2.0 only
+            // @-- try to start DUT1 with selected bit-rate settings
+            rc = can_start(handle, &bitrate);
+            XCTAssertEqual(CANERR_BAUDRATE, rc);
+#else
+            // @      but some drivers can handle it in CAN FD operation mode
             // @-- start DUT1 with selected bit-rate settings
             rc = can_start(handle, &bitrate);
             XCTAssertEqual(CANERR_NOERROR, rc);
@@ -1763,6 +1964,7 @@
             // @-- stop/reset DUT1
             rc = can_reset(handle);
             XCTAssertEqual(CANERR_NOERROR, rc);
+#endif
             // @-- get status of DUT1 and check to be in INIT state
             rc = can_status(handle, &status.byte);
             XCTAssertEqual(CANERR_NOERROR, rc);
@@ -1777,7 +1979,7 @@
 }
 #endif
     
-#if (CAN_FD_SUPPORTED != 0)
+#if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 // @xctest TC03.29: Start CAN controller with CAN FD bit-rate settings in CAN 2.0 operation mode
 //
 // @expected CANERR_BAUDRATE
@@ -1803,6 +2005,7 @@
 
     // @test: loop over selected CAN FD bit-rate settings
     for (int i = 0; i < 8; i++) {
+         memset(&bitrate, 0, sizeof(can_bitrate_t));
          switch (i) {
             // @sub(1): nominal 1Mbps
             case 0: BITRATE_FD_1M(bitrate); break;
@@ -1827,7 +2030,8 @@
         // @-- start DUT1 with CAN FD bit-rate settings
         rc = can_start(handle, &bitrate);
         if (opCapa.fdoe) {
-            // @-- CAN FD capable device: accept it
+#if (TC03_29_ISSUE_PCBUSB_BR_FD_IN_2_0 != WORKAROUND_ENABLED)
+            // @issue(PeakCAN): only SJA1000 frequency allowed in CAN 2.0 mode
             XCTAssertEqual(CANERR_NOERROR, rc);
             // @--- get status of DUT1 and check to be in RUNNING state
             rc = can_status(handle, &status.byte);
@@ -1836,6 +2040,10 @@
             // @--- stop/reset DUT1
             rc = can_reset(handle);
             XCTAssertEqual(CANERR_NOERROR, rc);
+#else
+            // @workaround: nothing to do, just check the result
+            XCTAssertEqual(CANERR_BAUDRATE, rc);
+#endif
         } else {
             // @-- otherwise: refuse to accept it
             XCTAssertEqual(CANERR_BAUDRATE, rc);
@@ -1846,6 +2054,7 @@
         XCTAssertTrue(status.can_stopped);
     }
     // @post:
+    memset(&bitrate, 0, sizeof(can_bitrate_t));
     BITRATE_250K(bitrate);
     // @- start DUT1 with CAN 2.0 bit-rate settings (250kbps)
     rc = can_start(handle, &bitrate);
@@ -1875,4 +2084,4 @@
 
 @end
 
-// $Id: test_can_start.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_start.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //

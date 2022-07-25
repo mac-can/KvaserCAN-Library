@@ -49,6 +49,11 @@
 #import "can_api.h"
 #import <XCTest/XCTest.h>
 
+#ifndef CAN_FD_SUPPORTED
+#define CAN_FD_SUPPORTED  FEATURE_SUPPORTED
+#warning CAN_FD_SUPPORTED not set, default=FEATURE_SUPPORTED
+#endif
+
 @interface Testing : XCTestCase
 
 @end
@@ -71,9 +76,33 @@
 - (void)testSmokeTest {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
+    char name[CANPROP_MAX_BUFFER_SIZE];
+    uint16_t version;
+    uint8_t patch;
+    uint32_t build;
+    char *string = NULL;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
     
+    // @pre:
+    // @- get library information
+   if ((can_property(INVALID_HANDLE, CANPROP_GET_VERSION, (void*)&version, sizeof(uint16_t)) == CANERR_NOERROR) &&
+       (can_property(INVALID_HANDLE, CANPROP_GET_PATCH_NO, (void*)&patch, sizeof(uint8_t)) == CANERR_NOERROR) &&
+       (can_property(INVALID_HANDLE, CANPROP_GET_BUILD_NO, (void*)&build, sizeof(uint32_t)) == CANERR_NOERROR) &&
+       (can_property(INVALID_HANDLE, CANPROP_GET_LIBRARY_DLLNAME, (void*)name, CANPROP_MAX_BUFFER_SIZE) == CANERR_NOERROR))
+       NSLog(@"CAN API V3 Testing: %s V%u.%u.%u (%x)\n", name, (version & 0xFF00U) >> 8, (version & 0x00FFU), patch, build);
+    // @- get information from DUT1
+    if ((handle = can_init(DUT1, CANMODE_DEFAULT, NULL)) != INVALID_HANDLE) {
+        if ((string = can_hardware(handle)) != NULL)
+            NSLog(@"DUT1: %s\n", string);
+        (void)can_exit(handle);
+    }
+    // @- get information from DUT2
+    if ((handle = can_init(DUT2, CANMODE_DEFAULT, NULL)) != INVALID_HANDLE) {
+        if ((string = can_hardware(handle)) != NULL)
+            NSLog(@"DUT2: %s\n", string);
+        (void)can_exit(handle);
+    }
     // @test:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -125,4 +154,4 @@
 
 @end
 
-// $Id: Testing.mm 1062 2022-07-03 16:53:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Testing.mm 1073 2022-07-16 13:06:44Z makemake $  Copyright (c) UV Software, Berlin //
