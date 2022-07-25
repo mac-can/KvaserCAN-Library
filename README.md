@@ -126,13 +126,13 @@ Type `can_test --help` to display all program options.
 
 #### macOS Monterey
 
-- macOS Monterey (12.4) on a Mac mini (M1, 2020)
+- macOS Monterey (12.5) on a Mac mini (M1, 2020)
 - Apple clang version 13.1.6 (clang-1316.0.21.2.5)
 - Xcode Version 13.4.1 (13F100)
 
 #### macOS Big Sur
 
-- macOS Big Sur (11.6.7) on a MacBook Pro (2019)
+- macOS Big Sur (11.6.8) on a MacBook Pro (2019)
 - Apple clang version 13.0.0 (clang-1300.0.29.30)
 - Xcode Version 13.2.1 (13C100)
 
@@ -156,6 +156,7 @@ General test settings can be adapted in the file `Settings.h`.
 ## Known Bugs and Caveats
 
 - For a list of known bugs and caveats see tab [Issues](https://github.com/mac-can/MacCAN-KvaserCAN/issues) in the GitHub repo.
+- For multi-channel devices from Kvaser, the driver/library can only access channel CAN1. The other channels are not enumerated.
 
 ## This and That
 
@@ -177,7 +178,7 @@ You can choose between one of them if you use this work in whole or in part.
 Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. \
 Windows is a registered trademark of Microsoft Corporation in the United States and/or other countries. \
 Linux is a registered trademark of Linus Torvalds. \
-All other company, product and service names mentioned herein are trademarks, registered trademarks or service marks of their respective owners.
+All other company, product and service names mentioned herein may be trademarks, registered trademarks or service marks of their respective owners.
 
 ### Hazard Note
 
