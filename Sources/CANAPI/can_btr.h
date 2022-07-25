@@ -49,9 +49,9 @@
  *
  *  @brief       CAN API V3 for generic CAN Interfaces (Bit-rate Conversion)
  *
- *  @author      $Author: haumea $
+ *  @author      $Author: makemake $
  *
- *  @version     $Rev: 1044 $
+ *  @version     $Rev: 1082 $
  *
  *  @defgroup    can_btr CAN Bit-rate Conversion
  *  @{
@@ -79,6 +79,10 @@ extern "C" {
 
 /** @note  Set define OPTION_CANAPI_COMPANIONS to a non-zero value to compile
  *         this module in conjunction with the CAN API V3 sources (e.g. in
+ *         the build environment).
+ */
+/** @note  Set define OPTION_CANBTR_CHECK_BITRATE to a non-zero value to
+ *         compile with bit-rate range checking in the conversion functions (e.g. in
  *         the build environment).
  */
 /** @note  Set define OPTION_CANBTR_PEAK_FREQUENCIES to a non-zero value to
@@ -152,14 +156,16 @@ extern "C" {
  *  @brief Limits for nominal bit-rate settings
  *  @{ */
 #ifdef CANBTR_STANDALONE_VARIANT
-#define BTR_NOMINAL_BRP_MIN        1u  /**< min. bit-timing prescaler */
-#define BTR_NOMINAL_BRP_MAX     1024u  /**< max. bit-timing prescaler */
-#define BTR_NOMINAL_TSEG1_MIN      1u  /**< min. time segment 1 (before SP) */
-#define BTR_NOMINAL_TSEG1_MAX    256u  /**< max. time segment 1 (before SP) */
-#define BTR_NOMINAL_TSEG2_MIN      1u  /**< min. time segment 2 (after SP) */
-#define BTR_NOMINAL_TSEG2_MAX    128u  /**< max. time segment 2 (after SP) */
-#define BTR_NOMINAL_SJW_MIN        1u  /**< min. syncronization jump width */
-#define BTR_NOMINAL_SJW_MAX      128u  /**< max. syncronization jump width */
+#define BTR_NOMINAL_BRP_MIN         1u  /**< min. bit-timing prescaler */
+#define BTR_NOMINAL_BRP_MAX      1024u  /**< max. bit-timing prescaler */
+#define BTR_NOMINAL_TSEG1_MIN       1u  /**< min. time segment 1 (before SP) */
+#define BTR_NOMINAL_TSEG1_MAX     256u  /**< max. time segment 1 (before SP) */
+#define BTR_NOMINAL_TSEG2_MIN       1u  /**< min. time segment 2 (after SP) */
+#define BTR_NOMINAL_TSEG2_MAX     128u  /**< max. time segment 2 (after SP) */
+#define BTR_NOMINAL_SJW_MIN         1u  /**< min. syncronization jump width */
+#define BTR_NOMINAL_SJW_MAX       128u  /**< max. syncronization jump width */
+#define BTR_NOMINAL_SAM_SINGLE      0u  /**< single: the bus is sampled once */
+#define BTR_NOMINAL_SAM_TRIPLE      1u  /**< triple: the bus is sampled three times */
 #else
 #define BTR_NOMINAL_BRP_MIN       (CANBTR_NOMINAL_BRP_MIN)
 #define BTR_NOMINAL_BRP_MAX       (CANBTR_NOMINAL_BRP_MAX)
@@ -169,9 +175,9 @@ extern "C" {
 #define BTR_NOMINAL_TSEG2_MAX     (CANBTR_NOMINAL_TSEG2_MAX)
 #define BTR_NOMINAL_SJW_MIN       (CANBTR_NOMINAL_SJW_MIN)
 #define BTR_NOMINAL_SJW_MAX       (CANBTR_NOMINAL_SJW_MAX)
+#define BTR_NOMINAL_SAM_SINGLE    (CANBTR_NOMINAL_SAM_SINGLE)
+#define BTR_NOMINAL_SAM_TRIPLE    (CANBTR_NOMINAL_SAM_TRIPLE)
 #endif
-#define BTR_NOMINAL_SAM_MIN         0u  /**< single sampling (CAN 2.0 only) */
-#define BTR_NOMINAL_SAM_MAX         1u  /**< triple sampling (CAN 2.0 only) */
 #define BTR_NOMINAL_SP_MIN       0.05f  /**< tbd. */
 #define BTR_NOMINAL_SP_MAX       1.00f  /**< tbd. */
 #define BTR_NOMINAL_SPEED_MIN    1000.f /**< tbd. */
@@ -200,6 +206,7 @@ extern "C" {
 #define BTR_DATA_SJW_MIN          (CANBTR_DATA_SJW_MIN)
 #define BTR_DATA_SJW_MAX          (CANBTR_DATA_SJW_MAX)
 #endif
+#define BTR_DATA_SAM_UNDEFINED      0u  /**< number of samples not defined for CAN FD */
 #define BTR_DATA_SP_MIN           0.1f  /**< tbd. */
 #define BTR_DATA_SP_MAX           1.0f  /**< tbd. */
 #define BTR_DATA_SPEED_MIN     1000.0f  /**< tbd. */
@@ -218,8 +225,8 @@ extern "C" {
 #define BTR_SJA1000_TSEG2_MAX       8u  /**< max. time segment 2 (after SP) */
 #define BTR_SJA1000_SJW_MIN         1u  /**< min. syncronization jump width */
 #define BTR_SJA1000_SJW_MAX         4u  /**< max. syncronization jump width */
-#define BTR_SJA1000_SAM_MIN         0u  /**< single: the bus is sampled once */
-#define BTR_SJA1000_SAM_MAX         1u  /**< triple: the bus is sampled three times */
+#define BTR_SJA1000_SAM_SINGLE      0u  /**< single: the bus is sampled once */
+#define BTR_SJA1000_SAM_TRIPLE      1u  /**< triple: the bus is sampled three times */
 #else
 #define BTR_SJA1000_BRP_MIN       (CANBTR_SJA1000_BRP_MIN)
 #define BTR_SJA1000_BRP_MAX       (CANBTR_SJA1000_BRP_MAX)
@@ -229,8 +236,8 @@ extern "C" {
 #define BTR_SJA1000_TSEG2_MAX     (CANBTR_SJA1000_TSEG2_MAX)
 #define BTR_SJA1000_SJW_MIN       (CANBTR_SJA1000_SJW_MIN)
 #define BTR_SJA1000_SJW_MAX       (CANBTR_SJA1000_SJW_MAX)
-#define BTR_SJA1000_SAM_MIN       (CANBTR_SJA1000_SAM_MIN)
-#define BTR_SJA1000_SAM_MAX       (CANBTR_SJA1000_SAM_MAX)
+#define BTR_SJA1000_SAM_SINGLE    (CANBTR_SJA1000_SAM_SINGLE)
+#define BTR_SJA1000_SAM_TRIPLE    (CANBTR_SJA1000_SAM_TRIPLE)
 #endif
 #define BTR_SJA1000_SP_MIN       0.20f  /**< tbd. */
 #define BTR_SJA1000_SP_MAX       0.95f  /**< tbd. */
@@ -340,6 +347,16 @@ typedef uint16_t btr_sja1000_t;
 
 /*  -----------  prototypes  ---------------------------------------------
  */
+
+/** @brief       ...
+ *
+ *  @param[in]   bitrate -
+ *  @param[in]   fdoe    -
+ *  @param[in]   brse    -
+ *
+ *  @returns     0 if successful, or a negative value on error.
+ */
+int btr_check_bitrate(const btr_bitrate_t *bitrate, bool fdoe, bool brse);
 
 /** @brief       ...
  *
