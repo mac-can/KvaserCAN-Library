@@ -313,7 +313,6 @@ int can_start(int handle, const can_bitrate_t *bitrate)
     int rc = CANERR_FATAL;              // return value
 
     can_bitrate_t tmpBitrate;           // bit-rate settings
-    can_speed_t tmpSpeed;               // transmission speed
     KvaserUSB_BusParams_t busParams;    // Kvaser bus parameter
     KvaserUSB_BusParamsFd_t busParamsFd;// Kvaser FD bus parameter
 
@@ -329,7 +328,6 @@ int can_start(int handle, const can_bitrate_t *bitrate)
         return CANERR_ONLINE;
 
     memcpy(&tmpBitrate, bitrate, sizeof(can_bitrate_t));
-    memset(&tmpSpeed, 0, sizeof(can_speed_t));
     memset(&busParams, 0, sizeof(KvaserUSB_BusParams_t));
     memset(&busParamsFd, 0, sizeof(KvaserUSB_BusParamsFd_t));
     bool fdoe = can[handle].mode.fdoe ? true : false;
@@ -344,7 +342,7 @@ int can_start(int handle, const can_bitrate_t *bitrate)
                 return CANERR_BAUDRATE;
         } else {
             // note: bit-rate settings are checked by the conversion function
-            if (btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed) < 0)
+            if (btr_check_bitrate(&tmpBitrate, fdoe, brse) < 0)
                 return CANERR_BAUDRATE;
         }
         // (b) convert bit-rate settings to Kvaser bus parameter
@@ -361,7 +359,7 @@ int can_start(int handle, const can_bitrate_t *bitrate)
             return CANERR_BAUDRATE;
         } else {
             // note: bit-rate settings are checked by the conversion function
-            if (btr_bitrate2speed(&tmpBitrate, fdoe, brse, &tmpSpeed) < 0)
+            if (btr_check_bitrate(&tmpBitrate, fdoe, brse) < 0)
                 return CANERR_BAUDRATE;
         }
         // (b) convert bit-rate settings to Kvaser bus parameter
