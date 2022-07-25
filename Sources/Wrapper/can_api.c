@@ -51,7 +51,7 @@
 #include "build_no.h"
 #define VERSION_MAJOR    0
 #define VERSION_MINOR    3
-#define VERSION_PATCH    99
+#define VERSION_PATCH    1
 #define VERSION_BUILD    BUILD_NO
 #define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(__APPLE__)
