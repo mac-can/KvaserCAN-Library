@@ -34,7 +34,7 @@ OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/Timer.o $(BINDIR)/libKvaserCAN.a
 
 ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
 
-VERSION = 0.3.0
+VERSION = 0.3.1
 
 TARGET  = can_test
 
@@ -49,12 +49,12 @@ HEADERS = -I$(MAIN_DIR) \
 	-I$(MACCAN_DIR) \
 	-I$(KVASER_DIR)
 
-CFLAGS += -O2 -Wall -Wno-parentheses \
+CFLAGS += -O0 -Wall -Wno-parentheses \
 	-fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
-CXXFLAGS += -g -Wall -Wextra -pthread \
+CXXFLAGS += -O0 -g -Wall -Wextra -pthread \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -68,12 +68,13 @@ CFLAGS += -arch arm64 -arch x86_64
 CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
-endif
 
 
 CXX = clang++
 CC = clang
 LD = clang++
+endif
+
 RM = rm -f
 CP = cp -f
 

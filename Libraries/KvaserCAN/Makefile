@@ -111,7 +111,7 @@ CFLAGS += -O2 -Wall -Wextra -Wno-parentheses \
 	$(DEFINES) \
 	$(HEADERS)
 
-CXXFLAGS += -g -Wall -Wextra -pthread \
+CXXFLAGS += -O2 -g -Wall -Wextra -pthread \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -131,7 +131,6 @@ CFLAGS += -arch arm64 -arch x86_64
 CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
-
 
 CXX = clang++
 CC = clang

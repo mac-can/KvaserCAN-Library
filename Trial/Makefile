@@ -77,7 +77,7 @@ CHECKER += --bug-hunting
 endif
 
 ifeq ($(XCTEST),FULL)
-TESTING = 
+TESTING =
 else
 TESTING = -only-testing Testing/Testing/testSmokeTest
 endif
