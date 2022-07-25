@@ -998,7 +998,6 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
     can_bitrate_t bitrate;
     can_speed_t speed;
     uint8_t status;
-    uint8_t load;
 
     assert(IS_HANDLE_VALID(handle));    // just to make sure
 
@@ -1071,11 +1070,12 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
         break;
     case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint16_t)
         if (nbyte >= sizeof(uint8_t)) {
-            if ((rc = can_busload(handle, &load, NULL)) == CANERR_NOERROR) {
+            KvaserUSB_BusLoad_t load = 0U;
+            if ((rc = KvaserCAN_GetBusLoad(&can[handle].device, &load)) == CANERR_NOERROR) {
                 if (nbyte > sizeof(uint8_t))
-                    *(uint16_t*)value = (uint16_t)load * 100U;  // 0 - 10000 ==> 0.00% - 100.00%
+                    *(uint16_t*)value = (uint16_t)load;       // 0..10000 ==> 0%..100%
                 else
-                    *(uint8_t*)value = (uint8_t)load;           // 0  -  100 ==> 0.00% - 100.00%
+                    *(uint8_t*)value = (uint8_t)load / 100U;  // 0..100 (legacy resolution)
                 rc = CANERR_NOERROR;
             }
         }
