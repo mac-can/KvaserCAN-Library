@@ -132,6 +132,8 @@ extern CANUSB_Return_t CANUSB_ReadPipe(CANUSB_Handle_t handle, UInt8 pipeRef, vo
 
 extern CANUSB_Return_t CANUSB_WritePipe(CANUSB_Handle_t handle, UInt8 pipeRef, const void *buffer, UInt32 size, UInt16 timeout);
 
+extern CANUSB_Return_t CANUSB_ResetPipe(CANUSB_Handle_t handle, UInt8 pipeRef);
+
 extern CANUSB_AsyncPipe_t CANUSB_CreatePipeAsync(CANUSB_Handle_t handle, UInt8 pipeRef, size_t bufferSize);
 
 extern CANUSB_Return_t CANUSB_DestroyPipeAsync(CANUSB_AsyncPipe_t asyncPipe);
@@ -189,5 +191,5 @@ extern UInt32 CANUSB_GetVersion(void);
 #endif
 #endif /* MACCAN_IOUSBKIT_H_INCLUDED */
 
-/* * $Id: MacCAN_IOUsbKit.h 1087 2022-01-10 16:09:31Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.h 1208 2022-07-18 15:04:40Z makemake $ *** (c) UV Software, Berlin ***
  */

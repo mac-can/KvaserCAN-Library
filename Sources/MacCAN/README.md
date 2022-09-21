@@ -3,7 +3,7 @@
 _Copyright &copy; 2012-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
 _All rights reserved._
 
-Version $Rev: 1200 $
+Version $Rev: 1523 $
 
 # Running CAN and CAN FD on Mac&reg;
 
@@ -52,14 +52,14 @@ The [MacCAN-TouCAN driver](https://mac-can.github.io/drivers/RusokuCAN/) for Tou
 And it is open source;
 goto https://github.com/mac-can/RusokuCAN.dylib.
 
-### CAN Leaf Interfaces from Kvaser
+### USB CAN Interfaces from Kvaser
 
 The Swedish company [Kvaser AB](https://www.kvaser.com) supplies advanced CAN solutions to engineers designing and deploying systems for manifold areas of applications.
 They offer a wide range of CAN hardware and CAN software, mainly for applications under Windows but also under Linux.
 
-Welcome the [MacCAN-KvaserCAN driver](https://mac-can.github.io/drivers/KvaserCAN/) for CAN Leaf interfaces from Kvaser as the next member of the MacCAN family.
+Welcome the [MacCAN-KvaserCAN driver](https://mac-can.github.io/drivers/KvaserCAN/) for CAN interfaces from Kvaser as the next member of the MacCAN family.
 Find its source code on GitHub;
-goto https://github.com/mac-can/MacCAN-KvaserCAN-Library.
+goto https://github.com/mac-can/KvaserCAN-Library.
 
 ## HowTo
 
