@@ -34,7 +34,7 @@ OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/Timer.o $(BINDIR)/libKvaserCAN.a
 
 ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
 
-VERSION = 0.3.1
+VERSION = 0.3.2
 
 TARGET  = can_test
 
