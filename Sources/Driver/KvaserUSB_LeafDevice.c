@@ -629,7 +629,7 @@ CANUSB_Return_t Leaf_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_Can
     if (device->recvData.txAck.cntMsg < device->recvData.txAck.maxMsg)
         device->recvData.txAck.transId = (device->recvData.txAck.transId + 1U) % device->recvData.txAck.maxMsg;
     else
-        return CANUSB_ERROR_FULL;
+        return CANUSB_ERROR_BUSY;
 
     /* channel no. and transaction id */
     uint8_t channel = device->channelNo;

@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -267,7 +267,7 @@ extern CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, uint16_t
 extern CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device_t *device);
 extern CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device);
 
-extern CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_Callback_t callback);
+extern CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_AsyncPipeCbk_t callback);
 extern CANUSB_Return_t KvaserUSB_AbortReception(KvaserUSB_Device_t *device);
 
 extern CANUSB_Return_t KvaserUSB_SendRequest(KvaserUSB_Device_t *device, const uint8_t *buffer, uint32_t nbyte);

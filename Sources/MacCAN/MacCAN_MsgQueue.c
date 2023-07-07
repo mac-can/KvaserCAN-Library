@@ -2,7 +2,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
@@ -63,16 +63,33 @@
                                  ts.tv_sec += (time_t)1; \
                              } } while(0)
 
-#define ENTER_CRITICAL_SECTION(queue)  assert(0 == pthread_mutex_lock(&queue->wait.mutex))
-#define LEAVE_CRITICAL_SECTION(queue)  assert(0 == pthread_mutex_unlock(&queue->wait.mutex))
-
 #define SIGNAL_WAIT_CONDITION(queue,flg)  do{ queue->wait.flag = flg; \
                                                assert(0 == pthread_cond_signal(&queue->wait.cond)); } while(0)
 #define WAIT_CONDITION_INFINITE(queue,res)  do{ queue->wait.flag = false; \
                                                 res = pthread_cond_wait(&queue->wait.cond, &queue->wait.mutex); } while(0)
 #define WAIT_CONDITION_TIMEOUT(queue,abstime,res)  do{ queue->wait.flag = false; \
                                                        res = pthread_cond_timedwait(&queue->wait.cond, &queue->wait.mutex, &abstime); } while(0)
+#define ENTER_CRITICAL_SECTION(queue)  assert(0 == pthread_mutex_lock(&queue->wait.mutex))
+#define LEAVE_CRITICAL_SECTION(queue)  assert(0 == pthread_mutex_unlock(&queue->wait.mutex))
 
+struct msg_queue_tag {                  /* Message Queue (w/ elements of user-defined size): */
+    UInt32 size;                        /* - total number of ring-buffer elements */
+    UInt32 used;                        /* - number of used ring-buffer elements */
+    UInt32 high;                        /* - highest level of the ring-buffer */
+    UInt32 head;                        /* - read position of the ring-buffer */
+    UInt32 tail;                        /* - write position of the ring-buffer */
+    UInt8 *queueElem;                   /* - the ring-buffer itself */
+    size_t elemSize;                    /* - size of one element */
+    struct cond_wait_t {                /* - blocking operation: */
+        pthread_mutex_t mutex;          /*   - a Posix mutex */
+        pthread_cond_t cond;            /*   - a Posix condition */
+        Boolean flag;                   /*   - and a flag */
+    } wait;
+    struct overflow_t {                 /* - overflow events: */
+        Boolean flag;                   /*   - to indicate an overflow */
+        UInt64 counter;                 /*   - overflow counter */
+    } ovfl;
+};
 static Boolean EnqueueElement(CANQUE_MsgQueue_t queue, const void *element);
 static Boolean DequeueElement(CANQUE_MsgQueue_t queue, void *element);
 
@@ -80,14 +97,14 @@ CANQUE_MsgQueue_t CANQUE_Create(size_t numElem, size_t elemSize) {
     CANQUE_MsgQueue_t msgQueue = NULL;
 
     MACCAN_DEBUG_CORE("        - Message queue for %u elements of size %u bytes\n", numElem, elemSize);
-    if ((msgQueue = (CANQUE_MsgQueue_t)malloc(sizeof(struct msg_queue_t_))) == NULL) {
+    if ((msgQueue = (CANQUE_MsgQueue_t)malloc(sizeof(struct msg_queue_tag))) == NULL) {
         MACCAN_DEBUG_ERROR("+++ Unable to create message queue (NULL pointer)\n");
         return NULL;
     }
-    bzero(msgQueue, sizeof(struct msg_queue_t_));
+    bzero(msgQueue, sizeof(struct msg_queue_tag));
     if ((msgQueue->queueElem = calloc(numElem, elemSize))) {
         if ((pthread_mutex_init(&msgQueue->wait.mutex, NULL) == 0) &&
-            (pthread_cond_init(&msgQueue->wait.cond, NULL)) == 0) {
+            (pthread_cond_init(&msgQueue->wait.cond, NULL) == 0)) {
             msgQueue->elemSize = (size_t)elemSize;
             msgQueue->size = (UInt32)numElem;
             msgQueue->wait.flag = false;
@@ -135,7 +152,7 @@ CANQUE_Return_t CANQUE_Signal(CANQUE_MsgQueue_t msgQueue) {
     return retVal;
 }
 
-CANQUE_Return_t CANQUE_Enqueue(CANQUE_MsgQueue_t msgQueue, void const *message/*, UInt16 timeout*/) {
+CANQUE_Return_t CANQUE_Enqueue(CANQUE_MsgQueue_t msgQueue, void const *message) {
     CANQUE_Return_t retVal = CANUSB_ERROR_RESOURCE;
 
     if (message && msgQueue) {
@@ -144,7 +161,7 @@ CANQUE_Return_t CANQUE_Enqueue(CANQUE_MsgQueue_t msgQueue, void const *message/*
             SIGNAL_WAIT_CONDITION(msgQueue, true);
             retVal = CANUSB_SUCCESS;
         } else {
-            retVal = CANUSB_ERROR_FULL;
+            retVal = CANUSB_ERROR_OVERRUN;
         }
         LEAVE_CRITICAL_SECTION(msgQueue);
     } else {
@@ -282,5 +299,5 @@ static Boolean DequeueElement(CANQUE_MsgQueue_t queue, void *element) {
         return false;
 }
 
-/* * $Id: MacCAN_MsgQueue.c 1199 2022-06-19 19:02:00Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgQueue.c 1752 2023-07-06 19:40:46Z makemake $ *** (c) UV Software, Berlin ***
  */

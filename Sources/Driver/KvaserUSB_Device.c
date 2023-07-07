@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -126,7 +126,7 @@ static CANUSB_Return_t GetUsbConfiguration(CANUSB_Handle_t handle, KvaserUSB_Can
         }
     }
     /* set device name, vendor name and website (zero-terminated strings) */
-    if (CANUSB_GetDeviceName(handle, device->name, KVASER_MAX_STRING_LENGTH) < 0)
+    if (CANUSB_GetDeviceUsbName(handle, device->name, KVASER_MAX_STRING_LENGTH) < 0)
         strncpy(device->name, "(unkown)", KVASER_MAX_STRING_LENGTH);
     strncpy(device->vendor, KVASER_COMPANY_NAME, KVASER_MAX_STRING_LENGTH);
     strncpy(device->website, KVASER_WEBSITE_URL, KVASER_MAX_STRING_LENGTH);
@@ -221,7 +221,7 @@ CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device) {
         return CANUSB_ERROR_NULLPTR;
 
     /* abort asynchronous pipe */
-    /*retVal =*/ CANUSB_ReadPipeAsyncAbort(device->recvPipe);
+    /*retVal =*/ CANUSB_AbortPipeAsync(device->recvPipe);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: asynchronous pipe could not be stopped (%i)\n", device->name, device->channelNo+1, retVal);
     /* close the USB device */
@@ -305,7 +305,7 @@ CANUSB_Return_t KvaserUSB_ReadResponse(KvaserUSB_Device_t *device, uint8_t *buff
     return retVal;
 }
 
-CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_Callback_t callback) {
+CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_AsyncPipeCbk_t callback) {
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
 
     /* sanity check */
@@ -315,7 +315,7 @@ CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_Call
         return CANUSB_ERROR_NOTINIT;
 
     /* start asynchronous read on endpoint */
-    retVal = CANUSB_ReadPipeAsyncStart(device->recvPipe, callback, (void*)&device->recvData);
+    retVal = CANUSB_ReadPipeAsync(device->recvPipe, callback, (void*)&device->recvData);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s #%u: reception loop could not be started (%i)\n", device->name, device->channelNo, retVal);
 
@@ -332,7 +332,7 @@ CANUSB_Return_t KvaserUSB_AbortReception(KvaserUSB_Device_t *device) {
         return CANUSB_ERROR_NOTINIT;
 
     /* stop asynchronous read on endpoint */
-    retVal = CANUSB_ReadPipeAsyncAbort(device->recvPipe);
+    retVal = CANUSB_AbortPipeAsync(device->recvPipe);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s #%u: reception loop could not be stopped (%i)\n", device->name, device->channelNo, retVal);
 
