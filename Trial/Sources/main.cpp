@@ -3,6 +3,7 @@
 //  MacCAN-KvaserCAN
 //  Bart Simpson didn´t do it
 //
+#include "KvaserCAN_Defines.h"
 #include "KvaserCAN.h"
 
 #include <stdio.h>
@@ -51,6 +52,8 @@
 
 #if defined(_WIN32) || defined(_WIN64)
  static void usleep(unsigned int usec);
+ /* useconds_t: to be compatible with macOS */
+ typedef unsigned int  useconds_t;
 #endif
 static void sigterm(int signo);
 
@@ -71,18 +74,18 @@ int main(int argc, const char * argv[]) {
     CANAPI_Bitrate_t bitrate = {};
     bitrate.index = CANBTR_INDEX_250K;
     CANAPI_Message_t message = {};
-    message.id = 0x55AU;
+    message.id = 0x000U;
     message.xtd = 0;
     message.rtr = 0;
     message.dlc = CAN_MAX_DLC;
-    message.data[0] = 0x11;
-    message.data[1] = 0x22;
-    message.data[2] = 0x33;
-    message.data[3] = 0x44;
-    message.data[4] = 0x55;
-    message.data[5] = 0x66;
-    message.data[6] = 0x77;
-    message.data[7] = 0x88;
+    message.data[0] = 0x00U;
+    message.data[1] = 0x00U;
+    message.data[2] = 0x00U;
+    message.data[3] = 0x00U;
+    message.data[4] = 0x00U;
+    message.data[5] = 0x00U;
+    message.data[6] = 0x00U;
+    message.data[7] = 0x00U;
     message.timestamp.tv_sec = 0;
     message.timestamp.tv_nsec = 0;
     CANAPI_Return_t retVal = 0;
@@ -91,7 +94,7 @@ int main(int argc, const char * argv[]) {
     useconds_t delay = 0U;
     CCanApi::SChannelInfo info;
     CCanApi::EChannelState state;
-    //int32_t clocks[CANPROP_MAX_BUFFER_SIZE/sizeof(int32_t)];
+//    int32_t clocks[CANPROP_MAX_BUFFER_SIZE/sizeof(int32_t)];
     char szVal[CANPROP_MAX_BUFFER_SIZE];
     uint16_t u16Val;
     uint32_t u32Val;
@@ -108,10 +111,12 @@ int main(int argc, const char * argv[]) {
     int option_stop = OPTION_NO;
     int option_check = ISSUE_198;
     int option_retry = OPTION_NO;
-    int option_repeat = OPTION_NO;
+    int option_reply = OPTION_NO;
     int option_transmit = OPTION_NO;
+//    int option_device_id = OPTION_NO;
 //    int option_trace = OPTION_NO;
     int option_log = OPTION_NO;
+    int option_xor = OPTION_NO;
     uint64_t received = 0ULL;
     uint64_t expected = 0ULL;
     time_t now = time(NULL);
@@ -173,7 +178,8 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "IGNORE")) option_check = OPTION_NO;
 #endif
         if (!strcmp(argv[i], "RETRY")) option_retry = OPTION_YES;
-        if (!strcmp(argv[i], "REPEAT")) option_repeat = OPTION_YES;
+        if (!strcmp(argv[i], "REPLY")) option_reply = OPTION_YES;
+        if (!strcmp(argv[i], "XOR:ON")) option_xor = OPTION_YES;
         if (!strcmp(argv[i], "SILENT")) option_echo = OPTION_NO;
         /* time-stamps */
 //        if (!strcmp(argv[i], "ZERO")) option_time = OPTION_TIME_ZERO;
@@ -198,8 +204,7 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "RTR:OFF")) opMode.nrtr = 1;
     }
     fprintf(stdout, ">>> %s\n", CKvaserCAN::GetVersion());
-
-    if((signal(SIGINT, sigterm) == SIG_ERR) ||
+    if ((signal(SIGINT, sigterm) == SIG_ERR) ||
 #if !defined(_WIN32) && !defined(_WIN64)
        (signal(SIGHUP, sigterm) == SIG_ERR) ||
 #endif
@@ -210,6 +215,7 @@ int main(int argc, const char * argv[]) {
     if (option_log)
         MACCAN_LOG_OPEN();
     MACCAN_LOG_PRINTF("# MacCAN-KvaserCAN - %s", ctime(&now));
+    /* information from library */
     if (option_info) {
         retVal = myDriver.GetProperty(CANPROP_GET_SPEC, (void *)&u16Val, sizeof(uint16_t));
         if (retVal == CCanApi::NoError)
@@ -417,32 +423,54 @@ int main(int argc, const char * argv[]) {
     if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.WriteMessage returned %i\n", retVal);
 #endif
-    if ((option_transmit > 0) && !option_retry)
-        fprintf(stdout, "Attention: The program will be aborted when the transmitter is busy.\n"
-                        "           Use progrsm option RETRY to avoid this.\n");
-    fprintf(stdout, "Press Ctrl+C to abort...\n");
     /* transmit messages */
-    while (running && (option_transmit-- > 0)) {
-        if (!opMode.fdoe) {
-            message.fdf = 0;
-            message.brs = 0;
-            message.dlc = CAN_MAX_DLC;
-        } else {
-            message.fdf = opMode.fdoe;
-            message.brs = opMode.brse;
-            message.dlc = CANFD_MAX_DLC;
+    if (option_transmit) {
+      if (!option_retry)
+          fprintf(stdout, "Attention: The program will be aborted when the transmitter is busy.\n"
+                          "           Use progrsm option RETRY to avoid this.\n");
+        fprintf(stdout, "Press Ctrl+C to abort..."); fflush(stdout);
+        frames = 0;
+        now = time(NULL);
+        while (running && (option_transmit > frames)) {
+            if (!opMode.fdoe) {
+                message.fdf = 0;
+                message.brs = 0;
+                message.dlc = CAN_MAX_DLC;
+            } else {
+                message.fdf = opMode.fdoe;
+                message.brs = opMode.brse;
+                message.dlc = CANFD_MAX_DLC;
+            }
+            message.id = (uint32_t)frames & (message.xtd ? CAN_MAX_XTD_ID : CAN_MAX_STD_ID);
+            message.data[0] = (uint8_t)(((uint64_t)frames & 0x00000000000000FF) >> 0);
+            message.data[1] = (uint8_t)(((uint64_t)frames & 0x000000000000FF00) >> 8);
+            message.data[2] = (uint8_t)(((uint64_t)frames & 0x0000000000FF0000) >> 16);
+            message.data[3] = (uint8_t)(((uint64_t)frames & 0x00000000FF000000) >> 24);
+            message.data[4] = (uint8_t)(((uint64_t)frames & 0x000000FF00000000) >> 32);
+            message.data[5] = (uint8_t)(((uint64_t)frames & 0x0000FF0000000000) >> 40);
+            message.data[6] = (uint8_t)(((uint64_t)frames & 0x00FF000000000000) >> 48);
+            message.data[7] = (uint8_t)(((uint64_t)frames & 0xFF00000000000000) >> 56);
+retry_write:
+            retVal = myDriver.WriteMessage(message);
+            if ((retVal == CCanApi::TransmitterBusy) && option_retry)
+                goto retry_write;
+            else if (retVal != CCanApi::NoError) {
+                fprintf(stderr, "\n+++ error: myDriver.WriteMessage returned %i\n", retVal);
+                goto teardown;
+            }
+            if (delay)
+                usleep(delay);
+            frames++;
         }
-retry:
-        retVal = myDriver.WriteMessage(message);
-        if ((retVal == CCanApi::TransmitterBusy) && option_retry)
-            goto retry;
-        else if (retVal != CCanApi::NoError) {
-            fprintf(stderr, "+++ error: myDriver.WriteMessage returned %i\n", retVal);
-            goto teardown;
+        fprintf(stdout, "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
+        if (myDriver.GetStatus(status) == CCanApi::NoError) {
+            fprintf(stdout, ">>> myDriver.WriteMessage: status = 0x%02X\n", status.byte);
         }
-        if (delay)
-            usleep(delay);
+        fprintf(stdout, "    %i message(s) sent (took %.1lfs)\n", frames, difftime(time(NULL), now));
     }
+    /* receiving message */
+    fprintf(stdout, "Press Ctrl+C to abort...\n");
+    frames = 0;
     while (running) {
         if ((retVal = myDriver.ReadMessage(message, timeout)) == CCanApi::NoError) {
             if (option_echo) {
@@ -457,13 +485,6 @@ retry:
                     fprintf(stdout, " %02x", message.data[i]);
                 if (message.sts)
                     fprintf(stdout, " <<< status frame");
-                else if (option_repeat) {
-                    retVal = myDriver.WriteMessage(message);
-                    if (retVal != CCanApi::NoError) {
-                        fprintf(stderr, "+++ error: myDriver.WriteMessage returned %i\n", retVal);
-                        goto teardown;
-                    }
-                }
                 fprintf(stdout, "\n");
             } else {
                 if (!(frames++ % 2048)) {
@@ -489,6 +510,22 @@ retry:
                         goto teardown;
                 }
                 expected = received + 1;
+            }
+            if (option_reply) {
+                if (option_xor)
+                    message.id = (message.id ^ UINT32_MAX) & (message.xtd ? CAN_MAX_XTD_ID : CAN_MAX_STD_ID);
+                else
+                    message.id = message.xtd ? ((message.id + 0x10000000U) & CAN_MAX_XTD_ID) : ((message.id + 0x400U) & CAN_MAX_STD_ID);
+                for (uint8_t i = 0; i < CCanApi::Dlc2Len(message.dlc); i++)
+                    message.data[i] = message.data[i] ^ 0xFFU;
+retry_reply:
+                retVal = myDriver.WriteMessage(message);
+                if ((retVal == CCanApi::TransmitterBusy) && option_retry)
+                    goto retry_reply;
+                else if (retVal != CCanApi::NoError) {
+                    fprintf(stderr, "+++ error: myDriver.WriteMessage returned %i\n", retVal);
+                    goto teardown;
+                }
             }
         }
         else if (retVal != CCanApi::ReceiverEmpty) {
@@ -589,10 +626,10 @@ end:
 
 static void verbose(const can_mode_t &mode, const can_bitrate_t &bitrate, const can_speed_t &speed)
 {
-    fprintf(stdout, "Op.-Mode: 0x%02X (fdoe=%u,brse=%u,niso=%u,shrd=%u,nxtd=%u,nrtr=%u,err=%u,mon=%u)\n",
+    fprintf(stdout, "    Op.-Mode: 0x%02X (fdoe=%u,brse=%u,niso=%u,shrd=%u,nxtd=%u,nrtr=%u,err=%u,mon=%u)\n",
             mode.byte, mode.fdoe, mode.brse, mode.niso, mode.shrd, mode.nxtd, mode.nrtr, mode.err, mode.mon);
     if (bitrate.btr.frequency > 0) {
-        fprintf(stdout, "Baudrate: %.0fkbps@%.1f%%",
+        fprintf(stdout, "    Baudrate: %.0fkbps@%.1f%%",
             speed.nominal.speed / 1000., speed.nominal.samplepoint * 100.);
         if (/*speed.data.brse*/mode.fdoe && mode.brse)
             fprintf(stdout, ":%.0fkbps@%.1f%%",
@@ -613,7 +650,7 @@ static void verbose(const can_mode_t &mode, const can_bitrate_t &bitrate, const 
         fprintf(stdout, ")\n");
     }
     else {
-        fprintf(stdout, "Baudrate: %skbps (CiA index %i)\n",
+        fprintf(stdout, "    Baudrate: %skbps (CiA index %i)\n",
             bitrate.index == CANBDR_1000 ? "1000" :
             bitrate.index == -CANBDR_800 ? "800" :
             bitrate.index == -CANBDR_500 ? "500" :
