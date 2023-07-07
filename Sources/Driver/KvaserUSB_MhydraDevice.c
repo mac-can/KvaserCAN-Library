@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2021-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2021-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -57,6 +57,7 @@
 #include <assert.h>
 
 #include "MacCAN_Debug.h"
+#include <inttypes.h>
 
 #ifndef OPTION_PRINT_DEVICE_INFO
 #define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
@@ -317,6 +318,15 @@ CANUSB_Return_t Mhydra_TeardownChannel(KvaserUSB_Device_t *device) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): reception loop could not be aborted (%i)\n", device->name, device->handle, retVal);
         return retVal;
     }
+    /* now we are off :( */
+    MACCAN_DEBUG_DRIVER("Statistical data:\n");
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" CAN frame(s) written to endpoint\n", device->sendData.msgCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" error(s) while writing to endpoint\n", device->sendData.errCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" CAN frame(s) received and enqueued\n", device->recvData.msgCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" error event(s) received and encoded\n", device->recvData.errCounter);
+    MACCAN_DEBUG_DRIVER("%10.1f%% highest level of the receive queue\n", ((float)CANQUE_QueueHigh(device->recvData.msgQueue) * 100.0) \
+                                                                       /  (float)CANQUE_QueueSize(device->recvData.msgQueue));
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" overrun event(s) of the receive queue\n", CANQUE_OverflowCounter(device->recvData.msgQueue));
     return retVal;
 }
 
@@ -956,6 +966,11 @@ CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_C
         /* one more transmit message pending*/
         device->recvData.txAck.cntMsg++;
     }
+    /* counting */
+    if (retVal == CANUSB_SUCCESS)
+        device->sendData.msgCounter++;
+    else
+        device->sendData.errCounter++;
     return retVal;
 }
 
@@ -1493,6 +1508,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                     if (CMD_ERROR_EVENT == hydra->buffer[index]) {
                         (void)CANPIP_Write(context->msgPipe, &hydra->buffer[index], nbyte);
                     }
+                    context->errCounter++;
                     break;
                 case CMD_GET_BUSPARAMS_RESP:
                 case CMD_GET_DRIVERMODE_RESP:
@@ -1527,7 +1543,8 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                                     break;
                                 if (message.sts && !(context->opMode & CANMODE_ERR))
                                     break;
-                                (void)CANQUE_Enqueue(context->msgQueue, (void*)&message);
+                                if (CANQUE_Enqueue(context->msgQueue, (void*)&message) == CANUSB_SUCCESS)
+                                    context->msgCounter++;
                             } else {
                                 /* there are flags that do not belong to a received CAN message */
                                 (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->timerFreq);
