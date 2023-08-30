@@ -2,7 +2,7 @@
 //
 //  CAN Monitor for Kvaser CAN Interfaces
 //
-//  Copyright (c) 2007,2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2007,2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #error Unsupported architecture
 #endif
 static const char APPLICATION[] = "CAN Monitor for Kvaser CAN Interfaces, Version " VERSION_STRING;
-static const char COPYRIGHT[]   = "Copyright (c) 2007,2020-2022 by Uwe Vogt, UV Software, Berlin";
+static const char COPYRIGHT[]   = "Copyright (c) 2007,2020-2023 by Uwe Vogt, UV Software, Berlin";
 static const char WARRANTY[]    = "This program comes with ABSOLUTELY NO WARRANTY!\n\n" \
                                   "This is free software, and you are welcome to redistribute it\n" \
                                   "under certain conditions; type `--version' for details.";
@@ -84,34 +84,6 @@ public:
 public:
     static int ListCanDevices(void);
     static int TestCanDevices(CANAPI_OpMode_t opMode);
-#if (0)
-    // list of CAN interface vendors
-    static const struct TCanVendor {
-        int32_t id;
-        char *name;
-    } m_CanVendors[];
-    // list of CAN interface devices
-    static const struct TCanDevice {
-        int32_t library;
-        int32_t adapter;
-        char *name;
-    } m_CanDevices[];
-};
-const CCanDriver::TCanVendor CCanDriver::m_CanVendors[] = {
-    {KVASERCAN_LIBRARY_ID, (char *)"Kvaser" },
-    {EOF, NULL}
-};
-const CCanDriver::TCanDevice CCanDriver::m_CanDevices[] = {
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL0, (char *)"Kvaser CAN Channel 0" },
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL1, (char *)"Kvaser CAN Channel 1" },
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL2, (char *)"Kvaser CAN Channel 2" },
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL3, (char *)"Kvaser CAN Channel 3" },
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL4, (char *)"Kvaser CAN Channel 4" },
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL5, (char *)"Kvaser CAN Channel 5" },
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL6, (char *)"Kvaser CAN Channel 6" },
-    {KVASERCAN_LIBRARY_ID, KVASER_CAN_CHANNEL7, (char *)"Kvaser CAN Channel 7" },
-    {EOF, EOF, NULL}
-#endif
 };
 
 static void sigterm(int signo);
@@ -141,6 +113,7 @@ int main(int argc, const char * argv[]) {
     int num_boards = 0;
     int show_version = 0;
     char *device, *firmware, *software;
+    char property[CANPROP_MAX_BUFFER_SIZE] = "";
     struct option long_options[] = {
         {"baudrate", required_argument, 0, 'b'},
         {"bitrate", required_argument, 0, 'B'},
@@ -159,14 +132,16 @@ int main(int argc, const char * argv[]) {
         {"wraparound", required_argument, 0, 'w'},
         {"exclude", required_argument, 0, 'x'},
         {"script", required_argument, 0, 's'},
-        {"list-boards", optional_argument, 0, 'L'},
-        {"test-boards", optional_argument, 0, 'T'},
+        {"list-boards", no_argument, 0, 'L'},
+        {"test-boards", no_argument, 0, 'T'},
         {"help", no_argument, 0, 'h'},
         {"version", no_argument, &show_version, 1},
         {0, 0, 0, 0}
     };
     CANAPI_Bitrate_t bitrate = {};
     bitrate.index = CANBTR_INDEX_250K;
+    bool hasDataPhase = false;
+    bool hasNoSamp = true;
     CANAPI_OpMode_t opMode = {};
     opMode.byte = CANMODE_DEFAULT;
     CANAPI_Return_t retVal = 0;
@@ -214,16 +189,16 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             switch (baudrate) {
-                case 1000: case 1000000: bitrate.index = (int32_t)CANBTR_INDEX_1M; break;
-                case 800:  case 800000:  bitrate.index = (int32_t)CANBTR_INDEX_800K; break;
-                case 500:  case 500000:  bitrate.index = (int32_t)CANBTR_INDEX_500K; break;
-                case 250:  case 250000:  bitrate.index = (int32_t)CANBTR_INDEX_250K; break;
-                case 125:  case 125000:  bitrate.index = (int32_t)CANBTR_INDEX_125K; break;
-                case 100:  case 100000:  bitrate.index = (int32_t)CANBTR_INDEX_100K; break;
-                case 50:   case 50000:   bitrate.index = (int32_t)CANBTR_INDEX_50K; break;
-                case 20:   case 20000:   bitrate.index = (int32_t)CANBTR_INDEX_20K; break;
-                case 10:   case 10000:   bitrate.index = (int32_t)CANBTR_INDEX_10K; break;
-                default:                 bitrate.index = (int32_t)-baudrate; break;
+                case 0: case 1000: case 1000000: bitrate.index = (int32_t)CANBTR_INDEX_1M; break;
+                case 1: case 800:  case 800000:  bitrate.index = (int32_t)CANBTR_INDEX_800K; break;
+                case 2: case 500:  case 500000:  bitrate.index = (int32_t)CANBTR_INDEX_500K; break;
+                case 3: case 250:  case 250000:  bitrate.index = (int32_t)CANBTR_INDEX_250K; break;
+                case 4: case 125:  case 125000:  bitrate.index = (int32_t)CANBTR_INDEX_125K; break;
+                case 5: case 100:  case 100000:  bitrate.index = (int32_t)CANBTR_INDEX_100K; break;
+                case 6: case 50:   case 50000:   bitrate.index = (int32_t)CANBTR_INDEX_50K; break;
+                case 7: case 20:   case 20000:   bitrate.index = (int32_t)CANBTR_INDEX_20K; break;
+                case 8: case 10:   case 10000:   bitrate.index = (int32_t)CANBTR_INDEX_10K; break;
+                default:                         bitrate.index = (int32_t)-baudrate; break;
             }
             if (CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
@@ -234,16 +209,12 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
-        case 'B':
+        case 'B':  /* option `--bitrate=<bit-rate>' as string */
             if (bd++) {
                 fprintf(stderr, "%s: duplicated option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--bitrate' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (CCanDriver::MapString2Bitrate(optarg, bitrate) != CCanApi::NoError) {
+            if (CCanDriver::MapString2Bitrate(optarg, bitrate, hasDataPhase, hasNoSamp) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
@@ -260,13 +231,9 @@ int main(int argc, const char * argv[]) {
             verbose = 1;
             break;
 #if (OPTION_CAN_2_0_ONLY == 0)
-        case 'm':
+        case 'm':  /* option `--mode=(2.0|FDF[+BSR])' (-m)*/
             if (op++) {
                 fprintf(stderr, "%s: duplicated option `--mode' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--mode' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
             if (!strcasecmp(optarg, "default") || !strcasecmp(optarg, "classic") ||
@@ -317,13 +284,9 @@ int main(int argc, const char * argv[]) {
             }
             opMode.nrtr = 1;
             break;
-        case 't':
+        case 't':  /* option `--time=(ABS|REL|ZERO)' (-t) */
             if (mt++) {
                 fprintf(stderr, "%s: duplicated option `--time' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--time' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
             if (!strcasecmp(optarg, "ABSOLUTE") || !strcasecmp(optarg, "ABS") || !strcasecmp(optarg, "a"))
@@ -341,13 +304,9 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
-        case 'i':
+        case 'i':  /* option `--id=(HEX|DEC|OCT)' (-i) */
             if (mi++) {
                 fprintf(stderr, "%s: duplicated option `--id' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--id' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
             if (!strcasecmp(optarg, "HEXADECIMAL") || !strcasecmp(optarg, "HEX") || !strcasecmp(optarg, "h") || !strcasecmp(optarg, "16"))
@@ -365,13 +324,9 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
-        case 'd':
+        case 'd':  /* option `--data=(HEX|DEC|OCT)' (-d) */
             if (md++) {
                 fprintf(stderr, "%s: duplicated option `--data' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--data' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
             if (!strcasecmp(optarg, "HEXADECIMAL") || !strcasecmp(optarg, "HEX") || !strcasecmp(optarg, "h") || !strcasecmp(optarg, "16"))
@@ -389,13 +344,9 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
-        case 'a':
+        case 'a':  /* option `--ascii=(ON|OFF)' (-a) */
             if (ma++) {
                 fprintf(stderr, "%s: duplicated option `--ascii' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--ascii' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
             if (!strcasecmp(optarg, "OFF") || !strcasecmp(optarg, "NO") || !strcasecmp(optarg, "n") || !strcasecmp(optarg, "0"))
@@ -411,13 +362,9 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
-        case 'w':
+        case 'w':  /* option `--wrap=....' (-w) */
             if (mw++) {
                 fprintf(stderr, "%s: duplicated option `--wrap' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--wrap' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
             if (!strcasecmp(optarg, "NO") || !strcasecmp(optarg, "n") || !strcasecmp(optarg, "0"))
@@ -441,13 +388,9 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
-        case 'x':
+        case 'x':  /* option `--exclude=[~]<id-list>' (-x) */
             if (exclude++) {
                 fprintf(stderr, "%s: duplicated option `--exclude' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--exclude' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
             if (!get_exclusion(optarg)) {
@@ -467,7 +410,7 @@ int main(int argc, const char * argv[]) {
             num_boards = CCanDriver::TestCanDevices(opMode/*, optarg*/);
             fprintf(stdout, "Number of present CAN interfaces: %i\n", num_boards);
             return (num_boards >= 0) ? 0 : 1;
-        case 'h':
+        case 'h':  /* option `--help' (-h) */
             usage(stdout, basename(argv[0]));
             return 0;
         case '?':
@@ -493,7 +436,7 @@ int main(int argc, const char * argv[]) {
             fprintf(stderr, "%s: too many arguments given\n", basename(argv[0]));
         return 1;
     }
-#if (1)
+    /* - search the <interface> by its name in the device list */
     bool result = CCanDriver::GetFirstChannel(channel);
     while (result) {
         if (strcasecmp(argv[optind], channel.m_szDeviceName) == 0) {
@@ -505,17 +448,6 @@ int main(int argc, const char * argv[]) {
         fprintf(stderr, "%s: illegal argument `%s'\n", basename(argv[0]), argv[optind]);
         return 1;
     }
-#else
-    for (channel = 0; CCanDriver::m_CanDevices[channel].adapter != EOF; channel++) {
-        if (strcasecmp(argv[optind], CCanDriver::m_CanDevices[channel].name) == 0) {
-            break;
-        }
-    }
-    if (CCanDriver::m_CanDevices[channel].adapter == EOF) {
-        fprintf(stderr, "%s: illegal argument `%s'\n", basename(argv[0]), argv[optind]);
-        return 1;
-    }
-#endif
     /* - check bit-timing index (n/a for CAN FD) */
     if (opMode.fdoe && (bitrate.btr.frequency <= 0)) {
         fprintf(stderr, "%s: illegal combination of options `--mode' (m) and `--bitrate'\n", basename(argv[0]));
@@ -539,25 +471,13 @@ int main(int argc, const char * argv[]) {
             fprintf(stdout, "Bit-rate=%.0fkbps@%.1f%%",
                 speed.nominal.speed / 1000.,
                 speed.nominal.samplepoint * 100.);
-            if (speed.data.brse)
+            if (opMode.byte & CANMODE_BRSE)
                 fprintf(stdout, ":%.0fkbps@%.1f%%",
                     speed.data.speed / 1000.,
                     speed.data.samplepoint * 100.);
-            fprintf(stdout, " (f_clock=%i,nom_brp=%u,nom_tseg1=%u,nom_tseg2=%u,nom_sjw=%u",
-                bitrate.btr.frequency,
-                bitrate.btr.nominal.brp,
-                bitrate.btr.nominal.tseg1,
-                bitrate.btr.nominal.tseg2,
-                bitrate.btr.nominal.sjw);
-            if (speed.data.brse)
-                fprintf(stdout, ",data_brp=%u,data_tseg1=%u,data_tseg2=%u,data_sjw=%u",
-                    bitrate.btr.data.brp,
-                    bitrate.btr.data.tseg1,
-                    bitrate.btr.data.tseg2,
-                    bitrate.btr.data.sjw);
-            else
-                fprintf(stdout, ",nom_sam=%u", bitrate.btr.nominal.sam);
-            fprintf(stdout, ")\n\n");
+            (void)CCanDriver::MapBitrate2String(bitrate, property, CANPROP_MAX_BUFFER_SIZE,
+                                                (opMode.byte & CANMODE_BRSE), hasNoSamp);
+            fprintf(stdout, " (%s)\n\n", property);
         }
         else {
             fprintf(stdout, "Baudrate=%.0fkbps@%.1f%% (index %i)\n\n",
@@ -566,31 +486,25 @@ int main(int argc, const char * argv[]) {
         }
     }
     /* - initialize interface */
-#if (1)
     fprintf(stdout, "Hardware=%s...", channel.m_szDeviceName);
     fflush (stdout);
     retVal = canDriver.InitializeChannel(channel.m_nChannelNo, opMode);
-#else
-    fprintf(stdout, "Hardware=%s...", CCanDriver::m_CanDevices[channel].name);
-    fflush (stdout);
-    retVal = canDriver.InitializeChannel(CCanDriver::m_CanDevices[channel].adapter, opMode);
-#endif
     if (retVal != CCanApi::NoError) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be initialized (%i)", retVal);
         if (retVal == CCanApi::NotSupported)
-            fprintf(stderr, " - possibly CAN operating mode %02Xh not supported", opMode.byte);
+            fprintf(stderr, "\n           - possibly CAN operating mode %02Xh not supported", opMode.byte);
         fputc('\n', stderr);
         goto finalize;
     }
     fprintf(stdout, "OK!\n");
     /* - start communication */
     if (bitrate.btr.frequency > 0) {
-        fprintf(stdout, "Bit-rate=%.0fkbps",
-            speed.nominal.speed / 1000.);
-        if (speed.data.brse)
-            fprintf(stdout, ":%.0fkbps",
-                speed.data.speed / 1000.);
+        fprintf(stdout, "Bit-rate=%.0fkbps", speed.nominal.speed / 1000.);
+        if (opMode.byte & CANMODE_BRSE)
+            fprintf(stdout, ":%.0fkbps", speed.data.speed / 1000.);
+        else if (opMode.byte & CANMODE_FDOE)
+            fprintf(stdout, ":%.0fkbps", speed.nominal.speed / 1000.);
         fprintf(stdout, "...");
     }
     else {
@@ -613,7 +527,7 @@ int main(int argc, const char * argv[]) {
         goto teardown;
     }
     fprintf(stdout, "OK!\n");
-    /* - do your job well: */
+    /* - reception loop */
     canDriver.ReceptionLoop();
     /* - show interface information */
     if ((device = canDriver.GetHardwareVersion()) != NULL)

@@ -1,7 +1,7 @@
 #
 #	CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 #
-#	Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2017-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
 #
 #	This file is part of MacCAN-KvaserCAN.
@@ -164,9 +164,11 @@ bindir:
 incdir:
 	@mkdir -p $(INCDIR)
 	@cp $(SOURCE_DIR)/KvaserCAN_Defines.h $(INCDIR)
+	@cp $(SOURCE_DIR)/KvaserCAN_Defaults.h $(INCDIR)
 	@cp $(CANAPI_DIR)/can_api.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Types.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Defines.h $(INCDIR)
+	@cp $(CANAPI_DIR)/CANBTR_Defaults.h $(INCDIR)
 
 clean:
 	$(RM) $(TARGET) $(STATIC) $(OUTDIR)/*.o $(OUTDIR)/*.d

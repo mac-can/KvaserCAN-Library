@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 //
-//  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -49,6 +49,7 @@
 #define KVASERCAN_H_INCLUDED
 
 #include "KvaserCAN_Defines.h"
+#include "KvaserCAN_Defaults.h"
 #include "CANAPI.h"
 
 /// \name   KvaserCAN
@@ -62,7 +63,7 @@
 #endif
 #define KVASERCAN_LIBRARY_VENDOR  "UV Software, Berlin"
 #define KVASERCAN_LIBRARY_LICENSE  "BSD-2-Clause OR GPL-3.0-or-later"
-#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2020-2022  Uwe Vogt, UV Software, Berlin"
+#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin"
 #define KVASERCAN_LIBRARY_HAZARD_NOTE  "If you connect your CAN device to a real CAN network when using this library,\n" \
                                        "you might damage your application."
 /// \}
@@ -122,8 +123,8 @@ public:
     static char *GetVersion();  // (for compatibility reasons)
 
     static CANAPI_Return_t MapIndex2Bitrate(int32_t index, CANAPI_Bitrate_t &bitrate);
-    static CANAPI_Return_t MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate);
-    static CANAPI_Return_t MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length);
+    static CANAPI_Return_t MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate, bool &data, bool &sam);
+    static CANAPI_Return_t MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length, bool data = false, bool sam = false);
     static CANAPI_Return_t MapBitrate2Speed(CANAPI_Bitrate_t bitrate, CANAPI_BusSpeed_t &speed);
 private:
     CANAPI_Return_t MapBitrate2Sja1000(CANAPI_Bitrate_t bitrate, uint16_t &btr0btr1);

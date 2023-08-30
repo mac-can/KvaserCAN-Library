@@ -1,24 +1,24 @@
 ### CAN Interface API, Version 3
 
-_Copyright &copy; 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)_ \
+_Copyright &copy; 2004-2023  Uwe Vogt, UV Software, Berlin (info@uv-software.com)_ \
 _All rights reserved._
 
-Version $Rev: 1085 $
+Version $Rev: 1155 $
 
 # A CAN Interface Wrapper Specification
 
 Originally, the CAN Interface API was based on a CAN interface definition as part of a microcontroller hardware abstraction layer for an 82527-compatible on-chip CAN controller.
-It was developed for use by (simple hand-coded) CANopen applications and migrated to different microcontroller types (even if the CAN peripherals on the micro had a different design).
+It was developed for use by (simple hand-coded) CANopen applications and migrated to different microcontroller types (even if the CAN peripherals on that micro had a different design).
 
 ## CAN API V1
 
 What works on microcontrollers should also work on PC.
-So I started to use this interface definition as a wrapper specification for different CAN devices from various vendors: e.g. for IXXAT, PEAK, Vector, Kvaser, and also for Linux-CAN (aka SocketCAN).
+I started to use this interface definition as a wrapper specification for different CAN devices from various vendors: e.g. for IXXAT, PEAK, Vector, Kvaser, and also for Linux-CAN (aka SocketCAN).
 
 ## CAN API V2
 
 Dealing around with 14 virtual Basic-CAN messages boxes and a FIFO upon a virtual Full-CAN message box was a little bit over-engineered and error-prone.
-So I optimized the interface definition to have an easy to use API following an _init-start-read-write-stop-exit_ pattern.
+I optimized the interface definition to have an easy to use API following an _init-start-read-write-stop-exit_ pattern.
 
 ## CAN API V3
 

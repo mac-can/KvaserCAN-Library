@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 //
-//  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -339,23 +339,18 @@ CANAPI_Return_t CKvaserCAN::MapIndex2Bitrate(int32_t index, CANAPI_Bitrate_t &bi
 }
 
 EXPORT
-CANAPI_Return_t CKvaserCAN::MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate) {
-    bool brse = false;
-    // TODO: rework function 'btr_string2bitrate'
-    return (CANAPI_Return_t)btr_string2bitrate((btr_string_t)string, &bitrate, &brse);
+CANAPI_Return_t CKvaserCAN::MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate, bool &data, bool &sam) {
+    return (CANAPI_Return_t)btr_string2bitrate((btr_string_t)string, &bitrate, &data, &sam);
 }
 
 EXPORT
-CANAPI_Return_t CKvaserCAN::MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length) {
-    (void) length;
-    // TODO: rework function 'btr_bitrate2string'
-    return (CANAPI_Return_t)btr_bitrate2string(&bitrate, false, (btr_string_t)string);
+CANAPI_Return_t CKvaserCAN::MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length, bool data, bool sam) {
+    return (CANAPI_Return_t)btr_bitrate2string(&bitrate, data, sam, (btr_string_t)string, length);
 }
 
 EXPORT
 CANAPI_Return_t CKvaserCAN::MapBitrate2Speed(CANAPI_Bitrate_t bitrate, CANAPI_BusSpeed_t &speed) {
-    // TODO: rework function 'btr_bitrate2speed'
-    return (CANAPI_Return_t)btr_bitrate2speed(&bitrate, false, false, &speed);
+    return (CANAPI_Return_t)btr_bitrate2speed(&bitrate, &speed);
 }
 
 //  Private methodes

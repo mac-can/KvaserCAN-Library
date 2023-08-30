@@ -4,6 +4,7 @@
 //  Bart Simpson didn´t do it
 //
 #include "KvaserCAN_Defines.h"
+#include "KvaserCAN_Defaults.h"
 #include "KvaserCAN.h"
 
 #include <stdio.h>
@@ -23,25 +24,48 @@
 //#define SECOND_CHANNEL
 #define ISSUE_198   (0)
 
-#define BITRATE_1M(x)         do{ x.btr.frequency=8000000; x.btr.nominal.brp= 1; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_800K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 1; x.btr.nominal.tseg1= 7; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_500K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 2; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_250K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 4; x.btr.nominal.tseg1= 5; x.btr.nominal.tseg2= 2; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_125K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 4; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_100K(x)       do{ x.btr.frequency=8000000; x.btr.nominal.brp= 5; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_50K(x)        do{ x.btr.frequency=8000000; x.btr.nominal.brp=10; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_20K(x)        do{ x.btr.frequency=8000000; x.btr.nominal.brp=25; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_10K(x)        do{ x.btr.frequency=8000000; x.btr.nominal.brp=50; x.btr.nominal.tseg1=11; x.btr.nominal.tseg2= 4; x.btr.nominal.sjw= 1; x.btr.nominal.sam=0; } while(0)
-
-#define BITRATE_FD_1M(x)      do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_FD_500K(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_FD_250K(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_FD_125K(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=8; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; } while(0)
-#define BITRATE_FD_1M8M(x)    do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=31; x.btr.nominal.tseg2= 8; x.btr.nominal.sjw= 8; x.btr.nominal.sam=0; x.btr.data.brp=1; x.btr.data.tseg1= 7; x.btr.data.tseg2=2; x.btr.data.sjw=1; } while(0)
-#define BITRATE_FD_500K4M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=2; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1= 7; x.btr.data.tseg2=2; x.btr.data.sjw=2; } while(0)
-#define BITRATE_FD_250K2M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=4; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1=15; x.btr.data.tseg2=4; x.btr.data.sjw=4; } while(0)
-#define BITRATE_FD_125K1M(x)  do{ x.btr.frequency=80000000; x.btr.nominal.brp=8; x.btr.nominal.tseg1=63; x.btr.nominal.tseg2=16; x.btr.nominal.sjw=16; x.btr.nominal.sam=0; x.btr.data.brp=2; x.btr.data.tseg1=31; x.btr.data.tseg2=8; x.btr.data.sjw=8; } while(0)
-
+#if (1)
+#define BITRATE_1M(x)    KVASER_CAN_BR_1M(x)
+#define BITRATE_800K(x)  KVASER_CAN_BR_800K(x)
+#define BITRATE_500K(x)  KVASER_CAN_BR_500K(x)
+#define BITRATE_250K(x)  KVASER_CAN_BR_250K(x)
+#define BITRATE_125K(x)  KVASER_CAN_BR_125K(x)
+#define BITRATE_100K(x)  KVASER_CAN_BR_100K(x)
+#define BITRATE_50K(x)   KVASER_CAN_BR_50K(x)
+#define BITRATE_20K(x)   KVASER_CAN_BR_20K(x)
+#define BITRATE_10K(x)   KVASER_CAN_BR_10K(x)
+#define BITRATE_5K(x)    KVASER_CAN_BR_5K(x)
+#else
+#define BITRATE_1M(x)    DEFAULT_CAN_BR_1M(x)  
+#define BITRATE_800K(x)  DEFAULT_CAN_BR_800K(x)
+#define BITRATE_500K(x)  DEFAULT_CAN_BR_500K(x)
+#define BITRATE_250K(x)  DEFAULT_CAN_BR_250K(x)
+#define BITRATE_125K(x)  DEFAULT_CAN_BR_125K(x)
+#define BITRATE_100K(x)  DEFAULT_CAN_BR_100K(x)
+#define BITRATE_50K(x)   DEFAULT_CAN_BR_50K(x) 
+#define BITRATE_20K(x)   DEFAULT_CAN_BR_20K(x) 
+#define BITRATE_10K(x)   DEFAULT_CAN_BR_10K(x) 
+#define BITRATE_5K(x)    DEFAULT_CAN_BR_5K(x)  
+#endif
+#if (1)
+#define BITRATE_FD_1M(x)      KVASER_CAN_FD_BR_1M(x)
+#define BITRATE_FD_500K(x)    KVASER_CAN_FD_BR_500K(x)
+#define BITRATE_FD_250K(x)    KVASER_CAN_FD_BR_250K(x)
+#define BITRATE_FD_125K(x)    KVASER_CAN_FD_BR_125K(x)
+#define BITRATE_FD_1M8M(x)    KVASER_CAN_FD_BR_1M8M(x)
+#define BITRATE_FD_500K4M(x)  KVASER_CAN_FD_BR_500K4M(x)
+#define BITRATE_FD_250K2M(x)  KVASER_CAN_FD_BR_250K2M(x)
+#define BITRATE_FD_125K1M(x)  KVASER_CAN_FD_BR_125K1M(x)
+#else
+#define BITRATE_FD_1M(x)      DEFAULT_CAN_FD_BR_1M(x)
+#define BITRATE_FD_500K(x)    DEFAULT_CAN_FD_BR_500K(x)
+#define BITRATE_FD_250K(x)    DEFAULT_CAN_FD_BR_250K(x)
+#define BITRATE_FD_125K(x)    DEFAULT_CAN_FD_BR_125K(x)
+#define BITRATE_FD_1M8M(x)    DEFAULT_CAN_FD_BR_1M8M(x)
+#define BITRATE_FD_500K4M(x)  DEFAULT_CAN_FD_BR_500K4M(x)
+#define BITRATE_FD_250K2M(x)  DEFAULT_CAN_FD_BR_250K2M(x)
+#define BITRATE_FD_125K1M(x)  DEFAULT_CAN_FD_BR_125K1M(x)
+#endif
 #define OPTION_NO   (0)
 #define OPTION_YES  (1)
 
@@ -150,6 +174,7 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "BD:50K")) BITRATE_50K(bitrate);
         if (!strcmp(argv[i], "BD:20K")) BITRATE_20K(bitrate);
         if (!strcmp(argv[i], "BD:10K")) BITRATE_10K(bitrate);
+//        if (!strcmp(argv[i], "BD:5K")) BITRATE_5K(bitrate);
         /* CAN FD operation */
         if (!strcmp(argv[i], "CANFD") || !strcmp(argv[i], "FD")) opMode.fdoe = 1;
         if (!strcmp(argv[i], "FDF")) opMode.fdoe = 1;
@@ -234,7 +259,7 @@ int main(int argc, const char * argv[]) {
             fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_PATCH_NO) returned %i\n", retVal);
         retVal = myDriver.GetProperty(CANPROP_GET_BUILD_NO, (void *)&u32Val, sizeof(uint32_t));
         if (retVal == CCanApi::NoError)
-            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_BUILD_NO): value = %" PRIx32 "\n", u32Val);
+            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_BUILD_NO): value = 0x%07" PRIx32 "\n", u32Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_BUILD_NO) returned %i\n", retVal);
         retVal = myDriver.GetProperty(CANPROP_GET_LIBRARY_ID, (void *)&i32Val, sizeof(int32_t));
@@ -383,6 +408,13 @@ int main(int argc, const char * argv[]) {
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_DEVICE_DLLNAME) returned %i\n", retVal);
         /* vendor-specific properties */
+#if (0)
+        retVal = myDriver.GetProperty(KVASERCAN_PROPERTY_SERIAL_NUMBER, (void *)szVal, CANPROP_MAX_BUFFER_SIZE);
+        if (retVal == CCanApi::NoError)
+            fprintf(stdout, ">>> myDriver.GetProperty(KVASERCAN_PROPERTY_SERIAL_NUMBER): value = '%s'\n", szVal);
+        else
+            fprintf(stderr, "+++ error: myDriver.GetProperty(KVASERCAN_PROPERTY_SERIAL_NUMBER) returned %i\n", retVal);
+#endif
         retVal = myDriver.GetProperty(CANPROP_GET_CAN_CLOCK, (void *)&i32Val, sizeof(int32_t));
         if (retVal == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_CAN_CLOCK): value = %d\n", i32Val);
@@ -425,9 +457,9 @@ int main(int argc, const char * argv[]) {
 #endif
     /* transmit messages */
     if (option_transmit) {
-      if (!option_retry)
-          fprintf(stdout, "Attention: The program will be aborted when the transmitter is busy.\n"
-                          "           Use progrsm option RETRY to avoid this.\n");
+        if (!option_retry)
+            fprintf(stdout, "Attention: The program will be aborted when the transmitter is busy.\n"
+                            "           Use progrsm option RETRY to avoid this.\n");
         fprintf(stdout, "Press Ctrl+C to abort..."); fflush(stdout);
         frames = 0;
         now = time(NULL);
@@ -483,8 +515,12 @@ retry_write:
                             message.fdf ? 'F' : ' ', message.brs ? 'B' : ' ', message.esi ? 'E' :' ', CCanApi::Dlc2Len(message.dlc));
                 for (uint8_t i = 0; i < CCanApi::Dlc2Len(message.dlc); i++)
                     fprintf(stdout, " %02x", message.data[i]);
-                if (message.sts)
+                if (message.sts) {
                     fprintf(stdout, " <<< status frame");
+                    if (myDriver.GetStatus(status) == CCanApi::NoError) {
+                        fprintf(stdout, " (0x%02X)", status.byte);
+                    }
+                }
                 fprintf(stdout, "\n");
             } else {
                 if (!(frames++ % 2048)) {
@@ -662,6 +698,37 @@ static void verbose(const can_mode_t &mode, const can_bitrate_t &bitrate, const 
             bitrate.index == -CANBDR_10 ? "10" : "?", -bitrate.index);
     }
 }
+
+#if defined(_WIN32) || defined(_WIN64)
+ /* usleep(3) - Linux man page
+  *
+  * Notes
+  * The type useconds_t is an unsigned integer type capable of holding integers in the range [0,1000000].
+  * Programs will be more portable if they never mention this type explicitly. Use
+  *
+  *    #include <unistd.h>
+  *    ...
+  *        unsigned int usecs;
+  *    ...
+  *        usleep(usecs);
+  */
+ static void usleep(unsigned int usec) {
+    HANDLE timer;
+    LARGE_INTEGER ft;
+
+    ft.QuadPart = -(10 * (LONGLONG)usec); // Convert to 100 nanosecond interval, negative value indicates relative time
+    if (usec >= 100) {
+        if ((timer = CreateWaitableTimer(NULL, TRUE, NULL)) != NULL) {
+            SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
+            WaitForSingleObject(timer, INFINITE);
+            CloseHandle(timer);
+        }
+    }
+    else {
+        Sleep(0);
+    }
+ }
+#endif
 
 static void sigterm(int signo) {
     //fprintf(stderr, "%s: got signal %d\n", __FILE__, signo);

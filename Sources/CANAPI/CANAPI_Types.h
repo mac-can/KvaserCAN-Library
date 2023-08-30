@@ -2,7 +2,7 @@
 /*
  *  CAN Interface API, Version 3 (Data Types and Defines)
  *
- *  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+ *  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
  *  All rights reserved.
  *
  *  This file is part of CAN API V3.
@@ -49,9 +49,9 @@
  *
  *  @brief       CAN API V3 for generic CAN Interfaces - Data Types and Defines
  *
- *  @author      $Author: makemake $
+ *  @author      $Author: haumea $
  *
- *  @version     $Rev: 1082 $
+ *  @version     $Rev: 1128 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -75,6 +75,9 @@ extern "C" {
 /*  -----------  options  ------------------------------------------------
  */
 
+/** @name  Compiler Switches
+ *  @brief Options for conditional compilation.
+ *  @{ */
 /** @note  Set define OPTION_CANAPI_LIBRARY to a non-zero value to compile
  *         the master loader library (e.g. in the build environment). Or
  *         optionally set define OPTION_CANAPI_DRIVER to a non-zero value
@@ -83,13 +86,17 @@ extern "C" {
 /** @note  Set define OPTION_CAN_2_0_ONLY to a non-zero value to compile
  *         with CAN 2.0 frame format only (e.g. in the build environment).
  */
-#if (OPTION_CAN_2_0_ONLY != 0)
+#ifndef OPTION_DISABLED
+#define OPTION_DISABLED  0  /**< if a define is not defined, it is automatically set to 0 */
+#endif
+#if (OPTION_CAN_2_0_ONLY != OPTION_DISABLED)
 #ifdef _MSC_VER
-#pragma message ( "Compilation with with legacy CAN 2.0 frame format!" )
+#pragma message ( "Compilation with legacy CAN 2.0 frame format!" )
 #else
-#warning Compilation with with legacy CAN 2.0 frame format!
+#warning Compilation with legacy CAN 2.0 frame format!
 #endif
 #endif
+/** @} */
 
 /*  -----------  defines  ------------------------------------------------
  */
@@ -243,9 +250,10 @@ extern "C" {
 #define CANERR_LEC_BIT1           (-14) /**< LEC - recessive bit error */
 #define CANERR_LEC_BIT0           (-15) /**< LEC - dominant bit error */
 #define CANERR_LEC_CRC            (-16) /**< LEC - checksum error */
+#define CANERR_RESERVED1          (-19) /**< RIP - error frame */
 #define CANERR_TX_BUSY            (-20) /**< USR - transmitter busy */
 #define CANERR_RX_EMPTY           (-30) /**< USR - receiver empty */
-#define CANERR_ERR_FRAME          (-40) /**< USR - error frame */
+#define CANERR_QUE_OVR            (-40) /**< USR - queue overrun */
 #define CANERR_TIMEOUT            (-50) /**< USR - time-out */
 #define CANERR_RESOURCE           (-90) /**< USR - resource allocation */
 #define CANERR_BAUDRATE           (-91) /**< USR - illegal baudrate */
@@ -319,14 +327,17 @@ extern "C" {
 #define CANPROP_GET_RCV_QUEUE_SIZE  27U /**< maximum number of message the receive queue can hold (uint32_t) */
 #define CANPROP_GET_RCV_QUEUE_HIGH  28U /**< maximum number of message the receive queue has hold (uint32_t) */
 #define CANPROP_GET_RCV_QUEUE_OVFL  29U /**< overflow counter of the receive queue (uint64_t) */
-#define CANPROP_GET_FLT_11BIT_CODE  32U /**< acceptance filter code of 11-bit identifier (int32_t) */
-#define CANPROP_GET_FLT_11BIT_MASK  33U /**< acceptance filter mask of 11-bit identifier (int32_t) */
-#define CANPROP_GET_FLT_29BIT_CODE  34U /**< acceptance filter code of 29-bit identifier (int32_t) */
-#define CANPROP_GET_FLT_29BIT_MASK  35U /**< acceptance filter mask of 29-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_11BIT_CODE  36U /**< set value for acceptance filter code of 11-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_11BIT_MASK  37U /**< set value for acceptance filter mask of 11-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_29BIT_CODE  38U /**< set value for acceptance filter code of 29-bit identifier (int32_t) */
-#define CANPROP_SET_FLT_29BIT_MASK  39U /**< set value for acceptance filter mask of 29-bit identifier (int32_t) */
+#define CANPROP_GET_TRM_QUEUE_SIZE  30U /**< maximum number of message the transmit queue can hold (uint32_t) */
+#define CANPROP_GET_TRM_QUEUE_HIGH  31U /**< maximum number of message the transmit queue has hold (uint32_t) */
+#define CANPROP_GET_TRM_QUEUE_OVFL  32U /**< overflow counter of the transmit queue (uint64_t) */
+#define CANPROP_GET_FLT_11BIT_CODE  40U /**< acceptance filter code of 11-bit identifier (int32_t) */
+#define CANPROP_GET_FLT_11BIT_MASK  41U /**< acceptance filter mask of 11-bit identifier (int32_t) */
+#define CANPROP_GET_FLT_29BIT_CODE  42U /**< acceptance filter code of 29-bit identifier (int32_t) */
+#define CANPROP_GET_FLT_29BIT_MASK  43U /**< acceptance filter mask of 29-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_11BIT_CODE  44U /**< set value for acceptance filter code of 11-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_11BIT_MASK  45U /**< set value for acceptance filter mask of 11-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_29BIT_CODE  46U /**< set value for acceptance filter code of 29-bit identifier (int32_t) */
+#define CANPROP_SET_FLT_29BIT_MASK  47U /**< set value for acceptance filter mask of 29-bit identifier (int32_t) */
 #if (OPTION_CANAPI_LIBRARY != 0)
 /* - -  build-in bit-rate conversion  - - - - - - - - - - - - - - - - - */
 #define CANPROP_GET_BTR_INDEX       64U /**< bit-rate as CiA index (int32_t) */
@@ -503,14 +514,14 @@ typedef union can_bitrate_t_ {
 typedef struct can_speed_t_ {
     struct {                            /*   nominal bus speed: */
 #if (OPTION_CAN_2_0_ONLY == 0)
-        bool  fdoe;                     /**<   CAN FD operation enabled */
+        bool  reserved;                 /**<   CAN FD operation enabled */
 #endif
         float speed;                    /**<   bus speed in [Bit/s] */
         float samplepoint;              /**<   sample point in [percent] */
     } nominal;                          /**< nominal bus speed */
 #if (OPTION_CAN_2_0_ONLY == 0)
     struct {                            /*   data bus speed: */
-        bool  brse;                     /**<   bit-rate switch enabled */
+        bool  reserved;                 /**<   bit-rate switch enabled */
         float speed;                    /**<   bus speed in [Bit/s] */
         float samplepoint;              /**<   sample point in [percent] */
     } data;                             /**< data bus speed */

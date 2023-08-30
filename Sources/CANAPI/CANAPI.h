@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Interface Definition)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -73,9 +73,9 @@
 ///              zero to compile your program with the CAN API source files or to
 ///              link your program with the static library at compile-time.
 ///
-/// \author      $Author: makemake $
+/// \author      $Author: haumea $
 //
-/// \version     $Rev: 1033 $
+/// \version     $Rev: 1143 $
 //
 /// \defgroup    can_api CAN Interface API, Version 3
 /// \{
@@ -155,7 +155,7 @@ public:
         MessageLost = CANERR_MSG_LST,  ///< message lost
         TransmitterBusy = CANERR_TX_BUSY,  ///< transmitter busy
         ReceiverEmpty = CANERR_RX_EMPTY,  ///< receiver empty
-        ErrorFrame = CANERR_ERR_FRAME,  ///< error frame
+        QueueOverrun = CANERR_QUE_OVR,  ///< queue overrun
         Timeout = CANERR_TIMEOUT,  ///< timed out
         ResourceError = CANERR_RESOURCE,  ///< resource allocation
         InvalidBaudrate = CANERR_BAUDRATE,  ///<  illegal baudrate
@@ -440,8 +440,8 @@ public:
 /// \{
 public:
     static CANAPI_Return_t MapIndex2Bitrate(int32_t index, CANAPI_Bitrate_t &bitrate);
-    static CANAPI_Return_t MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate);
-    static CANAPI_Return_t MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length);
+    static CANAPI_Return_t MapString2Bitrate(const char *string, CANAPI_Bitrate_t &bitrate, bool &data, bool &sam);
+    static CANAPI_Return_t MapBitrate2String(CANAPI_Bitrate_t bitrate, char *string, size_t length, bool data = false, bool sam = false);
     static CANAPI_Return_t MapBitrate2Speed(CANAPI_Bitrate_t bitrate, CANAPI_BusSpeed_t &speed);
 /// \}
 
@@ -457,7 +457,7 @@ public:
             0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 8U, 8U, 8U, 8U, 8U, 8U, 8U
 #endif
         };
-        return dlc_table[dlc & 0xFU];
+        return dlc_table[(dlc < 16U) ? dlc : 15U];
     }
     static uint8_t Len2Dlc(uint8_t len) {
 #if (OPTION_CAN_2_0_ONLY == 0)
@@ -478,4 +478,4 @@ public:
 /// \}
 #endif // CANAPI_H_INCLUDED
 /// \}
-// $Id: CANAPI.h 1033 2022-01-11 19:58:04Z makemake $  Copyright (c) UV Software //
+// $Id: CANAPI.h 1143 2023-08-13 17:50:24Z haumea $  Copyright (c) UV Software //
