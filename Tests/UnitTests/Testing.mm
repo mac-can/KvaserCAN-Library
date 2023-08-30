@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -69,9 +69,19 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC0.0: Smoke-test
+// @xctest TC00.0: A test case
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
+//
+// - (void)testCase {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC00.1: The default scenario, suitable for long-term stress tests
+//
+// @expected: CANERR_NOERROR
 //
 - (void)testSmokeTest {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -83,14 +93,13 @@
     char *string = NULL;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-    
     // @pre:
     // @- get library information
-   if ((can_property(INVALID_HANDLE, CANPROP_GET_VERSION, (void*)&version, sizeof(uint16_t)) == CANERR_NOERROR) &&
-       (can_property(INVALID_HANDLE, CANPROP_GET_PATCH_NO, (void*)&patch, sizeof(uint8_t)) == CANERR_NOERROR) &&
-       (can_property(INVALID_HANDLE, CANPROP_GET_BUILD_NO, (void*)&build, sizeof(uint32_t)) == CANERR_NOERROR) &&
-       (can_property(INVALID_HANDLE, CANPROP_GET_LIBRARY_DLLNAME, (void*)name, CANPROP_MAX_BUFFER_SIZE) == CANERR_NOERROR))
-       NSLog(@"CAN API V3 Testing: %s V%u.%u.%u (%x)\n", name, (version & 0xFF00U) >> 8, (version & 0x00FFU), patch, build);
+    if ((can_property(INVALID_HANDLE, CANPROP_GET_VERSION, (void*)&version, sizeof(uint16_t)) == CANERR_NOERROR) &&
+        (can_property(INVALID_HANDLE, CANPROP_GET_PATCH_NO, (void*)&patch, sizeof(uint8_t)) == CANERR_NOERROR) &&
+        (can_property(INVALID_HANDLE, CANPROP_GET_BUILD_NO, (void*)&build, sizeof(uint32_t)) == CANERR_NOERROR) &&
+        (can_property(INVALID_HANDLE, CANPROP_GET_LIBRARY_DLLNAME, (void*)name, CANPROP_MAX_BUFFER_SIZE) == CANERR_NOERROR))
+        NSLog(@"CAN API V3 Testing: %s V%u.%u.%u (%x)\n", name, (version & 0xFF00U) >> 8, (version & 0x00FFU), patch, build);
     // @- get information from DUT1
     if ((handle = can_init(DUT1, CANMODE_DEFAULT, NULL)) != INVALID_HANDLE) {
         if ((string = can_hardware(handle)) != NULL)
@@ -103,6 +112,12 @@
             NSLog(@"DUT2: %s\n", string);
         (void)can_exit(handle);
     }
+    // @- probe if DUT1 is present and not occupied
+    // @  todo: insert coin here
+    // @- probe if DUT2 is present and not occupied
+    // @  todo: insert coin here
+    // @- check if different channels have been selected
+    // @  todo: insert coin here
     // @test:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -134,9 +149,10 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
 //- (void)testExample {
@@ -154,4 +170,4 @@
 
 @end
 
-// $Id: Testing.mm 1073 2022-07-16 13:06:44Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Testing.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //

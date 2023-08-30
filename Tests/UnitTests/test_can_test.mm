@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -69,32 +69,41 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC01.1: Probe interface when not initialized
+// @xctest TC01.0: Probe CAN channel (sunnyday scenario)
 //
-// @expected CANERR_NOERROR and interface state CANBRD_PRESENT
+// @expected: CANERR_NOERROR
 //
-- (void)testWhenInterfaceNotOccupied {
+// - (void)testSunnydayScenario {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC01.1: Probe CAN channel if CAN channel is not initialized (nor occupied)
+//
+// @expected: CANERR_NOERROR and channel state CANBRD_PRESENT
+//
+- (void)testIfChannelNotOccupied {
     int state = CANBRD_NOT_TESTABLE;
     int rc = CANERR_FATAL;
-
     // @test:
     // @- probe DUT1 with configured settings
     rc = can_test(DUT1, TEST_CANMODE, NULL, &state);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertEqual(CANBRD_PRESENT, state);
+    // @end.
 }
 
-// @xctest TC01.2: Probe interface when already initialized (by own process)
+// @xctest TC01.2: Probe CAN channel if CAN channel is already initialized (by own process)
 //
-// @expected CANERR_NOERROR and interface state CANBRD_OCCUPIED
+// @expected: CANERR_NOERROR and channel state CANBRD_OCCUPIED
 //
-- (void)testWhenInterfaceOccupiedByOwnProcess {
+- (void)testIfChannelOccupiedByOwnProcess {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int state = CANBRD_NOT_TESTABLE;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -103,7 +112,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- probe DUT1 with configured settings
     rc = can_test(DUT1, TEST_CANMODE, NULL, &state);
@@ -145,36 +153,36 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @post:
     // @- probe DUT1 with configured settings
     rc = can_test(DUT1, TEST_CANMODE, NULL, &state);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertEqual(CANBRD_PRESENT, state);
+    // @end.
 }
 
-// @xctest TC01.3: Probe interface when used by another process
+// @xctest TC01.3: Probe CAN channel if CAN channel is used by another process
 //
-// @expected CANERR_NOERROR and interface state CANBRD_OCCUPIED
+// @expected: CANERR_NOERROR and channel state CANBRD_OCCUPIED
 //
-- (void)testWhenInterfaceOccupiedByAnotherProcess {
+- (void)testIfChannelOccupiedByAnotherProcess {
     // @note: this scenario is not testable:
     // @      1) up to now I didn´t found an I/O service to detect this
     // @      2) the other process must be started manually (or forked)
     XCTAssertTrue(true);
+    // @end.
 }
 
-// @xctest TC01.4: Probe interface with valid channel number(s).
+// @xctest TC01.4: Probe CAN channel with valid channel number(s)
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
 - (void)testWithValidChannelNo {
     SInt32 channel = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @test:
     // @- loop over the list of devices to get the channel no.
     rc = can_property(INVALID_HANDLE, CANPROP_SET_FIRST_CHANNEL, (void*)NULL, 0U);
@@ -189,16 +197,16 @@
         }
         rc = can_property(INVALID_HANDLE, CANPROP_SET_NEXT_CHANNEL, (void*)NULL, 0U);
     }
+    // @end.
 }
 
-// @xctest TC01.5: Probe interface with invalid channel number(s)
+// @xctest TC01.5: Probe CAN channel with invalid channel number(s)
 //
-// @expected CANERR_NOTINIT or CANERR_VENDOR
+// @expected: CANERR_NOTINIT or CANERR_VENDOR
 //
 - (void)testWithInvalidChannelNo {
     int state = CANBRD_NOT_TESTABLE;
     int rc = CANERR_FATAL;
-
     // @test:
     // @- probe with invalid channel no. -1
     rc = can_test((SInt32)(-1), TEST_CANMODE, NULL, &state);
@@ -220,60 +228,57 @@
     XCTAssertNotEqual(CANERR_NOERROR, rc);
     XCTAssert((CANERR_NOTINIT == rc) || (CANERR_VENDOR >= rc));
     XCTAssertEqual(CANBRD_NOT_TESTABLE, state);
-
     // @note: channel numbers are defined by the CAN device vendor.
     // @      Therefore, no assumptions can be made for positive values!
+    // @end.
 }
 
-// @xctest TC01.6: Probe interface with its full operation mode capability
+// @xctest TC01.6: Probe CAN channel with its full operation mode capabilities
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
-- (void)testOperationModeCapability {
+- (void)testCheckOperationModeCapabilities {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get operation capability from DUT1
+    // @- get operation capabilities from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.byte = capa.byte;
     // @- probe DUT1 with all bits from operation capacity
     rc = can_test(DUT1, mode.byte, NULL, NULL);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC01.7: Probe interface with operation mode bit MON set (listen-only mode)
+// @xctest TC01.7: Probe CAN channel with operation mode bit MON set (listen-only mode)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if listen-only mode is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if listen-only mode is not supported
 //
-- (void)testMonitorModeEnableDisable {
+- (void)testCheckMonitorModeEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get operation capability from DUT1
+    // @- get operation capabilities from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.mon = 1;
     // @- probe DUT1 with operation mode bit MON set
@@ -283,30 +288,28 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
-
+    // @end.
 }
 
-// @xctest TC01.8: Probe interface with operation mode bit ERR set (error frame reception)
+// @xctest TC01.8: Probe CAN channel with operation mode bit ERR set (error frame reception)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if error frame reception is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if error frame reception is not supported
 //
-- (void)testErrorFramesEnableDisable {
+- (void)testCheckErrorFramesEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get operation capability from DUT1
+    // @- get operation capabilities from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.err = 1;
     // @- probe DUT1 with operation mode bit ERR set
@@ -316,29 +319,28 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC01.9: Probe interface with operation mode bit NRTR set (suppress remote frames)
+// @xctest TC01.9: Probe CAN channel with operation mode bit NRTR set (suppress remote frames)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if suppressing of remote frames is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of remote frames is not supported
 //
-- (void)testRemoteFramesDisableEnable {
+- (void)testCheckRemoteFramesDisabledEnabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get operation capability from DUT1
+    // @- get operation capabilities from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.nrtr = 1;
     // @- probe DUT1 with operation mode bit NRTR set
@@ -348,29 +350,28 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC01.10: Probe interface with operation mode bit NXTD set (suppress extended frames)
+// @xctest TC01.10: Probe CAN channel with operation mode bit NXTD set (suppress extended frames)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if suppressing of extended frames is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of extended frames is not supported
 //
-- (void)testExtendedFramesDisableEnable {
+- (void)testCheckExtendedFramesDisabledEnabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get operation capability from DUT1
+    // @- get operation capabilities from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.nxtd = 1;
     // @- probe DUT1 with operation mode bit NXTD set
@@ -380,29 +381,28 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC01.11: Probe interface with operation mode bit FDOE set (CAN FD operation enabled)
+// @xctest TC01.11: Probe CAN channel with operation mode bit FDOE set (CAN FD operation enabled)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode is not supported
 //
-- (void)testCanFdOperationEnableDisable {
+- (void)testCheckCanFdOperationEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get operation capability from DUT1
+    // @- get operation capabilities from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.fdoe = 1;
     mode.brse = 0;
@@ -413,29 +413,28 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC01.12: Probe interface with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled)
+// @xctest TC01.12: Probe CAN channel with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode or bit-rate switching is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode or bit-rate switching is not supported
 //
-- (void)testBitrateSwitchingEnableDisable {
+- (void)testCheckBitrateSwitchingEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-    // @- get operation capability from DUT1
+    // @- get operation capabilities from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.fdoe = 1;
     mode.brse = 1;
@@ -446,7 +445,6 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
-
     // @test:
     mode.fdoe = 0;
     mode.brse = 1;
@@ -457,8 +455,29 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
+
+// @xctest TC01.13: Probe CAN channel with operation mode bit BRSE set but not FDOE (invalid combination)
+//
+// @expected: CANERR_ILLPARA
+//
+// - (void)testCheckBitrateSwitchingEnabledWithoutCanFdEnabled {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC01.14: Probe CAN channel in all possible channel states
+//
+// @expected: CANERR_NOERROR
+//
+// - (void)testInAllChannelStates {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
 
 @end
 
-// $Id: test_can_test.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_test.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //

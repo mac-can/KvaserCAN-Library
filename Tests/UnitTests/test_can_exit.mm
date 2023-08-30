@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -69,7 +69,17 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC08.1: Try to shutdown interface with invalid interface handle(s)
+// @xctest TC08.0: Tear down CAN channel (sunnyday scenario)
+//
+// @expected: CANERR_NOERROR
+//
+// - (void)testSunnydayScenario {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC08.1: Tear down CAN channel with invalid channel handle(s)
 //
 // @expected CANERR_HANDLE
 //
@@ -78,7 +88,6 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -111,7 +120,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @note: value -1 is used to shutdown all interfaces!
     // @- try to shutdown DUT1 with invalid handle INT32_MIN
@@ -124,23 +132,22 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC08.2: Try to shutdown interface when it is not initialized
+// @xctest TC08.2: Tear down CAN channel if CAN channel is not initialized
 //
 // @expected CANERR_NOTINIT
 //
-- (void)testWhenInterfaceNotInitialized {
+- (void)testIfChannelNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @test:
     // @- try to shutdown DUT1 with invalid handle -1
     rc = can_exit(INVALID_HANDLE);
@@ -151,7 +158,6 @@
     // @- try to shutdown DUT1 with invalid handle INT32_MAX
     rc = can_exit(INT32_MAX);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-
     // @post:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -184,20 +190,20 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC08.3: Shutdown interface when it is initializes (but CAN controller not started)
+// @xctest TC08.3: Tear down CAN channel if CAN channel is initialized (but CAN controller not started)
 //
 // @expected CANERR_NOERROR
 //
-- (void)testWhenInterfaceInitialized {
+- (void)testIfChannelInitialized {
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -206,26 +212,25 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 (should return an error)
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
 
-// @xctest TC08.4: Shutdown interface when CAN controller is started
+// @xctest TC08.4: Tear down CAN channel if CAN controller is started
 //
 // @expected CANERR_NOERROR
 //
-- (void)testWhenInterfaceStarted {
+- (void)testIfControllerStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -252,24 +257,24 @@
     XCTAssertFalse(status.can_stopped);
 #endif
     // @test:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 (should return an error)
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
 
-// @xctest TC08.5: Shutdown interface after CAN controller is stopped
+// @xctest TC08.5: Tear down CAN channel if CAN channel was previously stopped
 //
 // @expected CANERR_NOERROR
 //
-- (void)testWhenInterfaceStopped {
+- (void)testIfControllerStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -302,26 +307,25 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 (should return an error)
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
 
-// @xctest TC08.6: Shutdown interface when already shutdown
+// @xctest TC08.6: Tear down CAN channel if CAN channel was previously torn down
 //
 // @expected CANERR_NOTINIT
 //
-- (void)testWhenInterfaceShutdown {
+- (void)testIfChannelTornDown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -354,10 +358,9 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- try to shutdown DUT1 again
     rc = can_exit(handle);
@@ -365,19 +368,19 @@
     // @- get status of DUT1 (should return an error)
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
 
-// @xctest TC08.7: Shutdown all initialized interfaces at once
+// @xctest TC08.7: Tear down all initialized CAN channels at once
 //
 // @expected CANERR_NOERROR
 //
-- (void)testShutdownAllInterfaces {
+- (void)testTeardownAllInterfaces {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle1 = INVALID_HANDLE;
     int handle2 = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle1 = can_init(DUT1, TEST_CANMODE, NULL);
@@ -402,9 +405,8 @@
     XCTAssertFalse(status.can_stopped);
     // @issue(PeakCAN): a delay of 100ms is required here
     PCBUSB_INIT_DELAY();
-
     // @test:
-    // @- shutdown all interfaces
+    // @- tear down all interfaces
     rc = can_exit(CANEXIT_ALL);
     XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT2 (should return an error)
@@ -413,8 +415,9 @@
     // @- get status of DUT1 (should return an error)
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
 
 @end
 
-// $Id: test_can_exit.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_exit.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //

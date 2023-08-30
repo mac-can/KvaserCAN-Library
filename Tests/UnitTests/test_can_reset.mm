@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -69,7 +69,17 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC06.1: Stop CAN controller with invalid interface handle(s)
+// @xctest TC06.0: Reset CAN controller (sunnyday scenario)
+//
+// @expected: CANERR_NOERROR
+//
+// - (void)testSunnydayScenario {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC06.1: Reset CAN controller with invalid channel handle(s)
 //
 // @expected CANERR_HANDLE
 //
@@ -78,7 +88,6 @@
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -118,7 +127,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -136,26 +144,25 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC06.2: Stop CAN controller when interface is not initialized
+// @xctest TC06.2: Reset CAN controller if CAN channel is not initialized
 //
 // @expected CANERR_NOTINIT
 //
-- (void)testWhenInterfaceNotInitialized {
+- (void)testIfChannelNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @test:
     // @- try to stop DUT1
     rc = can_reset(DUT1);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-
     // @post:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -188,21 +195,21 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC06.3: Stop CAN controller when interface initialized (but CAN controller not started)
+// @xctest TC06.3: Reset CAN controller if CAN channel initialized (but CAN controller not started)
 //
 // @expected CANERR_NOERROR
 //
-- (void)testWhenInterfaceInitialized {
+- (void)testIfChannelInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -211,7 +218,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- try to stop/reset DUT1
     rc = can_reset(handle);
@@ -226,7 +232,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -252,21 +257,31 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC06.4: Stop CAN controller when it was stopped before
+// @xctest TC06.6: Reset CAN controller if CAN controller is already started
+//
+// @expected: CANERR_NOERROR
+//
+// - (void)testIfControllerStarted {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC06.4: Reset CAN controller if CAN controller was previously stopped
 //
 // @expected CANERR_NOERROR
 //
-- (void)testWhenInterfaceStopped {
+- (void)testIfControllerStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -299,7 +314,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- try to stop/reset DUT1 again
     rc = can_reset(handle);
@@ -314,23 +328,22 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC06.5: Stop CAN controller when interface already shutdown
+// @xctest TC06.5: Reset CAN controller if CAN channel was previously torn down
 //
 // @expected CANERR_NOTINIT
 //
-- (void)testWhenInterfaceShutdown {
+- (void)testIfChannelTornDown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -363,16 +376,26 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- try to stop/reset DUT1 again
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
+
+// @xctest TC06.6: Check statistical counters after CAN controller was reset
+//
+// @expected: after reset: tx=?, rx=?, err=? ==> after re-start: tx=0, rx=0, err=0
+//
+// - (void)testCheckStatisticalCounters {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
 
 @end
 
-// $Id: test_can_reset.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_reset.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //

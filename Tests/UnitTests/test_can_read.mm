@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -85,9 +85,19 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC04.1: Read a CAN message with invalid interface handle(s)
+// @xctest TC04.0: Read a CAN message (sunnyday scenario)
 //
-// @expected CANERR_HANDLE
+// @expected: CANERR_NOERROR
+//
+// - (void)testSunnydayScenario {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC04.1: Read a CAN message with invalid channel handle(s)
+//
+// @expected: CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -95,7 +105,6 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -104,7 +113,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- try to read a message from DUT1 with invalid handle -1
     rc = can_read(INVALID_HANDLE, &message, 0U);
@@ -143,23 +151,22 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    
     // @post:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
 // @xctest TC04.2: Give a NULL pointer as argument for parameter 'message'
 //
-// @expected CANERR_NULLPTR
+// @expected: CANERR_NULLPTR
 //
 - (void)testWithNullPointerForMessage {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -171,7 +178,6 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- read a message from DUT1 with NULL for parameter 'message'
     rc = can_read(handle, NULL, 0U);
@@ -180,7 +186,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -199,27 +204,26 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC04.3: Read a CAN message when interface is not initialized
+// @xctest TC04.3: Read a CAN message if CAN channel is not initialized
 //
-// @expected CANERR_NOTINIT
+// @expected: CANERR_NOTINIT
 //
-- (void)testWhenInterfaceNotInitialized {
+- (void)testIfChannelNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @test:
     // @- try to read a message from DUT1
     rc = can_read(DUT1, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-
     // @post:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -252,22 +256,22 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC04.4: Read a CAN message when CAN controller is not started
+// @xctest TC04.4: Read a CAN message if CAN controller is not started
 //
-// @expected CANERR_OFFLINE
+// @expected: CANERR_OFFLINE
 //
-- (void)testWhenInterfaceNotStarted {
+- (void)testIfControllerNotStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -276,7 +280,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- try to read a message from DUT1
     rc = can_read(handle, &message, 0U);
@@ -285,7 +288,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -311,22 +313,22 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC04.5: Read a CAN message when CAN controller already stopped
+// @xctest TC04.5: Read a CAN message if CAN controller was previously stopped
 //
-// @expected CANERR_OFFLINE
+// @expected: CANERR_OFFLINE
 //
-- (void)testWhenInterfaceStopped {
+- (void)testIfControllerStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -355,7 +357,6 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- try to read a message from DUT1
     rc = can_read(handle, &message, 0U);
@@ -364,24 +365,23 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC04.6: Read a CAN message when interface already shutdown
+// @xctest TC04.6: Read a CAN message if CAN channel was previously torn down
 //
-// @expected CANERR_NOTINIT
+// @expected: CANERR_NOTINIT
 //
-- (void)testWhenInterfaceShutdown {
+- (void)testIfChannelTornDown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -414,27 +414,26 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- try to read a message from DUT1
     rc = can_read(handle, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
 
-// @xctest TC04.7: Read a CAN message when reception queue is empty
+// @xctest TC04.7: Read a CAN message if receive queue is empty
 //
-// @expected CANERR_RX_EMPTY
+// @expected: CANERR_RX_EMPTY
 //
-- (void)testWhenReceiveQueueIsEmpty {
+- (void)testIfReceiveQueueEmpty {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -446,7 +445,6 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- try to read a message from DUT1 when there in none
     rc = can_read(handle, &message, 0U);
@@ -480,16 +478,17 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC04.8: Read a CAN message from reception queue after overrun
+// @xctest TC04.8: Read a CAN message from receive queue after overrun
 //
-// @expected CANERR_NOERROR, but status bit 'queue_overrun' = 1
+// @expected: CANERR_NOERROR, but status bit 'queue_overrun' = 1
 //
-- (void)testWhenReceiveQueueIsFull {
+- (void)testIfReceiveQueueFull {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message1 = {};
@@ -499,7 +498,7 @@
     int handle2 = INVALID_HANDLE;
     int rc = CANERR_FATAL;
     int i;
-
+    // transmit message
     message2.id = 0x400U;
     message2.fdf = mode.fdoe ? 1 : 0;
     message2.brs = mode.brse ? 1 : 0;
@@ -509,7 +508,6 @@
     message2.sts = 0;
     message2.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message2.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle1 = can_init(DUT1, mode.byte, NULL);
@@ -541,7 +539,6 @@
     XCTAssertFalse(status.can_stopped);
     // @issue(PeakCAN): a delay of 100ms is required here
     PCBUSB_INIT_DELAY();
-
     // @test:
     NSLog(@"Be patient...");
     // @- spam the receive queue of DUT1 with one message too much
@@ -600,7 +597,6 @@
     XCTAssertFalse(status.can_stopped);
     // @- check if bit CANSTAT_QUE_OVR is cleared in status register
     XCTAssertFalse(status.queue_overrun);
-
     // @post:
     // @- stop/reset DUT1
     rc = can_reset(handle1);
@@ -609,27 +605,29 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle1);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT2
+    // @- tear down DUT2
     rc = can_exit(handle2);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
 // @xctest TC04.9: Read a CAN message after message lost
 //
-// @expected CANERR_NOERROR but status flag 'message_lost' set
+// @expected: CANERR_NOERROR but status flag 'message_lost' set
 //
-//- (void)testWhenMessageLost {
-// @todo: How to loose a message?
-//
+// - (void)testIfMessageLost {
+//     // @todo: How to loose a message?
+//     // @end.
+// }
 
-// @xctest TC04.10: Measure time-stamp accuracy of the device
+// @xctest TC04.10: Measure the time-stamp accuracy of the device
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
-- (void)testTimestampAccuracy {
+- (void)testMeasureTimestampAccuracy {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message1 = {};
@@ -656,7 +654,6 @@
     message2.sts = 0;
     message2.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message2.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle1 = can_init(DUT1, mode.byte, NULL);
@@ -953,7 +950,6 @@
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
 #endif
-
     // @test:
     NSLog(@"Be patient...");
     timer.Restart((uint32_t)TEST_TIMESTAMP * 100U * CTimer::MSEC);
@@ -1015,14 +1011,15 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle1);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT2
+    // @- tear down DUT2
     rc = can_exit(handle2);
     XCTAssertEqual(CANERR_NOERROR, rc);
 
+    // @end.
 }
 @end
 
-// $Id: test_can_read.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_read.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //

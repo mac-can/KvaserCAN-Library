@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -70,16 +70,25 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC02.1: Initialize interface again when interface already initialzed
+// @xctest TC02.0: Initialize CAN channel (sunnyday scenario)
 //
-// @expected CANERR_YETINIT
+// @expected: CANERR_NOERROR
 //
-- (void)testWhenInterfaceInitialized {
+// - (void)testSunnydayScenario {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC02.1: Initialize CAN channel if CAN channel is already initialized
+//
+// @expected: CANERR_YETINIT
+//
+- (void)testIfChannelInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -88,7 +97,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- try to initialize DUT1 a second time
     rc = can_init(DUT1, TEST_CANMODE, NULL);
@@ -97,7 +105,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -123,21 +130,21 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC02.2: Initialize interface again when CAN controller already started
+// @xctest TC02.2: Initialize CAN channel if CAN controller is already started
 //
-// @expected CANERR_YETINIT
+// @expected: CANERR_YETINIT
 //
-- (void)testWhenInterfaceStarted {
+- (void)testIfControllerStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -153,7 +160,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @test:
     // @- try to initialize DUT1 a second time
     rc = can_init(DUT1, TEST_CANMODE, NULL);
@@ -162,7 +168,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -181,21 +186,21 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC02.3: Initialize interface again when CAN controller already stopped
+// @xctest TC02.3: Initialize CAN channel if CAN controller was previously stopped
 //
-// @expected CANERR_YETINIT
+// @expected: CANERR_YETINIT
 //
-- (void)testWhenInterfaceStopped {
+- (void)testIfControllerStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -228,7 +233,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- try to initialize DUT1 a second time
     rc = can_init(DUT1, TEST_CANMODE, NULL);
@@ -237,22 +241,21 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post: shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC02.4: Initialize interface again when shutdown before
+// @xctest TC02.4: Initialize CAN channel if CAN channel was previously torn down
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
-- (void)testWhenInterfaceShutdown {
+- (void)testIfChannelTornDown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -285,10 +288,9 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- initialize DUT1 a second time
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -297,21 +299,20 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post: shutdown DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC02.5: Initialize interface with valid channel number(s)
+// @xctest TC02.5: Initialize CAN channel with valid channel number(s)
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR if available, otherwise CANERR_HANDLE or vendor-specific error code
 //
 - (void)testWithValidChannelNo {
     SInt32 channel = INVALID_HANDLE;
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @test:
     // @- loop over the list of devices to get the channel no.
     rc = can_property(INVALID_HANDLE, CANPROP_SET_FIRST_CHANNEL, (void*)NULL, 0U);
@@ -322,7 +323,7 @@
             // @-- try to initialize found channel with default settings
             handle = can_init(channel, TEST_CANMODE, NULL);
             if (0 <= handle) {
-                // @-- on success: shutdown straightaway
+                // @-- on success: tear down straightaway
                 (void)can_exit(handle);
             } else if (CANERR_NOTINIT != handle) {
                 // @-- otherwise: error NOTINIT or vendor-specific error
@@ -331,15 +332,15 @@
         }
         rc = can_property(INVALID_HANDLE, CANPROP_SET_NEXT_CHANNEL, (void*)NULL, 0U);
     }
+    // @end.
 }
 
-// @xctest TC02.6: Initialize interface with invalid channel number(s)
+// @xctest TC02.6: Initialize CAN channel with invalid channel number(s)
 //
-// @expected CANERR_NOTINIT or CANERR_VENDOR
+// @expected: CANERR_NOTINIT or CANERR_VENDOR
 //
 - (void)testWithInvalidChannelNo {
     int rc = CANERR_FATAL;
-
     // @test:
     // @- try to initialize with invalid channel no. -1
     rc = can_init((SInt32)(-1), TEST_CANMODE, NULL);
@@ -357,23 +358,22 @@
     rc = can_init((SInt32)INT32_MIN, TEST_CANMODE, NULL);
     XCTAssertNotEqual(CANERR_NOERROR, rc);
     XCTAssert((CANERR_NOTINIT == rc) || (CANERR_VENDOR >= rc));
-
     // @note: channel numbers are defined by the CAN device vendor.
     //        Therefore, no assumptions can be made for positive values!
+    // @end.
 }
 
-// @xctest TC02.7: Check if interface can be initialized with its full operation mode capability
+// @xctest TC02.7: Check if CAN channel can be initialized with its full operation mode capabilities
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
-- (void)testOperationModeCapability {
+- (void)testCheckOperationModeCapabilities {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -381,10 +381,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.byte = capa.byte;
     // @- initialize DUT1 with all bits from operation capacity
@@ -394,7 +393,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
     // @- start DUT1 with configured bit-rate settings
     if (mode.fdoe) BITRATE_FD_250K2M(bitrate);
@@ -413,21 +411,21 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC02.8: Check if interface can be initialized with operation mode bit MON set (listen-only mode)
+// @xctest TC02.8: Check if CAN channel can be initialized with operation mode bit MON set (listen-only mode)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if listen-only mode is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if listen-only mode is not supported
 //
-- (void)testMonitorModeEnableDisable {
+- (void)testCheckMonitorModeEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -435,10 +433,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.mon = 1;
     // @- initialize DUT1 with operation mode bit MON set
@@ -452,24 +449,24 @@
         XCTAssertEqual(CANMODE_MON, mode.byte);
 
         // @todo: try to send a frame & receive some frames
-        // @- shutdown DUT1
+        // @- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC02.9: Check if interface can be initialized with operation mode bit ERR set (error frame reception)
+// @xctest TC02.9: Check if CAN channel can be initialized with operation mode bit ERR set (error frame reception)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if error frame reception is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if error frame reception is not supported
 //
-- (void)testErrorFramesEnableDisable {
+- (void)testCheckErrorFramesEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -477,10 +474,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.err = 1;
     // @- initialize DUT1 with operation mode bit ERR set
@@ -494,24 +490,24 @@
         XCTAssertEqual(CANMODE_ERR, mode.byte);
 
         // @todo: receive some error frames
-        // @- shutdown DUT1
+        // @- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC02.10: Check if interface can be initialized with operation mode bit NRTR set (suppress remote frames)
+// @xctest TC02.10: Check if CAN channel can be initialized with operation mode bit NRTR set (suppress remote frames)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if suppressing of remote frames is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of remote frames is not supported
 //
-- (void)testRemoteFramesDisableEnable {
+- (void)testCheckRemoteFramesDisabledEnabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -519,10 +515,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.nrtr = 1;
     // @- initialize DUT1 with operation mode bit NRTR set
@@ -536,24 +531,24 @@
         XCTAssertEqual(CANMODE_NRTR, mode.byte);
 
         // @todo: try to request & receive some remote frames
-        // @- shutdown DUT1
+        // @- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC02.11: Check if interface can be initialized with operation mode bit NXTD set (suppress extended frames)
+// @xctest TC02.11: Check if CAN channel can be initialized with operation mode bit NXTD set (suppress extended frames)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if suppressing of extended frames is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if suppressing of extended frames is not supported
 //
-- (void)testExtendedFramesDisableEnable {
+- (void)testCheckExtendedFramesDisabledEnabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -561,10 +556,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.nxtd = 1;
     // @- initialize DUT1 with operation mode bit NXTD set
@@ -578,24 +572,24 @@
         XCTAssertEqual(CANMODE_NXTD, mode.byte);
 
         // @todo: try to send & receive some extended frames
-        // @- shutdown DUT1
+        // @- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC02.12: Check if interface can be initialized with operation mode bit FDOE set (CAN FD operation enabled)
+// @xctest TC02.12: Check if CAN channel can be initialized with operation mode bit FDOE set (CAN FD operation enabled)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode is not supported
 //
-- (void)testCanFdOperationEnableDisable {
+- (void)testCheckCanFdOperationEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -603,10 +597,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.fdoe = 1;
     mode.brse = 0;
@@ -622,24 +615,24 @@
 #if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
         // @todo: try to send & receive some CAN FD long frames
 #endif
-        // @- shutdown DUT1
+        // @- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
 
-// @xctest TC02.13: Check if interface can be initialized with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled)
+// @xctest TC02.13: Check if CAN channel can be initialized with operation mode bit FDOE and BRSE set (CAN FD operation with bit-rate switching enabled)
 //
-// @expected CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode or bit-rate switching is not supported
+// @expected: CANERR_NOERROR or CANERR_ILLPARA if CAN FD operation mode or bit-rate switching is not supported
 //
-- (void)testBitrateSwitchingEnableDisable {
+- (void)testCheckBitrateSwitchingEnabledDisabled {
     can_mode_t capa = { CANMODE_DEFAULT };
     can_mode_t mode = { CANMODE_DEFAULT };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -647,10 +640,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     mode.fdoe = 1;
     mode.brse = 1;
@@ -666,7 +658,7 @@
 #if (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
         // @todo: try to send & receive some CAN FD fast frames
 #endif
-        // @- shutdown DUT1
+        // @- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
         
@@ -679,8 +671,19 @@
     } else {
         XCTAssertEqual(CANERR_ILLPARA, rc);
     }
+    // @end.
 }
+
+// @xctest TC02.14: Check if CAN channel can be initialized with operation mode bit BRSE set but not FDOE (invalid combination)
+//
+// expected: CANERR_ILLPARA (invalid combinatio for CAN 2.0 operation and CAN FD operation)
+//
+// - (void)testCheckBitrateSwitchingEnabledWithoutCanFdEnabled {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
 
 @end
 
-// $Id: test_can_init.mm 1073 2022-07-16 13:06:44Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_init.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //
