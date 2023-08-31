@@ -1,7 +1,7 @@
 #
-#	CAN Monitor for Kvaser CAN Interfaces
+#	CAN Monitor for Kvaser CAN Interfaces (CAN API V3)
 #
-#	Copyright (C) 2020-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2007,2012-2023  Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #
 #	This program is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
@@ -21,16 +21,16 @@ current_OS := $(patsubst CYGWIN%,Cygwin,$(current_OS))
 current_OS := $(patsubst MINGW%,MinGW,$(current_OS))
 current_OS := $(patsubst MSYS%,MinGW,$(current_OS))
 
-HOME_DIR = ../..
+PROJ_DIR = ../..
+HOME_DIR = .
 MAIN_DIR = ./Sources
 
-SOURCE_DIR = $(HOME_DIR)/Sources
-CANAPI_DIR = $(HOME_DIR)/Sources/CANAPI
-MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
-KVASER_DIR = $(HOME_DIR)/Sources/Driver
+DRIVER_DIR = $(PROJ_DIR)/Sources
+CANAPI_DIR = $(PROJ_DIR)/Sources/CANAPI
 
-OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/Timer.o  $(BINDIR)/libKvaserCAN.a \
-	$(OUTDIR)/Message.o $(OUTDIR)/can_msg.o
+OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/Timer.o \
+	$(OUTDIR)/Message.o $(OUTDIR)/can_msg.o \
+	$(BINDIR)/libKvaserCAN.a
 
 
 ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
@@ -45,17 +45,16 @@ DEFINES = -DOPTION_CANAPI_DRIVER=1 \
 	-DOPTION_CANAPI_COMPANIONS=1
 
 HEADERS = -I$(MAIN_DIR) \
-	-I$(SOURCE_DIR) \
-	-I$(CANAPI_DIR) \
-	-I$(MACCAN_DIR) \
-	-I$(KVASER_DIR)
+	-I$(HOME_DIR) \
+	-I$(DRIVER_DIR) \
+	-I$(CANAPI_DIR)
 
-CFLAGS += -O0 -Wall -Wno-parentheses \
+CFLAGS += -O2 -Wall -Wextra -Wno-parentheses \
 	-fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
-CXXFLAGS += -O0 -g -Wall -Wextra -pthread \
+CXXFLAGS += -O2 -g -Wall -Wextra -pthread \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -79,8 +78,8 @@ RM = rm -f
 CP = cp -f
 
 OUTDIR = .objects
-BINDIR = $(HOME_DIR)/Binaries
-INCDIR = $(HOME_DIR)/Includes
+BINDIR = $(PROJ_DIR)/Binaries
+INCDIR = $(PROJ_DIR)/Includes
 
 .PHONY: info outdir bindir incdir
 

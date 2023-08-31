@@ -1,8 +1,8 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  CAN Monitor for Kvaser CAN Interfaces
+//  CAN Monitor for generic Interfaces (CAN API V3)
 //
-//  Copyright (c) 2007,2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2007,2012-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -17,42 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "build_no.h"
-#define VERSION_MAJOR    0
-#define VERSION_MINOR    3
-#define VERSION_PATCH    99
-#define VERSION_BUILD    BUILD_NO
-#define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
-#if defined(_WIN64)
-#define PLATFORM        "x64"
-#elif defined(_WIN32)
-#define PLATFORM        "x86"
-#elif defined(__linux__)
-#define PLATFORM        "Linux"
-#elif defined(__APPLE__)
-#define PLATFORM        "macOS"
-#else
-#error Unsupported architecture
-#endif
-static const char APPLICATION[] = "CAN Monitor for Kvaser CAN Interfaces, Version " VERSION_STRING;
-static const char COPYRIGHT[]   = "Copyright (c) 2007,2020-2023 by Uwe Vogt, UV Software, Berlin";
-static const char WARRANTY[]    = "This program comes with ABSOLUTELY NO WARRANTY!\n\n" \
-                                  "This is free software, and you are welcome to redistribute it\n" \
-                                  "under certain conditions; type `--version' for details.";
-static const char LICENSE[]     = "This program is free software: you can redistribute it and/or modify\n" \
-                                  "it under the terms of the GNU General Public License as published by\n" \
-                                  "the Free Software Foundation, either version 3 of the License, or\n" \
-                                  "(at your option) any later version.\n\n" \
-                                  "This program is distributed in the hope that it will be useful,\n" \
-                                  "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" \
-                                  "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" \
-                                  "GNU General Public License for more details.\n\n" \
-                                  "You should have received a copy of the GNU General Public License\n" \
-                                  "along with this program.  If not, see <http://www.gnu.org/licenses/>.";
-#define basename(x)  "can_moni" // FIXME: Where is my `basename' function?
-
-#include "KvaserCAN_Defines.h"
-#include "KvaserCAN.h"
+#include "Driver.h"
 #include "Timer.h"
 #include "Message.h"
 
@@ -78,7 +43,7 @@ static const char LICENSE[]     = "This program is free software: you can redist
 
 static int get_exclusion(const char *arg);  // TODO: make it a member function
 
-class CCanDriver : public CKvaserCAN {
+class CCanDevice : public CCanDriver {
 public:
     uint64_t ReceptionLoop();
 public:
@@ -94,12 +59,28 @@ static int can_id[MAX_ID];
 static int can_id_xtd = 1;
 static volatile int running = 1;
 
-static CCanDriver canDriver = CCanDriver();
+static CCanDevice canDevice = CCanDevice();
 
-// TODO: this code could be made more C++ alike
+static const char APPLICATION[] = "CAN Monitor for " MONITOR_INTEFACE ", Version " VERSION_STRING;
+static const char COPYRIGHT[]   = "Copyright (c) " MONITOR_COPYRIGHT;
+static const char WARRANTY[]    = "This program comes with ABSOLUTELY NO WARRANTY!\n\n" \
+                                  "This is free software, and you are welcome to redistribute it\n" \
+                                  "under certain conditions; type '--version' for details.";
+static const char LICENSE[]     = "This program is free software: you can redistribute it and/or modify\n" \
+                                  "it under the terms of the GNU General Public License as published by\n" \
+                                  "the Free Software Foundation, either version 3 of the License, or\n" \
+                                  "(at your option) any later version.\n\n" \
+                                  "This program is distributed in the hope that it will be useful,\n" \
+                                  "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" \
+                                  "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" \
+                                  "GNU General Public License for more details.\n\n" \
+                                  "You should have received a copy of the GNU General Public License\n" \
+                                  "along with this program.  If not, see <http://www.gnu.org/licenses/>.";
+#define basename(x)  "can_moni" // FIXME: Where is my `basename' function?
+
 int main(int argc, const char * argv[]) {
     int opt;
-    CCanDriver::SChannelInfo channel;
+    CCanDevice::SChannelInfo channel;
     int op = 0, rf = 0, xf = 0, ef = 0, lo = 0, sh = 0;
     long baudrate = CANBDR_250; int bd = 0;
     CCanMessage::EFormatTimestamp modeTime = CCanMessage::OptionZero; int mt = 0;
@@ -148,8 +129,8 @@ int main(int argc, const char * argv[]) {
 
     /* default bit-timing */
     CANAPI_BusSpeed_t speed = {};
-    (void)CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate);
-    (void)CCanDriver::MapBitrate2Speed(bitrate, speed);
+    (void)CCanDevice::MapIndex2Bitrate(bitrate.index, bitrate);
+    (void)CCanDevice::MapBitrate2Speed(bitrate, speed);
     (void)op;
 
     /* default format options */
@@ -158,6 +139,7 @@ int main(int argc, const char * argv[]) {
     (void)CCanMessage::SetDataFormat(modeData);
     (void)CCanMessage::SetAsciiFormat(modeAscii);
     (void)CCanMessage::SetWraparound(wraparound);
+    (void)mw;
 
     /* exclude list (11-bit IDs only) */
     for (int i = 0; i < MAX_ID; i++) {
@@ -180,10 +162,6 @@ int main(int argc, const char * argv[]) {
                 fprintf(stderr, "%s: duplicated option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
-            if (optarg && optarg[0] == '-') {
-                fprintf(stderr, "%s: missing argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
-                return 1;
-            }
             if (sscanf(optarg, "%li", &baudrate) != 1) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
@@ -200,11 +178,11 @@ int main(int argc, const char * argv[]) {
                 case 8: case 10:   case 10000:   bitrate.index = (int32_t)CANBTR_INDEX_10K; break;
                 default:                         bitrate.index = (int32_t)-baudrate; break;
             }
-            if (CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate) != CCanApi::NoError) {
+            if (CCanDevice::MapIndex2Bitrate(bitrate.index, bitrate) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
-            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
+            if (CCanDevice::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
@@ -214,11 +192,11 @@ int main(int argc, const char * argv[]) {
                 fprintf(stderr, "%s: duplicated option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
-            if (CCanDriver::MapString2Bitrate(optarg, bitrate, hasDataPhase, hasNoSamp) != CCanApi::NoError) {
+            if (CCanDevice::MapString2Bitrate(optarg, bitrate, hasDataPhase, hasNoSamp) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
-            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
+            if (CCanDevice::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
@@ -230,7 +208,7 @@ int main(int argc, const char * argv[]) {
             }
             verbose = 1;
             break;
-#if (OPTION_CAN_2_0_ONLY == 0)
+#if (CAN_FD_SUPPORTED != 0)
         case 'm':  /* option `--mode=(2.0|FDF[+BSR])' (-m)*/
             if (op++) {
                 fprintf(stderr, "%s: duplicated option `--mode' (%c)\n", basename(argv[0]), opt);
@@ -362,6 +340,7 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
+#if (CAN_FD_SUPPORTED != 0)
         case 'w':  /* option `--wrap=....' (-w) */
             if (mw++) {
                 fprintf(stderr, "%s: duplicated option `--wrap' (%c)\n", basename(argv[0]), opt);
@@ -388,6 +367,7 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
+#endif
         case 'x':  /* option `--exclude=[~]<id-list>' (-x) */
             if (exclude++) {
                 fprintf(stderr, "%s: duplicated option `--exclude' (%c)\n", basename(argv[0]), opt);
@@ -401,13 +381,13 @@ int main(int argc, const char * argv[]) {
         case 'L':  /* option `--list-boards[=<vendor>]' (-L) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
             /* list all supported interfaces */
-            num_boards = CCanDriver::ListCanDevices(/*optarg*/);
+            num_boards = CCanDevice::ListCanDevices(/*optarg*/);
             fprintf(stdout, "Number of supported CAN interfaces: %i\n", num_boards);
             return (num_boards >= 0) ? 0 : 1;
         case 'T':  /* option `--test-boards[=<vendor>]' (-T) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
             /* list all available interfaces */
-            num_boards = CCanDriver::TestCanDevices(opMode/*, optarg*/);
+            num_boards = CCanDevice::TestCanDevices(opMode/*, optarg*/);
             fprintf(stdout, "Number of present CAN interfaces: %i\n", num_boards);
             return (num_boards >= 0) ? 0 : 1;
         case 'h':  /* option `--help' (-h) */
@@ -437,12 +417,12 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
     /* - search the <interface> by its name in the device list */
-    bool result = CCanDriver::GetFirstChannel(channel);
+    bool result = CCanDevice::GetFirstChannel(channel);
     while (result) {
         if (strcasecmp(argv[optind], channel.m_szDeviceName) == 0) {
             break;
         }
-        result = CCanDriver::GetNextChannel(channel);
+        result = CCanDevice::GetNextChannel(channel);
     }
     if (!result) {
         fprintf(stderr, "%s: illegal argument `%s'\n", basename(argv[0]), argv[optind]);
@@ -453,9 +433,8 @@ int main(int argc, const char * argv[]) {
         fprintf(stderr, "%s: illegal combination of options `--mode' (m) and `--bitrate'\n", basename(argv[0]));
         return 1;
     }
-    /* CAN Monitor for Kvaser CAN Leaf interfaces */
+    /* CAN Monitor for genericc CAN interfaces */
     fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
-
     /* - show operation mode and bit-rate settings */
     if (verbose) {
         fprintf(stdout, "Op.-mode=%s", (opMode.byte & CANMODE_FDOE) ? "CANFD" : "CAN2.0");
@@ -475,7 +454,7 @@ int main(int argc, const char * argv[]) {
                 fprintf(stdout, ":%.0fkbps@%.1f%%",
                     speed.data.speed / 1000.,
                     speed.data.samplepoint * 100.);
-            (void)CCanDriver::MapBitrate2String(bitrate, property, CANPROP_MAX_BUFFER_SIZE,
+            (void)CCanDevice::MapBitrate2String(bitrate, property, CANPROP_MAX_BUFFER_SIZE,
                                                 (opMode.byte & CANMODE_BRSE), hasNoSamp);
             fprintf(stdout, " (%s)\n\n", property);
         }
@@ -488,7 +467,7 @@ int main(int argc, const char * argv[]) {
     /* - initialize interface */
     fprintf(stdout, "Hardware=%s...", channel.m_szDeviceName);
     fflush (stdout);
-    retVal = canDriver.InitializeChannel(channel.m_nChannelNo, opMode);
+    retVal = canDevice.InitializeChannel(channel.m_nChannelNo, opMode);
     if (retVal != CCanApi::NoError) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be initialized (%i)", retVal);
@@ -520,7 +499,7 @@ int main(int argc, const char * argv[]) {
             bitrate.index == CANBTR_INDEX_10K  ? "10" : "?");
     }
     fflush(stdout);
-    retVal = canDriver.StartController(bitrate);
+    retVal = canDevice.StartController(bitrate);
     if (retVal != CCanApi::NoError) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be started (%i)\n", retVal);
@@ -528,17 +507,17 @@ int main(int argc, const char * argv[]) {
     }
     fprintf(stdout, "OK!\n");
     /* - reception loop */
-    canDriver.ReceptionLoop();
+    canDevice.ReceptionLoop();
     /* - show interface information */
-    if ((device = canDriver.GetHardwareVersion()) != NULL)
+    if ((device = canDevice.GetHardwareVersion()) != NULL)
         fprintf(stdout, "Hardware: %s\n", device);
-    if ((firmware = canDriver.GetFirmwareVersion()) != NULL)
+    if ((firmware = canDevice.GetFirmwareVersion()) != NULL)
         fprintf(stdout, "Firmware: %s\n", firmware);
-    if ((software = CCanDriver::GetVersion()) != NULL)
+    if ((software = CCanDevice::GetVersion()) != NULL)
         fprintf(stdout, "Software: %s\n", software);
 teardown:
     /* - teardown the interface*/
-    retVal = canDriver.TeardownChannel();
+    retVal = canDevice.TeardownChannel();
     if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ error: CAN Controller could not be reset (%i)\n", retVal);
         goto finalize;
@@ -549,31 +528,31 @@ finalize:
     return retVal;
 }
 
-int CCanDriver::ListCanDevices(void) {
-    CCanDriver::SChannelInfo info;
+int CCanDevice::ListCanDevices(void) {
+    CCanDevice::SChannelInfo info;
     int n = 0;
 
     fprintf(stdout, "Suppored hardware:\n");
-    bool result = CCanDriver::GetFirstChannel(info);
+    bool result = CCanDevice::GetFirstChannel(info);
     while (result) {
         fprintf(stdout, "\"%s\" (VendorName=\"%s\", LibraryId=%" PRIi32 ", ChannelNo=%" PRIi32 ")\n",
                          info.m_szDeviceName, info.m_szVendorName, info.m_nLibraryId, info.m_nChannelNo);
         n++;
-        result = CCanDriver::GetNextChannel(info);
+        result = CCanDevice::GetNextChannel(info);
     }
     return n;
 }
 
-int CCanDriver::TestCanDevices(CANAPI_OpMode_t opMode) {
-    CCanDriver::SChannelInfo info;
+int CCanDevice::TestCanDevices(CANAPI_OpMode_t opMode) {
+    CCanDevice::SChannelInfo info;
     int n = 0;
 
-    bool result = CCanDriver::GetFirstChannel(info);
+    bool result = CCanDevice::GetFirstChannel(info);
     while (result) {
         fprintf(stdout, "Hardware=%s...", info.m_szDeviceName);
         fflush(stdout);
         EChannelState state;
-        CANAPI_Return_t retVal = CCanDriver::ProbeChannel(info.m_nChannelNo, opMode, state);
+        CANAPI_Return_t retVal = CCanDevice::ProbeChannel(info.m_nChannelNo, opMode, state);
         if ((retVal == CCanApi::NoError) || (retVal == CCanApi::IllegalParameter)) {
             CTimer::Delay(333U * CTimer::MSEC);  // to fake probing a hardware
             switch (state) {
@@ -586,12 +565,12 @@ int CCanDriver::TestCanDevices(CANAPI_OpMode_t opMode) {
                 fprintf(stderr, "+++ warning: CAN operation mode not supported (%02xh)\n", opMode.byte);
         } else
             fprintf(stdout, "FAILED!\n");
-        result = CCanDriver::GetNextChannel(info);
+        result = CCanDevice::GetNextChannel(info);
     }
     return n;
 }
 
-uint64_t CCanDriver::ReceptionLoop() {
+uint64_t CCanDevice::ReceptionLoop() {
     CANAPI_Message_t message;
     CANAPI_Return_t retVal;
     uint64_t frames = 0U;
@@ -602,8 +581,7 @@ uint64_t CCanDriver::ReceptionLoop() {
     fprintf(stderr, "\nPress ^C to abort.\n\n");
     while(running) {
         if ((retVal = ReadMessage(message)) == CCanApi::NoError) {
-            if ((((message.id < MAX_ID) && can_id[message.id]) || ((message.id >= MAX_ID) && can_id_xtd)) &&
-                !message.sts) {
+            if ((((message.id < MAX_ID) && can_id[message.id]) || ((message.id >= MAX_ID) && can_id_xtd))) {
                 (void)CCanMessage::Format(message, ++frames, string, CANPROP_MAX_STRING_LENGTH);
                 fprintf(stdout, "%s\n", string);
             }
@@ -688,7 +666,7 @@ static int get_exclusion(const char *arg)
 static void sigterm(int signo)
 {
     //fprintf(stderr, "%s: got signal %d\n", __FILE__, signo);
-    (void)canDriver.SignalChannel();
+    (void)canDevice.SignalChannel();
     running = 0;
     (void)signo;
 }
@@ -706,20 +684,22 @@ static void usage(FILE *stream, const char *program)
     fprintf(stream, " -i  --id=(HEX|DEC|OCT)        display mode of CAN-IDs (default=HEX)\n");
     fprintf(stream, " -d, --data=(HEX|DEC|OCT)      display mode of data bytes (default=HEX)\n");
     fprintf(stream, " -a, --ascii=(ON|OFF)          display data bytes in ASCII (default=ON)\n");
+#if (CAN_FD_SUPPORTED != 0)
     fprintf(stream, " -w, --wrap=(NO|8|10|16|32|64) wraparound after n data bytes (default=NO)\n");
+#endif
     fprintf(stream, " -x, --exclude=[~]<id-list>    exclude CAN-IDs: <id>[-<id>]{,<id>[-<id>]}\n");
 //    fprintf(stream, " -s, --script=<filename>       execute a script file\n"); // TODO: script engine
-#if (OPTION_CAN_2_0_ONLY == 0)
+#if (CAN_FD_SUPPORTED != 0)
     fprintf(stream, " -m, --mode=(2.0|FDF[+BSR])    CAN operation mode: CAN 2.0 or CAN FD format\n");
 #endif
-    fprintf(stream, "     --shared                  shared CAN controller access (when supported)\n");
+    fprintf(stream, "     --shared                  shared CAN controller access (if supported)\n");
     fprintf(stream, "     --listen-only             monitor mode (listen-only, transmitter is off)\n");
     fprintf(stream, "     --error-frames            allow reception of error frames\n");
     fprintf(stream, "     --no-remote-frames        suppress remote frames (RTR frames)\n");
     fprintf(stream, "     --no-extended-frames      suppress extended frames (29-bit identifier)\n");
-    fprintf(stream, " -b, --baudrate=<baudrate>     CAN bit timing in kbps (default=250)\n");
-    fprintf(stream, "     --bitrate=<bit-rate>      CAN bit rate settings (as a string)\n");
-    fprintf(stream, " -v, --verbose                 show detailed bit rate settings\n");
+    fprintf(stream, " -b, --baudrate=<baudrate>     CAN bit-timing in kbps (default=250), or\n");
+    fprintf(stream, "     --bitrate=<bit-rate>      CAN bit-rate settings (as a string)\n");
+    fprintf(stream, " -v, --verbose                 show detailed bit-rate settings\n");
 #if (OPTION_CANAPI_LIBRARY != 0)
     fprintf(stream, " -L, --list-boards[=<vendor>]  list all supported CAN interfaces and exit\n");
     fprintf(stream, " -T, --test-boards[=<vendor>]  list all available CAN interfaces and exit\n");

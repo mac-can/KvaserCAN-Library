@@ -1,8 +1,8 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  CAN Tester for Kvaser CAN Interfaces
+//  CAN Tester for PEAK PCAN Interfaces (CAN API V3)
 //
-//  Copyright (c) 2007,2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2008-2010,2014-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -17,42 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-#include "build_no.h"
-#define VERSION_MAJOR    0
-#define VERSION_MINOR    3
-#define VERSION_PATCH    99
-#define VERSION_BUILD    BUILD_NO
-#define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
-#if defined(_WIN64)
-#define PLATFORM        "x64"
-#elif defined(_WIN32)
-#define PLATFORM        "x86"
-#elif defined(__linux__)
-#define PLATFORM        "Linux"
-#elif defined(__APPLE__)
-#define PLATFORM        "macOS"
-#else
-#error Unsupported architecture
-#endif
-static const char APPLICATION[] = "CAN Tester for Kvaser CAN Interfaces, Version " VERSION_STRING;
-static const char COPYRIGHT[]   = "Copyright (c) 2007,2020-2023 by Uwe Vogt, UV Software, Berlin";
-static const char WARRANTY[]    = "This program comes with ABSOLUTELY NO WARRANTY!\n\n" \
-                                  "This is free software, and you are welcome to redistribute it\n" \
-                                  "under certain conditions; type `--version' for details.";
-static const char LICENSE[]     = "This program is free software: you can redistribute it and/or modify\n" \
-                                  "it under the terms of the GNU General Public License as published by\n" \
-                                  "the Free Software Foundation, either version 3 of the License, or\n" \
-                                  "(at your option) any later version.\n\n" \
-                                  "This program is distributed in the hope that it will be useful,\n" \
-                                  "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" \
-                                  "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" \
-                                  "GNU General Public License for more details.\n\n" \
-                                  "You should have received a copy of the GNU General Public License\n" \
-                                  "along with this program.  If not, see <http://www.gnu.org/licenses/>.";
-#define basename(x)  "can_test" // FIXME: Where is my `basename' function?
-
-#include "KvaserCAN_Defines.h"
-#include "KvaserCAN.h"
+#include "Driver.h"
 #include "Timer.h"
 
 #include <stdio.h>
@@ -77,8 +42,7 @@ static const char LICENSE[]     = "This program is free software: you can redist
 #define TxMODE  (1)
 #define TxFRAMES  (2)
 #define TxRANDOM  (3)
-
-class CCanDriver : public CKvaserCAN {
+class CCanDevice : public CCanDriver {
 public:
     uint64_t ReceiverTest(bool checkCounter = false, uint64_t expectedNumber = 0U, bool stopOnError = false);
     uint64_t TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, uint32_t id = 0x100U, uint8_t dlc = 0U, uint32_t delay = 0U, uint64_t offset = 0U);
@@ -95,12 +59,28 @@ static void version(FILE *stream, const char *program);
 static const char *prompt[4] = {"-\b", "/\b", "|\b", "\\\b"};
 static volatile int running = 1;
 
-static CCanDriver canDriver = CCanDriver();
+static CCanDevice canDevice = CCanDevice();
 
-// TODO: this code could be made more C++ alike
+static const char APPLICATION[] = "CAN Tester for " TESTER_INTEFACE ", Version " VERSION_STRING;
+static const char COPYRIGHT[]   = "Copyright (c) " TESTER_COPYRIGHT;
+static const char WARRANTY[]    = "This program comes with ABSOLUTELY NO WARRANTY!\n\n" \
+                                  "This is free software, and you are welcome to redistribute it\n" \
+                                  "under certain conditions; type '--version' for details.";
+static const char LICENSE[]     = "This program is free software: you can redistribute it and/or modify\n" \
+                                  "it under the terms of the GNU General Public License as published by\n" \
+                                  "the Free Software Foundation, either version 3 of the License, or\n" \
+                                  "(at your option) any later version.\n\n" \
+                                  "This program is distributed in the hope that it will be useful,\n" \
+                                  "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" \
+                                  "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" \
+                                  "GNU General Public License for more details.\n\n" \
+                                  "You should have received a copy of the GNU General Public License\n" \
+                                  "along with this program.  If not, see <http://www.gnu.org/licenses/>.";
+#define basename(x)  "can_test" // FIXME: Where is my `basename' function?
+
 int main(int argc, const char * argv[]) {
     int opt;
-    CCanDriver::SChannelInfo channel;
+    CCanDevice::SChannelInfo channel;
     int mode = RxMODE, m = 0;
     int op = 0, rf = 0, xf = 0, ef = 0, lo = 0, sh = 0;
     long baudrate = CANBDR_250; int bd = 0;
@@ -153,8 +133,8 @@ int main(int argc, const char * argv[]) {
 
     /* default bit-timing */
     CANAPI_BusSpeed_t speed = {};
-    (void)CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate);
-    (void)CCanDriver::MapBitrate2Speed(bitrate, speed);
+    (void)CCanDevice::MapIndex2Bitrate(bitrate.index, bitrate);
+    (void)CCanDevice::MapBitrate2Speed(bitrate, speed);
     (void)op;
 
     /* signal handler */
@@ -190,11 +170,11 @@ int main(int argc, const char * argv[]) {
                 case 8: case 10:   case 10000:   bitrate.index = (int32_t)CANBTR_INDEX_10K; break;
                 default:                         bitrate.index = (int32_t)-baudrate; break;
             }
-            if (CCanDriver::MapIndex2Bitrate(bitrate.index, bitrate) != CCanApi::NoError) {
+            if (CCanDevice::MapIndex2Bitrate(bitrate.index, bitrate) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
-            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
+            if (CCanDevice::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--baudrate' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
@@ -204,11 +184,11 @@ int main(int argc, const char * argv[]) {
                 fprintf(stderr, "%s: duplicated option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
-            if (CCanDriver::MapString2Bitrate(optarg, bitrate, hasDataPhase, hasNoSamp) != CCanApi::NoError) {
+            if (CCanDevice::MapString2Bitrate(optarg, bitrate, hasDataPhase, hasNoSamp) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
-            if (CCanDriver::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
+            if (CCanDevice::MapBitrate2Speed(bitrate, speed) != CCanApi::NoError) {
                 fprintf(stderr, "%s: illegal argument for option `--bitrate'\n", basename(argv[0]));
                 return 1;
             }
@@ -220,6 +200,7 @@ int main(int argc, const char * argv[]) {
             }
             verbose = 1;
             break;
+#if (CAN_FD_SUPPORTED != 0)
         case 'm':  /* option `--mode=(2.0|FDF[+BSR])' (-m)*/
             if (op++) {
                 fprintf(stderr, "%s: duplicated option `--mode' (%c)\n", basename(argv[0]), opt);
@@ -237,6 +218,7 @@ int main(int argc, const char * argv[]) {
                 return 1;
             }
             break;
+#endif
         case 'S':  /* option `--shared' */
             if (sh++) {
                 fprintf(stderr, "%s: duplicated option `--shared'\n", basename(argv[0]));
@@ -385,7 +367,11 @@ int main(int argc, const char * argv[]) {
                 fprintf(stderr, "%s: illegal argument for option `--dlc' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
+#if (CAN_FD_SUPPORTED != 0)
             if ((can_dlc < 0) || (CANFD_MAX_LEN < can_dlc)) {
+#else
+            if ((can_dlc < 0) || (CAN_MAX_LEN < can_dlc)) {
+#endif
                 fprintf(stderr, "%s: illegal argument for option `--dlc' (%c)\n", basename(argv[0]), opt);
                 return 1;
             }
@@ -408,13 +394,13 @@ int main(int argc, const char * argv[]) {
         case 'L':  /* option `--list-boards[=<vendor>]' (-L) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
             /* list all supported interfaces */
-            num_boards = CCanDriver::ListCanDevices(/*optarg*/);
+            num_boards = CCanDevice::ListCanDevices(/*optarg*/);
             fprintf(stdout, "Number of supported CAN interfaces: %i\n", num_boards);
             return (num_boards >= 0) ? 0 : 1;
         case 'T':  /* option `--test-boards[=<vendor>]' (-T) */
             fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
             /* list all available interfaces */
-            num_boards = CCanDriver::TestCanDevices(opMode/*, optarg*/);
+            num_boards = CCanDevice::TestCanDevices(opMode/*, optarg*/);
             fprintf(stdout, "Number of present CAN interfaces: %i\n", num_boards);
             return (num_boards >= 0) ? 0 : 1;
         case 'h':  /* option `--help' (-h) */
@@ -444,12 +430,12 @@ int main(int argc, const char * argv[]) {
         return 1;
     }
     /* - search the <interface> by its name in the device list */
-    bool result = CCanDriver::GetFirstChannel(channel);
+    bool result = CCanDevice::GetFirstChannel(channel);
     while (result) {
         if (strcasecmp(argv[optind], channel.m_szDeviceName) == 0) {
             break;
         }
-        result = CCanDriver::GetNextChannel(channel);
+        result = CCanDevice::GetNextChannel(channel);
     }
     if (!result) {
         fprintf(stderr, "%s: illegal argument `%s'\n", basename(argv[0]), argv[optind]);
@@ -490,9 +476,8 @@ int main(int argc, const char * argv[]) {
         fprintf(stderr, "%s: illegal option `--no-remote-frames' for transmitter test\n", basename(argv[0]));
         return 1;
     }
-    /* CAN Tester for Kvaser CAN Leaf interfaces */
+    /* CAN Tester for generic CAN interfaces */
     fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
-
     /* - show operation mode and bit-rate settings */
     if (verbose) {
         fprintf(stdout, "Op.-mode=%s", (opMode.byte & CANMODE_FDOE) ? "CANFD" : "CAN2.0");
@@ -512,7 +497,7 @@ int main(int argc, const char * argv[]) {
                 fprintf(stdout, ":%.0fkbps@%.1f%%",
                     speed.data.speed / 1000.,
                     speed.data.samplepoint * 100.);
-            (void)CCanDriver::MapBitrate2String(bitrate, property, CANPROP_MAX_BUFFER_SIZE,
+            (void)CCanDevice::MapBitrate2String(bitrate, property, CANPROP_MAX_BUFFER_SIZE,
                                                 (opMode.byte & CANMODE_BRSE), hasNoSamp);
             fprintf(stdout, " (%s)\n\n", property);
         }
@@ -525,7 +510,7 @@ int main(int argc, const char * argv[]) {
     /* - initialize interface */
     fprintf(stdout, "Hardware=%s...", channel.m_szDeviceName);
     fflush (stdout);
-    retVal = canDriver.InitializeChannel(channel.m_nChannelNo, opMode);
+    retVal = canDevice.InitializeChannel(channel.m_nChannelNo, opMode);
     if (retVal != CCanApi::NoError) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be initialized (%i)", retVal);
@@ -557,7 +542,7 @@ int main(int argc, const char * argv[]) {
             bitrate.index == CANBTR_INDEX_10K  ? "10" : "?");
     }
     fflush(stdout);
-    retVal = canDriver.StartController(bitrate);
+    retVal = canDevice.StartController(bitrate);
     if (retVal != CCanApi::NoError) {
         fprintf(stdout, "FAILED!\n");
         fprintf(stderr, "+++ error: CAN Controller could not be started (%i)\n", retVal);
@@ -567,28 +552,28 @@ int main(int argc, const char * argv[]) {
     /* - do your job well: */
     switch (mode) {
     case TxMODE:    /* transmitter test (duration) */
-        (void)canDriver.TransmitterTest((time_t)txtime, opMode, (uint32_t)can_id, (uint8_t)can_dlc, (uint32_t)delay, (uint64_t)number);
+        (void)canDevice.TransmitterTest((time_t)txtime, opMode, (uint32_t)can_id, (uint8_t)can_dlc, (uint32_t)delay, (uint64_t)number);
         break;
     case TxFRAMES:  /* transmitter test (frames) */
-        (void)canDriver.TransmitterTest((uint64_t)txframes, opMode, false, (uint32_t)can_id, (uint8_t)can_dlc, (uint32_t)delay, (uint64_t)number);
+        (void)canDevice.TransmitterTest((uint64_t)txframes, opMode, false, (uint32_t)can_id, (uint8_t)can_dlc, (uint32_t)delay, (uint64_t)number);
         break;
     case TxRANDOM:  /* transmitter test (random) */
-        (void)canDriver.TransmitterTest((uint64_t)txframes, opMode, true, (uint32_t)can_id, (uint8_t)can_dlc, (uint32_t)delay, (uint64_t)number);
+        (void)canDevice.TransmitterTest((uint64_t)txframes, opMode, true, (uint32_t)can_id, (uint8_t)can_dlc, (uint32_t)delay, (uint64_t)number);
         break;
     default:        /* receiver test (abort with Ctrl+C) */
-        (void)canDriver.ReceiverTest((bool)n, (uint64_t)number, (bool)stop_on_error);
+        (void)canDevice.ReceiverTest((bool)n, (uint64_t)number, (bool)stop_on_error);
         break;
     }
     /* - show interface information */
-    if ((device = canDriver.GetHardwareVersion()) != NULL)
+    if ((device = canDevice.GetHardwareVersion()) != NULL)
         fprintf(stdout, "Hardware: %s\n", device);
-    if ((firmware = canDriver.GetFirmwareVersion()) != NULL)
+    if ((firmware = canDevice.GetFirmwareVersion()) != NULL)
         fprintf(stdout, "Firmware: %s\n", firmware);
-    if ((software = CCanDriver::GetVersion()) != NULL)
+    if ((software = CCanDevice::GetVersion()) != NULL)
         fprintf(stdout, "Software: %s\n", software);
 teardown:
     /* - teardown the interface*/
-    retVal = canDriver.TeardownChannel();
+    retVal = canDevice.TeardownChannel();
     if (retVal != CCanApi::NoError) {
         fprintf(stderr, "+++ error: CAN Controller could not be reset (%i)\n", retVal);
         goto finalize;
@@ -599,31 +584,31 @@ finalize:
     return retVal;
 }
 
-int CCanDriver::ListCanDevices(void) {
-    CCanDriver::SChannelInfo info;
+int CCanDevice::ListCanDevices(void) {
+    CCanDevice::SChannelInfo info;
     int n = 0;
 
     fprintf(stdout, "Suppored hardware:\n");
-    bool result = CCanDriver::GetFirstChannel(info);
+    bool result = CCanDevice::GetFirstChannel(info);
     while (result) {
         fprintf(stdout, "\"%s\" (VendorName=\"%s\", LibraryId=%" PRIi32 ", ChannelNo=%" PRIi32 ")\n",
                          info.m_szDeviceName, info.m_szVendorName, info.m_nLibraryId, info.m_nChannelNo);
         n++;
-        result = CCanDriver::GetNextChannel(info);
+        result = CCanDevice::GetNextChannel(info);
     }
     return n;
 }
 
-int CCanDriver::TestCanDevices(CANAPI_OpMode_t opMode) {
-    CCanDriver::SChannelInfo info;
+int CCanDevice::TestCanDevices(CANAPI_OpMode_t opMode) {
+    CCanDevice::SChannelInfo info;
     int n = 0;
 
-    bool result = CCanDriver::GetFirstChannel(info);
+    bool result = CCanDevice::GetFirstChannel(info);
     while (result) {
         fprintf(stdout, "Hardware=%s...", info.m_szDeviceName);
         fflush(stdout);
         EChannelState state;
-        CANAPI_Return_t retVal = CCanDriver::ProbeChannel(info.m_nChannelNo, opMode, state);
+        CANAPI_Return_t retVal = CCanDevice::ProbeChannel(info.m_nChannelNo, opMode, state);
         if ((retVal == CCanApi::NoError) || (retVal == CCanApi::IllegalParameter)) {
             CTimer::Delay(333U * CTimer::MSEC);  // to fake probing a hardware
             switch (state) {
@@ -636,12 +621,12 @@ int CCanDriver::TestCanDevices(CANAPI_OpMode_t opMode) {
                 fprintf(stderr, "+++ warning: CAN operation mode not supported (%02xh)\n", opMode.byte);
         } else
             fprintf(stdout, "FAILED!\n");
-        result = CCanDriver::GetNextChannel(info);
+        result = CCanDevice::GetNextChannel(info);
     }
     return n;
 }
 
-uint64_t CCanDriver::TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
+uint64_t CCanDevice::TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
     CANAPI_Message_t message;
     CANAPI_Return_t retVal;
 
@@ -704,7 +689,7 @@ retry_tx_test:
     return frames;
 }
 
-uint64_t CCanDriver::TransmitterTest(uint64_t count, CANAPI_OpMode_t opMode, bool random, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
+uint64_t CCanDevice::TransmitterTest(uint64_t count, CANAPI_OpMode_t opMode, bool random, uint32_t id, uint8_t dlc, uint32_t delay, uint64_t offset) {
     CANAPI_Message_t message;
     CANAPI_Return_t retVal;
 
@@ -772,7 +757,7 @@ retry_tx_test:
     CTimer::Delay(1U * CTimer::SEC);  /* afterburner */
     return frames;}
 
-uint64_t CCanDriver::ReceiverTest(bool checkCounter, uint64_t expectedNumber, bool stopOnError) {
+uint64_t CCanDevice::ReceiverTest(bool checkCounter, uint64_t expectedNumber, bool stopOnError) {
     CANAPI_Message_t message;
     CANAPI_Status_t status;
     CANAPI_Return_t retVal;
@@ -859,7 +844,7 @@ uint64_t CCanDriver::ReceiverTest(bool checkCounter, uint64_t expectedNumber, bo
 static void sigterm(int signo)
 {
     //fprintf(stderr, "%s: got signal %d\n", __FILE__, signo);
-    (void)canDriver.SignalChannel();
+    (void)canDevice.SignalChannel();
     running = 0;
     (void)signo;
 }
@@ -872,38 +857,38 @@ static void sigterm(int signo)
 static void usage(FILE *stream, const char *program)
 {
     fprintf(stream, "Usage: %s <interface> [<option>...]\n", program);
-    fprintf(stream, "Options for receiver test (default):\n");
+    fprintf(stream, "Options for receiver test (default test mode):\n");
     fprintf(stream, " -r, --receive                 count received messages until ^C is pressed\n");
     fprintf(stream, " -n, --number=<number>         check up-counting numbers starting with <number>\n");
     fprintf(stream, " -s, --stop                    stop on error (with option --number)\n");
-#if (OPTION_CAN_2_0_ONLY == 0)
+#if (CAN_FD_SUPPORTED != 0)
     fprintf(stream, " -m, --mode=(2.0|FDF[+BSR])    CAN operation mode: CAN 2.0 or CAN FD format\n");
 #endif
-    fprintf(stream, "     --shared                  shared CAN controller access (when supported)\n");
+    fprintf(stream, "     --shared                  shared CAN controller access (if supported)\n");
     fprintf(stream, "     --listen-only             monitor mode (listen-only, transmitter is off)\n");
     fprintf(stream, "     --error-frames            allow reception of error frames\n");
     fprintf(stream, "     --no-remote-frames        suppress remote frames (RTR frames)\n");
     fprintf(stream, "     --no-extended-frames      suppress extended frames (29-bit identifier)\n");
-    fprintf(stream, " -b, --baudrate=<baudrate>     CAN bit timing in kbps (default=250)\n");
-    fprintf(stream, "     --bitrate=<bit-rate>      CAN bit rate settings (as a string)\n");
-    fprintf(stream, " -v, --verbose                 show detailed bit rate settings\n");
+    fprintf(stream, " -b, --baudrate=<baudrate>     CAN bit-timing in kbps (default=250), or\n");
+    fprintf(stream, "     --bitrate=<bit-rate>      CAN bit-rate settings (as a string)\n");
+    fprintf(stream, " -v, --verbose                 show detailed bit-rate settings\n");
     fprintf(stream, "Options for transmitter test:\n");
     fprintf(stream, " -t, --transmit=<time>         send messages for the given time in seconds, or\n");
-    fprintf(stream, " -f, --frames=<number>,        alternatively send the given number of messages,\n");
+    fprintf(stream, " -f, --frames=<number>,        alternatively send the given number of messages, or\n");
     fprintf(stream, "     --random=<number>         optionally with random cycle time and data length\n");
     fprintf(stream, " -c, --cycle=<cycle>           cycle time in milliseconds (default=0) or\n");
     fprintf(stream, " -u, --usec=<cycle>            cycle time in microseconds (default=0)\n");
     fprintf(stream, " -d, --dlc=<length>            send messages of given length (default=8)\n");
     fprintf(stream, " -i, --id=<can-id>             use given identifier (default=100h)\n");
     fprintf(stream, " -n, --number=<number>         set first up-counting number (default=0)\n");
-#if (OPTION_CAN_2_0_ONLY == 0)
+#if (CAN_FD_SUPPORTED != 0)
     fprintf(stream, " -m, --mode=(2.0|FDF[+BSR])    CAN operation mode: CAN 2.0 or CAN FD format\n");
 #endif
-    fprintf(stream, "     --shared                  shared CAN controller access (when supported)\n");
-    fprintf(stream, " -b, --baudrate=<baudrate>     CAN bit timing in kbps (default=250)\n");
-    fprintf(stream, "     --bitrate=<bit-rate>      CAN bit rate settings (as a string)\n");
-    fprintf(stream, " -v, --verbose                 show detailed bit rate settings\n");
-    fprintf(stream, "Options:\n");
+    fprintf(stream, "     --shared                  shared CAN controller access (if supported)\n");
+    fprintf(stream, " -b, --baudrate=<baudrate>     CAN bit-timing in kbps (default=250), or\n");
+    fprintf(stream, "     --bitrate=<bit-rate>      CAN bit-rate settings (as a string)\n");
+    fprintf(stream, " -v, --verbose                 show detailed bit-rate settings\n");
+    fprintf(stream, "Other options:\n");
 #if (OPTION_CANAPI_LIBRARY != 0)
     fprintf(stream, " -L, --list-boards[=<vendor>]  list all supported CAN interfaces and exit\n");
     fprintf(stream, " -T, --test-boards[=<vendor>]  list all available CAN interfaces and exit\n");

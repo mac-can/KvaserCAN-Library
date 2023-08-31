@@ -55,9 +55,9 @@
  *               |  SJW  |          BRP          |SAM|   TSEG2   |     TSEG1     |<br>
  *               +-7-+-6-+-5-+---+---+---+---+-0-+-7-+-6-+---+-4-+-3-+---+---+-0-+<br>
  *
- *  @author      $Author: haumea $
+ *  @author      $Author: makemake $
  *
- *  @version     $Rev: 1155 $
+ *  @version     $Rev: 1186 $
  *
  *  @addtogroup  can_btr
  *  @{
@@ -195,10 +195,14 @@ int btr_check_bitrate(const btr_bitrate_t *bitrate, bool fdoe, bool brse) {
 int btr_compare_bitrates(const btr_bitrate_t *bitrate1, const btr_bitrate_t *bitrate2, bool fdoe, bool brse, bool cmp_sp) {
     btr_bitrate_t temporary1;           // bit-rate 1 settings
     uint64_t nom_speed1, nom_sp1;
+#if (OPTION_CAN_2_0_ONLY == OPTION_DISABLED)
     uint64_t data_speed1, data_sp1;
+#endif
     btr_bitrate_t temporary2;           // bit-rate 2 settings
     uint64_t nom_speed2, nom_sp2;
+#if (OPTION_CAN_2_0_ONLY == OPTION_DISABLED)
     uint64_t data_speed2, data_sp2;
+#endif
     int rc1 = 0, rc2 = 0;               // return values
 
     if (!bitrate1 || !bitrate2)         // check for null-pointer
@@ -549,7 +553,7 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
 
     char str[BTR_STRING_MAX], *ptr;     // local variables
     char *key, *value;
-    long number = 0;
+    long number;
 
     int f_clock = 0;
     int nom_brp = 0;
@@ -557,11 +561,12 @@ static int scan_bitrate(const btr_string_t string, btr_bitrate_t *bitrate, bool 
     int nom_tseg2 = 0;
     int nom_sjw = 0;
     int nom_sam = 0;
+#if (OPTION_CAN_2_0_ONLY == OPTION_DISABLED)
     int data_brp = 0;
     int data_tseg1 = 0;
     int data_tseg2 = 0;
     int data_sjw = 0;
-
+#endif
     if (strlen(string) >= BTR_STRING_MAX)
         return BTRERR_BAUDRATE;
     strncpy(str, string, BTR_STRING_MAX);
