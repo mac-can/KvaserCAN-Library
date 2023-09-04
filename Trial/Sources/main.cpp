@@ -174,7 +174,7 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "BD:50K")) BITRATE_50K(bitrate);
         if (!strcmp(argv[i], "BD:20K")) BITRATE_20K(bitrate);
         if (!strcmp(argv[i], "BD:10K")) BITRATE_10K(bitrate);
-//        if (!strcmp(argv[i], "BD:5K")) BITRATE_5K(bitrate);
+        if (!strcmp(argv[i], "BD:5K")) BITRATE_5K(bitrate);
         /* CAN FD operation */
         if (!strcmp(argv[i], "CANFD") || !strcmp(argv[i], "FD")) opMode.fdoe = 1;
         if (!strcmp(argv[i], "FDF")) opMode.fdoe = 1;
