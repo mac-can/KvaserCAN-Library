@@ -911,10 +911,6 @@ CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_C
         return CANUSB_ERROR_ILLPARA;
     if (message->brs && !message->fdf)
         return CANUSB_ERROR_ILLPARA;
-    if (message->esi && !(device->recvData.opMode & CANMODE_FDOE))  // TODO: check this
-        return CANUSB_ERROR_ILLPARA;
-    if (message->esi && !message->fdf)  // TODO: and also this
-        return CANUSB_ERROR_ILLPARA;
     if (message->sts)  /* note: error frames cannot be sent */
         return CANUSB_ERROR_ILLPARA;
 
@@ -2349,7 +2345,7 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t d
     flags |= message->rtr ? MSGFLAG_RTR : 0x0U;
     flags |= message->fdf ? MSGFLAG_FDF : 0x0U;
     flags |= message->brs ? MSGFLAG_BRS : 0x0U;
-    flags |= message->esi ? MSGFLAG_ESI : 0x0U;  // TODO: check this
+    flags |= message->esi ? MSGFLAG_ESI : 0x0U;
     buffer[8] = UINT32LOLO(flags);
     buffer[9] = UINT32LOHI(flags);
     buffer[10] = UINT32HILO(flags);
