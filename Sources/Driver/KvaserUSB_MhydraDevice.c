@@ -319,11 +319,12 @@ CANUSB_Return_t Mhydra_TeardownChannel(KvaserUSB_Device_t *device) {
         return retVal;
     }
     /* now we are off :( */
-    MACCAN_DEBUG_DRIVER("Statistical data:\n");
+    MACCAN_DEBUG_DRIVER("    Diagnostic data:\n");
     MACCAN_DEBUG_DRIVER("%8"PRIu64" CAN frame(s) written to endpoint\n", device->sendData.msgCounter);
     MACCAN_DEBUG_DRIVER("%8"PRIu64" error(s) while writing to endpoint\n", device->sendData.errCounter);
     MACCAN_DEBUG_DRIVER("%8"PRIu64" CAN frame(s) received and enqueued\n", device->recvData.msgCounter);
-    MACCAN_DEBUG_DRIVER("%8"PRIu64" error event(s) received and encoded\n", device->recvData.errCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" error frame(s) received and encoded\n", device->recvData.stsCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" error event(s) received and recorded\n", device->recvData.errCounter);
     MACCAN_DEBUG_DRIVER("%10.1f%% highest level of the receive queue\n", ((float)CANQUE_QueueHigh(device->recvData.msgQueue) * 100.0) \
                                                                        /  (float)CANQUE_QueueSize(device->recvData.msgQueue));
     MACCAN_DEBUG_DRIVER("%8"PRIu64" overrun event(s) of the receive queue\n", CANQUE_OverflowCounter(device->recvData.msgQueue));
@@ -1539,8 +1540,12 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                                     break;
                                 if (message.sts && !(context->opMode & CANMODE_ERR))
                                     break;
-                                if (CANQUE_Enqueue(context->msgQueue, (void*)&message) == CANUSB_SUCCESS)
-                                    context->msgCounter++;
+                                if (CANQUE_Enqueue(context->msgQueue, (void*)&message) == CANUSB_SUCCESS) {
+                                    if (!message.sts)
+                                        context->msgCounter++;
+                                    else
+                                        context->stsCounter++;
+                                }
                             } else {
                                 /* there are flags that do not belong to a received CAN message */
                                 (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->timerFreq);
@@ -1678,6 +1683,8 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
                  */
                 flags = BUF2UINT32(buffer[8]);
                 MACCAN_LOG_PRINTF("! Logged flags:");
+                if ((flags & MSGFLAG_ERROR_FRAME))
+                    MACCAN_LOG_PRINTF(" MSGFLAG_ERROR_FRAME");
                 if ((flags & MSGFLAG_OVERRUN))
                     MACCAN_LOG_PRINTF(" MSGFLAG_OVERRUN");
                 if ((flags & MSGFLAG_NERR))
@@ -1737,7 +1744,7 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     if (!(flags & MSGFLAG_ERROR_FRAME))
         length = Dlc2Len(buffer[21] & 0xFU);
     else
-        length = 4U;  // error fram data
+        length = 4U;  // error frame data
     /* message: id, dlc, data and flags */
     message->id = BUF2UINT32(buffer[12]) & CAN_MAX_XTD_ID;
     message->dlc = BUF2UINT8(buffer[21]) & CANFD_MAX_DLC;
@@ -1748,6 +1755,10 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     message->brs = (flags & MSGFLAG_BRS) ? 1 : 0;
     message->esi = (flags & MSGFLAG_ESI) ? 1 : 0;
     message->sts = (flags & MSGFLAG_STS) ? 1 : 0;
+    // TODO: encode status message
+    if (message->sts) {
+        message->dlc = 4;
+    }
     /* time-stamp from 64-bit timer value */
     ticks = BUF2UINT64(buffer[24]);
     KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, frequency);

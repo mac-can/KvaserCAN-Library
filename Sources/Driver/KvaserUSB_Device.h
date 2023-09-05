@@ -226,6 +226,7 @@ typedef struct kvaser_recv_context_t_ { /* USB read pipe context: */
         bool noAck;                     /*   - flag to skip CMD_TX_ACKNOWLEDGE */
     } txAck;
     uint64_t msgCounter;                /* - number of received CAN frames */
+    uint64_t stsCounter;                /* - number of received error frames */
     uint64_t errCounter;                /* - number of received error events */
     // TODO: do we need a mutex?
 } KvaserUSB__AsyncContext_t, KvaserUSB_RecvData_t;

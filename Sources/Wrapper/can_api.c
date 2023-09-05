@@ -495,9 +495,9 @@ int can_status(int handle, uint8_t *status)
 
     // get status-register from device
     if ((rc = KvaserCAN_GetBusStatus(&can[handle].device, &busStatus)) == CANUSB_SUCCESS) {
-        can[handle].status.bus_off = (busStatus & BUSSTAT_BUSOFF)? 1 : 0;
-        can[handle].status.bus_error = (busStatus & BUSSTAT_ERROR_PASSIVE)? 1 : 0;
-        can[handle].status.warning_level = (busStatus & BUSSTAT_ERROR_WARNING)? 1 : 0;
+        can[handle].status.bus_off = (busStatus & (BUSSTAT_BUSOFF | BUSSTAT_FLAG_BUSOFF))? 1 : 0;
+        can[handle].status.bus_error = (busStatus & (BUSSTAT_FLAG_BUS_ERROR))? 1 : 0;
+        can[handle].status.warning_level = (busStatus & (BUSSTAT_ERROR_PASSIVE | BUSSTAT_FLAG_ERR_PASSIVE))? 1 : 0;
         // TODO: can[handle].status.message_lost |= (busStatus & canSTAT_RXERR)? 1 : 0;
         // TODO: can[handle].status.transmitter_busy |= (busStatus & canSTAT_TX_PENDING)? 1 : 0;
     }

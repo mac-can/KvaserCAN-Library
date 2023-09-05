@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -227,7 +227,7 @@
 #define MSGFLAG_RTR          MSGFLAG_REMOTE_FRAME
 #define MSGFLAG_STS           MSGFLAG_ERROR_FRAME
 
-/* ---  Chip status flags  ---
+/* ---  Chip status flags (Leaf family)  ---
  */
 #define BUSSTAT_BUSOFF                      0x01U
 #define BUSSTAT_ERROR_PASSIVE               0x02U
@@ -236,6 +236,8 @@
 #define BUSSTAT_BUSOFF_RECOVERY             0x10U
 #define BUSSTAT_IGNORING_ERRORS             0x20U
 
+/* ---  Chip status flags (Mhydra family)  ---
+ */
 #define BUSSTAT_FLAG_ERR_ACTIVE             0x00U
 #define BUSSTAT_FLAG_RESET                  0x01U
 #define BUSSTAT_FLAG_BUS_ERROR              0x10U
