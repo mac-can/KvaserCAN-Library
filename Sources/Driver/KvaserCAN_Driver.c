@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -78,11 +78,12 @@ CANUSB_Return_t KvaserCAN_ProbeChannel(KvaserUSB_Channel_t channel, const Kvaser
      */
     opCapa |= KvaserDEV_IsCanFdSupported(productId) ? CANMODE_FDOE : 0x00U;
     opCapa |= KvaserDEV_IsCanFdSupported(productId) ? CANMODE_BRSE : 0x00U;
-    opCapa |= KvaserDEV_IsNonIsoCanFdSupported(productId) ? CANMODE_NISO : 0x00U;
-    opCapa |= KvaserDEV_IsErrorFrameSupported(productId) ? CANMODE_ERR : 0x00U;
+    // TODO: opCapa |= KvaserDEV_IsNonIsoCanFdSupported(productId) ? CANMODE_NISO : 0x00U;
+    //opCapa |= CANMODE_SHRD;  /{ not possible with IOUsbKit }/
+    opCapa |= CANMODE_NXTD;    /* suppressing extended frames (software solution) */
+    opCapa |= CANMODE_NRTR;    /* suppressing remote frames (software solution) */
+    opCapa |= CANMODE_ERR;     /* status frames are always enabled / error frames only with SJA1000 */
     opCapa |= KvaserDEV_IsSilentModeSupported(productId) ? CANMODE_MON : 0x00U;
-    opCapa |= CANMODE_NXTD;
-    opCapa |= CANMODE_NRTR;
     /* check given operation mode against the operation capabilities */
     if ((opMode & ~opCapa) != 0) {
         retVal = CANUSB_ERROR_ILLPARA;
