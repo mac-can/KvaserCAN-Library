@@ -146,14 +146,15 @@ bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.txAck.maxMsg = MHYDRA_MAX_OUTSTANDING_TX;
 
     /* set CAN channel operation capabilities from device spec. */
-    device->opCapability = 0x00U;
+    device->opCapability = CANMODE_DEFAULT;
     device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_FDOE : 0x00U;
     device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_BRSE : 0x00U;
     // TODO: device->opCapability |= KvaserDEV_IsNonIsoCanFdSupported(device->productId) ? CANMODE_NISO : 0x00U;
-    device->opCapability |= KvaserDEV_IsErrorFrameSupported(device->productId) ? CANMODE_ERR : 0x00U;
+    //device->opCapability |= CANMODE_SHRD;  /{ not possible with IOUsbKit }/
+    device->opCapability |= CANMODE_NXTD;    /* suppressing extended frames (software solution) */
+    device->opCapability |= CANMODE_NRTR;    /* suppressing remote frames (software solution) */
+    device->opCapability |= CANMODE_ERR;     /* status frames are always enabled / error frames only with SJA1000 */
     device->opCapability |= KvaserDEV_IsSilentModeSupported(device->productId) ? CANMODE_MON : 0x00U;
-    device->opCapability |= CANMODE_NXTD;
-    device->opCapability |= CANMODE_NRTR;
 
     /* initialize Hydra HE address and channel no. */
     device->hydraData.channel2he = ILLEGAL_HE;
@@ -1337,7 +1338,7 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
     /* set default values */
     capabilities->dummy = 0;
     capabilities->silentMode = KvaserDEV_IsSilentModeSupported(device->productId);
-    capabilities->errorFrame = KvaserDEV_IsErrorFrameSupported(device->productId);
+    capabilities->errorGen = KvaserDEV_IsErrorFrameSupported(device->productId);
     capabilities->busStats = 0;
     capabilities->errorCount = 0;
     capabilities->singleShot = 0;
@@ -1394,7 +1395,7 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
                 if (status == 0) {
                     switch (subCmds[i]) {
                         case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = ((mask & channel) && (value & channel)) ? 1 : 0; break;
-                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorGen = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = ((mask & channel) && (value & channel)) ? 1 : 0; break;
@@ -1755,10 +1756,8 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     message->brs = (flags & MSGFLAG_BRS) ? 1 : 0;
     message->esi = (flags & MSGFLAG_ESI) ? 1 : 0;
     message->sts = (flags & MSGFLAG_STS) ? 1 : 0;
-    // TODO: encode status message
-    if (message->sts) {
-        message->dlc = 4;
-    }
+    /* note: error frames have four byte */
+    if (message->sts) message->dlc = 4U;
     /* time-stamp from 64-bit timer value */
     ticks = BUF2UINT64(buffer[24]);
     KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, frequency);
@@ -2377,7 +2376,7 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t d
     fpga_ctrl |= (uint32_t)(message->dlc & 0xFU) << 8;
     fpga_ctrl |= message->fdf ? 0x8000U : 0x0U;
     fpga_ctrl |= message->brs ? 0x4000U : 0x0U;
-    fpga_ctrl |= message->esi ? 0x2000U : 0x0U;  // TODO: check this
+    fpga_ctrl |= message->esi ? 0x2000U : 0x0U;
     buffer[20] = UINT32LOLO(fpga_ctrl);
     buffer[21] = UINT32LOHI(fpga_ctrl);
     buffer[22] = UINT32HILO(fpga_ctrl);
@@ -2724,7 +2723,7 @@ static uint8_t Len2Dlc(uint8_t len) {
     MACCAN_DEBUG_DRIVER("      - transceiver type: %d\n", deviceInfo->transceiver.transceiverType);
     MACCAN_DEBUG_DRIVER("    - capabilities (if SWOPTION_CAP_REQ):\n");
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SILENT_MODE: %d\n", deviceInfo->capabilities.silentMode);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %d\n", deviceInfo->capabilities.errorFrame);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %d\n", deviceInfo->capabilities.errorGen);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_BUS_STATS: %d\n", deviceInfo->capabilities.busStats);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRCOUNT_READ: %d\n", deviceInfo->capabilities.errorCount);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SINGLE_SHOT: %d\n", deviceInfo->capabilities.singleShot);

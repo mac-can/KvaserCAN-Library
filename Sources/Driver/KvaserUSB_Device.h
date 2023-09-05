@@ -100,7 +100,7 @@ typedef struct kvaser_capabilities_t_ { /* channel capabilities: */
     uint16_t singleShot : 1;            /* - CAP_SUB_CMD_SINGLE_SHOT */
     uint16_t errorCount : 1;            /* - CAP_SUB_CMD_ERRCOUNT_READ */
     uint16_t busStats : 1;              /* - CAP_SUB_CMD_BUS_STATS */
-    uint16_t errorFrame : 1;            /* - CAP_SUB_CMD_ERRFRAME */
+    uint16_t errorGen : 1;              /* - CAP_SUB_CMD_ERRFRAME (error frame generation!) */
     uint16_t silentMode : 1;            /* - CAP_SUB_CMD_SILENT_MODE */
     uint16_t dummy : 2;
 } KvaserUSB_Capabilities_t;
@@ -159,38 +159,38 @@ typedef uint8_t KvaserUSB_BusStatus_t;  /* bus status (Kvaser bus status)! */
 typedef uint16_t KvaserUSB_BusLoad_t;   /* bus load (0..10000 = 0.00..100.00) */
 
 typedef struct kvaser_chip_state_event_t_ {  /* event - chip state: */
-    uint8_t  channel;                        /* - channel no. (from header) */
-    uint16_t time[3];
-    uint8_t  txErrorCounter;
-    uint8_t  rxErrorCounter;
-    uint8_t  busStatus;
-    uint8_t  _reserved1;
-    uint16_t _reserved2;
+    uint8_t  channel;                   /* - channel no. (from header) */
+    uint16_t time[3];                   /* - 48-bit timer value */
+    uint8_t  txErrorCounter;            /* - tx error counter */
+    uint8_t  rxErrorCounter;            /* - rx error counter */
+    uint8_t  busStatus;                 /* - bus status */
+    uint8_t  _reserved1;                /* - (not used) */
+    uint16_t _reserved2;                /* - (not used) */
 } KvaserUSB_ChipStateEvent_t;
 
-typedef struct kvaser_error_event_t_ {  /* event - error event: */
+typedef struct kvaser_error_event_t_ {  /* event - ç: */
     uint8_t  errorCode;                 /* - error code (from header) */
-    uint16_t time[3];
-    uint16_t _reserved;
-    uint16_t addInfo1;
-    uint16_t addInfo2;
+    uint16_t time[3];                   /* - 48-bit timer value */
+    uint16_t _reserved;                 /* - (not used) */
+    uint16_t addInfo1;                  /* - additional information 1 */
+    uint16_t addInfo2;                  /* - additional information 2 */
 } KvaserUSB_ErrorEvent_t;
 
 typedef struct kvaser_can_error_event_t_ {  /* event - CAN error event: */
-    uint8_t  flags;                         /* - flags (from header) */
-    uint16_t time[3];
-    uint8_t  channel;
-    uint8_t  _reserved;
-    uint8_t  txErrorCounter;
-    uint8_t  rxErrorCounter;
-    uint8_t  busStatus;
-    uint8_t  errorFactor;
+    uint8_t  flags;                     /* - flags (from header) */
+    uint16_t time[3];                   /* - 48-bit timer value */
+    uint8_t  channel;                   /* - CAN channel */
+    uint8_t  _reserved;                 /* - (not used) */
+    uint8_t  txErrorCounter;            /* - tx error counter */
+    uint8_t  rxErrorCounter;            /* - rx error counter */
+    uint8_t  busStatus;                 /* - bus status */
+    uint8_t  errorFactor;               /* - error factor */
 } KvaserUSB_CanErrorEvent_t;
 
 typedef struct kvaser_event_data_t_  {  /* event data: */
-    KvaserUSB_ChipStateEvent_t chipState;
-    KvaserUSB_ErrorEvent_t errorEvent;
-    KvaserUSB_CanErrorEvent_t canError;
+    KvaserUSB_ChipStateEvent_t chipState;/*- chip state */
+    KvaserUSB_ErrorEvent_t errorEvent;  /* - error event */
+    KvaserUSB_CanErrorEvent_t canError; /* - CAN error event */
 } KvaserUSB_EventData_t;
 
 typedef struct kvaser_endpoints_t_ {    /* USB endpoints: */
@@ -201,9 +201,9 @@ typedef struct kvaser_endpoints_t_ {    /* USB endpoints: */
     } bulkIn, bulkOut;  // TODO: [KVASER_MAX_CAN_CHANNELS]
 } KvaserUSB_Endpoints_t;
 
-typedef uint8_t KvaserUSB_Frequency_t;
+typedef uint8_t KvaserUSB_Frequency_t;  /* CAN clock / timer (in [MHz]) */
 
-typedef uint64_t KvaserUSB_CpuTicks_t;
+typedef uint64_t KvaserUSB_CpuTicks_t;  /* 48-bit timer value (ticks) */
 
 typedef struct kavser_hydra_buffer_t_ { /* USB Hydra retention buffer (Leaf Pro): */
     uint32_t length;                    /* - number of bytes in the retention buffer */
