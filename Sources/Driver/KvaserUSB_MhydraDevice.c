@@ -2382,7 +2382,7 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t d
     buffer[22] = UINT32HILO(fpga_ctrl);
     buffer[23] = UINT32HIHI(fpga_ctrl);
     uint8_t dlc = MIN(message->dlc, message->fdf ? CANFD_MAX_DLC : CAN_MAX_DLC);
-    buffer[24] = Dlc2Len(dlc);
+    buffer[24] = message->rtr ? 0U : Dlc2Len(dlc); // rtr messages should have zero length
     buffer[25] = UINT8BYTE(dlc);
     buffer[26] = UINT8BYTE(0x00);
     buffer[27] = UINT8BYTE(0x00);
@@ -2643,7 +2643,7 @@ static uint8_t Dlc2Len(uint8_t dlc) {
     const static uint8_t dlc_table[16] = {
         0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 12U, 16U, 20U, 24U, 32U, 48U, 64U
     };
-    return dlc_table[dlc & 0xFU];
+    return dlc_table[(dlc < 16U) ? dlc : 15U];
 }
 
 #ifdef LEN2DLC  // TODO: activate when required
