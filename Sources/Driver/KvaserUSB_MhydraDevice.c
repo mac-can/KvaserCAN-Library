@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2021-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2021-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -57,6 +57,7 @@
 #include <assert.h>
 
 #include "MacCAN_Debug.h"
+#include <inttypes.h>
 
 #ifndef OPTION_PRINT_DEVICE_INFO
 #define OPTION_PRINT_DEVICE_INFO  0  /* note: set to non-zero value to print device information */
@@ -145,14 +146,15 @@ bool Mhydra_ConfigureChannel(KvaserUSB_Device_t *device) {
     device->recvData.txAck.maxMsg = MHYDRA_MAX_OUTSTANDING_TX;
 
     /* set CAN channel operation capabilities from device spec. */
-    device->opCapability = 0x00U;
+    device->opCapability = CANMODE_DEFAULT;
     device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_FDOE : 0x00U;
     device->opCapability |= KvaserDEV_IsCanFdSupported(device->productId) ? CANMODE_BRSE : 0x00U;
     // TODO: device->opCapability |= KvaserDEV_IsNonIsoCanFdSupported(device->productId) ? CANMODE_NISO : 0x00U;
-    device->opCapability |= KvaserDEV_IsErrorFrameSupported(device->productId) ? CANMODE_ERR : 0x00U;
+    //device->opCapability |= CANMODE_SHRD;  /{ not possible with IOUsbKit }/
+    device->opCapability |= CANMODE_NXTD;    /* suppressing extended frames (software solution) */
+    device->opCapability |= CANMODE_NRTR;    /* suppressing remote frames (software solution) */
+    device->opCapability |= CANMODE_ERR;     /* status frames are always enabled / error frames only with SJA1000 */
     device->opCapability |= KvaserDEV_IsSilentModeSupported(device->productId) ? CANMODE_MON : 0x00U;
-    device->opCapability |= CANMODE_NXTD;
-    device->opCapability |= CANMODE_NRTR;
 
     /* initialize Hydra HE address and channel no. */
     device->hydraData.channel2he = ILLEGAL_HE;
@@ -317,6 +319,16 @@ CANUSB_Return_t Mhydra_TeardownChannel(KvaserUSB_Device_t *device) {
         MACCAN_DEBUG_ERROR("+++ %s (device #%u): reception loop could not be aborted (%i)\n", device->name, device->handle, retVal);
         return retVal;
     }
+    /* now we are off :( */
+    MACCAN_DEBUG_DRIVER("    Diagnostic data:\n");
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" CAN frame(s) written to endpoint\n", device->sendData.msgCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" error(s) while writing to endpoint\n", device->sendData.errCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" CAN frame(s) received and enqueued\n", device->recvData.msgCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" error frame(s) received and encoded\n", device->recvData.stsCounter);
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" error event(s) received and recorded\n", device->recvData.errCounter);
+    MACCAN_DEBUG_DRIVER("%10.1f%% highest level of the receive queue\n", ((float)CANQUE_QueueHigh(device->recvData.msgQueue) * 100.0) \
+                                                                       /  (float)CANQUE_QueueSize(device->recvData.msgQueue));
+    MACCAN_DEBUG_DRIVER("%8"PRIu64" overrun event(s) of the receive queue\n", CANQUE_OverflowCounter(device->recvData.msgQueue));
     return retVal;
 }
 
@@ -901,10 +913,6 @@ CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_C
         return CANUSB_ERROR_ILLPARA;
     if (message->brs && !message->fdf)
         return CANUSB_ERROR_ILLPARA;
-    if (message->esi && !(device->recvData.opMode & CANMODE_FDOE))  // TODO: check this
-        return CANUSB_ERROR_ILLPARA;
-    if (message->esi && !message->fdf)  // TODO: and also this
-        return CANUSB_ERROR_ILLPARA;
     if (message->sts)  /* note: error frames cannot be sent */
         return CANUSB_ERROR_ILLPARA;
 
@@ -912,7 +920,7 @@ CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_C
     if (device->recvData.txAck.cntMsg < device->recvData.txAck.maxMsg)
         device->recvData.txAck.transId = (device->recvData.txAck.transId + 1U) % device->recvData.txAck.maxMsg;
     else
-        return CANUSB_ERROR_FULL;
+        return CANUSB_ERROR_BUSY;
 
     /* channel no. and transaction id */
     uint8_t channel = device->hydraData.channel2he;
@@ -956,6 +964,11 @@ CANUSB_Return_t Mhydra_SendMessage(KvaserUSB_Device_t *device, const KvaserUSB_C
         /* one more transmit message pending*/
         device->recvData.txAck.cntMsg++;
     }
+    /* counting */
+    if (retVal == CANUSB_SUCCESS)
+        device->sendData.msgCounter++;
+    else
+        device->sendData.errCounter++;
     return retVal;
 }
 
@@ -1325,7 +1338,7 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
     /* set default values */
     capabilities->dummy = 0;
     capabilities->silentMode = KvaserDEV_IsSilentModeSupported(device->productId);
-    capabilities->errorFrame = KvaserDEV_IsErrorFrameSupported(device->productId);
+    capabilities->errorGen = KvaserDEV_IsErrorFrameSupported(device->productId);
     capabilities->busStats = 0;
     capabilities->errorCount = 0;
     capabilities->singleShot = 0;
@@ -1382,7 +1395,7 @@ CANUSB_Return_t Mhydra_GetCapabilities(KvaserUSB_Device_t *device, KvaserUSB_Cap
                 if (status == 0) {
                     switch (subCmds[i]) {
                         case CAP_SUB_CMD_SILENT_MODE: capabilities->silentMode = ((mask & channel) && (value & channel)) ? 1 : 0; break;
-                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorFrame = ((mask & channel) && (value & channel)) ? 1 : 0; break;
+                        case CAP_SUB_CMD_ERRFRAME: capabilities->errorGen = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         case CAP_SUB_CMD_BUS_STATS: capabilities->busStats = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         case CAP_SUB_CMD_ERRCOUNT_READ: capabilities->errorCount = ((mask & channel) && (value & channel)) ? 1 : 0; break;
                         case CAP_SUB_CMD_SINGLE_SHOT: capabilities->singleShot = ((mask & channel) && (value & channel)) ? 1 : 0; break;
@@ -1493,6 +1506,7 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                     if (CMD_ERROR_EVENT == hydra->buffer[index]) {
                         (void)CANPIP_Write(context->msgPipe, &hydra->buffer[index], nbyte);
                     }
+                    context->errCounter++;
                     break;
                 case CMD_GET_BUSPARAMS_RESP:
                 case CMD_GET_DRIVERMODE_RESP:
@@ -1527,7 +1541,12 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                                     break;
                                 if (message.sts && !(context->opMode & CANMODE_ERR))
                                     break;
-                                (void)CANQUE_Enqueue(context->msgQueue, (void*)&message);
+                                if (CANQUE_Enqueue(context->msgQueue, (void*)&message) == CANUSB_SUCCESS) {
+                                    if (!message.sts)
+                                        context->msgCounter++;
+                                    else
+                                        context->stsCounter++;
+                                }
                             } else {
                                 /* there are flags that do not belong to a received CAN message */
                                 (void)UpdateEventData(&context->evData, &hydra->buffer[index], nbyte, context->timerFreq);
@@ -1665,6 +1684,8 @@ static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint3
                  */
                 flags = BUF2UINT32(buffer[8]);
                 MACCAN_LOG_PRINTF("! Logged flags:");
+                if ((flags & MSGFLAG_ERROR_FRAME))
+                    MACCAN_LOG_PRINTF(" MSGFLAG_ERROR_FRAME");
                 if ((flags & MSGFLAG_OVERRUN))
                     MACCAN_LOG_PRINTF(" MSGFLAG_OVERRUN");
                 if ((flags & MSGFLAG_NERR))
@@ -1724,7 +1745,7 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     if (!(flags & MSGFLAG_ERROR_FRAME))
         length = Dlc2Len(buffer[21] & 0xFU);
     else
-        length = 4U;  // error fram data
+        length = 4U;  // error frame data
     /* message: id, dlc, data and flags */
     message->id = BUF2UINT32(buffer[12]) & CAN_MAX_XTD_ID;
     message->dlc = BUF2UINT8(buffer[21]) & CANFD_MAX_DLC;
@@ -1735,6 +1756,8 @@ static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint
     message->brs = (flags & MSGFLAG_BRS) ? 1 : 0;
     message->esi = (flags & MSGFLAG_ESI) ? 1 : 0;
     message->sts = (flags & MSGFLAG_STS) ? 1 : 0;
+    /* note: error frames have four byte */
+    if (message->sts) message->dlc = 4U;
     /* time-stamp from 64-bit timer value */
     ticks = BUF2UINT64(buffer[24]);
     KvaserUSB_TimestampFromTicks(&message->timestamp, ticks, frequency);
@@ -2332,7 +2355,7 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t d
     flags |= message->rtr ? MSGFLAG_RTR : 0x0U;
     flags |= message->fdf ? MSGFLAG_FDF : 0x0U;
     flags |= message->brs ? MSGFLAG_BRS : 0x0U;
-    flags |= message->esi ? MSGFLAG_ESI : 0x0U;  // TODO: check this
+    flags |= message->esi ? MSGFLAG_ESI : 0x0U;
     buffer[8] = UINT32LOLO(flags);
     buffer[9] = UINT32LOHI(flags);
     buffer[10] = UINT32HILO(flags);
@@ -2353,13 +2376,13 @@ static uint32_t FillTxCanMessageReq(uint8_t *buffer, uint32_t maxbyte, uint8_t d
     fpga_ctrl |= (uint32_t)(message->dlc & 0xFU) << 8;
     fpga_ctrl |= message->fdf ? 0x8000U : 0x0U;
     fpga_ctrl |= message->brs ? 0x4000U : 0x0U;
-    fpga_ctrl |= message->esi ? 0x2000U : 0x0U;  // TODO: check this
+    fpga_ctrl |= message->esi ? 0x2000U : 0x0U;
     buffer[20] = UINT32LOLO(fpga_ctrl);
     buffer[21] = UINT32LOHI(fpga_ctrl);
     buffer[22] = UINT32HILO(fpga_ctrl);
     buffer[23] = UINT32HIHI(fpga_ctrl);
     uint8_t dlc = MIN(message->dlc, message->fdf ? CANFD_MAX_DLC : CAN_MAX_DLC);
-    buffer[24] = Dlc2Len(dlc);
+    buffer[24] = message->rtr ? 0U : Dlc2Len(dlc); // rtr messages should have zero length
     buffer[25] = UINT8BYTE(dlc);
     buffer[26] = UINT8BYTE(0x00);
     buffer[27] = UINT8BYTE(0x00);
@@ -2620,7 +2643,7 @@ static uint8_t Dlc2Len(uint8_t dlc) {
     const static uint8_t dlc_table[16] = {
         0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 12U, 16U, 20U, 24U, 32U, 48U, 64U
     };
-    return dlc_table[dlc & 0xFU];
+    return dlc_table[(dlc < 16U) ? dlc : 15U];
 }
 
 #ifdef LEN2DLC  // TODO: activate when required
@@ -2700,7 +2723,7 @@ static uint8_t Len2Dlc(uint8_t len) {
     MACCAN_DEBUG_DRIVER("      - transceiver type: %d\n", deviceInfo->transceiver.transceiverType);
     MACCAN_DEBUG_DRIVER("    - capabilities (if SWOPTION_CAP_REQ):\n");
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SILENT_MODE: %d\n", deviceInfo->capabilities.silentMode);
-    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %d\n", deviceInfo->capabilities.errorFrame);
+    MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRFRAME: %d\n", deviceInfo->capabilities.errorGen);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_BUS_STATS: %d\n", deviceInfo->capabilities.busStats);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_ERRCOUNT_READ: %d\n", deviceInfo->capabilities.errorCount);
     MACCAN_DEBUG_DRIVER("      - CAP_SUB_CMD_SINGLE_SHOT: %d\n", deviceInfo->capabilities.singleShot);

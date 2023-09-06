@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -100,7 +100,7 @@ typedef struct kvaser_capabilities_t_ { /* channel capabilities: */
     uint16_t singleShot : 1;            /* - CAP_SUB_CMD_SINGLE_SHOT */
     uint16_t errorCount : 1;            /* - CAP_SUB_CMD_ERRCOUNT_READ */
     uint16_t busStats : 1;              /* - CAP_SUB_CMD_BUS_STATS */
-    uint16_t errorFrame : 1;            /* - CAP_SUB_CMD_ERRFRAME */
+    uint16_t errorGen : 1;              /* - CAP_SUB_CMD_ERRFRAME (error frame generation!) */
     uint16_t silentMode : 1;            /* - CAP_SUB_CMD_SILENT_MODE */
     uint16_t dummy : 2;
 } KvaserUSB_Capabilities_t;
@@ -159,38 +159,38 @@ typedef uint8_t KvaserUSB_BusStatus_t;  /* bus status (Kvaser bus status)! */
 typedef uint16_t KvaserUSB_BusLoad_t;   /* bus load (0..10000 = 0.00..100.00) */
 
 typedef struct kvaser_chip_state_event_t_ {  /* event - chip state: */
-    uint8_t  channel;                        /* - channel no. (from header) */
-    uint16_t time[3];
-    uint8_t  txErrorCounter;
-    uint8_t  rxErrorCounter;
-    uint8_t  busStatus;
-    uint8_t  _reserved1;
-    uint16_t _reserved2;
+    uint8_t  channel;                   /* - channel no. (from header) */
+    uint16_t time[3];                   /* - 48-bit timer value */
+    uint8_t  txErrorCounter;            /* - tx error counter */
+    uint8_t  rxErrorCounter;            /* - rx error counter */
+    uint8_t  busStatus;                 /* - bus status */
+    uint8_t  _reserved1;                /* - (not used) */
+    uint16_t _reserved2;                /* - (not used) */
 } KvaserUSB_ChipStateEvent_t;
 
-typedef struct kvaser_error_event_t_ {  /* event - error event: */
+typedef struct kvaser_error_event_t_ {  /* event - ç: */
     uint8_t  errorCode;                 /* - error code (from header) */
-    uint16_t time[3];
-    uint16_t _reserved;
-    uint16_t addInfo1;
-    uint16_t addInfo2;
+    uint16_t time[3];                   /* - 48-bit timer value */
+    uint16_t _reserved;                 /* - (not used) */
+    uint16_t addInfo1;                  /* - additional information 1 */
+    uint16_t addInfo2;                  /* - additional information 2 */
 } KvaserUSB_ErrorEvent_t;
 
 typedef struct kvaser_can_error_event_t_ {  /* event - CAN error event: */
-    uint8_t  flags;                         /* - flags (from header) */
-    uint16_t time[3];
-    uint8_t  channel;
-    uint8_t  _reserved;
-    uint8_t  txErrorCounter;
-    uint8_t  rxErrorCounter;
-    uint8_t  busStatus;
-    uint8_t  errorFactor;
+    uint8_t  flags;                     /* - flags (from header) */
+    uint16_t time[3];                   /* - 48-bit timer value */
+    uint8_t  channel;                   /* - CAN channel */
+    uint8_t  _reserved;                 /* - (not used) */
+    uint8_t  txErrorCounter;            /* - tx error counter */
+    uint8_t  rxErrorCounter;            /* - rx error counter */
+    uint8_t  busStatus;                 /* - bus status */
+    uint8_t  errorFactor;               /* - error factor */
 } KvaserUSB_CanErrorEvent_t;
 
 typedef struct kvaser_event_data_t_  {  /* event data: */
-    KvaserUSB_ChipStateEvent_t chipState;
-    KvaserUSB_ErrorEvent_t errorEvent;
-    KvaserUSB_CanErrorEvent_t canError;
+    KvaserUSB_ChipStateEvent_t chipState;/*- chip state */
+    KvaserUSB_ErrorEvent_t errorEvent;  /* - error event */
+    KvaserUSB_CanErrorEvent_t canError; /* - CAN error event */
 } KvaserUSB_EventData_t;
 
 typedef struct kvaser_endpoints_t_ {    /* USB endpoints: */
@@ -201,18 +201,16 @@ typedef struct kvaser_endpoints_t_ {    /* USB endpoints: */
     } bulkIn, bulkOut;  // TODO: [KVASER_MAX_CAN_CHANNELS]
 } KvaserUSB_Endpoints_t;
 
-typedef CANUSB_AsyncPipe_t KvaserUSB_RecvPipe_t;
+typedef uint8_t KvaserUSB_Frequency_t;  /* CAN clock / timer (in [MHz]) */
 
-typedef uint8_t KvaserUSB_Frequency_t;
-
-typedef uint64_t KvaserUSB_CpuTicks_t;
+typedef uint64_t KvaserUSB_CpuTicks_t;  /* 48-bit timer value (ticks) */
 
 typedef struct kavser_hydra_buffer_t_ { /* USB Hydra retention buffer (Leaf Pro): */
     uint32_t length;                    /* - number of bytes in the retention buffer */
     uint8_t buffer[KVASER_HYDRA_RETENTION_SIZE];
 } KvaserUSB_HydraBuffer_t;
 
-typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
+typedef struct kvaser_recv_context_t_ { /* USB read pipe context: */
     CANPIP_MsgPipe_t msgPipe;           /* - message pipe for data exchange */
     CANQUE_MsgQueue_t msgQueue;         /* - message queue for received CAN frames */
     KvaserUSB_OpMode_t opMode;          /* - demanded CAN operation mode */
@@ -220,15 +218,30 @@ typedef struct kvaser_recv_data_t_ {    /* USB pipe context: */
     KvaserUSB_Timestamp_t timeRef;      /* - time reference (UTC+0) */
     KvaserUSB_Frequency_t canClock;     /* - CAN clock in [MHz] */
     KvaserUSB_Frequency_t timerFreq;    /* - CAN timer in [MHz] */
+    KvaserUSB_HydraBuffer_t hydraBuf;   /* - retention buffer */
     struct tx_acknowledge_tag {         /* - Tx acknowledge: */
         uint8_t maxMsg;                 /*   - max. outstanding Tx messages */
         uint8_t cntMsg;                 /*   - number of sent Tx messages */
         uint8_t transId;                /*   - transaction ID (0..maxMsg-1) */
         bool noAck;                     /*   - flag to skip CMD_TX_ACKNOWLEDGE */
     } txAck;
-    KvaserUSB_HydraBuffer_t hydraBuf;
+    uint64_t msgCounter;                /* - number of received CAN frames */
+    uint64_t stsCounter;                /* - number of received error frames */
+    uint64_t errCounter;                /* - number of received error events */
     // TODO: do we need a mutex?
-} KvaserUSB_RecvData_t;
+} KvaserUSB__AsyncContext_t, KvaserUSB_RecvData_t;
+typedef CANUSB_AsyncPipe_t KvaserUSB_RecvPipe_t;
+
+typedef struct kvaser_send_context_t_ { /* USB write pipe context: */
+#if (0)
+    CANQUE_MsgQueue_t msgQueue;         /* - message queue for CAN frames to be sent */
+    bool isBusy;                        /* - to indicate a transmission in progress */
+#endif
+    uint64_t msgCounter;                /* - number of written CAN frames */
+    uint64_t errCounter;                /* - number of write pipe errors */
+    // TODO: do we need a mutex?
+} KvaserUSB_SendContext_t, KvaserUSB_SendData_t;
+// TODO: typedef CANUSB_AsyncPipe_t KvaserUSB_SendPipe_t;
 
 typedef uint8_t KvaserUSB_CanChannel_t; /* CAN channel on a device (range 0,..n) */
 
@@ -247,6 +260,7 @@ typedef struct kvaser_device_t_ {       /* KvaserCAN device: */
     KvaserUSB_Endpoints_t endpoints;    /* - USB endpoints */
     KvaserUSB_RecvPipe_t recvPipe;      /* - USB reception pipe */
     KvaserUSB_RecvData_t recvData;      /* - pipe w/ CAN message queue */
+    KvaserUSB_SendData_t sendData;      /* - only some statistical counters */
     KvaserUSB_CanChannel_t numChannels; /* - number of CAN channels */
     KvaserUSB_CanChannel_t channelNo;   /* - active CAN channel on device */
     KvaserUSB_OpMode_t opCapability;    /* - CAN operation mode capabilities */
@@ -267,7 +281,7 @@ extern CANUSB_Return_t KvaserUSB_ProbeUsbDevice(CANUSB_Index_t channel, uint16_t
 extern CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device_t *device);
 extern CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device);
 
-extern CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_Callback_t callback);
+extern CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_AsyncPipeCbk_t callback);
 extern CANUSB_Return_t KvaserUSB_AbortReception(KvaserUSB_Device_t *device);
 
 extern CANUSB_Return_t KvaserUSB_SendRequest(KvaserUSB_Device_t *device, const uint8_t *buffer, uint32_t nbyte);

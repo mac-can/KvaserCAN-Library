@@ -2,7 +2,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
@@ -50,25 +50,7 @@
 
 #include "MacCAN_Common.h"
 
-/* -- U Can't Touch This! -- */
-typedef struct msg_queue_t_ {
-    UInt32 size;
-    UInt32 used;
-    UInt32 high;
-    UInt32 head;
-    UInt32 tail;
-    UInt8 *queueElem;
-    size_t elemSize;
-    struct cond_wait_t {
-        pthread_mutex_t mutex;
-        pthread_cond_t cond;
-        Boolean flag;
-    } wait;
-    struct overflow_t {
-        Boolean flag;
-        UInt64 counter;
-    } ovfl;
-} *CANQUE_MsgQueue_t;
+typedef struct msg_queue_tag *CANQUE_MsgQueue_t;
 
 typedef int CANQUE_Return_t;
 
@@ -82,7 +64,7 @@ extern CANQUE_Return_t CANQUE_Destroy(CANQUE_MsgQueue_t msgQueue);
 
 extern CANQUE_Return_t CANQUE_Signal(CANQUE_MsgQueue_t msgQueue);
 
-extern CANQUE_Return_t CANQUE_Enqueue(CANQUE_MsgQueue_t msgQueue, void const *message/*, UInt16 timeout*/);
+extern CANQUE_Return_t CANQUE_Enqueue(CANQUE_MsgQueue_t msgQueue, void const *message);
 
 extern CANQUE_Return_t CANQUE_Dequeue(CANQUE_MsgQueue_t msgQueue, void *message, UInt16 timeout);
 
@@ -101,5 +83,5 @@ extern UInt32 CANQUE_QueueHigh(CANQUE_MsgQueue_t msgQueue);
 #endif
 #endif /* MACCAN_MSGQUEUE_H_INCLUDED */
 
-/* * $Id: MacCAN_MsgQueue.h 1076 2022-01-06 08:02:11Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgQueue.h 1747 2023-07-06 11:22:35Z makemake $ *** (c) UV Software, Berlin ***
  */

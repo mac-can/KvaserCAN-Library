@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -74,9 +74,19 @@
     (void)can_exit(CANKILL_ALL);
 }
 
-// @xctest TC05.1: Send a CAN message with invalid interface handle(s)
+// @xctest TC05.0: Send a CAN message (sunnyday scenario)
 //
-// @expected CANERR_HANDLE
+// @expected: CANERR_NOERROR
+//
+// - (void)testSunnydayScenario {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC05.1: Send a CAN message with invalid channel handle(s)
+//
+// @expected: CANERR_HANDLE
 //
 - (void)testWithInvalidHandle {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -85,7 +95,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x300U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -95,7 +105,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, mode.byte, NULL);
@@ -104,7 +113,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @test:
     // @- try to send a message from DUT1 with invalid handle -1
     rc = can_write(INVALID_HANDLE, &message, 0U);
@@ -143,23 +151,22 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
 // @xctest TC05.2: Give a NULL pointer as argument for parameter 'message'
 //
-// @expected CANERR_NULLPTR
+// @expected: CANERR_NULLPTR
 //
 - (void)testWithNullPointerForMessage {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -171,7 +178,6 @@
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- send a message from DUT1 with NULL for parameter 'message'
     rc = can_write(handle, NULL, 0U);
@@ -180,7 +186,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -199,23 +204,24 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.3: Send a CAN message when interface is not initialized
+// @xctest TC05.3: Send a CAN message if CAN channel is not initialized
 //
-// @expected CANERR_NOTINIT
+// @expected: CANERR_NOTINIT
 //
-- (void)testWhenInterfaceNotInitialized {
+- (void)testIfChannelNotInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_mode_t mode = { TEST_CANMODE };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x302U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -225,12 +231,10 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @test:
     // @- try to send a message from DUT1
     rc = can_write(DUT1, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
-
     // @post:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, mode.byte, NULL);
@@ -263,23 +267,24 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.4: Send a CAN message when CAN controller is not started
+// @xctest TC05.4: Send a CAN message if CAN controller is not started
 //
-// @expected CANERR_OFFLINE
+// @expected: CANERR_OFFLINE
 //
-- (void)testWhenInterfaceNotStarted {
+- (void)testControllerNotNotStarted {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_mode_t mode = { TEST_CANMODE };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x303U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -289,12 +294,10 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, mode.byte, NULL);
     XCTAssertLessThanOrEqual(0, handle);
-
     // @test:
     // @- try to send a message from DUT1
     rc = can_write(handle, &message, 0U);
@@ -303,7 +306,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
     // @- start DUT1 with configured bit-rate settings
     rc = can_start(handle, &bitrate);
@@ -329,23 +331,24 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.5: Send a CAN message when CAN controller already stopped
+// @xctest TC05.5: Send a CAN message if CAN controller was previously stopped
 //
-// @expected CANERR_OFFLINE
+// @expected: CANERR_OFFLINE
 //
-- (void)testWhenInterfaceStopped {
+- (void)testIfControllerStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_mode_t mode = { TEST_CANMODE };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x304U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -355,7 +358,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, mode.byte, NULL);
@@ -384,7 +386,6 @@
     // @- stop/reset DUT1
     rc = can_reset(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- try to send a message from DUT1
     rc = can_write(handle, &message, 0U);
@@ -393,25 +394,25 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-
     // @post:
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.6: Send a CAN message when interface already shutdown
+// @xctest TC05.6: Send a CAN message if CAN channel was previously torn down
 //
-// @expected CANERR_NOTINIT
+// @expected: CANERR_NOTINIT
 //
-- (void)testWhenInterfaceShutdown {
+- (void)testIfChannelTornDown {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_mode_t mode = { TEST_CANMODE };
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x305U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -421,7 +422,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, mode.byte, NULL);
@@ -454,19 +454,19 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @test:
     // @- try to send a message from DUT1
     rc = can_write(handle, &message, 0U);
     XCTAssertEqual(CANERR_NOTINIT, rc);
+    // @end.
 }
 
-// @xctest TC05.7: Send CAN messages with valid 11-bit identifier and check its correct transmission on receiver side
+// @xctest TC05.7: Send CAN messages with valid 11-bit identifier(s) and check its correct transmission on receiver side
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
 - (void)testWithValid11bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -487,7 +487,6 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -520,7 +519,6 @@
     XCTAssertFalse(status.can_stopped);
     // @issue(PeakCAN): a delay of 100ms is required here
     PCBUSB_INIT_DELAY();
-
     // @test:
     // @- loop over all 11-bit CAN identifier (0x000 to 0x7FF with +1)
     for (uint32_t canId = 0x000U; canId <= CAN_MAX_STD_ID; canId++) {
@@ -551,7 +549,6 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- stop/reset DUT1
     rc = can_reset(handle1);
@@ -560,17 +557,18 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle1);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT2
+    // @- tear down DUT2
     rc = can_exit(handle2);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.8: Send CAN messages with invalid 11-bit identifier
+// @xctest TC05.8: Send CAN messages with invalid 11-bit identifier(s)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testWithInvalid11bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -579,7 +577,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x307U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -589,7 +587,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings but w/o bit NXTD
@@ -606,7 +603,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @test:
     // @- try to send a message with invalid STD 0x800 from DUT1
     message.id = 0x800U;
@@ -664,7 +660,6 @@
     message.id = 0xFFFFFFFFU;
     rc = can_write(handle, &message, 0U);
     XCTAssertEqual(CANERR_ILLPARA, rc);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -683,14 +678,15 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.9: Send CAN messages with valid 29-bit identifier and check its correct transmission on receiver side
+// @xctest TC05.9: Send CAN messages with valid 29-bit identifier(s) and check its correct transmission on receiver side
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
 - (void)testWithValid29bitIdentifier {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -711,7 +707,6 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -744,7 +739,6 @@
     XCTAssertFalse(status.can_stopped);
     // @issue(PeakCAN): a delay of 100ms is required here
     PCBUSB_INIT_DELAY();
-
     // @test:
     // @- loop over all 29-bit CAN identifier (0x000 to 0x1FFFFFFF with (<<1)+1)
     for (uint32_t canId = 0x000U; canId <= CAN_MAX_XTD_ID; canId = ((canId << 1) + 1U))  {
@@ -775,7 +769,6 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- stop/reset DUT1
     rc = can_reset(handle1);
@@ -784,17 +777,18 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle1);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT2
+    // @- tear down DUT2
     rc = can_exit(handle2);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.10: Send CAN messages with invalid 29-bit identifier
+// @xctest TC05.10: Send CAN messages with invalid 29-bit identifier(s)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testWithInvalid29bitIdentifier  {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -803,7 +797,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x309U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -813,7 +807,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings but w/o bit NXTD
@@ -830,7 +823,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @test:
     // @- try to send a message with invalid XTD 0x20000000 from DUT1
     message.id = 0x20000000U;
@@ -840,7 +832,6 @@
     message.id = 0xFFFFFFFFU;
     rc = can_write(handle, &message, 0U);
     XCTAssertEqual(CANERR_ILLPARA, rc);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -859,14 +850,15 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.11: Send CAN messages with valid Data Length Code and check its correct transmission on receiver side
+// @xctest TC05.11: Send CAN messages with valid Data Length Code(s) and check its correct transmission on receiver side
 //
-// @expected CANERR_NOERROR
+// @expected: CANERR_NOERROR
 //
 - (void)testWithValidDataLengthCode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -887,7 +879,6 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -920,7 +911,6 @@
     XCTAssertFalse(status.can_stopped);
     // @issue(PeakCAN): a delay of 100ms is required here
     PCBUSB_INIT_DELAY();
-
     // @test:
     // @- loop over all Data Length codes (0 to 8 or 15 with +1)
     for (uint8_t canDlc = 0x0U; canDlc <= (mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC); canDlc++)  {
@@ -951,7 +941,6 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- stop/reset DUT1
     rc = can_reset(handle1);
@@ -960,17 +949,18 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle1);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT2
+    // @- tear down DUT2
     rc = can_exit(handle2);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.12: Send CAN messages with invalid Data Length Code
+// @xctest TC05.12: Send CAN messages with invalid Data Length Code(s)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testWithInvalidDataLengthCode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -979,7 +969,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x30BU;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -989,7 +979,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, mode.byte, NULL);
@@ -1005,7 +994,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @test:
     // @- CAN 2.0:
     if (!mode.fdoe) {
@@ -1046,7 +1034,6 @@
     message.dlc = 0xFFU;
     rc = can_write(handle, &message, 0U);
     XCTAssertEqual(CANERR_ILLPARA, rc);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -1065,14 +1052,15 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.13: Send a CAN message with flag XTD when operation mode NXTD is selected (suppress extended frames)
+// @xctest TC05.13: Send a CAN message with flag XTD set but operation mode NXTD is selected (suppress extended frames)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testCheckFlagXtdWhenOperationModeNoXtd {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1082,7 +1070,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x30CU;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -1092,7 +1080,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1100,10 +1087,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @- when suppress XTD frames supported:
     if (capa.nxtd) {
         mode.nxtd = 1;
@@ -1150,15 +1136,16 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- shutdown DUT1
+        // @-- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     }
+    // @end.
 }
 
-// @xctest TC05.14: Send a CAN message with flag RTR set when operation mode NRTR is selected (suppress remote frames)
+// @xctest TC05.14: Send a CAN message with flag RTR set but operation mode NRTR is selected (suppress remote frames)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testCheckFlagRtrWhenOperationModeNoRtr {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1168,7 +1155,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x30DU;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -1178,7 +1165,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1186,10 +1172,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @- when suppress RTR frames supported:
     if (capa.nrtr) {
         mode.nrtr = 1;
@@ -1236,15 +1221,16 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- shutdown DUT1
+        // @-- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     }
+    // @end.
 }
 
 // @xctest TC05.15: Send a CAN FD message with flag FDF set in CAN 2.0 operation mode (FDOE = 0)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testCheckFlagFdfInCan20OperationMode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1254,7 +1240,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x30EU;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -1264,7 +1250,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1272,10 +1257,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @- when CAN FD long frames supported:
     if (capa.fdoe) {
         mode.fdoe = mode.brse = 0;
@@ -1323,15 +1307,16 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- shutdown DUT1
+        // @-- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     }
+    // @end.
 }
 
 // @xctest TC05.16: Send a CAN FD message with flag BRS set in CAN 2.0 operation mode (FDOE = 0 and BRSE = 0)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testCheckFlagBrsInCan20OperationMode {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1341,7 +1326,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x30FU;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -1351,7 +1336,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1359,10 +1343,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @- when CAN FD long and fast frames supported:
     if (capa.fdoe && capa.brse) {
         mode.fdoe = mode.brse = 0;
@@ -1410,15 +1393,16 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- shutdown DUT1
+        // @-- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     }
+    // @end.
 }
 
-// @xctest TC05.17: Send a CAN FD message with flag BRS set in CAN FD operation mode (FDOE = 1) when bit-rate switching is not enabled (BRSE = 0)
+// @xctest TC05.17: Send a CAN FD message with flag BRS set in CAN FD operation mode (FDOE = 1) but bit-rate switching is not enabled (BRSE = 0)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testCheckFlagBrsWithoutFlagFdf {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1428,7 +1412,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x310U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -1438,7 +1422,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1446,10 +1429,9 @@
     // @- get operation capability from DUT1
     rc = can_property(handle, CANPROP_GET_OP_CAPABILITY, (void*)&capa.byte, sizeof(UInt8));
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
-
     // @- when CAN FD long and fast frames supported:
     if (capa.fdoe && capa.brse) {
         mode.fdoe = mode.brse = 1;
@@ -1501,15 +1483,16 @@
         rc = can_status(handle, &status.byte);
         XCTAssertEqual(CANERR_NOERROR, rc);
         XCTAssertTrue(status.can_stopped);
-        // @-- shutdown DUT1
+        // @-- tear down DUT1
         rc = can_exit(handle);
         XCTAssertEqual(CANERR_NOERROR, rc);
     }
+    // @end.
 }
 
 // @xctest TC05.18: Send a CAN message with flag STS set (status message)
 //
-// @expected CANERR_ILLPARA
+// @expected: CANERR_ILLPARA
 //
 - (void)testCheckFlagSts {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -1518,7 +1501,7 @@
     can_message_t message = {};
     int handle = INVALID_HANDLE;
     int rc = CANERR_FATAL;
-
+    // transmit message
     message.id = 0x311U;
     message.fdf = mode.fdoe ? 1 : 0;
     message.brs = mode.brse ? 1 : 0;
@@ -1528,7 +1511,6 @@
     message.sts = 0;
     message.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     // @- initialize DUT1 with configured settings
     handle = can_init(DUT1, TEST_CANMODE, NULL);
@@ -1544,7 +1526,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @test:
     // @- try to send a message with bit STS set
     message.sts = 1;
@@ -1554,7 +1535,6 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertFalse(status.can_stopped);
-
     // @post:
     // @- send and receive some frames to/from DUT2 (optional)
 #if (SEND_TEST_FRAMES != 0)
@@ -1573,19 +1553,20 @@
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 
-// @xctest TC05.19: Send a CAN message when transmitter is busy (transmit queue full)
+// @xctest TC05.19: Send a CAN message if transmitter is busy (transmit queue full)
 //
-// @expected CANERR_TX_BUSY but status flag 'transmitter_busy' set
+// @expected: CANERR_TX_BUSY but status flag 'transmitter_busy' set
 //
-// @note: statuc flag 'transmitter_busy' is only set when the message is acknowledged by the CAN controller.
+// @note: status flag 'transmitter_busy' is only set if the message is acknowledged by the CAN controller.
 //
 #if (FEATURE_WRITE_ACKNOWLEDGED == FEATURE_SUPPORTED)
-- (void)testWhenTransmitterIsBusy {
+- (void)testIfTransmitterIsBusy {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
     can_status_t status = { CANSTAT_RESET };
     can_message_t message1 = {};
@@ -1594,7 +1575,7 @@
     int handle2 = INVALID_HANDLE;
     int rc = CANERR_FATAL;
     int i;
-
+    // transmit message
     message1.id = 0x500U;
     message1.fdf = mode.fdoe ? 1 : 0;
     message1.brs = mode.brse ? 1 : 0;
@@ -1604,7 +1585,6 @@
     message1.sts = 0;
     message1.dlc = mode.fdoe ? CANFD_MAX_DLC : CAN_MAX_DLC;
     memset(message1.data, 0, CANFD_MAX_LEN);
-
     // @pre:
     mode.nxtd = 0;
     // @- initialize DUT1 with configured settings
@@ -1637,7 +1617,6 @@
     XCTAssertFalse(status.can_stopped);
     // @issue(PeakCAN): a delay of 100ms is required here
     PCBUSB_INIT_DELAY();
-
     // @test:
     NSLog(@"Be patient...");
     // @- fire a lot of messages from DUT1 until the transmitter tilt
@@ -1662,7 +1641,6 @@
     XCTAssertFalse(status.can_stopped);
     // @- check if bit CANSTAT_TX_BUSY is set in status register
     XCTAssertTrue(status.transmitter_busy);
-
     // @post:
     // @- stop/reset DUT1
     rc = can_reset(handle1);
@@ -1671,15 +1649,46 @@
     rc = can_status(handle1, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
     XCTAssertTrue(status.can_stopped);
-    // @- shutdown DUT1
+    // @- tear down DUT1
     rc = can_exit(handle1);
     XCTAssertEqual(CANERR_NOERROR, rc);
-    // @- shutdown DUT2
+    // @- tear down DUT2
     rc = can_exit(handle2);
     XCTAssertEqual(CANERR_NOERROR, rc);
+    // @end.
 }
 #endif
 
+// @xctest TC05.20: Send a CAN FD message with flag ESI set (error indicator)
+//
+// @expected: CANERR_xyz
+//
+// - (void)testWithFlagEsiInCanFdOperationMode {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC05.21: Send a CAN FD message with flag STS set (status message)
+//
+// @expected: CANERR_xyz
+//
+// - (void)tesWithFlagStsInCanFdOperationMode {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
+// @xctest TC05.22: Send a CAN FD message if transmitter is busy (transmit queue full)
+//
+// @expected: CANERR_xyz
+//
+// - (void)tesIfTransmitterIsBusyInCanFdOperationMode {
+//     // @test:
+//     // @todo: insert coin here
+//     // @end.
+// }
+
 @end
 
-// $Id: test_can_write.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_write.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //

@@ -2,7 +2,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
@@ -62,10 +62,13 @@
 #define CANUSB_ERROR_reserved  (-91)
 #define CANUSB_ERROR_RESOURCE  (-90)
 #define CANUSB_ERROR_TIMEOUT   (-50)
+#define CANUSB_ERROR_OVERRUN   (-40)
 #define CANUSB_ERROR_EMPTY     (-30)
-#define CANUSB_ERROR_FULL      (-20)
+#define CANUSB_ERROR_BUSY      (-20)
 #define CANUSB_ERROR_OK          (0)
-#define CANUSB_SUCCESS  CANUSB_ERROR_OK
+/* MacCAN specific error codes */
+#define CANUSB_ERROR_STALLED   CANUSB_ERROR_BUSY
+#define CANUSB_SUCCESS         CANUSB_ERROR_OK
 
 /* CAN API V3 compatible board states */
 #define CANUSB_BOARD_NOT_AVAILABLE  (-1)
@@ -85,5 +88,5 @@ extern "C" {
 #endif
 #endif /* MACCAN_COMMAN_H_INCLUDED */
 
-/* * $Id: MacCAN_Common.h 1068 2021-12-30 18:14:57Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Common.h 1757 2023-07-07 06:24:29Z makemake $ *** (c) UV Software, Berlin ***
  */

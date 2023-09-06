@@ -1,7 +1,7 @@
 #
 #	CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
 #
-#	Copyright (c) 2017-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2017-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
 #
 #	This file is part of MacCAN-KvaserCAN.
@@ -65,14 +65,14 @@ OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o \
 	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
 
-ifeq ($(current_OS),Darwin) # macOS - libUVCANKVL.dylib
+ifeq ($(current_OS),Darwin)  # macOS - libUVCANKVL.dylib
 
 PROJECT = UVCANKVL
 LIBRARY = lib$(PROJECT)
 
 MAJOR = 0
 MINOR = 3
-PATCH = 1
+PATCH = 2
 
 VERSION = $(MAJOR).$(MINOR).$(PATCH)
 TARGET  = $(LIBRARY).$(VERSION).dylib
@@ -91,7 +91,7 @@ DEFINES = -DOPTION_CANAPI_KVASERCAN_DYLIB=1 \
 	-DOPTION_CANAPI_RETVALS=1 \
 	-DOPTION_CANAPI_COMPANIONS=1 \
 	-DOPTION_MACCAN_PIPE_INFO=0 \
-	-DOPTION_MACCAN_PIPE_TIMEOUT=0 \
+	-DOPTION_MACCAN_PIPE_TIMEOUT=1 \
 	-DOPTION_MACCAN_MULTICHANNEL=0 \
 	-DOPTION_MACCAN_LOGGER=0 \
 	-DOPTION_MACCAN_DEBUG_LEVEL=0 \
@@ -164,9 +164,11 @@ bindir:
 incdir:
 	@mkdir -p $(INCDIR)
 	@cp $(SOURCE_DIR)/KvaserCAN_Defines.h $(INCDIR)
+	@cp $(SOURCE_DIR)/KvaserCAN_Defaults.h $(INCDIR)
 	@cp $(CANAPI_DIR)/can_api.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Types.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Defines.h $(INCDIR)
+	@cp $(CANAPI_DIR)/CANBTR_Defaults.h $(INCDIR)
 
 clean:
 	$(RM) $(TARGET) $(STATIC) $(OUTDIR)/*.o $(OUTDIR)/*.d

@@ -1,6 +1,6 @@
 ### macOS&reg; User-Space Driver for USB CAN Interfaces from Kvaser
 
-_Copyright &copy; 2020-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
+_Copyright &copy; 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
 _All rights reserved._
 
 # Deployment
@@ -32,9 +32,9 @@ _All rights reserved._
   - `$(PROJROOT)/Sources/Swift/CANAPI.swift`
   - `$(PROJROOT)/Libraries/CANAPI/Makefile`<sup>*</sup>
   - `$(PROJROOT)/Libraries/KvaserCAN/Makefile`<sup>*</sup>
-  - `$(PROJROOT)/Utilities/can_moni/Sources/main.cpp`
+  - `$(PROJROOT)/Utilities/can_moni/Driver.h`
   - `$(PROJROOT)/Utilities/can_moni/Makefile`
-  - `$(PROJROOT)/Utilities/can_test/Sources/main.cpp`
+  - `$(PROJROOT)/Utilities/can_test/Driver.h`
   - `$(PROJROOT)/Utilities/can_test/Makefile`
 
   <sup>*</sup>_) Set variable_ `CURRENT_VERSION` _and_ `COMPATIBILITY_VERSION` _accordingly._

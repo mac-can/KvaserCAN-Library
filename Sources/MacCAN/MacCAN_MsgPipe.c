@@ -2,7 +2,7 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
@@ -65,11 +65,15 @@
 #define PIPI  0
 #define PIPO  1
 
+struct msg_pipe_tag {
+    int fildes[2];
+};
+
 CANPIP_MsgPipe_t CANPIP_Create(void) {
     CANPIP_MsgPipe_t msgPipe = NULL;
 
     MACCAN_DEBUG_CORE("        - Message pipe of size %u bytes\n", PIPE_BUF);
-    if ((msgPipe = (CANPIP_MsgPipe_t)malloc(sizeof(struct msg_pipe_t_))) == NULL) {
+    if ((msgPipe = (CANPIP_MsgPipe_t)malloc(sizeof(struct msg_pipe_tag))) == NULL) {
         MACCAN_DEBUG_ERROR("+++ Unable to create message pipe (NULL pointer)\n");
         return NULL;
     }
@@ -110,7 +114,7 @@ CANPIP_Return_t CANPIP_Write(CANPIP_MsgPipe_t msgPipe, void const *buffer, size_
         if (n < 0)
             retVal = CANUSB_ERROR_FATAL;
         else if (n < (ssize_t)nbyte)
-            retVal = CANUSB_ERROR_FULL;
+            retVal = CANUSB_ERROR_OVERRUN;
         else
             retVal = CANUSB_SUCCESS;
     }
@@ -169,5 +173,5 @@ CANPIP_Return_t CANPIP_Read(CANPIP_MsgPipe_t msgPipe, void *buffer, size_t maxby
     return retVal;
 }
 
-/* * $Id: MacCAN_MsgPipe.c 1199 2022-06-19 19:02:00Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgPipe.c 1752 2023-07-06 19:40:46Z makemake $ *** (c) UV Software, Berlin ***
  */
