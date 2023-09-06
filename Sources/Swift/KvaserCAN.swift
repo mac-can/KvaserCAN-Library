@@ -2,7 +2,7 @@
 //
 //  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
 //
-//  Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.

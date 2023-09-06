@@ -41,7 +41,6 @@ let package = Package(
                 "CANAPI/LICENSE.GPL-3.0-or-later",
                 "Swift/CANAPI.swift",
                 "Swift/KvaserCAN.swift",
-                "Kvaser/*.*",
                 "include/README.md"
             ],
             sources: [

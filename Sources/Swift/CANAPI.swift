@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Interface Definition)
 //
-//  Copyright (C) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (C) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -54,7 +54,7 @@
 
     @author   $Author: makemake $
 
-    @version  $Rev: 1063 $
+    @version  $Rev: 1195 $
  */
 import Foundation
 import CCanApi
@@ -272,13 +272,11 @@ public class CanApi {
     public struct Speed {
         // struct: nominal bus speed
         public struct Nominal {
-            public var fdOperationEnabled: Bool
             public var busSpeed: Float
             public var samplePoint: Float
         }
         // struct: data phase bus speed
         public struct DataPhase {
-            public var bitrateSwitchingEnabled: Bool
             public var busSpeed: Float
             public var samplePoint: Float
         }
@@ -287,11 +285,9 @@ public class CanApi {
         public var data: DataPhase
         // transmission rate from C interface
         public init(from speed: CanBusSpeed) {
-            nominal = Nominal(fdOperationEnabled: speed.nominal.fdoe,
-                              busSpeed: speed.nominal.speed,
+            nominal = Nominal(busSpeed: speed.nominal.speed,
                               samplePoint: speed.nominal.samplepoint)
-            data = DataPhase(bitrateSwitchingEnabled: speed.data.brse,
-                             busSpeed: speed.data.speed,
+            data = DataPhase(busSpeed: speed.data.speed,
                              samplePoint: speed.data.samplepoint)
         }
         // conversion from Swift to C interface
@@ -1030,4 +1026,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1063 2022-07-03 18:21:52Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1195 2023-09-06 17:35:23Z makemake $  Copyright (c) UV Software, Berlin //
