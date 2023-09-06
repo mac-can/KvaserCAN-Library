@@ -65,7 +65,7 @@ OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o \
 	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
 
-ifeq ($(current_OS),Darwin) # macOS - libUVCANKVL.dylib
+ifeq ($(current_OS),Darwin)  # macOS - libUVCANKVL.dylib
 
 PROJECT = UVCANKVL
 LIBRARY = lib$(PROJECT)
