@@ -41,7 +41,7 @@
 
 #define MAX_ID  (CAN_MAX_STD_ID + 1)
 
-static int get_exclusion(const char *arg);  // TODO: make it a member function
+static int get_exclusion(const char *arg);
 
 class CCanDevice : public CCanDriver {
 public:
@@ -209,7 +209,7 @@ int main(int argc, const char * argv[]) {
             verbose = 1;
             break;
 #if (CAN_FD_SUPPORTED != 0)
-        case 'm':  /* option `--mode=(2.0|FDF[+BSR])' (-m)*/
+        case 'm':  /* option `--mode=(2.0|FDF[+BRS])' (-m)*/
             if (op++) {
                 fprintf(stderr, "%s: duplicated option `--mode' (%c)\n", basename(argv[0]), opt);
                 return 1;
@@ -433,7 +433,7 @@ int main(int argc, const char * argv[]) {
         fprintf(stderr, "%s: illegal combination of options `--mode' (m) and `--bitrate'\n", basename(argv[0]));
         return 1;
     }
-    /* CAN Monitor for genericc CAN interfaces */
+    /* CAN Monitor for generic CAN interfaces */
     fprintf(stdout, "%s\n%s\n\n%s\n\n", APPLICATION, COPYRIGHT, WARRANTY);
     /* - show operation mode and bit-rate settings */
     if (verbose) {
@@ -447,13 +447,9 @@ int main(int argc, const char * argv[]) {
         if ((opMode.byte & CANMODE_MON)) fprintf(stdout, "+MON");
         fprintf(stdout, " (op_mode=%02Xh)\n", opMode.byte);
         if (bitrate.btr.frequency > 0) {
-            fprintf(stdout, "Bit-rate=%.0fkbps@%.1f%%",
-                speed.nominal.speed / 1000.,
-                speed.nominal.samplepoint * 100.);
+            fprintf(stdout, "Bit-rate=%.0fkbps@%.1f%%", speed.nominal.speed / 1000., speed.nominal.samplepoint * 100.);
             if (opMode.byte & CANMODE_BRSE)
-                fprintf(stdout, ":%.0fkbps@%.1f%%",
-                    speed.data.speed / 1000.,
-                    speed.data.samplepoint * 100.);
+                fprintf(stdout, ":%.0fkbps@%.1f%%", speed.data.speed / 1000., speed.data.samplepoint * 100.);
             (void)CCanDevice::MapBitrate2String(bitrate, property, CANPROP_MAX_BUFFER_SIZE,
                                                 (opMode.byte & CANMODE_BRSE), hasNoSamp);
             fprintf(stdout, " (%s)\n\n", property);
@@ -690,7 +686,7 @@ static void usage(FILE *stream, const char *program)
     fprintf(stream, " -x, --exclude=[~]<id-list>    exclude CAN-IDs: <id>[-<id>]{,<id>[-<id>]}\n");
 //    fprintf(stream, " -s, --script=<filename>       execute a script file\n"); // TODO: script engine
 #if (CAN_FD_SUPPORTED != 0)
-    fprintf(stream, " -m, --mode=(2.0|FDF[+BSR])    CAN operation mode: CAN 2.0 or CAN FD format\n");
+    fprintf(stream, " -m, --mode=(2.0|FDF[+BRS])    CAN operation mode: CAN 2.0 or CAN FD mode\n");
 #endif
     fprintf(stream, "     --shared                  shared CAN controller access (if supported)\n");
     fprintf(stream, "     --listen-only             monitor mode (listen-only, transmitter is off)\n");
@@ -709,6 +705,33 @@ static void usage(FILE *stream, const char *program)
 #endif
     fprintf(stream, " -h, --help                    display this help screen and exit\n");
     fprintf(stream, "     --version                 show version information and exit\n");
+#if (0)
+    fprintf(stream, "Arguments:\n");
+    fprintf(stream, "  <id>           CAN identifier (11-bit)\n");
+    fprintf(stream, "  <interface>    CAN interface board (list all with /LIST)\n");
+    fprintf(stream, "  <baudrate>     CAN baud rate index (default=3):\n");
+    fprintf(stream, "                 0 = 1000 kbps\n");
+    fprintf(stream, "                 1 = 800 kbps\n");
+    fprintf(stream, "                 2 = 500 kbps\n");
+    fprintf(stream, "                 3 = 250 kbps\n");
+    fprintf(stream, "                 4 = 125 kbps\n");
+    fprintf(stream, "                 5 = 100 kbps\n");
+    fprintf(stream, "                 6 = 50 kbps\n");
+    fprintf(stream, "                 7 = 20 kbps\n");
+    fprintf(stream, "                 8 = 10 kbps\n");
+    fprintf(stream, "  <bitrate>      comma-separated <key>=<value>-list:\n");
+    fprintf(stream, "                 f_clock=<value>         frequency in Hz or\n");
+    fprintf(stream, "                 f_clock_mhz=<value>     frequency in MHz\n");
+    fprintf(stream, "                 nom_brp=<value>         bit-rate prescaler (nominal)\n");
+    fprintf(stream, "                 nom_tseg1=<value>       time segment 1 (nominal)\n");
+    fprintf(stream, "                 nom_tseg2=<value>       time segment 2 (nominal)\n");
+    fprintf(stream, "                 nom_sjw=<value>         sync. jump width (nominal)\n");
+    fprintf(stream, "                 nom_sam=<value>         sampling (only SJA1000)\n");
+    fprintf(stream, "                 data_brp=<value>        bit-rate prescaler (FD data)\n");
+    fprintf(stream, "                 data_tseg1=<value>      time segment 1 (FD data)\n");
+    fprintf(stream, "                 data_tseg2=<value>      time segment 2 (FD data)\n");
+    fprintf(stream, "                 data_sjw=<value>        sync. jump width (FD data).\n");
+#endif
     fprintf(stream, "Hazard note:\n");
     fprintf(stream, "  If you connect your CAN device to a real CAN network when using this program,\n");
     fprintf(stream, "  you might damage your application.\n");
