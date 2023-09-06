@@ -1,6 +1,6 @@
 ### macOS&reg; User-Space Driver for USB CAN Interfaces from Kvaser
 
-_Copyright &copy; 2020-2022  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
+_Copyright &copy; 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
 # Running CAN and CAN FD on Mac&reg;
 
@@ -124,15 +124,15 @@ Type `can_test --help` to display all program options.
 
 ### Development Environment
 
-#### macOS Monterey
+#### macOS Ventura
 
-- macOS Monterey (12.5) on a Mac mini (M1, 2020)
-- Apple clang version 13.1.6 (clang-1316.0.21.2.5)
-- Xcode Version 13.4.1 (13F100)
+- macOS Ventura (13.5.1) on a Mac mini (M1, 2020)
+- Apple clang version 14.0.3 (clang-1403.0.22.14.1)
+- Xcode Version 14.3.1 (14E300c)
 
 #### macOS Big Sur
 
-- macOS Big Sur (11.6.8) on a MacBook Pro (2019)
+- macOS Big Sur (11.7.9) on a MacBook Pro (2019)
 - Apple clang version 13.0.0 (clang-1300.0.29.30)
 - Xcode Version 13.2.1 (13C100)
 
