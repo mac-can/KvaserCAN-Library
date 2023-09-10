@@ -160,6 +160,10 @@ General test settings can be adapted in the file `Settings.h`.
 
 ## This and That
 
+### CAN API V3 Reference
+
+A generic documentation of the CAN API V3 application programming interface can be found [here](https://uv-software.github.io/CANAPI-Docs). 
+
 ### Wrapper Library for Windows&reg;
 
 A CAN API V3 compatible Wrapper Library for Windows is also available.
