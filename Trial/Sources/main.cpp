@@ -74,6 +74,10 @@
 #define OPTION_TIME_ABS     (2)
 #define OPTION_TIME_REL     (3)
 
+#define CHANNEL  KVASER_CAN_CHANNEL0
+
+typedef CKvaserCAN  CCanDriver;
+
 #if defined(_WIN32) || defined(_WIN64)
  static void usleep(unsigned int usec);
  /* useconds_t: to be compatible with macOS */
@@ -85,9 +89,9 @@ static void verbose(const can_mode_t &mode, const can_bitrate_t &bitrate, const 
 
 static volatile int running = 1;
 
-static CKvaserCAN myDriver = CKvaserCAN();
+static CCanDriver myDriver = CCanDriver();
 #ifdef SECOND_CHANNEL
- static CKvaserCAN mySecond = CKvaserCAN();
+ static CCanDriver mySecond = CCanDriver();
 #endif
 
 int main(int argc, const char * argv[]) {
@@ -113,9 +117,10 @@ int main(int argc, const char * argv[]) {
     message.timestamp.tv_sec = 0;
     message.timestamp.tv_nsec = 0;
     CANAPI_Return_t retVal = 0;
-    int32_t channel = (int32_t)KVASER_CAN_CHANNEL0;
-    uint16_t timeout = CANREAD_INFINITE;
-    useconds_t delay = 0U;
+    int32_t channel = (int32_t)CHANNEL;
+    uint16_t rxTimeout = CANWAIT_INFINITE;
+    uint16_t txTimeout = 0U;
+    useconds_t txDelay = 0U;
     CCanApi::SChannelInfo info;
     CCanApi::EChannelState state;
 //    int32_t clocks[CANPROP_MAX_BUFFER_SIZE/sizeof(int32_t)];
@@ -189,12 +194,14 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "BR:500K")) BITRATE_FD_500K(bitrate);
         if (!strcmp(argv[i], "BR:1M")) BITRATE_FD_1M(bitrate);
         /* asynchronous IO */
-        if (!strcmp(argv[i], "POLLING")) timeout = 0U;
-        if (!strcmp(argv[i], "BLOCKING")) timeout = CANREAD_INFINITE;
+        if (!strcmp(argv[i], "POLLING")) rxTimeout = 0U;
+        if (!strcmp(argv[i], "BLOCKING")) rxTimeout = CANWAIT_INFINITE;
+        if (!strncmp(argv[i], "R:", 2) && sscanf(argv[i], "R:%i", &opt) == 1) rxTimeout = (useconds_t)opt;
         /* transmit messages */
         if ((sscanf(argv[i], "%i", &opt) == 1) && (opt > 0)) option_transmit = opt;
-        if (!strncmp(argv[i], "C:", 2) && sscanf(argv[i], "C:%i", &opt) == 1) delay = (useconds_t)opt * 1000U;
-        if (!strncmp(argv[i], "U:", 2) && sscanf(argv[i], "U:%i", &opt) == 1) delay = (useconds_t)opt;
+        if (!strncmp(argv[i], "T:", 2) && sscanf(argv[i], "T:%i", &opt) == 1) txTimeout = (useconds_t)opt;
+        if (!strncmp(argv[i], "C:", 2) && sscanf(argv[i], "C:%i", &opt) == 1) txDelay = (useconds_t)opt * 1000U;
+        if (!strncmp(argv[i], "U:", 2) && sscanf(argv[i], "U:%i", &opt) == 1) txDelay = (useconds_t)opt;
         /* receive messages */
         if (!strcmp(argv[i], "STOP")) option_stop = OPTION_YES;
 #if (ISSUE_198 == 0)
@@ -228,7 +235,7 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "XTD:OFF")) opMode.nxtd = 1;
         if (!strcmp(argv[i], "RTR:OFF")) opMode.nrtr = 1;
     }
-    fprintf(stdout, ">>> %s\n", CKvaserCAN::GetVersion());
+    fprintf(stdout, ">>> %s\n", CCanDriver::GetVersion());
     if ((signal(SIGINT, sigterm) == SIG_ERR) ||
 #if !defined(_WIN32) && !defined(_WIN64)
        (signal(SIGHUP, sigterm) == SIG_ERR) ||
@@ -284,11 +291,11 @@ int main(int argc, const char * argv[]) {
     if (option_list) {
         int n = 0;
 #if (1)
-        bool result = CKvaserCAN::GetFirstChannel(info);
+        bool result = CCanDriver::GetFirstChannel(info);
         while (result) {
             fprintf(stdout, ">>> CCanAPI::Get%sChannel(): %i = \'%s\' (%i = \'%s\')\n", !n ? "First" : "Next",
                     info.m_nChannelNo, info.m_szDeviceName, info.m_nLibraryId, info.m_szVendorName);
-            result = CKvaserCAN::GetNextChannel(info);
+            result = CCanDriver::GetNextChannel(info);
             n++;
         }
 #else
@@ -329,22 +336,22 @@ int main(int argc, const char * argv[]) {
     /* channel tester */
     if (option_test) {
 #if (1)
-        bool result = CKvaserCAN::GetFirstChannel(info);
+        bool result = CCanDriver::GetFirstChannel(info);
         while (result) {
-            retVal = CKvaserCAN::ProbeChannel(info.m_nChannelNo, opMode, state);
+            retVal = CCanDriver::ProbeChannel(info.m_nChannelNo, opMode, state);
             fprintf(stdout, ">>> CCanAPI::ProbeChannel(%i): state = %s", info.m_nChannelNo,
                             (state == CCanApi::ChannelOccupied) ? "occupied" :
                             (state == CCanApi::ChannelAvailable) ? "available" :
                             (state == CCanApi::ChannelNotAvailable) ? "not available" : "not testable");
             fprintf(stdout, "%s", (retVal == CCanApi::IllegalParameter) ? " (warning: Op.-Mode not supported)\n" : "\n");
-            result = CKvaserCAN::GetNextChannel(info);
+            result = CCanDriver::GetNextChannel(info);
         }
 #else
         retVal = myDriver.SetProperty(CANPROP_SET_FIRST_CHANNEL, (void *)NULL, 0U);
         while (retVal == CCanApi::NoError) {
             retVal = myDriver.GetProperty(CANPROP_GET_CHANNEL_NO, (void *)&i32Val, sizeof(int32_t));
             if (retVal == CCanApi::NoError) {
-                retVal = CKvaserCAN::ProbeChannel(i32Val, opMode, state);
+                retVal = CCanDriver::ProbeChannel(i32Val, opMode, state);
                 fprintf(stdout, ">>> CCanApi::ProbeChannel(%i): state = %s", i32Val,
                                 (state == CCanApi::ChannelOccupied) ? "occupied" :
                                 (state == CCanApi::ChannelAvailable) ? "available" :
@@ -451,15 +458,15 @@ int main(int argc, const char * argv[]) {
     retVal = mySecond.StartController(bitrate);
     if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.StartController returned %i\n", retVal);
-    retVal = mySecond.WriteMessage(message);
+    retVal = mySecond.WriteMessage(message, txTimeout);
     if (retVal != CCanApi::NoError)
         fprintf(stderr, "+++ error: mySecond.WriteMessage returned %i\n", retVal);
 #endif
     /* transmit messages */
     if (option_transmit) {
-        if (!option_retry)
+        if ((txTimeout == 0U) && !option_retry)
             fprintf(stdout, "Attention: The program will be aborted when the transmitter is busy.\n"
-                            "           Use progrsm option RETRY to avoid this.\n");
+                            "           Use program option RETRY or T:<timeout> to avoid this.\n");
         fprintf(stdout, "Press Ctrl+C to abort..."); fflush(stdout);
         frames = 0;
         now = time(NULL);
@@ -483,15 +490,15 @@ int main(int argc, const char * argv[]) {
             message.data[6] = (uint8_t)(((uint64_t)frames & 0x00FF000000000000) >> 48);
             message.data[7] = (uint8_t)(((uint64_t)frames & 0xFF00000000000000) >> 56);
 retry_write:
-            retVal = myDriver.WriteMessage(message);
+            retVal = myDriver.WriteMessage(message, txTimeout);
             if ((retVal == CCanApi::TransmitterBusy) && option_retry)
                 goto retry_write;
             else if (retVal != CCanApi::NoError) {
                 fprintf(stderr, "\n+++ error: myDriver.WriteMessage returned %i\n", retVal);
                 goto teardown;
             }
-            if (delay)
-                usleep(delay);
+            if (txDelay)
+                usleep(txDelay);
             frames++;
         }
         fprintf(stdout, "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b");
@@ -504,7 +511,7 @@ retry_write:
     fprintf(stdout, "Press Ctrl+C to abort...\n");
     frames = 0;
     while (running) {
-        if ((retVal = myDriver.ReadMessage(message, timeout)) == CCanApi::NoError) {
+        if ((retVal = myDriver.ReadMessage(message, rxTimeout)) == CCanApi::NoError) {
             if (option_echo) {
                 fprintf(stdout, ">>> %i\t", frames++);
                 fprintf(stdout, "%7li.%04li\t", (long)message.timestamp.tv_sec, message.timestamp.tv_nsec / 100000);
@@ -555,7 +562,7 @@ retry_write:
                 for (uint8_t i = 0; i < CCanApi::Dlc2Len(message.dlc); i++)
                     message.data[i] = message.data[i] ^ 0xFFU;
 retry_reply:
-                retVal = myDriver.WriteMessage(message);
+                retVal = myDriver.WriteMessage(message, txTimeout);
                 if ((retVal == CCanApi::TransmitterBusy) && option_retry)
                     goto retry_reply;
                 else if (retVal != CCanApi::NoError) {
@@ -582,7 +589,7 @@ retry_reply:
                 if (message.sts)
                     fprintf(stdout, " <<< status frame");
                 else if (option_repeat) {
-                    retVal = myDriver.WriteMessage(message);
+                    retVal = myDriver.WriteMessage(message, txTimeout);
                     if (retVal != CCanApi::NoError) {
                         fprintf(stderr, "+++ error: mySecond.WriteMessage returned %i\n", retVal);
                         goto teardown;
