@@ -480,6 +480,11 @@ TEST_F(GetBitrate, GTEST_TESTCASE(WithVariousCanBitrateSettings, GTEST_ENABLED))
         case 7: BITRATE_10K(bitrate); break;
         default: return;  // Get out of here!
         }
+#if (TC11_10_ISSUE_RUSOKU_BITRATE_10K != WORKAROUND_DISABLED)
+        // @! issue(MacCAN-TouCAN): 10kbps hardware bug (known issue)
+        if (i == 7)
+            continue;
+#endif
         // @pre:
         // @- initialize DUT1 in CAN 2.0 operation mode
 #if (OPTION_CAN_2_0_ONLY == 0)
@@ -657,4 +662,4 @@ TEST_F(GetBitrate, GTEST_TESTCASE(WithVariousCanFdBitrateSettings, GTEST_ENABLED
 }
 #endif  // (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 
-//  $Id: TC11_GetBitrate.cc 1188 2023-09-01 18:21:43Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TC11_GetBitrate.cc 1204 2023-09-24 15:26:57Z makemake $  Copyright (c) UV Software, Berlin.

@@ -47,6 +47,7 @@
 //
 #include "pch.h"
 #include <math.h>
+#include <limits.h>
 
 #ifndef OPTION_CAN_2_0_ONLY
 #define OPTION_CAN_2_0_ONLY  OPTION_DISABLED
@@ -1602,4 +1603,4 @@ TEST_F(BitrateConverter, GTEST_TESTCASE(BitrateToStringWithNullPointerForString,
 //
 // @note: passing a pointer for 'btr0btr1' is not possible with the C++ API!
 
-//  $Id: TCx2_BitrateConverter.cc 1183 2023-08-27 11:04:45Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TCx2_BitrateConverter.cc 1201 2023-09-13 11:09:28Z makemake $  Copyright (c) UV Software, Berlin.

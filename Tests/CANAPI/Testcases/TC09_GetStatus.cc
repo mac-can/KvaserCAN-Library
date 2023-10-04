@@ -568,6 +568,9 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfWarningLevelReached, GTEST_ENABLED)) {
     trmMsg.dlc = 0;
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
+#if (TC09_9_ISSUE_PCBUSB_WARNING_LEVEL == WORKAROUND_ENABLED)
+    ASSERT_TRUE(false) << "[  TC09.9  ] No warning level from device!";
+#endif
     // @
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
@@ -1128,7 +1131,12 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfMessageLost, GTEST_DISABLED)) {
 //
 // @disabled: This test is already covered by TC04.8 (ReadMessage.IfReceiveQueueFull)!
 //
-TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_DISABLED)) {
+#if (FEATURE_SIZE_RECEIVE_QUEUE != 0)
+#define GTEST_RECEIVE_QUEUE_FULL  GTEST_DISABLED
+#else
+#define GTEST_RECEIVE_QUEUE_FULL  GTEST_DISABLED
+#endif
+TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Message_t trmMsg = {};
@@ -1304,4 +1312,4 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_DISABLED)) {
     // @end.
 }
 
-//  $Id: TC09_GetStatus.cc 1193 2023-09-06 10:21:35Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TC09_GetStatus.cc 1201 2023-09-13 11:09:28Z makemake $  Copyright (c) UV Software, Berlin.

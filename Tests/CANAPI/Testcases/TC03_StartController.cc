@@ -463,6 +463,11 @@ TEST_F(StartController, GTEST_TESTCASE(WithValidCanBitrateIndex, GTEST_ENABLED))
         if (bitrate.index == CANBTR_INDEX_5K)
             continue;
 #endif
+#if (TC03_7_ISSUE_RUSOKU_BITRATE_10K != WORKAROUND_DISABLED)
+        // @! issue(MacCAN-TouCAN): 10kbps hardware bug (known issue)
+        if (bitrate.index == CANBTR_INDEX_10K)
+            continue;
+#endif
         // @pre:
         // printf("[   SUB%-3i ] ...\n", (i + 1));
         // @-- initialize DUT1 in CAN 2.0 operation mode
@@ -2308,4 +2313,4 @@ TEST_F(StartController, GTEST_TESTCASE(WithCanFdBitrateSettingsInCan20Mode, GTES
 }
 #endif  // (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 
-//  $Id: TC03_StartController.cc 1193 2023-09-06 10:21:35Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TC03_StartController.cc 1204 2023-09-24 15:26:57Z makemake $  Copyright (c) UV Software, Berlin.

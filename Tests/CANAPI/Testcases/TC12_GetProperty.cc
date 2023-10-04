@@ -94,10 +94,11 @@ TEST_F(GetProperty, GTEST_TESTCASE(SunnydayScenario, GTEST_SUNNYDAY)) {
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
-        if (testcase.IsRequired())
+        if (testcase.IsRequired()) {
             EXPECT_EQ(CCanApi::NoError, retVal);
-        else if (retVal != CCanApi::NoError)
+        } else if (retVal != CCanApi::NoError) {
             EXPECT_EQ(CCanApi::NotSupported, retVal);
+        }
         // next please
         param = testcase.GetNextEntry();
     }
@@ -171,10 +172,11 @@ TEST_F(GetProperty, GTEST_TESTCASE(WithNullPointerForValue, GTEST_ENABLED)) {
             // printf("param=%i (%s)\n", param, testcase.Description());
             // @--- try to get the property value (incl. pre-initialization parameter)
             retVal = dut1.GetProperty(param, NULL, testcase.SizeOf());
-            if (testcase.IsRequired())
+            if (testcase.IsRequired()) {
                 EXPECT_EQ(CCanApi::NullPointer, retVal);
-            else if (retVal != CCanApi::NullPointer)
+            } else if (retVal != CCanApi::NullPointer) {
                 EXPECT_EQ(CCanApi::NotSupported, retVal);
+            }
         }
         // next please
         param = testcase.GetNextEntry();
@@ -309,10 +311,11 @@ TEST_F(GetProperty, GTEST_TESTCASE(WithWrongParameterSize, GTEST_ENABLED)) {
             // @    note: property 'CANPROP_GET_BUSLOAD' has type UINT16 but type UINT8 is still
             // @          supported, so we set 'nbyte' to zero to have a buffer that's too small
             retVal = dut1.GetProperty(param, (void*)buffer, size);
-            if (testcase.IsRequired())
+            if (testcase.IsRequired()) {
                 EXPECT_EQ(CCanApi::IllegalParameter, retVal);
-            else if (retVal != CCanApi::IllegalParameter)
+            } else if (retVal != CCanApi::IllegalParameter) {
                 EXPECT_EQ(CCanApi::NotSupported, retVal);
+            }
         }
         // next please
         param = testcase.GetNextEntry();
@@ -366,16 +369,18 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelNotInitialized, GTEST_ENABLED)) {
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
         if (testcase.IsPreInit()) {
-            if (testcase.IsRequired())
+            if (testcase.IsRequired()) {
                 EXPECT_EQ(CCanApi::NoError, retVal);
-            else if (retVal != CCanApi::NoError)
+            } else if (retVal != CCanApi::NoError) {
                 EXPECT_EQ(CCanApi::NotSupported, retVal);
+            }
         }
         else {
-            if (testcase.IsRequired())
+            if (testcase.IsRequired()) {
                 EXPECT_EQ(CCanApi::NotInitialized, retVal);
-            else if (retVal != CCanApi::NotInitialized)
+            } else if (retVal != CCanApi::NotInitialized) {
                 EXPECT_EQ(CCanApi::NotSupported, retVal);
+            }
         }
         // next please
         param = testcase.GetNextEntry();
@@ -445,10 +450,11 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelInitialized, GTEST_ENABLED)) {
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
-        if (testcase.IsRequired())
+        if (testcase.IsRequired()) {
             EXPECT_EQ(CCanApi::NoError, retVal);
-        else if (retVal != CCanApi::NoError)
+        } else if (retVal != CCanApi::NoError) {
             EXPECT_EQ(CCanApi::NotSupported, retVal);
+        }
         // next please
         param = testcase.GetNextEntry();
     }
@@ -521,10 +527,11 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfControllerStarted, GTEST_ENABLED)) {
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
-        if (testcase.IsRequired())
+        if (testcase.IsRequired()) {
             EXPECT_EQ(CCanApi::NoError, retVal);
-        else if (retVal != CCanApi::NoError)
+        } else if (retVal != CCanApi::NoError){
             EXPECT_EQ(CCanApi::NotSupported, retVal);
+        }
         // next please
         param = testcase.GetNextEntry();
     }
@@ -605,10 +612,11 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfControllerStopped, GTEST_ENABLED)) {
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
-        if (testcase.IsRequired())
+        if (testcase.IsRequired()) {
             EXPECT_EQ(CCanApi::NoError, retVal);
-        else if (retVal != CCanApi::NoError)
+        } else if (retVal != CCanApi::NoError) {
             EXPECT_EQ(CCanApi::NotSupported, retVal);
+        }
         // next please
         param = testcase.GetNextEntry();
     }
@@ -679,16 +687,18 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
         if (testcase.IsPreInit()) {
-            if (testcase.IsRequired())
+            if (testcase.IsRequired()) {
                 EXPECT_EQ(CCanApi::NoError, retVal);
-            else if (retVal != CCanApi::NoError)
+            } else if (retVal != CCanApi::NoError) {
                 EXPECT_EQ(CCanApi::NotSupported, retVal);
+            }
         }
         else {
-            if (testcase.IsRequired())
+            if (testcase.IsRequired()) {
                 EXPECT_EQ(CCanApi::NotInitialized, retVal);
-            else if (retVal != CCanApi::NotInitialized)
+            } else if (retVal != CCanApi::NotInitialized) {
                 EXPECT_EQ(CCanApi::NotSupported, retVal);
+            }
         }
         // next please
         param = testcase.GetNextEntry();
@@ -698,4 +708,4 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
 }
 
 
-//  $Id: TC12_GetProperty.cc 1165 2023-08-22 06:57:25Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TC12_GetProperty.cc 1201 2023-09-13 11:09:28Z makemake $  Copyright (c) UV Software, Berlin.
