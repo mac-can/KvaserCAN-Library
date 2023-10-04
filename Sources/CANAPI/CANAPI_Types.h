@@ -51,7 +51,7 @@
  *
  *  @author      $Author: haumea $
  *
- *  @version     $Rev: 1128 $
+ *  @version     $Rev: 1212 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -290,11 +290,14 @@ extern "C" {
 #define CANBRD_NOT_TESTABLE        (-2) /**< CAN board not testable (e.g. legacy API) */
 /** @} */
 
-/** @name  Blocking Read
- *  @brief Control of blocking read
+/** @name  Blocking Operations
+ *  @brief Control of blocking operations
  *  @{ */
-#define CANREAD_INFINITE         65535U /**< infinite time-out (blocking read) */
+#define CANWAIT_INFINITE         65535U /**< infinite time-out (blocking operation) */
 #define CANKILL_ALL                (-1) /**< to signal all waiting event objects */
+/*  aliases (legacy names) */
+#define CANREAD_INFINITE   CANWAIT_INFINITE  /**< blocking read */
+#define CANWRITE_INFINITE  CANWAIT_INFINITE  /**< blocking write */
 /** @} */
 
 /** @name  Property IDs
