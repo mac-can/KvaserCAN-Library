@@ -69,10 +69,9 @@ OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/Device.o $(OUTDIR)/Options.o \
 	$(OUTDIR)/TC11_GetBitrate.o $(OUTDIR)/Bitrates.o \
 	$(OUTDIR)/TC12_GetProperty.o $(OUTDIR)/Properties.o \
 	$(OUTDIR)/TCx1_CallSequences.o $(OUTDIR)/TCx2_BitrateConverter.o \
-	$(OUTDIR)/Timer.o $(OUTDIR)/Progress.o \
-	$(GTEST_LIB)/libgtest.a $(CANAPI_LIB)/libKvaserCAN.a
+	$(OUTDIR)/Timer.o $(OUTDIR)/Progress.o
 
-ifeq ($(current_OS),Darwin)  # macOS - libKvaserCAN.dylib  - - - - - - - - -
+ifeq ($(current_OS),Darwin)  # macOS - libKvaserCAN.dylib
 
 TARGET	= kvl_testing
 
@@ -91,9 +90,11 @@ CFLAGS += -O2 -Wall -Wno-parentheses \
 	$(DEFINES) \
 	$(HEADERS)
 
-CXXFLAGS += -std=c++11 -O2 -g -Wall -Wextra -pthread \
+CXXFLAGS += -std=c++14 -O2 -g -Wall -Wextra -pthread \
 	$(DEFINES) \
 	$(HEADERS)
+
+OBJECTS  += $(GTEST_LIB)/libgtest.a $(CANAPI_LIB)/libKvaserCAN.a
 
 LIBRARIES =
 
@@ -106,11 +107,10 @@ CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
 
-endif  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
 CXX = clang++
 CC = clang
 LD = clang++
+endif
 RM = rm -f
 CP = cp -f
 
