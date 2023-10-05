@@ -572,6 +572,7 @@ retry_reply:
             }
         }
         else if (retVal != CCanApi::ReceiverEmpty) {
+            fprintf(stdout, ">>> myDriver.ReadMessage returned %i\n", retVal);
             goto teardown;
         }
 #ifdef SECOND_CHANNEL
