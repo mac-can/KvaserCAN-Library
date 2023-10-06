@@ -10,7 +10,8 @@ SOURCE2 = $(TARGET2).cpp $(BINARIES)/libUVCANKVL.a
 DEFINES2 = -DCHANNEL=1 -DBAUDRATE=CANBTR_INDEX_250K
 
 CXXFLAGS =
-LDFLAGS = -Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation
+LDFLAGS = -Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation \
+	-rpath /usr/local/lib -lpthread
 
 CXX = clang++
 LD = clang++
