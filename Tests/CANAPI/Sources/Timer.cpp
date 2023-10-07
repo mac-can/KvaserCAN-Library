@@ -52,17 +52,26 @@ static char THIS_FILE[]=__FILE__;
 #include "Timer.h"
 
 #if !defined(_WIN32) && !defined(_WIN64)
+#include <errno.h>
 #include <unistd.h>
 #include <sys/time.h>
 #endif
+#define POSIX_DEPRECATED  0  /* set to non-zero value to use 'gettimeofday' and 'usleep'*/
 
-// TODO: replace `gettimeofday' by `clock_gettime' and `usleep' by `clock_nanosleep'
 CTimer::CTimer(uint32_t u32Microseconds) {
 #if !defined(_WIN32) && !defined(_WIN64)
+#if (POSIX_DEPRECATED != 0)
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    m_u64UntilStop = ((uint64_t)tv.tv_sec * (uint64_t)1000000) + (uint64_t)tv.tv_usec \
+    m_u64UntilStop = ((uint64_t)tv.tv_sec * (uint64_t)1000000) + (uint64_t)tv.tv_usec
                    + ((uint64_t)u32Microseconds);
+#else
+    struct timespec now = { 0, 0 };
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    m_u64UntilStop = ((uint64_t)now.tv_sec * (uint64_t)1000000)
+                   + ((uint64_t)now.tv_nsec / (uint64_t)1000)
+                   + ((uint64_t)u32Microseconds);
+#endif
 #else
     LARGE_INTEGER largeCounter;  // high-resolution performance counter
 
@@ -80,10 +89,18 @@ CTimer::CTimer(uint32_t u32Microseconds) {
 
 bool CTimer::Restart(uint32_t u32Microseconds) {
 #if !defined(_WIN32) && !defined(_WIN64)
+#if (POSIX_DEPRECATED != 0)
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    m_u64UntilStop = ((uint64_t)tv.tv_sec * (uint64_t)1000000) + (uint64_t)tv.tv_usec \
+    m_u64UntilStop = ((uint64_t)tv.tv_sec * (uint64_t)1000000) + (uint64_t)tv.tv_usec
                    + ((uint64_t)u32Microseconds);
+#else
+    struct timespec now = { 0, 0 };
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    m_u64UntilStop = ((uint64_t)now.tv_sec * (uint64_t)1000000)
+                   + ((uint64_t)now.tv_nsec / (uint64_t)1000)
+                   + ((uint64_t)u32Microseconds);
+#endif
     return true;
 #else
     LARGE_INTEGER largeCounter;  // high-resolution performance counter
@@ -101,9 +118,16 @@ bool CTimer::Restart(uint32_t u32Microseconds) {
 bool CTimer::Timeout() {
 #if !defined(_WIN32) && !defined(_WIN64)
     uint64_t u64Now;
+#if (POSIX_DEPRECATED != 0)
     struct timeval tv;
     gettimeofday(&tv, NULL);
     u64Now = ((uint64_t)tv.tv_sec * (uint64_t)1000000) + (uint64_t)tv.tv_usec;
+#else
+    struct timespec now = { 0, 0 };
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    u64Now = ((uint64_t)now.tv_sec * (uint64_t)1000000)
+           + ((uint64_t)now.tv_nsec / (uint64_t)1000);
+#endif
     if(u64Now < this->m_u64UntilStop)
         return false;
     else
@@ -124,7 +148,20 @@ bool CTimer::Timeout() {
 
 bool CTimer::Delay(uint32_t u32Microseconds) {
 #if !defined(_WIN32) && !defined(_WIN64)
+#if (POSIX_DEPRECATED != 0)
     return (usleep((useconds_t)u32Microseconds) != 0) ? false : true;
+#else
+    int rc;
+    struct timespec delay;
+    delay.tv_sec = (time_t)(u32Microseconds / CTimer::SEC);
+    delay.tv_nsec = (long)((u32Microseconds % CTimer::SEC) * (uint32_t)1000);
+    errno = 0;
+    while ((rc = nanosleep(&delay, &delay))) {
+        if (errno != EINTR)
+            break;
+    }
+    return (rc != 0) ? false : true;
+#endif
 #else
 # ifndef CTIMER_WAITABLE_TIMER
     LARGE_INTEGER largeFrequency;  // frequency in counts per second
@@ -176,7 +213,7 @@ bool CTimer::Delay(uint32_t u32Microseconds) {
 struct timespec CTimer::GetTime() {
     struct timespec now = { 0, 0 };
 #if !defined(_WIN32) && !defined(_WIN64)
-    clock_gettime(CLOCK_MONOTONIC, &now);
+    clock_gettime(CLOCK_REALTIME, &now);
 #else
     static bool fInitialied = false;         // initialization flag
     static struct timespec tsStartTime;      // time at first call (UTC)
@@ -219,4 +256,4 @@ double CTimer::DiffTime(struct timespec start, struct timespec stop) {
             ((double)start.tv_sec + ((double)start.tv_nsec / 1000000000.f)));
 }
 
-// $Id: Timer.cpp 1166 2023-08-22 13:34:30Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: Timer.cpp 1213 2023-10-07 19:43:58Z makemake $  Copyright (c) UV Software, Berlin //
