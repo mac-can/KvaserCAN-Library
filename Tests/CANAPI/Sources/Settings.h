@@ -123,14 +123,14 @@
 #if (PCBUSB_INIT_DELAY_WORKAROUND != WORKAROUND_DISABLED)
 //  - When initializing two PCAN-USB devices then a delay of 100ms is required
 //    before sending messages. The receiver swallows the first few (issue #291)
-#define PCBUSB_INIT_DELAY()  do { CTimer::Delay(100U * CTimer::MSEC); } while(0)
+#define PCBUSB_INIT_DELAY()  do { CTimer::Delay((uint64_t)100 * CTimer::MSEC); } while(0)
 #else
 #define PCBUSB_INIT_DELAY()  while(0)
 #endif
 #if (PCBUSB_QXMTFULL_WORKAROUND != WORKAROUND_DISABLED)
 //  - Up to now no solution found to catch QXMTFULL event when sending a lot of
 //    messages back to back with buffered transfer (no acknowledge, issue #101)
-#define PCBUSB_QXMT_DELAY()  do { CTimer::Delay(0U * CTimer::MSEC); } while(0)
+#define PCBUSB_QXMT_DELAY()  do { CTimer::Delay((uint64_t)0 * CTimer::MSEC); } while(0)
 #else
 #define PCBUSB_QXMT_DELAY()  while(0)
 #endif
@@ -158,4 +158,4 @@
 #endif
 #endif // SETTINGS_H_INCLUDED
 
-//  $Id: Settings.h 1171 2023-08-23 15:08:43Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: Settings.h 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin.

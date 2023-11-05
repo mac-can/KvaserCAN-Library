@@ -671,11 +671,11 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueEmpty, GTEST_ENABLED)) {
 // @expected: CANERR_NOERROR but status bit 'queue_overrun' set
 //
 #if (FEATURE_SIZE_RECEIVE_QUEUE != 0)
-#define GTEST_RECEIVE_QUEUE_FULL  GTEST_ENABLED
+#define GTEST_TC04_8_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_RECEIVE_QUEUE_FULL  GTEST_DISABLED
+#define GTEST_TC04_8_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) {
+TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC04_8_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Message_t trmMsg = {};
@@ -760,11 +760,20 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)
         trmMsg.data[7] = (uint8_t)((uint64_t)i >> 56); if ((uint64_t)i > (uint64_t)0x0FFFFFFFFFFFFFF) trmMsg.dlc = 8U;
         // send one message (w/ delay calculated from bit-rate and data length)
         do {
-            retVal = dut2.WriteMessage(trmMsg, DEVICE_SEND_TIMEOUT);
+            retVal = dut2.WriteMessage(trmMsg, 0U);
             if (retVal == CCanApi::TransmitterBusy)
                 PCBUSB_QXMT_DELAY();
         } while (retVal == CCanApi::TransmitterBusy);
-        CTimer::Delay(dut2.TransmissionTime(dut2.GetBitrate(), 1, CCanApi::Dlc2Len(trmMsg.dlc)));
+        // wait for transmission to complete
+        uint64_t delay = dut2.TransmissionTime(dut2.GetBitrate(), 1, CCanApi::Dlc2Len(trmMsg.dlc));
+#if (TC04_8_ISSUE_PCBUSB_TRANSMIT_COMPLETE == WORKAROUND_ENABLED)
+        // @- issue(PCBUSB.TNG): PCAN-USB devices need more time as estimated
+        CANAPI_OpMode_t opCapa = { CANMODE_DEFAULT };
+        retVal = dut1.GetOpCapabilities(opCapa);
+        if ((CCanApi::NoError == retVal) && !opCapa.fdoe)
+            delay *= 2U;
+#endif
+        CTimer::Delay(delay);
         // on error abort
         ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut2.WriteMessage() failed with error code " << retVal;
         progress.Update(i + 1, 0);
@@ -774,11 +783,11 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)
     t1 = CTimer::GetTime();;
 #endif
     // @- an additional delay to ensure that the last message is received by DUT1
-    uint32_t delay = dut2.TransmissionTime(dut2.GetBitrate(), 10, CCanApi::Dlc2Len(trmMsg.dlc));
+    uint64_t delay = dut2.TransmissionTime(dut2.GetBitrate(), 10, CCanApi::Dlc2Len(trmMsg.dlc));
     CTimer::Delay(delay);
     // @- DUT1 read them all to empty the reception queue
     CTimer timer = CTimer(((dut1.TransmissionTime(dut1.GetBitrate(), (spam + DEVICE_LOOP_EXTRA)) *
-        DEVICE_LOOP_FACTOR) / DEVICE_LOOP_DIVISOR));  // bit-rate dependent timeout
+        (uint64_t)DEVICE_LOOP_FACTOR) / (uint64_t)DEVICE_LOOP_DIVISOR));  // bit-rate dependent timeout
     int32_t rcv = 0, sts = 0;
     do {
         // read message by message (with time-out)
@@ -800,9 +809,15 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)
     EXPECT_EQ((spam - TEST_QRCVFULL), (rcv + sts));
 #if (1)
     // @- DUT2 send / DUT1 read one more message to catch the overrun flag
-    timer.Restart((DEVICE_SEND_TIMEOUT + DEVICE_SEND_TIMEOUT) * CTimer::MSEC);
+    trmMsg.dlc = 5U;
+    trmMsg.data[0] = (uint8_t)'E';
+    trmMsg.data[1] = (uint8_t)'x';
+    trmMsg.data[2] = (uint8_t)'t';
+    trmMsg.data[3] = (uint8_t)'r';
+    trmMsg.data[4] = (uint8_t)'a';
+    timer.Restart((uint64_t)((TEST_READ_TIMEOUT * DEVICE_LOOP_FACTOR) / DEVICE_LOOP_DIVISOR) * CTimer::MSEC);
     do {
-        retVal = dut2.WriteMessage(trmMsg, DEVICE_SEND_TIMEOUT);
+        retVal = dut2.WriteMessage(trmMsg, 0U);
         if (retVal == CCanApi::TransmitterBusy)
             PCBUSB_QXMT_DELAY();
     } while ((retVal == CCanApi::TransmitterBusy) && !timer.Timeout());
@@ -810,7 +825,7 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)
         // read message by message (with time-out)
         retVal = dut1.ReadMessage(rcvMsg, TEST_READ_TIMEOUT);
     } while ((retVal == CCanApi::ReceiverEmpty) && !timer.Timeout());
-    // @- todo: check if this also works with PeakCAN driver/wrapper!
+    // @- todo: check why this extra message is required
 #endif
     // @- get status of DUT1 and check if bit 'queue_overrun' is set
     retVal = dut1.GetStatus(status);
@@ -819,8 +834,9 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)
     // @post:
     progress.Clear();
 #if (TC04_8_DEBUG != 0)
-    uint64_t ovfl = 0U; // PCAN_EXT_RX_QUE_OVERRUN (0x84): receive queue overrun counter (optional)
-    if (dut1.GetProperty((CANPROP_GET_VENDOR_PROP + 0x84U), (void*)&ovfl, sizeof(ovfl)) == CCanApi::NoError)
+    uint64_t ovfl = 0U;
+    if ((dut1.GetProperty(CANPROP_GET_RCV_QUEUE_OVFL, (void*)&ovfl, sizeof(ovfl)) == CCanApi::NoError) ||
+        (dut1.GetProperty(CANPROP_GET_VENDOR_PROP + 0x84U, (void*)&ovfl, sizeof(ovfl)) == CCanApi::NoError))
         std::cout << "[   RCVQ   ] ov=" << ovfl << std::endl;
     dut2.ShowTimeDifference("[   SEND   ]", t0, t1);
     std::cout << "[          ]  + " << ((float)delay / 1000.f) << "ms" << std::endl;
@@ -1349,7 +1365,12 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagRtrInOperationModeNoRtr, GTEST_ENABLE
 //
 // @expected: CANERR_NOERROR but status bit 'warning_level' is set and no status frame in the receive queue
 //
-TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagStsInOperationModeNoErr, GTEST_ENABLED)) {
+#if defined(__MAC_11_0)
+#define GTEST_TC04_15_ENABLED   GTEST_ENABLED
+#else
+#define GTEST_TC04_15_ENABLED   GTEST_DISABLED
+#endif
+TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagStsInOperationModeNoErr, GTEST_TC04_15_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Bitrate_t newBtr1 = {}, oldBtr1 = {};
@@ -1507,12 +1528,12 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagStsInOperationModeNoErr, GTEST_ENABLE
 //
 // @expected: CANERR_NOERROR but status bit 'warning_level' is set and a status frame in the receive queue
 //
-#if (FEATURE_ERROR_FRAMES != FEATURE_UNSUPPORTED)
-#define GTEST_STATUS_MESSAGE  GTEST_ENABLED
+#if (FEATURE_ERROR_FRAMES != FEATURE_UNSUPPORTED) && defined(__MAC_11_0)
+#define GTEST_TC04_16_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_STATUS_MESSAGE  GTEST_DISABLED
+#define GTEST_TC04_16_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagStsInOperationModeErr, GTEST_STATUS_MESSAGE)) {
+TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagStsInOperationModeErr, GTEST_TC04_16_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Bitrate_t newBtr1 = {}, oldBtr1 = {};
@@ -1957,4 +1978,4 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithDifferentTimeoutValues, GTEST_ENABLED)) {
 // @todo: (1) blocking read
 // @todo: (2) test reentrancy
 
-//  $Id: TC04_ReadMessage.cc 1201 2023-09-13 11:09:28Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC04_ReadMessage.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.

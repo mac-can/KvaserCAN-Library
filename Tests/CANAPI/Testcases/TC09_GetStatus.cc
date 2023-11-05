@@ -698,11 +698,11 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfWarningLevelReached, GTEST_ENABLED)) {
 // @expected: CANERR_NOERROR but status bit 'bus_error' is set
 //
 #if (FEATURE_ERROR_CODE_CAPTURE != FEATURE_UNSUPPORTED)
-#define GTEST_ERRORS_ON_BUS  GTEST_ENABLED
+#define GTEST_TC09_10_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_ERRORS_ON_BUS  GTEST_DISABLED
+#define GTEST_TC09_10_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(GetStatus, GTEST_TESTCASE(IfErrorsOnBus, GTEST_ERRORS_ON_BUS)) {
+TEST_F(GetStatus, GTEST_TESTCASE(IfErrorsOnBus, GTEST_TC09_10_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Bitrate_t newBtr1 = {}, oldBtr1 = {};
@@ -875,11 +875,11 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfErrorsOnBus, GTEST_ERRORS_ON_BUS)) {
 // @disabled: This test is already covered by TC05.19 (WriteMessage.IfTransmitterBusy)!
 //
 #if (FEATURE_SIZE_TRANSMIT_QUEUE != 0)
-#define GTEST_TRANSMITTER_BUSY  GTEST_DISABLED
+#define GTEST_TC09_11_ENABLED  GTEST_DISABLED
 #else
-#define GTEST_TRANSMITTER_BUSY  GTEST_DISABLED
+#define GTEST_TC09_11_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(GetStatus, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TRANSMITTER_BUSY)) {
+TEST_F(GetStatus, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TC09_11_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Message_t trmMsg = {};
@@ -963,10 +963,12 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TRANSMITTER_BUSY)) {
     // @- DUT2 read them all to empty the reception queue
     n = i;
     i = 0;
-    CTimer timer = CTimer(((dut2.TransmissionTime(dut2.GetBitrate(), n) * 25U) / 10U));
+    CTimer timer = CTimer(((dut2.TransmissionTime(dut2.GetBitrate(), n) * (uint64_t)DEVICE_LOOP_FACTOR) / (uint64_t)DEVICE_LOOP_DIVISOR));
     do {
+        // read message by message (with time-out)
         retVal = dut2.ReadMessage(rcvMsg, TEST_READ_TIMEOUT);
         if (retVal == CCanApi::NoError) {
+            // ignore status messages/error frames
             if (!rcvMsg.sts)
                 progress.Update(n, i++);
         }
@@ -1007,7 +1009,6 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TRANSMITTER_BUSY)) {
 TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueEmpty, GTEST_DISABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
-    CCanApi::EChannelState state;
     CANAPI_Message_t trmMsg = {};
     CANAPI_Message_t rcvMsg = {};
     CANAPI_Status_t status = {};
@@ -1028,17 +1029,6 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueEmpty, GTEST_DISABLED)) {
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
     // @pre:
-    // @- probe if DUT1 is present and not occupied
-    retVal = dut1.ProbeChannel(state);
-    ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut1.ProbeChannel() failed with error code " << retVal;
-    ASSERT_EQ(CCanApi::ChannelAvailable, state) << "[  ERROR!  ] " << g_Options.GetDeviceName(DUT1) << " is not available";
-    // @- probe if DUT2 is present and not occupied
-    retVal = dut2.ProbeChannel(state);
-    ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut2.ProbeChannel() failed with error code " << retVal;
-    ASSERT_EQ(CCanApi::ChannelAvailable, state) << "[  ERROR!  ] " << g_Options.GetDeviceName(DUT2) << " is not available";
-    // @- check if different channels have been selected
-    ASSERT_TRUE((g_Options.GetChannelNo(DUT1) != g_Options.GetChannelNo(DUT2)) || \
-        (g_Options.GetLibraryId(DUT1) != g_Options.GetLibraryId(DUT2))) << "[  ERROR!  ] same channel selected twice";
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
     ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut1.InitializeChannel() failed with error code " << retVal;
@@ -1132,11 +1122,11 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfMessageLost, GTEST_DISABLED)) {
 // @disabled: This test is already covered by TC04.8 (ReadMessage.IfReceiveQueueFull)!
 //
 #if (FEATURE_SIZE_RECEIVE_QUEUE != 0)
-#define GTEST_RECEIVE_QUEUE_FULL  GTEST_DISABLED
+#define GTEST_TC09_14_ENABLED  GTEST_DISABLED
 #else
-#define GTEST_RECEIVE_QUEUE_FULL  GTEST_DISABLED
+#define GTEST_TC09_14_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) {
+TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC09_14_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Message_t trmMsg = {};
@@ -1144,7 +1134,7 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) 
     CANAPI_Status_t status = {};
     CANAPI_Return_t retVal;
     // CAN message
-    trmMsg.id = 0x513U;
+    trmMsg.id = 0x408U;
     trmMsg.xtd = 0;
     trmMsg.rtr = 0;
     trmMsg.sts = 0;
@@ -1221,11 +1211,20 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) 
         trmMsg.data[7] = (uint8_t)((uint64_t)i >> 56); if ((uint64_t)i > (uint64_t)0x0FFFFFFFFFFFFFF) trmMsg.dlc = 8U;
         // send one message (w/ delay calculated from bit-rate and data length)
         do {
-            retVal = dut2.WriteMessage(trmMsg, DEVICE_SEND_TIMEOUT);
+            retVal = dut2.WriteMessage(trmMsg, 0U);
             if (retVal == CCanApi::TransmitterBusy)
                 PCBUSB_QXMT_DELAY();
         } while (retVal == CCanApi::TransmitterBusy);
-        CTimer::Delay(dut2.TransmissionTime(dut2.GetBitrate(), 1, CCanApi::Dlc2Len(trmMsg.dlc)));
+        // wait for transmission to complete
+        uint64_t delay = dut2.TransmissionTime(dut2.GetBitrate(), 1, CCanApi::Dlc2Len(trmMsg.dlc));
+#if (TC04_8_ISSUE_PCBUSB_TRANSMIT_COMPLETE == WORKAROUND_ENABLED)
+        // @- issue(PCBUSB.TNG): PCAN-USB devices need more time as estimated
+        CANAPI_OpMode_t opCapa = { CANMODE_DEFAULT };
+        retVal = dut1.GetOpCapabilities(opCapa);
+        if ((CCanApi::NoError == retVal) && !opCapa.fdoe)
+            delay *= 2U;
+#endif
+        CTimer::Delay(delay);
         // on error abort
         ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut2.WriteMessage() failed with error code " << retVal;
         progress.Update(i + 1, 0);
@@ -1235,11 +1234,11 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) 
     t1 = CTimer::GetTime();;
 #endif
     // @- an additional delay to ensure that the last message is received by DUT1
-    uint32_t delay = dut2.TransmissionTime(dut2.GetBitrate(), 10, CCanApi::Dlc2Len(trmMsg.dlc));
+    uint64_t delay = dut2.TransmissionTime(dut2.GetBitrate(), 10, CCanApi::Dlc2Len(trmMsg.dlc));
     CTimer::Delay(delay);
     // @- DUT1 read them all to empty the reception queue
     CTimer timer = CTimer(((dut1.TransmissionTime(dut1.GetBitrate(), (spam + DEVICE_LOOP_EXTRA)) *
-        DEVICE_LOOP_FACTOR) / DEVICE_LOOP_DIVISOR));  // bit-rate dependent timeout
+        (uint64_t)DEVICE_LOOP_FACTOR) / (uint64_t)DEVICE_LOOP_DIVISOR));  // bit-rate dependent timeout
     int32_t rcv = 0, sts = 0;
     do {
         // read message by message (with time-out)
@@ -1261,9 +1260,15 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) 
     EXPECT_EQ((spam - TEST_QRCVFULL), (rcv + sts));
 #if (1)
     // @- DUT2 send / DUT1 read one more message to catch the overrun flag
-    timer.Restart((DEVICE_SEND_TIMEOUT + DEVICE_SEND_TIMEOUT) * CTimer::MSEC);
+    trmMsg.dlc = 5U;
+    trmMsg.data[0] = (uint8_t)'E';
+    trmMsg.data[1] = (uint8_t)'x';
+    trmMsg.data[2] = (uint8_t)'t';
+    trmMsg.data[3] = (uint8_t)'r';
+    trmMsg.data[4] = (uint8_t)'a';
+    timer.Restart((uint64_t)((TEST_READ_TIMEOUT * DEVICE_LOOP_FACTOR) / DEVICE_LOOP_DIVISOR) * CTimer::MSEC);
     do {
-        retVal = dut2.WriteMessage(trmMsg, DEVICE_SEND_TIMEOUT);
+        retVal = dut2.WriteMessage(trmMsg, 0U);
         if (retVal == CCanApi::TransmitterBusy)
             PCBUSB_QXMT_DELAY();
     } while ((retVal == CCanApi::TransmitterBusy) && !timer.Timeout());
@@ -1271,7 +1276,7 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) 
         // read message by message (with time-out)
         retVal = dut1.ReadMessage(rcvMsg, TEST_READ_TIMEOUT);
     } while ((retVal == CCanApi::ReceiverEmpty) && !timer.Timeout());
-    // @- todo: check if this also works with PeakCAN driver/wrapper!
+    // @- todo: check why this extra message is required
 #endif
     // @- get status of DUT1 and check if bit 'queue_overrun' is set
     retVal = dut1.GetStatus(status);
@@ -1280,8 +1285,9 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) 
     // @post:
     progress.Clear();
 #if (TC04_8_DEBUG != 0)
-    uint64_t ovfl = 0U; // PCAN_EXT_RX_QUE_OVERRUN (0x84): receive queue overrun counter (optional)
-    if (dut1.GetProperty((CANPROP_GET_VENDOR_PROP + 0x84U), (void*)&ovfl, sizeof(ovfl)) == CCanApi::NoError)
+    uint64_t ovfl = 0U;
+    if ((dut1.GetProperty(CANPROP_GET_RCV_QUEUE_OVFL, (void*)&ovfl, sizeof(ovfl)) == CCanApi::NoError) ||
+        (dut1.GetProperty(CANPROP_GET_VENDOR_PROP + 0x84U, (void*)&ovfl, sizeof(ovfl)) == CCanApi::NoError))
         std::cout << "[   RCVQ   ] ov=" << ovfl << std::endl;
     dut2.ShowTimeDifference("[   SEND   ]", t0, t1);
     std::cout << "[          ]  + " << ((float)delay / 1000.f) << "ms" << std::endl;
@@ -1312,4 +1318,4 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_RECEIVE_QUEUE_FULL)) 
     // @end.
 }
 
-//  $Id: TC09_GetStatus.cc 1201 2023-09-13 11:09:28Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC09_GetStatus.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.

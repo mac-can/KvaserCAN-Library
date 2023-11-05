@@ -69,7 +69,7 @@ OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/Device.o $(OUTDIR)/Options.o \
 	$(OUTDIR)/TC11_GetBitrate.o $(OUTDIR)/Bitrates.o \
 	$(OUTDIR)/TC12_GetProperty.o $(OUTDIR)/Properties.o \
 	$(OUTDIR)/TCx1_CallSequences.o $(OUTDIR)/TCx2_BitrateConverter.o \
-	$(OUTDIR)/Timer.o $(OUTDIR)/Progress.o
+	$(OUTDIR)/Timer64.o $(OUTDIR)/Progress.o
 
 ifeq ($(current_OS),Darwin)  # macOS - libKvaserCAN.dylib
 
@@ -188,7 +188,7 @@ $(OUTDIR)/Device.o: $(MAIN_DIR)/Device.cpp
 $(OUTDIR)/Options.o: $(MAIN_DIR)/Options.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/Timer.o: $(MAIN_DIR)/Timer.cpp
+$(OUTDIR)/Timer64.o: $(MAIN_DIR)/Timer64.cpp
 	$(CXX) $(CXXFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/Progress.o: $(MAIN_DIR)/Progress.cpp

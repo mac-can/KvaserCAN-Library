@@ -256,9 +256,9 @@ TEST_F(ProbeChannel, GTEST_TESTCASE(WithValidChannelNo, GTEST_ENABLED)) {
         EXPECT_EQ(CCanApi::NoError, retVal);
         // @   note: state can take all possible values.
         if ((state == CCanApi::ChannelAvailable) || (state == CCanApi::ChannelOccupied))
-            CTimer::Delay(300U * CTimer::MSEC);
+            CTimer::Delay((uint64_t)300 * CTimer::MSEC);
         else
-            CTimer::Delay(100U * CTimer::MSEC);
+            CTimer::Delay((uint64_t)100 * CTimer::MSEC);
         // next please
         found = CCanDevice::GetNextChannel(info);
     }
@@ -1031,4 +1031,4 @@ TEST_F(ProbeChannel, GTEST_TESTCASE(WithInvalidLibraryId, GTEST_DISABLED)) {
 }
 #endif  // (OPTION_CANAPI_LIBRARY != OPTION_DISBALED)
 
-//  $Id: TC01_ProbeChannel.cc 1165 2023-08-22 06:57:25Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TC01_ProbeChannel.cc 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin.

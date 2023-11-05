@@ -2097,11 +2097,11 @@ TEST_F(StartController, GTEST_TESTCASE(WithCanBitrateIndexInCanFdMode, GTEST_ENA
 // @expected: CANERR_BAUDRATE (requires solely SJA1000 bit rates in CAN 2.0, e.g. PCAN-USB w/o FD)
 //
 #if (FEATURE_BITRATE_SJA1000 != FEATURE_UNSUPPORTED)
-#define GTEST_SJA1000_IN_CAN_FD  GTEST_ENABLED
+#define GTEST_TC03_28_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_SJA1000_IN_CAN_FD  GTEST_DISABLED
+#define GTEST_TC03_28_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(StartController, GTEST_TESTCASE(WithCanBitrateSettingsInCanFdMode, GTEST_SJA1000_IN_CAN_FD)) {
+TEST_F(StartController, GTEST_TESTCASE(WithCanBitrateSettingsInCanFdMode, GTEST_TC03_28_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Bitrate_t bitrate = { CANBTR_INDEX_1M };
@@ -2209,11 +2209,11 @@ TEST_F(StartController, GTEST_TESTCASE(WithCanBitrateSettingsInCanFdMode, GTEST_
 // @expected: CANERR_BAUDRATE (requires solely SJA1000 bit rates in CAN 2.0, e.g. PCAN-USB w/o FD)
 //
 #if (FEATURE_BITRATE_SJA1000 != FEATURE_UNSUPPORTED)
-#define GTEST_CAN_FD_IN_CAN_CLASSIC  GTEST_ENABLED
+#define GTEST_TC03_29_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_CAN_FD_IN_CAN_CLASSIC  GTEST_DISABLED
+#define GTEST_TC03_29_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(StartController, GTEST_TESTCASE(WithCanFdBitrateSettingsInCan20Mode, GTEST_CAN_FD_IN_CAN_CLASSIC)) {
+TEST_F(StartController, GTEST_TESTCASE(WithCanFdBitrateSettingsInCan20Mode, GTEST_TC03_29_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Bitrate_t bitrate = { CANBTR_INDEX_1M };
@@ -2313,4 +2313,4 @@ TEST_F(StartController, GTEST_TESTCASE(WithCanFdBitrateSettingsInCan20Mode, GTES
 }
 #endif  // (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 
-//  $Id: TC03_StartController.cc 1204 2023-09-24 15:26:57Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC03_StartController.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.

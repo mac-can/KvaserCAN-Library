@@ -62,20 +62,20 @@ TEST_F(SmokeTest, GTEST_TESTCASE(CheckGoogleTest, GTEST_DISABLED)) {
 TEST_F(SmokeTest, GTEST_TESTCASE(CheckTimer, GTEST_DISABLED)) {
     time_t now = time(NULL);
     CCounter counter = CCounter(true);
-    CTimer timer((uint32_t)2 * CTimer::SEC);
+    CTimer timer((uint64_t)2 * CTimer::SEC);
     counter.Increment();
     while (!timer.Timeout());
     EXPECT_GE(time(NULL), now + 1);
     counter.Increment();
-    CTimer::Delay((uint32_t)1 * CTimer::SEC);
+    CTimer::Delay((uint64_t)1 * CTimer::SEC);
     EXPECT_GE(time(NULL), now + 2);
 
     counter.Reset(true);
     struct timespec t0 = {}, t1 = {};
     t0 = CTimer::GetTime();
-    uint32_t delay = 100U * CTimer::MSEC;
-    uint32_t times = 10u;
-    for (uint32_t dt = 0U; dt < (times * delay); dt += delay) {
+    uint64_t delay = 100U * CTimer::MSEC;
+    uint64_t times = 10U;
+    for (uint64_t dt = 0U; dt < (times * delay); dt += delay) {
         counter.Increment();
         CTimer::Delay(delay);
         t1 = CTimer::GetTime();
@@ -300,4 +300,4 @@ TEST_F(SmokeTest, DefaultScenario) {
     // @end.
 }
 
-//  $Id: TC00_SmokeTest.cc 1185 2023-08-29 10:42:03Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TC00_SmokeTest.cc 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin.
