@@ -160,8 +160,7 @@ public:
     // special stuff
     static bool CompareMessages(CANAPI_Message_t message1, CANAPI_Message_t message2, bool esiFlag = false);
     static bool CompareBitrates(CANAPI_Bitrate_t bitRate1, CANAPI_Bitrate_t bitRate2, bool dataPhase = false);
-    static uint32_t TransmissionTime(CANAPI_Bitrate_t bitRate, int32_t frames = 1, uint8_t payload = 8U);
-    static long TimeDifference(struct timespec &start, struct timespec &stop);
+    static uint64_t TransmissionTime(CANAPI_Bitrate_t bitRate, int32_t frames = 1, uint8_t payload = 8U);
     static void ShowTimeDifference(const char *prefix, struct timespec &start, struct timespec &stop);
 private:
     int32_t SendAndReceiveFrames(CCanDevice *sender, CCanDevice *receiver, int32_t frames);
@@ -171,4 +170,4 @@ private:
 
 #endif // DEVICE_H_INCLUDED
 
-// $Id: Device.h 1185 2023-08-29 10:42:03Z haumea $  Copyright (c) UV Software, Berlin.
+// $Id: Device.h 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin.

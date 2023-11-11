@@ -80,4 +80,4 @@ public:
 
 #endif // PROGRESS_H_INCLUDED
 
-// $Id$  Copyright (c) UV Software, Berlin //
+// $Id: Progress.h 798 2023-10-07 19:01:13Z makemake $  Copyright (c) UV Software, Berlin //

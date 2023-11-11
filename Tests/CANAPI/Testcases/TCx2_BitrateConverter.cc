@@ -47,6 +47,7 @@
 //
 #include "pch.h"
 #include <math.h>
+#include <limits.h>
 
 #ifndef OPTION_CAN_2_0_ONLY
 #define OPTION_CAN_2_0_ONLY  OPTION_DISABLED
@@ -631,11 +632,11 @@ TEST_F(BitrateConverter, GTEST_TESTCASE(BitrateToSpeedWithDivisonByZero, GTEST_E
 // @expected: CANERR_NOERROR
 //
 #if (FEATURE_BITRATE_SJA1000 != FEATURE_UNSUPPORTED)
-#define GTEST_SJA1000_INDEXES_TO_BITRATE  GTEST_ENABLED
+#define GTEST_TCx2_4_1_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_SJA1000_INDEXES_TO_BITRATE  GTEST_DISABLED
+#define GTEST_TCx2_4_1_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(BitrateConverter, GTEST_TESTCASE(IndexToBitrateWithValidIndexes, GTEST_SJA1000_INDEXES_TO_BITRATE)) {
+TEST_F(BitrateConverter, GTEST_TESTCASE(IndexToBitrateWithValidIndexes, GTEST_TCx2_4_1_ENABLED)) {
     CANAPI_Bitrate_t bitrate;
     CANAPI_BusSpeed_t speed;
     CANAPI_Return_t retVal;
@@ -925,11 +926,11 @@ TEST_F(BitrateConverter, GTEST_TESTCASE(StringToBitrateWithNullPointerForString,
 // @expected: CANERR_NOERROR
 //
 #if (FEATURE_BITRATE_SJA1000 != FEATURE_UNSUPPORTED)
-#define GTEST_SJA1000_INDEXES_TO_STRING  GTEST_ENABLED
+#define GTEST_TCx2_7_1_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_SJA1000_INDEXES_TO_STRING  GTEST_DISABLED
+#define GTEST_TCx2_7_1_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(BitrateConverter, GTEST_TESTCASE(BitrateToStringFromValidIndexes, GTEST_SJA1000_INDEXES_TO_STRING)) {
+TEST_F(BitrateConverter, GTEST_TESTCASE(BitrateToStringFromValidIndexes, GTEST_TCx2_7_1_ENABLED)) {
     CANAPI_Bitrate_t source = {};
     CANAPI_Bitrate_t target = {};
     CANAPI_Return_t retVal;
@@ -1602,4 +1603,4 @@ TEST_F(BitrateConverter, GTEST_TESTCASE(BitrateToStringWithNullPointerForString,
 //
 // @note: passing a pointer for 'btr0btr1' is not possible with the C++ API!
 
-//  $Id: TCx2_BitrateConverter.cc 1183 2023-08-27 11:04:45Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TCx2_BitrateConverter.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.

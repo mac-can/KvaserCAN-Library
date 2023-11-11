@@ -138,4 +138,4 @@ void CCounter::Increment() {
 #endif
 }
 
-// $Id$  Copyright (c) UV Software, Berlin //
+// $Id: Progress.cpp 798 2023-10-07 19:01:13Z makemake $  Copyright (c) UV Software, Berlin //

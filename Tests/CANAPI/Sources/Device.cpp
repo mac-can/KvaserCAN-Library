@@ -61,8 +61,6 @@
 #define MESSAGE(n,i,l,d) do{ }while(0)
 #endif
 
-#define DIFF_TIME(t1,t2)  (((t1.tv_sec * 1000000000) + t1.tv_nsec) - ((t2.tv_sec * 1000000000) + t2.tv_nsec))
-
 CCanDevice::CCanDevice(int32_t library, int32_t channel, CANAPI_OpMode_t opMode, CANAPI_Bitrate_t bitRate, void *param) {
     m_nLibraryId = library;
     m_nChannelNo = channel;
@@ -191,7 +189,7 @@ int32_t CCanDevice::SendAndReceiveFrames(CCanDevice *sender, CCanDevice *receive
     struct timespec m0 = {};
     struct timespec m1 = {};
     // get current time: start of transmission
-    clock_gettime(CLOCK_MONOTONIC, &t0);
+    t0 = CTimer::GetTime();
 #endif
     // send the messages
     CProgress progress = CProgress(frames);
@@ -248,15 +246,15 @@ int32_t CCanDevice::SendAndReceiveFrames(CCanDevice *sender, CCanDevice *receive
     }
 #if (DEVICE_DEBUG != 0)
     // get current time: end of transmission
-    clock_gettime(CLOCK_MONOTONIC, &t1);
+    t1 = CTimer::GetTime();
 #endif
     // finish the plate
     int32_t remaining = (int32_t)(frames - n);
 #if (0) //defined(_WIN32) || defined(_WIN64)
-    uint32_t timeout = ((uint32_t)remaining * DEVICE_LOOP_TIMEOUT * CTimer::MSEC);  // FIXME: does not work for all bit-rates
+    uint32_t timeout = ((uint64_t)remaining * DEVICE_LOOP_TIMEOUT * CTimer::MSEC);  // FIXME: does not work for all bit-rates
 #else
-    uint32_t timeout = ((TransmissionTime(receiver->GetBitrate(), (remaining + DEVICE_LOOP_EXTRA))
-                     *   DEVICE_LOOP_FACTOR) / DEVICE_LOOP_DIVISOR);  // bit-rate dependent timeout
+    uint64_t timeout = (((uint64_t)TransmissionTime(receiver->GetBitrate(), (remaining + DEVICE_LOOP_EXTRA))
+                     *   (uint64_t)DEVICE_LOOP_FACTOR) / (uint64_t)DEVICE_LOOP_DIVISOR);  // bit-rate dependent timeout
 #endif
     if (n < frames) {
         CTimer timer = CTimer(timeout);
@@ -300,17 +298,17 @@ int32_t CCanDevice::SendAndReceiveFrames(CCanDevice *sender, CCanDevice *receive
     }
 #if (DEVICE_DEBUG != 0)
     // get current time: end of reception
-    clock_gettime(CLOCK_MONOTONIC, &t2);
+    t2 = CTimer::GetTime();
 #endif
     // return the number of received messages
     progress.Clear();
 #if (DEVICE_DEBUG != 0)
     if (frames > 0) {
-        std::cout << "  " << frames << " total sent frames in " << ((float)TimeDifference(t0, t1) / 1000.f) << "ms";
+        std::cout << "  " << frames << " total sent frames in " << ((float)CTimer::DiffTime(t0, t1) * 1000.f) << "ms";
         if (remaining > 0)
-            std::cout << " + " << remaining << " remaining frames in " << ((float)TimeDifference(t1, t2) / 1000.f) << "ms w/ timeout " << ((float)timeout / 1000.f) << "ms";
+            std::cout << " + " << remaining << " remaining frames in " << ((float)CTimer::DiffTime(t1, t2) * 1000.f) << "ms w/ timeout " << ((float)timeout / 1000.f) << "ms";
         if (remaining > 1)
-            std::cout << " : reception of " << n << " frames in " << ((float)TimeDifference(m0, m1) / 1000.f) << "ms";
+            std::cout << " : reception of " << n << " frames in " << ((float)CTimer::DiffTime(m0, m1) * 1000.f) << "ms";
         std::cout << std::endl;
     }
 #endif
@@ -438,7 +436,7 @@ bool CCanDevice::CompareBitrates(CANAPI_Bitrate_t bitRate1, CANAPI_Bitrate_t bit
     return true;
 }
 
-uint32_t CCanDevice::TransmissionTime(CANAPI_Bitrate_t bitRate, int32_t frames, uint8_t payload) {
+uint64_t CCanDevice::TransmissionTime(CANAPI_Bitrate_t bitRate, int32_t frames, uint8_t payload) {
     float time_per_bit = 100.f;  // assume the slowest bit-rate (10kbps)
     float bits_per_msg = 1.f + 11.f + 7.f + ((float)payload * 8.f) + 15.f + 1.f + 2.f + 7.f + 3.f;
 
@@ -446,19 +444,15 @@ uint32_t CCanDevice::TransmissionTime(CANAPI_Bitrate_t bitRate, int32_t frames, 
     if (CCanDevice::MapBitrate2Speed(bitRate, speed) == CCanApi::NoError)
         time_per_bit = 1000000.f / speed.nominal.speed;
 
-    uint32_t usec = (uint32_t)((float)frames * bits_per_msg * time_per_bit);
+    uint64_t usec = (uint64_t)((float)frames * bits_per_msg * time_per_bit);
 
     return (usec < 100U) ? 100U : usec;  // FIXME: CTimer::Delay calls Sleep(0) if t < 100us
-}
-
-long CCanDevice::TimeDifference(struct timespec &start, struct timespec &stop) {
-    return (long)(DIFF_TIME(stop, start) / 1000);
 }
 
 void CCanDevice::ShowTimeDifference(const char *prefix, struct timespec &start, struct timespec &stop) {
     if (prefix)
         std::cout << prefix << ' ';
-    std::cout << "dt=" << ((float)TimeDifference(start, stop) / 1000.f) << "ms" << std::endl;
+    std::cout << "dt=" << ((float)CTimer::DiffTime(start, stop) * 1000.f) << "ms" << std::endl;
 }
 
 void CCanDevice::ShowLibrayInformation(const char *prefix) {
@@ -596,4 +590,4 @@ void CCanDevice::ShowChannelCapabilities(const char* prefix) {
     std::cout << std::endl;
 }
 
-// $Id: Device.cpp 1185 2023-08-29 10:42:03Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: Device.cpp 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin //

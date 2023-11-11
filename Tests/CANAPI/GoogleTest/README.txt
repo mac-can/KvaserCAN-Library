@@ -13,7 +13,7 @@ URL: https://github.com/google/googletest
 
 Current Version used by CAN API V3 C++ Testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-v1.12.0 (https://github.com/google/googletest/releases/tag/v1.12.0)
+v1.14.0 (https://github.com/google/googletest/releases/tag/v1.14.0)
 
 Installation and Usage of GoogleTest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,4 +33,4 @@ Important Notes
 
 Last Updated
 ~~~~~~~~~~~~
-August 24, 2023
+September 13, 2023

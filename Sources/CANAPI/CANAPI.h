@@ -75,7 +75,7 @@
 ///
 /// \author      $Author: haumea $
 //
-/// \version     $Rev: 1143 $
+/// \version     $Rev: 1212 $
 //
 /// \defgroup    can_api CAN Interface API, Version 3
 /// \{
@@ -357,7 +357,7 @@ public:
     //
     /// \returns     0 if successful, or a negative value on error.
     //
-    virtual CANAPI_Return_t ReadMessage(CANAPI_Message_t &message, uint16_t timeout = CANREAD_INFINITE) = 0;
+    virtual CANAPI_Return_t ReadMessage(CANAPI_Message_t &message, uint16_t timeout = CANWAIT_INFINITE) = 0;
 
     /// \brief       retrieves the status register of the CAN interface.
     //
@@ -478,4 +478,4 @@ public:
 /// \}
 #endif // CANAPI_H_INCLUDED
 /// \}
-// $Id: CANAPI.h 1143 2023-08-13 17:50:24Z haumea $  Copyright (c) UV Software //
+// $Id: CANAPI.h 1212 2023-10-04 15:41:24Z haumea $  Copyright (c) UV Software //

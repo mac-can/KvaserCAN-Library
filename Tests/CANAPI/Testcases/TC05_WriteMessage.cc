@@ -1982,11 +1982,11 @@ TEST_F(WriteMessage, GTEST_TESTCASE(WithFlagSts, GTEST_ENABLED)) {
 // @expected: CANERR_TX_BUSY and status bit 'transmitter_busy' is set
 //
 #if (FEATURE_SIZE_TRANSMIT_QUEUE != 0)
-#define GTEST_TRANSMITTER_BUSY  GTEST_ENABLED
+#define GTEST_TC04_19_ENABLED  GTEST_ENABLED
 #else
-#define GTEST_TRANSMITTER_BUSY  GTEST_DISABLED
+#define GTEST_TC04_19_ENABLED  GTEST_DISABLED
 #endif
-TEST_F(WriteMessage, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TRANSMITTER_BUSY)) {
+TEST_F(WriteMessage, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TC04_19_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Message_t trmMsg = {};
@@ -2070,7 +2070,7 @@ TEST_F(WriteMessage, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TRANSMITTER_BUSY)) 
     // @- DUT2 read them all to empty the reception queue
     n = i;
     i = 0;
-    CTimer timer = CTimer(((dut2.TransmissionTime(dut2.GetBitrate(), n) * 25U) / 10U));
+    CTimer timer = CTimer(((dut2.TransmissionTime(dut2.GetBitrate(), n) * (uint64_t)DEVICE_LOOP_FACTOR) / (uint64_t)DEVICE_LOOP_DIVISOR));
     do {
         // read message by message (with time-out)
         retVal = dut2.ReadMessage(rcvMsg, TEST_READ_TIMEOUT);
@@ -2202,4 +2202,7 @@ TEST_F(WriteMessage, GTEST_TESTCASE(WithFlagEsi, GTEST_ENABLED)) {
 }
 #endif  // (OPTION_CAN_2_0_ONLY == 0)
 
-//  $Id: TC05_WriteMessage.cc 1193 2023-09-06 10:21:35Z haumea $  Copyright (c) UV Software, Berlin.
+// @todo: (1) blocking write
+// @todo: (2) test reentrancy
+
+//  $Id: TC05_WriteMessage.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.

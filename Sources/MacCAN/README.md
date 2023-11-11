@@ -3,7 +3,7 @@
 _Copyright &copy; 2012-2023  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
 _All rights reserved._
 
-Version $Rev: 1757 $
+Version $Rev: 1816 $
 
 # Running CAN and CAN FD on Mac&reg;
 
@@ -327,7 +327,7 @@ You can choose between one of them if you use this work in whole or in part.
 Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. \
 PCAN is a registered trademark of PEAK-System Technik GmbH, Darmstadt, Germany. \
 Qt is a registered trademark of The Qt Company Ltd. and its subsidiaries. \
-All other company, product and service names mentioned herein are trademarks, registered trademarks or service marks of their respective owners.
+All other company, product and service names mentioned herein may be trademarks, registered trademarks, or service marks of their respective owners.
 
 ### Contact
 

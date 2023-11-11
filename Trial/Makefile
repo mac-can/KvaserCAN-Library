@@ -24,7 +24,7 @@ OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
 	$(OUTDIR)/KvaserUSB_Device.o \
 	$(OUTDIR)/can_api.o  $(OUTDIR)/can_btr.o
 
-ifeq ($(current_OS),Darwin) # macOS - libKvaserCAN.dylib
+ifeq ($(current_OS),Darwin)  # macOS - libKvaserCAN.dylib
 
 VERSION = 0
 
@@ -71,7 +71,7 @@ LDFLAGS += -arch arm64 -arch x86_64
 endif
 
 CHECKER  = warning,information
-IGNORE   = -i MacCAN_MsgPipe.c -i can_msg.c -i can_dev.c
+IGNORE   = -i can_msg.c -i can_dev.c
 ifeq ($(HUNTER),BUGS)
 CHECKER += --bug-hunting
 endif
