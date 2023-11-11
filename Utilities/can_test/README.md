@@ -1,4 +1,4 @@
-__CAN Tester for Kvaser USB CAN Interfaces, Version 0.3.2__ \
+__CAN Tester for Kvaser USB CAN Interfaces, Version 0.3.3__ \
 Copyright &copy; 2008-2010,2014-2023 by Uwe Vogt, UV Software, Berlin
 
 ```
