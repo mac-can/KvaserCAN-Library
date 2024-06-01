@@ -1,8 +1,8 @@
 //  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later
 //
-//  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
+//  KvaserCAN - macOS User-Space Driver for Kvaser USB CAN Interfaces
 //
-//  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -43,27 +43,8 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
+//  along with MacCAN-KvaserCAN.  If not, see <https://www.gnu.org/licenses/>.
 //
-#include "build_no.h"
-#define VERSION_MAJOR    0
-#define VERSION_MINOR    3
-#define VERSION_PATCH    3
-#define VERSION_BUILD    BUILD_NO
-#define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
-#if defined(__APPLE__)
-#define PLATFORM        "macOS"
-#else
-#error Unsupported architecture
-#endif
-static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " VERSION_STRING;
-
-#ifdef _MSC_VER
-//no Microsoft extensions please!
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS 1
-#endif
-#endif
 #include "KvaserCAN.h"
 #include "can_defs.h"
 #include "can_api.h"
@@ -74,6 +55,23 @@ static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " V
 #include <errno.h>
 #include <assert.h>
 #include <limits.h>
+
+#if defined(__APPLE__)
+#define PLATFORM  "macOS"
+#else
+#error Platform not supported
+#endif
+#ifndef _MSC_VER
+#define STRCPY_S(dest,size,src)         strcpy(dest,src)
+#define STRNCPY_S(dest,size,src,len)    strncpy(dest,src,len)
+#define SSCANF_S(buf,format,...)        sscanf(buf,format,__VA_ARGS__)
+#define SPRINTF_S(buf,size,format,...)  snprintf(buf,size,format,__VA_ARGS__)
+#else
+#define STRCPY_S(dest,size,src)         strcpy_s(dest,size,src)
+#define STRNCPY_S(dest,size,src,len)    strncpy_s(dest,size,src,len)
+#define SSCANF_S(buf,format,...)        sscanf_s(buf,format,__VA_ARGS__)
+#define SPRINTF_S(buf,size,format,...)  sprintf_s(buf,size,format,__VA_ARGS__)
+#endif
 
 #if (OPTION_KVASERCAN_DYLIB != 0)
 __attribute__((constructor))
@@ -89,17 +87,7 @@ static void _finalizer() {
 #define EXPORT
 #endif
 
-#ifndef _MSC_VER
-#define STRCPY_S(dest,size,src)         strcpy(dest,src)
-#define STRNCPY_S(dest,size,src,len)    strncpy(dest,src,len)
-#define SSCANF_S(buf,format,...)        sscanf(buf,format,__VA_ARGS__)
-#define SPRINTF_S(buf,size,format,...)  sprintf(buf,format,__VA_ARGS__)
-#else
-#define STRCPY_S(dest,size,src)         strcpy_s(dest,size,src)
-#define STRNCPY_S(dest,size,src,len)    strncpy_s(dest,size,src,len)
-#define SSCANF_S(buf,format,...)        sscanf_s(buf,format,__VA_ARGS__)
-#define SPRINTF_S(buf,size,format,...)  sprintf_s(buf,size,format,__VA_ARGS__)
-#endif
+static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " VERSION_STRING;
 
 EXPORT
 CKvaserCAN::CKvaserCAN() {
@@ -134,7 +122,7 @@ bool CKvaserCAN::GetFirstChannel(SChannelInfo &info, void *param) {
     // set index to the first entry in the interface list (if any)
     CANAPI_Return_t rc = can_property((-1), CANPROP_SET_FIRST_CHANNEL, NULL, 0U);
     if (CANERR_NOERROR == rc) {
-        // get channel no, device name and device DLL name at actual index in the interface list
+        // get channel no, device name, etc. at actual index in the interface list
         if (((can_property((-1), CANPROP_GET_CHANNEL_NO, (void*)&info.m_nChannelNo, sizeof(int32_t))) == 0) &&
             ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
             ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {
@@ -156,7 +144,7 @@ bool CKvaserCAN::GetNextChannel(SChannelInfo &info, void *param) {
     // set index to the next entry in the interface list (if any)
     CANAPI_Return_t rc = can_property((-1), CANPROP_SET_NEXT_CHANNEL, NULL, 0U);
     if (CANERR_NOERROR == rc) {
-        // get channel no, device name and device DLL name at actual index in the interface list
+        // get channel no, device name, etc. at actual index in the interface list
         if (((can_property((-1), CANPROP_GET_CHANNEL_NO, (void*)&info.m_nChannelNo, sizeof(int32_t))) == 0) &&
             ((can_property((-1), CANPROP_GET_CHANNEL_NAME, (void*)&info.m_szDeviceName, CANPROP_MAX_BUFFER_SIZE)) == 0) &&
             ((can_property((-1), CANPROP_GET_CHANNEL_DLLNAME, (void*)&info.m_szDeviceDllName, CANPROP_MAX_BUFFER_SIZE)) == 0)) {

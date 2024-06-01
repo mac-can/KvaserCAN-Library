@@ -1,8 +1,8 @@
 //  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later
 //
-//  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
+//  KvaserCAN - macOS User-Space Driver for Kvaser USB CAN Interfaces
 //
-//  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of MacCAN-KvaserCAN.
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
+//  along with MacCAN-KvaserCAN.  If not, see <https://www.gnu.org/licenses/>.
 //
 #ifndef KVASERCAN_H_INCLUDED
 #define KVASERCAN_H_INCLUDED
@@ -56,14 +56,10 @@
 /// \brief  KvaserCAN dynamic library
 /// \{
 #define KVASERCAN_LIBRARY_ID  CANLIB_KVASER_32
-#if (OPTION_CANAPI_KVASERCAN_DYLIB != 0)
-  #define KVASERCAN_LIBRARY_NAME  CANDLL_KVASERCAN
-#else
-  #define KVASERCAN_LIBRARY_NAME  "libKvaserCAN.dylib"
-#endif
+#define KVASERCAN_LIBRARY_NAME  CANDLL_KVASERCAN
 #define KVASERCAN_LIBRARY_VENDOR  "UV Software, Berlin"
 #define KVASERCAN_LIBRARY_LICENSE  "BSD-2-Clause OR GPL-3.0-or-later"
-#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin"
+#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2020-2024 by Uwe Vogt, UV Software, Berlin"
 #define KVASERCAN_LIBRARY_HAZARD_NOTE  "If you connect your CAN device to a real CAN network when using this library,\n" \
                                        "you might damage your application."
 /// \}

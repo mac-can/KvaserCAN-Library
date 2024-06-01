@@ -1,8 +1,8 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
+ *  KvaserCAN - macOS User-Space Driver for Kvaser USB CAN Interfaces
  *
- *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -43,23 +43,16 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with MacCAN-KvaserCAN.  If not, see <https://www.gnu.org/licenses/>.
  */
 /** @addtogroup  can_api
  *  @{
  */
-#include "build_no.h"
-#define VERSION_MAJOR    0
-#define VERSION_MINOR    3
-#define VERSION_PATCH    3
-#define VERSION_BUILD    BUILD_NO
-#define VERSION_STRING   TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
 #if defined(__APPLE__)
-#define PLATFORM        "macOS"
+#define PLATFORM  "macOS"
 #else
-#error Unsupported architecture
+#error Platform not supported
 #endif
-static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " VERSION_STRING;
 
 /*  -----------  includes  -----------------------------------------------
  */
@@ -67,11 +60,11 @@ static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " V
 #include "can_api.h"
 #include "can_btr.h"
 
+#include "KvaserCAN_Driver.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-#include "KvaserCAN_Driver.h"
 
 /*  -----------  options  ------------------------------------------------
  */
@@ -82,9 +75,11 @@ static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " V
 #if (OPTION_CANAPI_KVASERCAN_DYLIB != 0)
 __attribute__((constructor))
 static void _initializer() {
+    // default initializer
 }
 __attribute__((destructor))
 static void _finalizer() {
+    // default finalizer
 }
 #define EXPORT  __attribute__((visibility("default")))
 #else
@@ -137,6 +132,8 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte);
 
 /*  -----------  variables  ----------------------------------------------
  */
+static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " VERSION_STRING;
+
 EXPORT
 can_board_t can_boards[8+1] = {  // list of supported CAN Interfaces
     {KVASER_CAN_CHANNEL0, (char *)"Kvaser CAN Channel 0"},
@@ -1138,7 +1135,6 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
 
 /*  -----------  revision control  ---------------------------------------
  */
-
 EXPORT
 char *can_version(void)
 {
@@ -1149,5 +1145,5 @@ char *can_version(void)
 /*  ----------------------------------------------------------------------
  *  Uwe Vogt,  UV Software,  Chausseestrasse 33 A,  10115 Berlin,  Germany
  *  Tel.: +49-30-46799872,  Fax: +49-30-46799873,  Mobile: +49-170-3801903
- *  E-Mail: uwe.vogt@uv-software.de,  Homepage: http://www.uv-software.de/
+ *  E-Mail: uwe.vogt@uv-software.de, Homepage: https://www.uv-software.de/
  */

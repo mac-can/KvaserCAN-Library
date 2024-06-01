@@ -1,7 +1,7 @@
 #
-#	KvaserCAN - macOS User-Space Driver and SDK for Kvaser CAN Interfaces
+#	KvaserCAN - macOS User-Space Driver for Kvaser USB CAN Interfaces
 #
-#	Copyright (c) 2020-2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
 #
 #	This file is part of MacCAN-KvaserCAN.
@@ -10,7 +10,7 @@
 #	and under the GNU General Public License v3.0 (or any later version). You can
 #	choose between one of them if you use MacCAN-KvaserCAN in whole or in part.
 #
-#	BSD 2-Clause Simplified License:
+#	BSD 2-Clause "Simplified" License:
 #	Redistribution and use in source and binary forms, with or without
 #	modification, are permitted provided that the following conditions are met:
 #	1. Redistributions of source code must retain the above copyright notice, this
@@ -19,7 +19,7 @@
 #	   this list of conditions and the following disclaimer in the documentation
 #	   and/or other materials provided with the distribution.
 #
-#	MacCAN-KvaserCAN IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+#	MacCAN-KvaserCAN IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 #	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
@@ -42,7 +42,7 @@
 #	GNU General Public License for more details.
 #
 #	You should have received a copy of the GNU General Public License
-#	along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
+#	along with MacCAN-KvaserCAN.  If not, see <https://www.gnu.org/licenses/>.
 #
 all:
 	@./build_no.sh
@@ -52,6 +52,7 @@ all:
 	$(MAKE) -C Libraries/KvaserCAN $@
 	$(MAKE) -C Utilities/can_test $@
 	$(MAKE) -C Utilities/can_moni $@
+	$(MAKE) -C Tests/CANAPI $@
 
 clean:
 	$(MAKE) -C Trial $@
@@ -59,6 +60,7 @@ clean:
 	$(MAKE) -C Libraries/KvaserCAN $@
 	$(MAKE) -C Utilities/can_test $@
 	$(MAKE) -C Utilities/can_moni $@
+	$(MAKE) -C Tests/CANAPI $@
 
 pristine:
 	$(MAKE) -C Trial $@
@@ -66,6 +68,7 @@ pristine:
 	$(MAKE) -C Libraries/KvaserCAN $@
 	$(MAKE) -C Utilities/can_test $@
 	$(MAKE) -C Utilities/can_moni $@
+	$(MAKE) -C Tests/CANAPI $@
 
 install:
 #	$(MAKE) -C Trial $@
@@ -73,6 +76,7 @@ install:
 	$(MAKE) -C Libraries/KvaserCAN $@
 #	$(MAKE) -C Utilities/can_test $@
 #	$(MAKE) -C Utilities/can_moni $@
+#	$(MAKE) -C Tests/CANAPI $@
 
 test:
 	$(MAKE) -C Trial $@
@@ -82,6 +86,10 @@ check:
 
 xctest:
 	$(MAKE) -C Trial $@
+
+smoketest:
+	$(MAKE) -C Tests/CANAPI clean all
+	./Tests/CANAPI/kvl_testing --gtest_filter="SmokeTest.*"
 
 build_no:
 	@./build_no.sh
