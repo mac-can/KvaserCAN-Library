@@ -2,13 +2,13 @@
 /*
  *  CAN Interface API, Version 3 (Definitions and Options)
  *
- *  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+ *  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
  *  All rights reserved.
  *
  *  This file is part of CAN API V3.
  *
- *  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
- *  under the GNU General Public License v3.0 (or any later version).
+ *  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+ *  and under the GNU General Public License v3.0 (or any later version).
  *  You can choose between one of them if you use this file.
  *
  *  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
  */
 /** @file        CANBTR_Defines.h
  *
@@ -51,7 +51,7 @@
  *
  *  @author      $Author: eris $
  *
- *  @version     $Rev: 1090 $
+ *  @version     $Rev: 1270 $
  *
  *  @addtogroup  can_btr
  *  @{

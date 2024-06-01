@@ -234,6 +234,11 @@ int main(int argc, const char * argv[]) {
         if (!strcmp(argv[i], "ERR:ON")) opMode.err = 1;
         if (!strcmp(argv[i], "XTD:OFF")) opMode.nxtd = 1;
         if (!strcmp(argv[i], "RTR:OFF")) opMode.nrtr = 1;
+        /* acceptance filtering */
+//        if (!strncmp(argv[i], "CODE:", 5) && sscanf(argv[i], "CODE:%x", &opt) == 1) accCode11 = (uint32_t)opt;
+//        if (!strncmp(argv[i], "MASK:", 5) && sscanf(argv[i], "MASK:%x", &opt) == 1) accMask11 = (uint32_t)opt;
+//        if (!strncmp(argv[i], "XCODE:", 6) && sscanf(argv[i], "XCODE:%x", &opt) == 1) accCode29 = (uint32_t)opt;
+//        if (!strncmp(argv[i], "XMASK:", 6) && sscanf(argv[i], "XMASK:%x", &opt) == 1) accMask29 = (uint32_t)opt;
     }
     fprintf(stdout, ">>> %s\n", CCanDriver::GetVersion());
     if ((signal(SIGINT, sigterm) == SIG_ERR) ||
@@ -266,7 +271,7 @@ int main(int argc, const char * argv[]) {
             fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_PATCH_NO) returned %i\n", retVal);
         retVal = myDriver.GetProperty(CANPROP_GET_BUILD_NO, (void *)&u32Val, sizeof(uint32_t));
         if (retVal == CCanApi::NoError)
-            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_BUILD_NO): value = 0x%07" PRIx32 "\n", u32Val);
+            fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_BUILD_NO): value = %07" PRIx32 "\n", u32Val);
         else
             fprintf(stderr, "+++ error: myDriver.GetProperty(CANPROP_GET_BUILD_NO) returned %i\n", retVal);
         retVal = myDriver.GetProperty(CANPROP_GET_LIBRARY_ID, (void *)&i32Val, sizeof(int32_t));
@@ -436,6 +441,8 @@ int main(int argc, const char * argv[]) {
         if (myDriver.GetProperty(CANPROP_GET_OP_MODE, (void *)&u8Val, sizeof(uint8_t)) == CCanApi::NoError)
             fprintf(stdout, ">>> myDriver.GetProperty(CANPROP_GET_OP_MODE): value = 0x%02X\n", u8Val);
     }
+   /* acceptance filtering */
+   // TODO: insert coin here
     /* start communication */
     retVal = myDriver.StartController(bitrate);
     if (retVal != CCanApi::NoError) {
@@ -506,6 +513,8 @@ retry_write:
             fprintf(stdout, ">>> myDriver.WriteMessage: status = 0x%02X\n", status.byte);
         }
         fprintf(stdout, "    %i message(s) sent (took %.1lfs)\n", frames, difftime(time(NULL), now));
+        if (option_exit)
+            goto teardown;
     }
     /* receiving message */
     fprintf(stdout, "Press Ctrl+C to abort...\n");
@@ -589,7 +598,7 @@ retry_reply:
                     fprintf(stdout, " %02x", message.data[i]);
                 if (message.sts)
                     fprintf(stdout, " <<< status frame");
-                else if (option_repeat) {
+                else if (option_reply) {
                     retVal = myDriver.WriteMessage(message, txTimeout);
                     if (retVal != CCanApi::NoError) {
                         fprintf(stderr, "+++ error: mySecond.WriteMessage returned %i\n", retVal);

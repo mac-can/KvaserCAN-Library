@@ -1,12 +1,17 @@
 #
 #	Trial Program
 #	MacCAN-KvaserCAN
-#	Bart Simpson didn´t do it
+#	Bart Simpson didn't do it
 #
 current_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown OS')
 current_OS := $(patsubst CYGWIN%,Cygwin,$(current_OS))
 current_OS := $(patsubst MINGW%,MinGW,$(current_OS))
 current_OS := $(patsubst MSYS%,MinGW,$(current_OS))
+
+
+TARGET	= kvl_test
+
+INSTALL = ~/bin
 
 HOME_DIR = ..
 MAIN_DIR = ./Sources
@@ -23,14 +28,6 @@ OBJECTS = $(OUTDIR)/main.o $(OUTDIR)/MacCAN_Debug.o $(OUTDIR)/MacCAN_Devices.o \
 	$(OUTDIR)/KvaserUSB_LeafDevice.o $(OUTDIR)/KvaserUSB_MhydraDevice.o \
 	$(OUTDIR)/KvaserUSB_Device.o \
 	$(OUTDIR)/can_api.o  $(OUTDIR)/can_btr.o
-
-ifeq ($(current_OS),Darwin)  # macOS - libKvaserCAN.dylib
-
-VERSION = 0
-
-TARGET	= kvl_test
-
-INSTALL = ~/bin
 
 DEFINES = -DOPTION_CAN_2_0_ONLY=0 \
 	-DOPTION_CANAPI_DRIVER=1 \
@@ -50,6 +47,9 @@ HEADERS = -I$(SOURCE_DIR) \
 	-I$(WRAPPER_DIR) \
 	-I$(MAIN_DIR)
 
+
+ifeq ($(current_OS),Darwin)  # macOS - libKvaserCAN.dylib
+
 CFLAGS += -O0 -g -Wall -Wextra -Wno-parentheses \
 	-fmessage-length=0 -fno-strict-aliasing \
 	$(DEFINES) \
@@ -59,16 +59,15 @@ CXXFLAGS += -O0 -g -Wall -Wextra -pthread \
 	$(DEFINES) \
 	$(HEADERS)
 
-LIBRARIES =
-
-LDFLAGS  += -lpthread \
-	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation
+LDFLAGS  += -Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation
 
 ifeq ($(BINARY),UNIVERSAL)
 CFLAGS += -arch arm64 -arch x86_64
 CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
+
+LIBRARIES = -lpthread
 
 CHECKER  = warning,information
 IGNORE   = -i can_msg.c -i can_dev.c
