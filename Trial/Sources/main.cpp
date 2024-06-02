@@ -1,7 +1,7 @@
 //
 //  main.cpp
 //  MacCAN-KvaserCAN
-//  Bart Simpson didn´t do it
+//  Bart Simpson didn't do it
 //
 #include "KvaserCAN_Defines.h"
 #include "KvaserCAN_Defaults.h"
