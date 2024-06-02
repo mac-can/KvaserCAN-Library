@@ -72,13 +72,6 @@
 class CANCPP CKvaserCAN : public CCanApi {
 private:
     CANAPI_Handle_t m_Handle;  ///< CAN interface handle
-    CANAPI_OpMode_t m_OpMode;  ///< CAN operation mode
-    CANAPI_Bitrate_t m_Bitrate;  ///< CAN bitrate settings
-    struct {
-        uint64_t u64TxMessages;  ///< number of transmitted CAN messages
-        uint64_t u64RxMessages;  ///< number of received CAN messages
-        uint64_t u64ErrorFrames;  ///< number of received status messages
-    } m_Counter;
 public:
     // constructor / destructor
     CKvaserCAN();
@@ -86,7 +79,7 @@ public:
     // CKvaserCAN-specific error codes (CAN API V3 extension)
     enum EErrorCodes {
         // note: range 0...-99 is reserved by CAN API V3
-        GeneralError = VendorSpecific, ///< mapped Kvaser CANlib error codes
+        GeneralError = VendorSpecific
     };
     // CCanApi overrides
     static bool GetFirstChannel(SChannelInfo &info, void *param = NULL);

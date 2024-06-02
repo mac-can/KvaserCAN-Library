@@ -91,21 +91,7 @@ static const char version[] = "CAN API V3 for Kvaser CAN Interfaces, Version " V
 
 EXPORT
 CKvaserCAN::CKvaserCAN() {
-    m_Handle = -1;
-    m_OpMode.byte = CANMODE_DEFAULT;
-    m_Bitrate.index = CANBTR_INDEX_250K;
-    m_Bitrate.btr.nominal.brp = 0;
-    m_Bitrate.btr.nominal.tseg1 = 0;
-    m_Bitrate.btr.nominal.tseg2 = 0;
-    m_Bitrate.btr.nominal.sjw = 0;
-    m_Bitrate.btr.nominal.sam = 0;
-    m_Bitrate.btr.data.brp = m_Bitrate.btr.nominal.brp;
-    m_Bitrate.btr.data.tseg1 = m_Bitrate.btr.nominal.tseg1;
-    m_Bitrate.btr.data.tseg2 = m_Bitrate.btr.nominal.tseg2;
-    m_Bitrate.btr.data.sjw = m_Bitrate.btr.nominal.sjw;
-    m_Counter.u64TxMessages = 0U;
-    m_Counter.u64RxMessages = 0U;
-    m_Counter.u64ErrorFrames = 0U;
+    m_Handle = (-1);
 }
 
 EXPORT
@@ -180,7 +166,6 @@ CANAPI_Return_t CKvaserCAN::InitializeChannel(int32_t channel, const CANAPI_OpMo
     CANAPI_Handle_t hnd = can_init(channel, opMode.byte, param);
     if (0 <= hnd) {
         m_Handle = hnd;  // we got a handle
-        m_OpMode = opMode;
         rc = CANERR_NOERROR;
     } else {
         rc = (CANAPI_Return_t)hnd;
@@ -214,12 +199,7 @@ CANAPI_Return_t CKvaserCAN::SignalChannel() {
 EXPORT
 CANAPI_Return_t CKvaserCAN::StartController(CANAPI_Bitrate_t bitrate) {
     // start the CAN controller with the given bit-rate settings
-    CANAPI_Return_t rc = can_start(m_Handle, &bitrate);
-    if (CANERR_NOERROR == rc) {
-        m_Bitrate = bitrate;
-        memset(&m_Counter, 0, sizeof(m_Counter));
-    }
-    return rc;
+    return can_start(m_Handle, &bitrate);
 }
 
 EXPORT
@@ -231,22 +211,13 @@ CANAPI_Return_t CKvaserCAN::ResetController() {
 EXPORT
 CANAPI_Return_t CKvaserCAN::WriteMessage(CANAPI_Message_t message, uint16_t timeout) {
     // transmit a message over the CAN bus
-    CANAPI_Return_t rc = can_write(m_Handle, &message, timeout);
-    if (CANERR_NOERROR == rc) {
-        m_Counter.u64TxMessages++;
-    }
-    return rc;
+    return can_write(m_Handle, &message, timeout);
 }
 
 EXPORT
 CANAPI_Return_t CKvaserCAN::ReadMessage(CANAPI_Message_t &message, uint16_t timeout) {
     // read one message from the message queue of the CAN interface, if any
-    CANAPI_Return_t rc = can_read(m_Handle, &message, timeout);
-    if (CANERR_NOERROR == rc) {
-        m_Counter.u64RxMessages += !message.sts ? 1U : 0U;
-        m_Counter.u64ErrorFrames += message.sts ? 1U : 0U;
-    }
-    return rc;
+    return can_read(m_Handle, &message, timeout);
 }
 
 EXPORT
@@ -264,17 +235,13 @@ CANAPI_Return_t CKvaserCAN::GetBusLoad(uint8_t &load) {
 EXPORT
 CANAPI_Return_t CKvaserCAN::GetBitrate(CANAPI_Bitrate_t &bitrate) {
     // retrieve the bit-rate setting of the CAN interface
-    CANAPI_Return_t rc = can_bitrate(m_Handle, &bitrate, NULL);
-    if (CANERR_NOERROR == rc) {
-        m_Bitrate = bitrate;
-    }
-    return rc;
+    return can_bitrate(m_Handle, &bitrate, NULL);
 }
 
 EXPORT
 CANAPI_Return_t CKvaserCAN::GetBusSpeed(CANAPI_BusSpeed_t &speed) {
     // retrieve the transmission rate of the CAN interface
-    return can_bitrate(m_Handle, &m_Bitrate, &speed);
+    return can_bitrate(m_Handle, NULL, &speed);
 }
 
 EXPORT
