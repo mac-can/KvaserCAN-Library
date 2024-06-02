@@ -1,8 +1,9 @@
 //  SPDX-License-Identifier: GPL-3.0-or-later
 //
-//  CAN Tester for generic Interfaces (CAN API V3)
+//  CAN Tester for Kvaser USB CAN Interfaces (CAN API V3)
 //
-//  Copyright (c) 2008-2010,2014-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+//  Copyright (c) 2005-2010 Uwe Vogt, UV Software, Friedrichshafen
+//  Copyright (c) 2012-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -15,38 +16,44 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 #ifndef DRIVER_H_INCLUDED
 #define DRIVER_H_INCLUDED
-#include "build_no.h"
-#define VERSION_MAJOR      0
-#define VERSION_MINOR      3
-#define VERSION_PATCH      3
-#define VERSION_BUILD      BUILD_NO
-#define VERSION_STRING     TOSTRING(VERSION_MAJOR) "." TOSTRING(VERSION_MINOR) "." TOSTRING(VERSION_PATCH) " (" TOSTRING(BUILD_NO) ")"
-#if defined(_WIN64)
-#define PLATFORM          "x64"
-#elif defined(_WIN32)
-#define PLATFORM          "x86"
-#elif defined(__linux__)
-#define PLATFORM          "Linux"
-#elif defined(__APPLE__)
-#define PLATFORM          "macOS"
-#elif defined(__CYGWIN__)
-#define PLATFORM          "Cygwin"
-#else
-#error Unsupported architecture
-#endif
+
+#include "KvaserCAN.h"
+
 #if (OPTION_CAN_2_0_ONLY != 0)
 #error Compilation with legacy CAN 2.0 frame format!
 #else
-#define CAN_FD_SUPPORTED   1  // don't touch that dial
+#define CAN_FD_SUPPORTED  1  // don't touch that dial
 #endif
-#define TESTER_INTEFACE   "Kvaser USB CAN Interfaces"
-#define TESTER_COPYRIGHT  "2008-2010,2014-2023 by Uwe Vogt, UV Software, Berlin"
+#define TESTER_INTERFACE  "Kvaser USB CAN Interfaces"
+#define TESTER_COPYRIGHT  "2005-2010,2012-2024 by Uwe Vogt, UV Software, Berlin"
+#define TESTER_PLATFORM   "Darwin"
+#define TESTER_ALIASNAME  "KVL:"
 
-#include "KvaserCAN.h"
+#define BITRATE_1M(x)    KVASER_CAN_BR_1M(x)
+#define BITRATE_800K(x)  KVASER_CAN_BR_800K(x)
+#define BITRATE_500K(x)  KVASER_CAN_BR_500K(x)
+#define BITRATE_250K(x)  KVASER_CAN_BR_250K(x)
+#define BITRATE_125K(x)  KVASER_CAN_BR_125K(x)
+#define BITRATE_100K(x)  KVASER_CAN_BR_100K(x)
+#define BITRATE_50K(x)   KVASER_CAN_BR_50K(x)
+#define BITRATE_20K(x)   KVASER_CAN_BR_20K(x)
+#define BITRATE_10K(x)   KVASER_CAN_BR_10K(x)
+#define BITRATE_5K(x)    KVASER_CAN_BR_5K(x)
+
+#if (CAN_FD_SUPPORTED != 0)
+#define BITRATE_FD_1M(x)      KVASER_CAN_FD_BR_1M(x)
+#define BITRATE_FD_500K(x)    KVASER_CAN_FD_BR_500K(x)
+#define BITRATE_FD_250K(x)    KVASER_CAN_FD_BR_250K(x)
+#define BITRATE_FD_125K(x)    KVASER_CAN_FD_BR_125K(x)
+#define BITRATE_FD_1M8M(x)    KVASER_CAN_FD_BR_1M8M(x)
+#define BITRATE_FD_500K4M(x)  KVASER_CAN_FD_BR_500K4M(x)
+#define BITRATE_FD_250K2M(x)  KVASER_CAN_FD_BR_250K2M(x)
+#define BITRATE_FD_125K1M(x)  KVASER_CAN_FD_BR_125K1M(x)
+#endif
 
 typedef CKvaserCAN  CCanDriver;
 
