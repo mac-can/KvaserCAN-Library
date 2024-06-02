@@ -136,7 +136,7 @@ extern "C" {
  #define KVASER_LIB_CANLIB      "canLib32.DLL"
  #define KVASER_LIB_WRAPPER     "u3cankvl.dll"
 #elif defined(__APPLE__)
- #define KVASER_LIB_CANLIB      "(n/a)"
+ #define KVASER_LIB_CANLIB      "(driverless)"
  #define KVASER_LIB_WRAPPER     "libUVCANKVL.dylib"
 #else
  #error Platform not supported

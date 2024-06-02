@@ -1006,14 +1006,14 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
         break;
     case CANPROP_GET_DEVICE_VENDOR:     // vendor name of the CAN interface (char[])
         if (nbyte >= 1U) {
-            strncpy((char*)value, can[handle].device.vendor, nbyte);
+            strncpy((char*)value, DEV_VENDOR, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
         }
         break;
     case CANPROP_GET_DEVICE_DLLNAME:    // file name of the CAN interface DLL (char[])
         if (nbyte >= 1U) {
-            strncpy((char*)value, "(driverless)", nbyte);  // note: there is no kernel driver!
+            strncpy((char*)value, DEV_DLLNAME, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
         }
