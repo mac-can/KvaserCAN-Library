@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 
@@ -170,10 +170,23 @@ TEST_F(GetBitrate, GTEST_TESTCASE(IfChannelNotInitialized, GTEST_ENABLED)) {
     // @test:
     // @- get bit-rate settings from DUT1
     retVal = dut1.GetBitrate(bitrate);
+#if (TC11_5_ISSUE_BITRATE != WORKAROUND_ENABLED)
     EXPECT_EQ(CCanApi::NotInitialized, retVal);
+#else
+    // @issue(Loader Library):
+    // @ The tester class overwrites GetBitrate by using the C function can_property.
+    // @ The underlying C function can_bitrate is tested anyway, but returns
+    // @ CANERR_NOTSUPP because can_property is called with handle -1.
+    EXPECT_EQ(CCanApi::NotSupported, retVal);
+#endif
     // @- get transmission rate from DUT1
     retVal = dut1.GetBusSpeed(speed);
+#if (TC11_5_ISSUE_BITRATE != WORKAROUND_ENABLED)
     EXPECT_EQ(CCanApi::NotInitialized, retVal);
+#else
+    // @issue(Loader Library): see above
+    EXPECT_EQ(CCanApi::NotSupported, retVal);
+#endif
     // @post
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
@@ -436,10 +449,23 @@ TEST_F(GetBitrate, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
     // @test:
     // @- get bit-rate settings from DUT1
     retVal = dut1.GetBitrate(bitrate);
+#if (TC11_9_ISSUE_BITRATE != WORKAROUND_ENABLED)
     EXPECT_EQ(CCanApi::NotInitialized, retVal);
+#else
+    // @issue(Loader Library):
+    // @ The tester class overwrites GetBitrate by using the C function can_property.
+    // @ The underlying C function can_bitrate is tested anyway, but returns
+    // @ CANERR_NOTSUPP because can_property is called with handle -1.
+    EXPECT_EQ(CCanApi::NotSupported, retVal);
+#endif
     // @- get transmission rate from DUT1
     retVal = dut1.GetBusSpeed(speed);
+#if (TC11_9_ISSUE_BITRATE != WORKAROUND_ENABLED)
     EXPECT_EQ(CCanApi::NotInitialized, retVal);
+#else
+    // @issue(Loader Library): see above
+    EXPECT_EQ(CCanApi::NotSupported, retVal);
+#endif
     // @end.
 }
 
@@ -662,4 +688,4 @@ TEST_F(GetBitrate, GTEST_TESTCASE(WithVariousCanFdBitrateSettings, GTEST_ENABLED
 }
 #endif  // (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 
-//  $Id: TC11_GetBitrate.cc 1204 2023-09-24 15:26:57Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC11_GetBitrate.cc 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin.

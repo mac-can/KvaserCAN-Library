@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #ifndef OPTIONS_H_INCLUDED
 #define OPTIONS_H_INCLUDED
@@ -70,6 +70,10 @@ private:
         CANAPI_Bitrate_t m_Bitrate;     // bit-rate settings
         void *m_pParameter;             // non PnP parameter
     } m_Dut[NUM_DUTS];
+#if (OPTION_CANAPI_LIBRARY != 0)
+    // search path for configurations
+    char *m_szSearchPath;               // search path for JSON files
+#endif
     // test options
     int32_t m_s32TestFrames;            // number of CAN frames to be sent during tests
     int32_t m_s32SmokeTestFrames;       // number of CAN frames to be sent during smoketest
@@ -85,6 +89,11 @@ public:
     COptions();
     virtual ~COptions() {};
     // getter/setter
+#if (OPTION_CANAPI_LIBRARY != 0)
+    char *GetSearchPath() {
+        return m_szSearchPath;
+    }
+#endif
     int32_t GetLibraryId(int dut) {
         return ((0 <= dut) && (dut < NUM_DUTS)) ? m_Dut[dut].m_Info.m_nLibraryId : INVALID_HANDLE;
     }
@@ -139,4 +148,4 @@ extern COptions g_Options;          // global access to testing options
 
 #endif // OPTIONS_H_INCLUDED
 
-// $Id: Options.h 1193 2023-09-06 10:21:35Z haumea $  Copyright (c) UV Software, Berlin.
+// $Id: Options.h 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin.

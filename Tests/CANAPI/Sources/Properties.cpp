@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,14 +43,14 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 #include <string.h>
 #include <limits.h>
 #include <iostream>
 
-#define MAX_PROPERTIES  37
+#define MAX_PROPERTIES  42
 
 #define LIB_PARAM  true
 #define DRV_PARAM  false
@@ -61,55 +61,70 @@
 #define PROP_REQUIRED  true
 #define PROP_OPTIONAL  false
 
+#if (FEATURE_FILTERING != FEATURE_SUPPORTED)
+#define PROP_FILTERING  PROP_OPTIONAL
+#else
+#define PROP_FILTERING  PROP_REQUIRED
+#endif
+
+#define MODE_RUNNING  true
+#define MODE_STOPPED  false
+
 static struct SProperty {
     uint16_t m_nId;
     uint32_t m_nSize;
     bool m_fPreInit;
     bool m_fSetter;
     bool m_fRequired;
+    bool m_fModeRunning;
     const char* m_szDescription;
 } aProperties[MAX_PROPERTIES + 1] = {
-    { CANPROP_GET_SPEC            , sizeof(uint16_t),        LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "version of the wrapper specification (uint16_t)" },
-    { CANPROP_GET_VERSION         , sizeof(uint16_t),        LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "version number of the library (uint16_t)" },
-    { CANPROP_GET_PATCH_NO        , sizeof(uint8_t),         LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "patch number of the library (uint8_t)" },
-    { CANPROP_GET_BUILD_NO        , sizeof(uint32_t),        LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "build number of the library (uint32_t)" },
-    { CANPROP_GET_LIBRARY_ID      , sizeof(int32_t),         LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "library id of the library (int32_t)" },
-    { CANPROP_GET_LIBRARY_VENDOR  , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "vendor name of the library (char[256])" },
-    { CANPROP_GET_LIBRARY_DLLNAME , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "file name of the library DLL (char[256])" },
-    { CANPROP_GET_DEVICE_TYPE     , sizeof(int32_t),         DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "device type of the CAN interface (int32_t)" },
-    { CANPROP_GET_DEVICE_NAME     , CANPROP_MAX_BUFFER_SIZE, DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "device name of the CAN interface (char[256])" },
-    { CANPROP_GET_DEVICE_VENDOR   , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "vendor name of the CAN interface (char[256])" },
-    { CANPROP_GET_DEVICE_DLLNAME  , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "file name of the CAN interface DLL (char[256])" },
-    { CANPROP_GET_DEVICE_PARAM    , CANPROP_MAX_BUFFER_SIZE, DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "device parameter of the CAN interface (char[256])" },
-    { CANPROP_GET_OP_CAPABILITY   , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "supported operation modes of the CAN controller (uint8_t)" },
-    { CANPROP_GET_OP_MODE         , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "active operation mode of the CAN controller (uint8_t)" },
-    { CANPROP_GET_BITRATE         , sizeof(can_bitrate_t),   DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "active bit-rate of the CAN controller (can_bitrate_t)" },
-    { CANPROP_GET_SPEED           , sizeof(can_speed_t),     DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "active bus speed of the CAN controller (can_speed_t)" },
-    { CANPROP_GET_STATUS          , sizeof(can_mode_t),      DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "current status register of the CAN controller (uint8_t)" },
-    { CANPROP_GET_BUSLOAD         , sizeof(uint16_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "current bus load of the CAN controller (uint16_t)" },
-    { CANPROP_GET_NUM_CHANNELS    , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "numbers of CAN channels on the CAN interface (uint8_t)" },
-    { CANPROP_GET_CAN_CHANNEL     , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "active CAN channel on the CAN interface (uint8_t)" },
-    { CANPROP_GET_CAN_CLOCK       , sizeof(int32_t),         DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "frequency of the CAN controller clock in [Hz] (int32_t)" },
-    { CANPROP_GET_TX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "total number of sent messages (uint64_t)" },
-    { CANPROP_GET_RX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "total number of reveiced messages (uint64_t)" },
-    { CANPROP_GET_ERR_COUNTER     , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, "total number of reveiced error frames (uint64_t)" },
-    { CANPROP_GET_RCV_QUEUE_SIZE  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "maximum number of message the receive queue can hold (uint32_t)" },
-    { CANPROP_GET_RCV_QUEUE_HIGH  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "maximum number of message the receive queue has hold (uint32_t)" },
-    { CANPROP_GET_RCV_QUEUE_OVFL  , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "overflow counter of the receive queue (uint64_t)" },
-    { CANPROP_GET_TRM_QUEUE_SIZE  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "maximum number of message the transmit queue can hold (uint32_t)" },
-    { CANPROP_GET_TRM_QUEUE_HIGH  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "maximum number of message the transmit queue has hold (uint32_t)" },
-    { CANPROP_GET_TRM_QUEUE_OVFL  , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, "overflow counter of the transmit queue (uint64_t)" },
+    { CANPROP_GET_SPEC            , sizeof(uint16_t),        LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "version of the wrapper specification (uint16_t)" },
+    { CANPROP_GET_VERSION         , sizeof(uint16_t),        LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "version number of the library (uint16_t)" },
+    { CANPROP_GET_PATCH_NO        , sizeof(uint8_t),         LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "patch number of the library (uint8_t)" },
+    { CANPROP_GET_BUILD_NO        , sizeof(uint32_t),        LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "build number of the library (uint32_t)" },
+    { CANPROP_GET_LIBRARY_ID      , sizeof(int32_t),         LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "library id of the library (int32_t)" },
+    { CANPROP_GET_LIBRARY_VENDOR  , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "vendor name of the library (char[256])" },
+    { CANPROP_GET_LIBRARY_DLLNAME , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "file name of the library DLL (char[256])" },
+    { CANPROP_GET_DEVICE_TYPE     , sizeof(int32_t),         DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "device type of the CAN interface (int32_t)" },
+    { CANPROP_GET_DEVICE_NAME     , CANPROP_MAX_BUFFER_SIZE, DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "device name of the CAN interface (char[256])" },
+    { CANPROP_GET_DEVICE_VENDOR   , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "vendor name of the CAN interface (char[256])" },
+    { CANPROP_GET_DEVICE_DLLNAME  , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "file name of the CAN interface DLL (char[256])" },
+    { CANPROP_GET_DEVICE_PARAM    , CANPROP_MAX_BUFFER_SIZE, DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "device parameter of the CAN interface (char[256])" },
+    { CANPROP_GET_OP_CAPABILITY   , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "supported operation modes of the CAN controller (uint8_t)" },
+    { CANPROP_GET_OP_MODE         , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "active operation mode of the CAN controller (uint8_t)" },
+    { CANPROP_GET_BITRATE         , sizeof(can_bitrate_t),   DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "active bit-rate of the CAN controller (can_bitrate_t)" },
+    { CANPROP_GET_SPEED           , sizeof(can_speed_t),     DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "active bus speed of the CAN controller (can_speed_t)" },
+    { CANPROP_GET_STATUS          , sizeof(can_mode_t),      DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "current status register of the CAN controller (uint8_t)" },
+    { CANPROP_GET_BUSLOAD         , sizeof(uint16_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "current bus load of the CAN controller (uint16_t)" },
+    { CANPROP_GET_NUM_CHANNELS    , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "numbers of CAN channels on the CAN interface (uint8_t)" },
+    { CANPROP_GET_CAN_CHANNEL     , sizeof(uint8_t),         DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "active CAN channel on the CAN interface (uint8_t)" },
+    { CANPROP_GET_CAN_CLOCK       , sizeof(int32_t),         DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "frequency of the CAN controller clock in [Hz] (int32_t)" },
+    { CANPROP_GET_TX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "total number of sent messages (uint64_t)" },
+    { CANPROP_GET_RX_COUNTER      , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "total number of reveiced messages (uint64_t)" },
+    { CANPROP_GET_ERR_COUNTER     , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "total number of reveiced error frames (uint64_t)" },
+    { CANPROP_GET_RCV_QUEUE_SIZE  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "maximum number of message the receive queue can hold (uint32_t)" },
+    { CANPROP_GET_RCV_QUEUE_HIGH  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "maximum number of message the receive queue has hold (uint32_t)" },
+    { CANPROP_GET_RCV_QUEUE_OVFL  , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "overflow counter of the receive queue (uint64_t)" },
+    { CANPROP_GET_TRM_QUEUE_SIZE  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "maximum number of message the transmit queue can hold (uint32_t)" },
+    { CANPROP_GET_TRM_QUEUE_HIGH  , sizeof(uint32_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "maximum number of message the transmit queue has hold (uint32_t)" },
+    { CANPROP_GET_TRM_QUEUE_OVFL  , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_OPTIONAL, MODE_RUNNING, "overflow counter of the transmit queue (uint64_t)" },
+    { CANPROP_GET_FILTER_11BIT    , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_FILTERING, MODE_RUNNING, "acceptance filter code and mask for 11-bit identifier (uint64_t)" },
+    { CANPROP_GET_FILTER_29BIT    , sizeof(uint64_t),        DRV_PARAM, PROP_GETTER, PROP_FILTERING, MODE_RUNNING, "acceptance filter code and mask for 29-bit identifier (uint64_t)" },
+    { CANPROP_SET_FILTER_11BIT    , sizeof(uint64_t),        DRV_PARAM, PROP_SETTER, PROP_FILTERING, MODE_STOPPED, "set value for acceptance filter code and mask for 11-bit identifier (uint64_t)" },
+    { CANPROP_SET_FILTER_29BIT    , sizeof(uint64_t),        DRV_PARAM, PROP_SETTER, PROP_FILTERING, MODE_STOPPED, "set value for acceptance filter code and mask for 29-bit identifier (uint64_t)" },
+    { CANPROP_SET_FILTER_RESET    , 0U /* NULL pointer*/,    DRV_PARAM, PROP_SETTER, PROP_FILTERING, MODE_STOPPED, "reset acceptance filter code and mask to default values (NULL)" },
     /* note:  SET_FIRST_CHANNEL must be called before any GET_CHANNEL_xyz, therefore we define it as a PROP_GETTER because it gets a (virtual) index */
-    { CANPROP_SET_FIRST_CHANNEL   , 0U /* NULL pointer*/,    LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "set index to the first entry in the interface list (NULL)" },
-    { CANPROP_GET_CHANNEL_NO      , sizeof(int32_t),         LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "get channel no. at actual index in the interface list (int32_t)" },
-    { CANPROP_GET_CHANNEL_NAME    , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "get channel name at actual index in the interface list (char[256])" },
-    { CANPROP_GET_CHANNEL_DLLNAME , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "get file name of the DLL at actual index in the interface list (char[256])" },
-    { CANPROP_GET_CHANNEL_VENDOR_ID , sizeof(int32_t),       LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "get library id at actual index in the interface list (int32_t)" },
-    { CANPROP_GET_CHANNEL_VENDOR_NAME , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "get vendor name at actual index in the interface list(char[256])" },
+    { CANPROP_SET_FIRST_CHANNEL   , 0U /* NULL pointer*/,    LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "set index to the first entry in the interface list (NULL)" },
+    { CANPROP_GET_CHANNEL_NO      , sizeof(int32_t),         LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "get channel no. at actual index in the interface list (int32_t)" },
+    { CANPROP_GET_CHANNEL_NAME    , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "get channel name at actual index in the interface list (char[256])" },
+    { CANPROP_GET_CHANNEL_DLLNAME , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "get file name of the DLL at actual index in the interface list (char[256])" },
+    { CANPROP_GET_CHANNEL_VENDOR_ID , sizeof(int32_t),       LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "get library id at actual index in the interface list (int32_t)" },
+    { CANPROP_GET_CHANNEL_VENDOR_NAME , CANPROP_MAX_BUFFER_SIZE, LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "get vendor name at actual index in the interface list(char[256])" },
     /* note:  SET_NEXT_CHANNEL is also defined as a setter because it gets the next (virtual) index (see above), but it can be EOF when there is no device entry */
-    { CANPROP_SET_NEXT_CHANNEL    , 0U /* NULL pointer*/,    LIB_PARAM, PROP_GETTER, PROP_REQUIRED, "set index to the next entry in the interface list (NULL)" },
+    { CANPROP_SET_NEXT_CHANNEL    , 0U /* NULL pointer*/,    LIB_PARAM, PROP_GETTER, PROP_REQUIRED, MODE_RUNNING, "set index to the next entry in the interface list (NULL)" },
     /* end marker */
-    { CANPROP_INVALID, 0U, false, false, false, "" }
+    { CANPROP_INVALID, 0U, false, false, false, false, "" }
 };
 
 CProperties::CProperties() {
@@ -151,6 +166,13 @@ bool CProperties::IsRequired() {
         return false;
 }
 
+bool CProperties::IsModeRunning() {
+    if (m_nIndex < MAX_PROPERTIES)
+        return aProperties[m_nIndex].m_fModeRunning;
+    else
+        return false;
+}
+
 uint32_t CProperties::SizeOf()  {
     if (m_nIndex < MAX_PROPERTIES)
         return aProperties[m_nIndex].m_nSize;
@@ -165,4 +187,4 @@ const char* CProperties::Description() {
         return aProperties[MAX_PROPERTIES].m_szDescription;
 }
 
-// $Id: Properties.cpp 1170 2023-08-23 14:01:13Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: Properties.cpp 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin //

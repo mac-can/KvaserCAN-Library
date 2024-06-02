@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 
@@ -388,7 +388,12 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
 //
 // @expected: CANERR_NOERROR but status bit 'bus_off' is set
 //
-TEST_F(GetStatus, GTEST_TESTCASE(IfInBusOffState, GTEST_ENABLED)) {
+#if !defined(__APPLE__) || defined(__MAC_11_0)
+#define GTEST_TC09_8_ENABLED  GTEST_ENABLED
+#else
+#define GTEST_TC09_8_ENABLED  GTEST_DISABLED
+#endif
+TEST_F(GetStatus, GTEST_TESTCASE(IfInBusOffState, GTEST_TC09_8_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Bitrate_t newBtr1 = {}, oldBtr1 = {};
@@ -411,14 +416,22 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfInBusOffState, GTEST_ENABLED)) {
     trmMsg.dlc = 0;
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
-#if (TC09_8_ISSUE_BUS_OFF == WORKAROUND_ENABLED)
-    ASSERT_TRUE(false) << "[  TC09.8  ] No bus-off state from device!";
-#endif
     // @
+    // @note: This test can be very fragile
+    if (g_Options.RunQuick())
+        GTEST_SKIP() << "This test can be very fragile!";
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
         GTEST_SKIP() << "This test cannot run if there is another device on bus!";
     // @pre:
+#if (TC09_8_ISSUE_BUS_OFF == WORKAROUND_ENABLED)
+    // @- issue(*): no bus-off state from device -> abort test
+    ASSERT_TRUE(false) << "[  TC09.8  ] No bus-off state from device!";
+#endif
+#if (TC09_8_ISSUE_TOUCAN_STATUS == WORKAROUND_ENABLED)
+    // @- issue(MacCAN-TouCAN): issue #32 (no bus error states from device) -> abort test
+    ASSERT_TRUE(false) << "[  TC09.8  ] Issue #32 (no bus error states from device)";
+#endif
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
     ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut1.InitializeChannel() failed with error code " << retVal;
@@ -545,7 +558,12 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfInBusOffState, GTEST_ENABLED)) {
 //
 // @expected: CANERR_NOERROR but status bit 'warning_level' is set
 //
-TEST_F(GetStatus, GTEST_TESTCASE(IfWarningLevelReached, GTEST_ENABLED)) {
+#if !defined(__APPLE__) || defined(__MAC_11_0)
+#define GTEST_TC09_9_ENABLED  GTEST_ENABLED
+#else
+#define GTEST_TC09_9_ENABLED  GTEST_DISABLED
+#endif
+TEST_F(GetStatus, GTEST_TESTCASE(IfWarningLevelReached, GTEST_TC09_9_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
     CANAPI_Bitrate_t newBtr1 = {}, oldBtr1 = {};
@@ -568,14 +586,22 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfWarningLevelReached, GTEST_ENABLED)) {
     trmMsg.dlc = 0;
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
-#if (TC09_9_ISSUE_PCBUSB_WARNING_LEVEL == WORKAROUND_ENABLED)
-    ASSERT_TRUE(false) << "[  TC09.9  ] No warning level from device!";
-#endif
     // @
+    // @note: This test can be very fragile
+    if (g_Options.RunQuick())
+        GTEST_SKIP() << "This test can be very fragile!";
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
         GTEST_SKIP() << "This test cannot run if there is another device on bus!";
     // @pre:
+#if (TC09_9_ISSUE_PCBUSB_WARNING_LEVEL == WORKAROUND_ENABLED)
+    // @- issue(PCBUSB): no warning level from device -> abort test
+    ASSERT_TRUE(false) << "[  TC09.9  ] No warning level from device!";
+#endif
+#if (TC09_9_ISSUE_TOUCAN_STATUS == WORKAROUND_ENABLED)
+    // @- issue(MacCAN-TouCAN): issue #32 (no bus error states from device) -> run with ICA
+    EXPECT_TRUE(false) << "[  TC09.9  ] Issue #32 (no bus error states from device)";
+#endif
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
     ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut1.InitializeChannel() failed with error code " << retVal;
@@ -728,10 +754,17 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfErrorsOnBus, GTEST_TC09_10_ENABLED)) {
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
     // @
+    // @note: This test can be very fragile
+    if (g_Options.RunQuick())
+        GTEST_SKIP() << "This test can be very fragile!";
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
         GTEST_SKIP() << "This test cannot run if there is another device on bus!";
     // @pre:
+#if (TC09_8_ISSUE_TOUCAN_STATUS == WORKAROUND_ENABLED)
+    // @- issue(MacCAN-TouCAN): issue #32 (no bus error states from device) -> abort test
+    ASSERT_TRUE(false) << "[  TC09.10 ] Issue #32 (no bus error states from device)";
+#endif
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
     ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut1.InitializeChannel() failed with error code " << retVal;
@@ -1193,9 +1226,12 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC09_14_ENABLED)) {
 #endif
     // @test:
     int32_t spam = (FEATURE_SIZE_RECEIVE_QUEUE + TEST_QRCVFULL);
-#if (TC04_8_ISSUE_QUEUE_SIZE == WORKAROUND_ENABLED)
+#if (TC04_8_ISSUE_PCBUSB_QUEUE_SIZE == WORKAROUND_ENABLED)
     // @- issue(PCBUSB.TOS): last element of the receive queue is not accessible
-    spam -= 1;
+    CANAPI_OpMode_t opCapa = { CANMODE_DEFAULT };
+    (void)dut1.GetOpCapabilities(opCapa);
+    if (!opCapa.fdoe)  // note: PCAN-USB devices only!
+        spam -= 1;
 #endif
     CProgress progress = CProgress(spam);
     // @- DUT2 spam the receive queue of DUT1 (with one message more than the queue can hold)
@@ -1318,4 +1354,4 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC09_14_ENABLED)) {
     // @end.
 }
 
-//  $Id: TC09_GetStatus.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC09_GetStatus.cc 1328 2024-05-29 18:49:38Z makemake $  Copyright (c) UV Software, Berlin.

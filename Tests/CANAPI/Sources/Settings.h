@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #ifndef SETTINGS_H_INCLUDED
 #define SETTINGS_H_INCLUDED
@@ -55,7 +55,7 @@
 #elif defined(__linux__)
 #define TEST_SEARCH_PATH  "~/Projects/CAN/DRV/API/json"
 #else
-#define TEST_SEARCH_PATH  "C:\\Projekte\\CAN\\DRV\\API\\json"
+#define TEST_SEARCH_PATH  "C:\\Program Files (x86)\\UV Software\\CAN API V3"
 #endif
 //  - devices under test (2 devices are required)
 #define TEST_DEVICE(dut)  g_Options.GetLibraryId(dut), g_Options.GetChannelNo(dut), g_Options.GetOpMode(dut), g_Options.GetBitrate(dut), g_Options.GetParameter(dut)
@@ -158,4 +158,4 @@
 #endif
 #endif // SETTINGS_H_INCLUDED
 
-//  $Id: Settings.h 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: Settings.h 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin.

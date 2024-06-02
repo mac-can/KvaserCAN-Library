@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 #include <math.h>
@@ -1603,4 +1603,4 @@ TEST_F(BitrateConverter, GTEST_TESTCASE(BitrateToStringWithNullPointerForString,
 //
 // @note: passing a pointer for 'btr0btr1' is not possible with the C++ API!
 
-//  $Id: TCx2_BitrateConverter.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TCx2_BitrateConverter.cc 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin.
