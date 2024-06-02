@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -403,13 +403,9 @@
     // @test:
     // @- get bus-load of DUT1 and check to be in INIT state
     rc = can_busload(handle, &load, &status.byte);
-#ifndef OPTION_CANAPI_RETVALS
-    XCTAssertEqual(CANERR_OFFLINE, rc);
-#else
-    // note: can_busload shall return CANERR_NOERROR even when
-    //       the CAN controller has not been started
+    // @  note: can_busload shall return CANERR_NOERROR even when
+    //          the CAN controller has not been started
     XCTAssertEqual(CANERR_NOERROR, rc);
-#endif
     XCTAssertTrue(status.can_stopped);
 
     // @post:
@@ -544,13 +540,9 @@
     // @test:
     // @- get bus-load of DUT1 and check to be in INIT state
     rc = can_busload(handle, &load, &status.byte);
-#ifndef OPTION_CANAPI_RETVALS
-    XCTAssertEqual(CANERR_OFFLINE, rc);
-#else
-    // note: can_busload shall return CANERR_NOERROR even when
-    //       the CAN controller has not been started
+    // @  note: can_busload shall return CANERR_NOERROR even when
+    //          the CAN controller has not been started
     XCTAssertEqual(CANERR_NOERROR, rc);
-#endif
     XCTAssertTrue(status.can_stopped);
 
     // @post:
@@ -684,4 +676,4 @@
 
 @end
 
-// $Id: test_can_busload.mm 1083 2022-07-25 12:40:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_busload.mm 1334 2024-06-02 10:00:20Z makemake $  Copyright (c) UV Software, Berlin //

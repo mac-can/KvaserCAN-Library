@@ -362,7 +362,7 @@
 
 // @xctest TC11.6: Get CAN bit-rate settings when interface initialized (but CAN controller not started)
 //
-// @expected CANERR_OFFLINE
+// @expected CANERR_NOERROR (even if the CAN controller has not been started)
 //
 - (void)testWhenInterfaceInitialized {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -382,7 +382,7 @@
     // @test:
     // @- get bit-rate of DUT1
     rc = can_bitrate(handle, &bitrate, NULL);
-    XCTAssertEqual(CANERR_OFFLINE, rc);
+    XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -473,7 +473,7 @@
 
 // @xctest TC11.8: Get CAN bit-rate settings when CAN controller stopped
 //
-// @expected CANERR_OFFLINE
+// @expected CANERR_NOERROR (even if the CAN controller has not been started)
 //
 - (void)testWhenInterfaceStopped {
     can_bitrate_t bitrate = { TEST_BTRINDEX };
@@ -517,7 +517,7 @@
     // @test:
     // @- get bit-rate of DUT1
     rc = can_bitrate(handle, &bitrate, NULL);
-    XCTAssertEqual(CANERR_OFFLINE, rc);
+    XCTAssertEqual(CANERR_NOERROR, rc);
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -808,4 +808,4 @@
 
 @end
 
-// $Id: test_can_bitrate.mm 1084 2022-07-25 13:39:18Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_bitrate.mm 1334 2024-06-02 10:00:20Z makemake $  Copyright (c) UV Software, Berlin //
