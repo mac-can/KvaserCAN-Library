@@ -1042,11 +1042,11 @@ TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartResetTeardownIniti
     // @end.
 }
 
-// @gtest TCx1.24: Call sequence 'Initialize-Start-Reset-Start-Teardown-Initialize-Start-Reset-Start-Reset-Teardown'
+// @gtest TCx1.24: Call sequence 'Initialize-Start-Reset-Start-Teardown-Initialize-Start-Reset-Reset-Start-Teardown'
 //
 // @expected: CANERR_NOERROR
 //
-TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartTeardownInitializeStartResetStartResetTeardown, GTEST_ENABLED)) {
+TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartTeardownInitializeStartResetResetStartTeardown, GTEST_ENABLED)) {
     CCanDevice dut = CCanDevice(TEST_DEVICE(DUT1));
     CANAPI_Return_t retVal = CCanApi::FatalError;
     CANAPI_Status_t status = { CANSTAT_RESET };
@@ -1089,7 +1089,7 @@ TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartTeardownInitialize
     EXPECT_EQ(CCanApi::NoError, dut.GetStatus(status));
     EXPECT_TRUE(status.can_stopped);
     // @- stop/reset DUT
-    EXPECT_EQ(CCanApi::NoError, dut.ResetController());
+    EXPECT_NE(CCanApi::NoError, dut.ResetController());
     EXPECT_EQ(CCanApi::NoError, dut.GetStatus(status));
     EXPECT_TRUE(status.can_stopped);
     // @- start DUT again with configured bit rate
@@ -1504,4 +1504,4 @@ TEST_F(CallSequences, GTEST_TESTCASE(ReadInitializeTeardown, GTEST_DISABLED)) {
     // @end.
 }
 
-//  $Id: TCx1_CallSequences.cc 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TCx1_CallSequences.cc 1336 2024-06-03 06:58:36Z makemake $  Copyright (c) UV Software, Berlin.
