@@ -59,7 +59,7 @@
 #define KVASERCAN_LIBRARY_NAME  CANDLL_KVASERCAN
 #define KVASERCAN_LIBRARY_VENDOR  "UV Software, Berlin"
 #define KVASERCAN_LIBRARY_LICENSE  "BSD-2-Clause OR GPL-3.0-or-later"
-#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2020-2024 by Uwe Vogt, UV Software, Berlin"
+#define KVASERCAN_LIBRARY_COPYRIGHT  "Copyright (c) 2017-2024 by Uwe Vogt, UV Software, Berlin"
 #define KVASERCAN_LIBRARY_HAZARD_NOTE  "If you connect your CAN device to a real CAN network when using this library,\n" \
                                        "you might damage your application."
 /// \}

@@ -89,10 +89,11 @@ static void _finalizer() {
 /*  -----------  defines  ------------------------------------------------
  */
 #ifndef CAN_MAX_HANDLES
-#define CAN_MAX_HANDLES         (8)     // maximum number of open handles
+#define CAN_MAX_HANDLES         (16)    // maximum number of open handles
 #endif
 #define INVALID_HANDLE          (-1)
 #define IS_HANDLE_VALID(hnd)    ((0 <= (hnd)) && ((hnd) < CAN_MAX_HANDLES))
+#define IS_HANDLE_OPENED(hnd)   (can[(hnd)].device.configured)
 #ifndef DLC2LEN
 #define DLC2LEN(x)              dlc_table[((x) < 16) ? (x) : 15]
 #endif
@@ -129,7 +130,11 @@ typedef struct {                        // Kvaser CAN interface:
 
 /*  -----------  prototypes  ---------------------------------------------
  */
-static void var_init(void);             // initialize variables
+static void var_init(void);             // initialize all variables
+static int all_closed(void);            // check if all handles closed
+
+static int exit_channel(int handle);    // teardown a single channel
+static int kill_channel(int handle);    // signal a single channel
 
 static int map_bitrate2busparams(const can_bitrate_t *bitrate, KvaserUSB_BusParams_t *busParams);
 static int map_busparams2bitrate(const KvaserUSB_BusParams_t *busParams, int32_t canClock, can_bitrate_t *bitrate);
@@ -167,12 +172,11 @@ EXPORT
 int can_test(int32_t channel, uint8_t mode, const void *param, int *result)
 {
     int rc = CANERR_FATAL;              // return value
-    int i;                              // loop variable
 
     if (result)                         // the last resort
         *result = CANBRD_NOT_TESTABLE;
     if (!init) {                        // if not initialized:
-        var_init();                     //   initialize the variables
+        var_init();                     //   initialize all variables
         // initialize the driver (MacCAN-Core driver)
         if ((rc = KvaserCAN_InitializeDriver()) != CANERR_NOERROR)
             return rc;
@@ -187,14 +191,12 @@ int can_test(int32_t channel, uint8_t mode, const void *param, int *result)
     // probe the CAN channel and check it selected operation mode is supported by the CAN controller
     rc = KvaserCAN_ProbeChannel(channel, mode, result);
     // when the music's over, turn out the light
-    for (i = 0; i < CAN_MAX_HANDLES; i++) {
-        if (can[i].device.configured)
-            break;
-    }
-    if (i == CAN_MAX_HANDLES) {
+#if (0)
+    if (all_closed()) {
         (void)KvaserCAN_TeardownDriver();
         init = 0;
     }
+#endif
     // note: 1. parameter 'result' is checked for NULL pointer by the called function
     //       2. error code CANERR_ILLPARA is returned in case the mode is not supported
     (void) param;
@@ -229,68 +231,74 @@ int can_init(int32_t channel, uint8_t mode, const void *param)
     return (int)channel;                // return the handle (channel)
 }
 
+static int exit_channel(int handle)
+{
+    int rc = CANERR_FATAL;              // return value
+
+    if (!IS_HANDLE_VALID(handle))       // must be a valid handle
+        return CANERR_HANDLE;
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
+        return CANERR_HANDLE;
+    /*if (!can[handle].status.can_stopped) // go to CAN INIT mode (bus off)*/
+        (void)KvaserCAN_CanBusOff(&can[handle].device);
+    if ((rc = KvaserCAN_TeardownChannel(&can[handle].device)) < CANERR_NOERROR)
+        return rc;
+
+    can[handle].status.byte |= CANSTAT_RESET;// CAN controller in INIT state
+    can[handle].device.configured = false;   // handle can be used again
+    return CANERR_NOERROR;
+}
+
 EXPORT
 int can_exit(int handle)
 {
-    int rc, i;                          // return value
+    int rc = CANERR_FATAL;              // return value
+    int i;                              // loop variable
 
     if (!init)                          // must be initialized
         return CANERR_NOTINIT;
-    if (handle != CANEXIT_ALL) {
-        if (!IS_HANDLE_VALID(handle))   // must be a valid handle
-            return CANERR_HANDLE;
-        if (!can[handle].device.configured) // must be an open handle
-            return CANERR_HANDLE;
-        /*if (!can[handle].status.can_stopped) // go to CAN INIT mode (bus off)*/
-            (void)KvaserCAN_CanBusOff(&can[handle].device);
-        if ((rc = KvaserCAN_TeardownChannel(&can[handle].device)) < CANERR_NOERROR)
+    if (handle != CANEXIT_ALL) {        // close a single handle
+        if ((rc = exit_channel(handle)) != CANERR_NOERROR)
             return rc;
-        can[handle].status.byte |= CANSTAT_RESET; // CAN controller in INIT state
-        can[handle].device.configured = false;    // handle can be used again
     }
     else {
         for (i = 0; i < CAN_MAX_HANDLES; i++) {
-            if (can[i].device.configured) // must be an open handle
-            {
-                /*if (!can[handle].status.can_stopped) // go to CAN INIT mode (bus off)*/
-                    (void)KvaserCAN_CanBusOff(&can[i].device);
-                (void)KvaserCAN_TeardownChannel(&can[i].device);
-                can[i].status.byte |= CANSTAT_RESET; // CAN controller in INIT state
-                can[i].device.configured = false;    // handle can be used again
-            }
+            (void)exit_channel(i);      // close all open handles
         }
     }
-    // teardown the driver when all interfaces released
-    for (i = 0; i < CAN_MAX_HANDLES; i++) {
-        if (can[i].device.configured)
-            break;
-    }
-    if (i == CAN_MAX_HANDLES) {
+    // teardown the driver when all channels released
+    if (all_closed()) {
         (void)KvaserCAN_TeardownDriver();
         init = 0;
     }
     return CANERR_NOERROR;
 }
 
+static int kill_channel(int handle)
+{
+    if (!IS_HANDLE_VALID(handle))       // must be a valid handle
+        return CANERR_HANDLE;
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
+        return CANERR_HANDLE;
+
+    return KvaserCAN_SignalChannel(&can[handle].device);
+}
+
 EXPORT
 int can_kill(int handle)
 {
-    int rc, i;                          // return value
+    int rc = CANERR_FATAL;              // return value
+    int i;                              // loop variable
 
     if (!init)                          // must be initialized
         return CANERR_NOTINIT;
-    if (handle != CANEXIT_ALL) {
-        if (!IS_HANDLE_VALID(handle))   // must be a valid handle
-            return CANERR_HANDLE;
-        if (!can[handle].device.configured) // must be an open handle
-            return CANERR_HANDLE;
-        if ((rc = KvaserCAN_SignalChannel(&can[handle].device)) < CANERR_NOERROR)
+    if (handle != CANKILL_ALL) {        // signal a single handle
+        if ((rc = kill_channel(handle)) != CANERR_NOERROR)
             return rc;
     }
     else {
         for (i = 0; i < CAN_MAX_HANDLES; i++) {
-            if (can[i].device.configured) // must be an open handle
-                (void)KvaserCAN_SignalChannel(&can[i].device);
+            (void)kill_channel(i);      // signal all open handles
         }
     }
     return CANERR_NOERROR;
@@ -309,7 +317,7 @@ int can_start(int handle, const can_bitrate_t *bitrate)
         return CANERR_NOTINIT;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return CANERR_HANDLE;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
     if (bitrate == NULL)                // check for null-pointer
         return CANERR_NULLPTR;
@@ -380,7 +388,7 @@ int can_reset(int handle)
         return CANERR_NOTINIT;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return CANERR_HANDLE;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
     if (can[handle].status.can_stopped) // must be running
 #if (OPTION_CANAPI_RETVALS == OPTION_DISABLED)
@@ -405,7 +413,7 @@ int can_write(int handle, const can_message_t *message, uint16_t timeout)
         return CANERR_NOTINIT;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return CANERR_HANDLE;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
     if (message == NULL)                // check for null-pointer
         return CANERR_NULLPTR;
@@ -429,7 +437,7 @@ int can_write(int handle, const can_message_t *message, uint16_t timeout)
     if (message->dlc > (uint8_t)(message->fdf ? CANFD_MAX_DLC : CAN_MAX_DLC))
         return CANERR_ILLPARA;          // invalid data length code
 
-    // transmit the CAN message (w/ or w/o acknowledgment)
+    // transmit the CAN message (with or w/o acknowledge)
     rc = KvaserCAN_WriteMessage(&can[handle].device, message, timeout);
     // update status and tx counter
     can[handle].status.transmitter_busy = (rc != CANUSB_SUCCESS) ? 1 : 0;
@@ -446,7 +454,7 @@ int can_read(int handle, can_message_t *message, uint16_t timeout)
         return CANERR_NOTINIT;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return CANERR_HANDLE;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
     if (message == NULL)                // check for null-pointer
         return CANERR_NULLPTR;
@@ -455,6 +463,7 @@ int can_read(int handle, can_message_t *message, uint16_t timeout)
 
     // read one CAN message from message queue, if any
     rc = KvaserCAN_ReadMessage(&can[handle].device, message, timeout);
+    // update status and rx or err counter
     can[handle].status.receiver_empty = (rc != CANUSB_SUCCESS) ? 1 : 0;
     can[handle].status.queue_overrun = CANQUE_OverflowFlag(can[handle].device.recvData.msgQueue) ? 1 : 0;
     can[handle].counters.rx += ((rc == CANUSB_SUCCESS) && !message->sts) ? 1U : 0U;
@@ -473,7 +482,7 @@ int can_status(int handle, uint8_t *status)
         return CANERR_NOTINIT;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return CANERR_HANDLE;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
 
     // get status-register from device
@@ -500,7 +509,7 @@ int can_busload(int handle, uint8_t *load, uint8_t *status)
         return CANERR_NOTINIT;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return CANERR_HANDLE;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
 
     // get bus load from device (0..10000 ==> 0%..100%)
@@ -536,7 +545,7 @@ int can_bitrate(int handle, can_bitrate_t *bitrate, can_speed_t *speed)
         return CANERR_NOTINIT;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return CANERR_HANDLE;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
 
     // get CAN clock from device
@@ -587,7 +596,7 @@ int can_property(int handle, uint16_t param, void *value, uint32_t nbyte)
     }
     // note: library is initialized and handle is valid
 
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return CANERR_HANDLE;
     // note: device properties must be queried with a valid handle
     return drv_parameter(handle, param, value, (size_t)nbyte);
@@ -602,7 +611,7 @@ char *can_hardware(int handle)
         return NULL;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return NULL;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return NULL;
 
     // return hardware version (zero-terminated string)
@@ -624,7 +633,7 @@ char *can_firmware(int handle)
         return NULL;
     if (!IS_HANDLE_VALID(handle))       // must be a valid handle
         return NULL;
-    if (!can[handle].device.configured) // must be an open handle
+    if (!IS_HANDLE_OPENED(handle))      // must be an open handle
         return NULL;
 
     // return firmware version (zero-terminated string)
@@ -652,6 +661,19 @@ static void var_init(void)
         can[i].counters.rx = 0ull;
         can[i].counters.err = 0ull;
     }
+}
+
+static int all_closed(void)
+{
+    int handle;
+
+    if (!init)
+        return 1;
+    for (handle = 0; handle < CAN_MAX_HANDLES; handle++) {
+        if (IS_HANDLE_OPENED(handle))
+            return 0;
+    }
+    return 1;
 }
 
 static int map_bitrate2busparams(const can_bitrate_t *bitrate, KvaserUSB_BusParams_t *busParams)
@@ -812,7 +834,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
            (param != CANPROP_SET_NEXT_CHANNEL))
             return CANERR_NULLPTR;
     }
-    /* CAN library properties */
+    // query or modify a CAN library properties
     switch (param) {
     case CANPROP_GET_SPEC:              // version of the wrapper specification (uint16_t)
         if (nbyte >= sizeof(uint16_t)) {
@@ -823,7 +845,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
     case CANPROP_GET_VERSION:           // version number of the library (uint16_t)
         if (nbyte >= sizeof(uint16_t)) {
             *(uint16_t*)value = ((uint16_t)VERSION_MAJOR << 8)
-                              | ((uint16_t)VERSION_MINOR & 0xFU);
+                              | ((uint16_t)VERSION_MINOR & 0xFu);
             rc = CANERR_NOERROR;
         }
         break;
@@ -846,28 +868,28 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
         }
         break;
     case CANPROP_GET_LIBRARY_VENDOR:    // vendor name of the library (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             strncpy((char*)value, CAN_API_VENDOR, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
         }
         break;
     case CANPROP_GET_LIBRARY_DLLNAME:   // file name of the library (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             strncpy((char*)value, LIB_DLLNAME, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
         }
         break;
     case CANPROP_GET_DEVICE_VENDOR:     // vendor name of the CAN interface (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             strncpy((char*)value, DEV_VENDOR, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
         }
         break;
     case CANPROP_GET_DEVICE_DLLNAME:    // file name of the CAN interface DLL (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             strncpy((char*)value, DEV_DLLNAME, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
@@ -898,7 +920,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
         }
         break;
     case CANPROP_GET_CHANNEL_NAME:      // get channel name at actual index in the interface list (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             if ((0 <= idx_board) && (idx_board < NUM_CHANNELS) &&
                 (can_boards[idx_board].type != EOF)) {
                 strncpy((char*)value, can_boards[idx_board].name, nbyte);
@@ -910,7 +932,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
         }
         break;
     case CANPROP_GET_CHANNEL_DLLNAME:   // get file name of the DLL at actual index in the interface list (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             if ((0 <= idx_board) && (idx_board < NUM_CHANNELS) &&
                 (can_boards[idx_board].type != EOF)) {
                 strncpy((char*)value, DEV_DLLNAME, nbyte);
@@ -933,7 +955,7 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
         }
         break;
     case CANPROP_GET_CHANNEL_VENDOR_NAME: // get vendor name at actual index in the interface list (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             if ((0 <= idx_board) && (idx_board < NUM_CHANNELS) &&
                 (can_boards[idx_board].type != EOF)) {
                 strncpy((char*)value, DEV_VENDOR, nbyte);
@@ -977,10 +999,10 @@ static int lib_parameter(uint16_t param, void *value, size_t nbyte)
 static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
 {
     int rc = CANERR_ILLPARA;            // suppose an invalid parameter
-    can_bitrate_t bitrate;
-    can_speed_t speed;
-    uint8_t status;
-    KvaserUSB_BusLoad_t load;
+    can_bitrate_t bitrate;              // bit-rate settings
+    can_speed_t speed;                  // current bus speed
+    uint8_t status = 0u;                // status register
+    KvaserUSB_BusLoad_t load = 0u;      // bus load
 
     assert(IS_HANDLE_VALID(handle));    // just to make sure
 
@@ -989,7 +1011,7 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
            (param != CANPROP_SET_NEXT_CHANNEL))
             return CANERR_NULLPTR;
     }
-    /* CAN interface properties */
+    // query or modify a CAN interface property
     switch (param) {
     case CANPROP_GET_DEVICE_TYPE:       // device type of the CAN interface (int32_t)
         if (nbyte >= sizeof(int32_t)) {
@@ -998,21 +1020,21 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
         }
         break;
     case CANPROP_GET_DEVICE_NAME:       // device name of the CAN interface (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             strncpy((char*)value, can[handle].device.name, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
         }
         break;
     case CANPROP_GET_DEVICE_VENDOR:     // vendor name of the CAN interface (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             strncpy((char*)value, DEV_VENDOR, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
         }
         break;
     case CANPROP_GET_DEVICE_DLLNAME:    // file name of the CAN interface DLL (char[])
-        if (nbyte >= 1U) {
+        if (nbyte >= 1u) {
             strncpy((char*)value, DEV_DLLNAME, nbyte);
             ((char*)value)[(nbyte - 1)] = '\0';
             rc = CANERR_NOERROR;
@@ -1056,11 +1078,11 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
         break;
     case CANPROP_GET_BUSLOAD:           // current bus load of the CAN controller (uint16_t)
         if (nbyte >= sizeof(uint8_t)) {
-            if ((rc = KvaserCAN_GetBusLoad(&can[handle].device, &load)) == CANERR_NOERROR) {
+            if (((rc = KvaserCAN_GetBusLoad(&can[handle].device, &load)) == CANERR_NOERROR) || (rc == CANERR_OFFLINE)) {
                 if (nbyte > sizeof(uint8_t))
-                    *(uint16_t*)value = (uint16_t)load;       // 0..10000 ==> 0.00%..100%
+                    *(uint16_t*)value = (uint16_t)load;       // 0..10000 ==> 0.00%..100.00%
                 else
-                    *(uint8_t*)value = (uint8_t)load / 100U;  // 0..100 (note: legacy resolution)
+                    *(uint8_t*)value = (uint8_t)load / 100U;  // 0..100% (note: legacy resolution)
                 rc = CANERR_NOERROR;
             }
         }
@@ -1120,26 +1142,7 @@ static int drv_parameter(int handle, uint16_t param, void *value, size_t nbyte)
         }
         break;
     default:
-#if (0)
-        if ((CANPROP_GET_VENDOR_PROP <= param) &&  // get a vendor-specific property value (void*)
-           (param < (CANPROP_GET_VENDOR_PROP + CANPROP_VENDOR_PROP_RANGE))) {
-            if ((sts = canIoCtl(can[handle].handle, (unsigned int)(param - CANPROP_GET_VENDOR_PROP),
-                                                           (void*)value, (DWORD)nbyte)) == canOK)
-                rc = CANERR_NOERROR;
-            else
-                rc = kvaser_error(sts);
-        }
-        else if ((CANPROP_SET_VENDOR_PROP <= param) &&  // set a vendor-specific property value (void*)
-                (param < (CANPROP_SET_VENDOR_PROP + CANPROP_VENDOR_PROP_RANGE))) {
-            if ((sts = canIoCtl(can[handle].handle, (unsigned int)(param - CANPROP_SET_VENDOR_PROP),
-                                                           (void*)value, (DWORD)nbyte)) == canOK)
-                rc = CANERR_NOERROR;
-            else
-                rc = kvaser_error(sts);
-        }
-        else                            // or general library properties (see lib_parameter)
-#endif
-            rc = lib_parameter(param, value, nbyte);
+        rc = lib_parameter(param, value, nbyte);  // library properties (w/o handle)
         break;
     }
     return rc;

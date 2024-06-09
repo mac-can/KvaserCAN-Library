@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser USB CAN Interfaces
  *
- *  Copyright (c) 2017-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -91,8 +91,6 @@ extern "C" {
 #endif
 #endif
 /** @} */
-#define OPTION_KVASER_CiA_BIT_TIMING    // FIXME: replace this by !OPTION_KVASER_BIT_TIMING
-
 
 /*  -----------  defines  ------------------------------------------------
  */
@@ -133,7 +131,7 @@ extern "C" {
  *  @{ */
 #define KVASER_LIB_ID            600    /**< library ID (CAN/COP API V1 compatible) */
 #if defined(_WIN32) || defined (_WIN64)
- #define KVASER_LIB_CANLIB      "canLib32.DLL"
+ #define KVASER_LIB_CANLIB      "canlib32.dll"
  #define KVASER_LIB_WRAPPER     "u3cankvl.dll"
 #elif defined(__APPLE__)
  #define KVASER_LIB_CANLIB      "(driverless)"
@@ -161,5 +159,5 @@ extern "C" {
 /*  ----------------------------------------------------------------------
  *  Uwe Vogt,  UV Software,  Chausseestrasse 33 A,  10115 Berlin,  Germany
  *  Tel.: +49-30-46799872,  Fax: +49-30-46799873,  Mobile: +49-170-3801903
- *  E-Mail: uwe.vogt@uv-software.de,  Homepage: http://www.uv-software.de/
+ *  E-Mail: uwe.vogt@uv-software.de, Homepage: https://www.uv-software.de/
  */
