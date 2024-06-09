@@ -30,9 +30,7 @@ _All rights reserved._
   - `$(PROJROOT)/Sources/Swift/CANAPI.swift`
   - `$(PROJROOT)/Libraries/CANAPI/Makefile`<sup>*</sup>
   - `$(PROJROOT)/Libraries/KvaserCAN/Makefile`<sup>*</sup>
-  - `$(PROJROOT)/Utilities/can_moni/Makefile`
   - `$(PROJROOT)/Utilities/can_moni/README.md`
-  - `$(PROJROOT)/Utilities/can_test/Makefile`
   - `$(PROJROOT)/Utilities/can_test/README.md`
 
   <sup>*</sup>_) Set variable_ `CURRENT_VERSION` _and_ `COMPATIBILITY_VERSION` _accordingly._

@@ -1,6 +1,6 @@
 ### macOS&reg; User-Space Driver for USB CAN Interfaces from Kvaser
 
-_Copyright &copy; 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
+_Copyright &copy; 2017-2024  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
 ![macOS Build](https://github.com/mac-can/KvaserCAN-Library/actions/workflows/macos-build.yml/badge.svg)
 
