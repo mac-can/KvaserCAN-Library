@@ -68,9 +68,9 @@
     // @workaround:
     // @end
 
-    $Author: makemake $
+    $Author: haumea $
 
-    $Rev: 792 $
+    $Rev: 793 $
 """
 # encoding: utf-8
 from datetime import datetime
@@ -86,6 +86,7 @@ testext = '.mm'
 specpath = '.'
 specext = '.txt'
 xctest = False
+gtest = False
 
 # output the test case subject
 def write_test_subject(file, text, option):
@@ -172,12 +173,21 @@ for file in files:
                     if line.startswith('// @xctest '):
                         write_test_subject(fp2, line.replace('// @xctest ', '', 1), testopts)
                         xctest = True
+                        gtest = False
+                        count += 1
+                        total += 1
+                    # - test case subject (gtest)
+                    elif line.startswith('// @gtest '):
+                        write_test_subject(fp2, line.replace('// @gtest ', '', 1), testopts)
+                        xctest = False
+                        gtest = True
                         count += 1
                         total += 1
                     # - test case subject (others)
                     elif line.startswith('// @testcase '):
-                        write_test_subject(fp2, line.replace('// @xctest ', '', 1), testopts)
+                        write_test_subject(fp2, line.replace('// @testcase ', '', 1), testopts)
                         xctest = False
+                        gtest = False
                         count += 1
                         total += 1
                     # - expected value
@@ -198,6 +208,8 @@ for file in files:
                 elif line.startswith('- (void)test') and xctest is True:
                     write_test_procedure(fp2, line.replace('- (void)', '').replace(' {', ''), testopts, os.path.splitext(file)[0])
                 # google test/mock fixture
+                elif line.startswith('TEST_F') and gtest is True:
+                    write_test_procedure(fp2, line.replace(' {', ''), testopts, "GoogleTest")
                 # TODO: insert coin here
             if testopts['separator']:
                 fp2.write(scanner + '\n')
