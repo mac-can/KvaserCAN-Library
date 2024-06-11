@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #ifdef _MSC_VER
 //no Microsoft extensions please!
@@ -55,6 +55,9 @@
 #include <string.h>
 #include <iostream>
 
+#if (DUT1 != 0) || (DUT2 != 1)
+#error Definition of DUT1 or DUT2 wrong
+#endif
 #define OPTION_HELP              "--can_help"
 #define OPTION_PATH              "--can_path"
 #define OPTION_DUT1              "--can_dut1"
@@ -78,10 +81,17 @@ static const bool c_fRtrDevice = false;
 static const bool c_fRunQuick = false;
 static const bool c_fCallSequences = false;
 static const bool c_fBitrateConverter = false;
+#if (OPTION_CANAPI_LIBRARY != 0)
+static const char c_szDefaultSearchPath[] = ".";
+#endif
 
 COptions g_Options = COptions();
 
 COptions::COptions() {
+#if (OPTION_CANAPI_LIBRARY != 0)
+    // configuration from JSON files
+    m_szSearchPath = (char*)c_szDefaultSearchPath;
+#endif
     // device under test #1
     if (!GetChannelInfoFromDeviceList(TEST_LIBRARY, TEST_CHANNEL1, m_Dut[DUT1].m_Info)) {
         m_Dut[DUT1].m_Info.m_nLibraryId = INVALID_HANDLE;
@@ -113,18 +123,37 @@ COptions::COptions() {
 }
 
 bool COptions::GetChannelInfoByDeviceName(const char *name, CCanApi::SChannelInfo &info) {
-    bool found = CCanDevice::GetFirstChannel(info);
-    while (found) {
+#if (OPTION_CANAPI_LIBRARY != 0)
+    CCanApi::SLibraryInfo libInfo;
+    bool library = CCanDevice::GetFirstLibrary(libInfo);
+    while (library) {
+		bool channel = CCanDevice::GetFirstChannel(libInfo.m_nLibraryId, info);
+        while (channel) {
+			if (!strcmp(info.m_szDeviceName, name)) {
+				return true;
+			}
+			channel = CCanDevice::GetNextChannel(info);
+		}
+		library = CCanDevice::GetNextLibrary(libInfo);
+	}
+#else
+    bool channel = CCanDevice::GetFirstChannel(info);
+    while (channel) {
         if (!strcmp(info.m_szDeviceName, name)) {
             return true;
         }
-        found = CCanDevice::GetNextChannel(info);
+        channel = CCanDevice::GetNextChannel(info);
     }
+#endif
     return false;
 }
 
 bool COptions::GetChannelInfoFromDeviceList(int32_t library, int32_t channel, CCanApi::SChannelInfo &info) {
+#if (OPTION_CANAPI_LIBRARY != 0)
+    bool found = CCanDevice::GetFirstChannel(library, info);
+#else
     bool found = CCanDevice::GetFirstChannel(info);
+#endif
     while (found) {
         if ((info.m_nLibraryId == library) && (info.m_nChannelNo == channel)) {
             return true;
@@ -194,15 +223,23 @@ int COptions::ScanOptions(int argc, char* argv[], char* err, size_t len) {
             else {
                 opt = (char*)TEST_SEARCH_PATH;
             }
-            CCanDriver *dummy = new CCanDriver();
-            if (dummy->SetProperty(CANPROP_SET_SEARCH_PATH, (void*)opt, 0) != CCanApi::NoError) {
+            if (!CCanDriver::SetSearchPath(opt)) {
                 if (err)
-                    snprintf(err, len, "search path not set --  %s", opt);
-                delete dummy;
+                    snprintf(err, len, "search path cannot be set --  %s", opt);
                 return false;
             }
-            std::cout << "JSON path: " << opt << std::endl;
-            delete dummy;
+            // default device under test #1 from JSON
+            if (!GetChannelInfoFromDeviceList(TEST_LIBRARY, TEST_CHANNEL1, m_Dut[DUT1].m_Info)) {
+                m_Dut[DUT1].m_Info.m_nLibraryId = INVALID_HANDLE;
+                m_Dut[DUT1].m_Info.m_nChannelNo = INVALID_HANDLE;
+            }
+            // default device under test #2 from JSON
+            if (!GetChannelInfoFromDeviceList(TEST_LIBRARY, TEST_CHANNEL2, m_Dut[DUT2].m_Info)) {
+                m_Dut[DUT2].m_Info.m_nLibraryId = INVALID_HANDLE;
+                m_Dut[DUT2].m_Info.m_nChannelNo = INVALID_HANDLE;
+            }
+            m_szSearchPath = opt;
+            std::cout << "JSON path: " << m_szSearchPath << std::endl;
         }
 #endif
         // option: --can_dut1=<interface>
@@ -716,4 +753,4 @@ int COptions::ShowHelp() {
     return m_fShowHelp;
 }
 
-// $Id: Options.cpp 1193 2023-09-06 10:21:35Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: Options.cpp 1315 2024-05-26 12:23:58Z makemake $  Copyright (c) UV Software, Berlin //

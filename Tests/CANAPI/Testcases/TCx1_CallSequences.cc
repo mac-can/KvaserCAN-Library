@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 
@@ -1042,11 +1042,11 @@ TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartResetTeardownIniti
     // @end.
 }
 
-// @gtest TCx1.24: Call sequence 'Initialize-Start-Reset-Start-Teardown-Initialize-Start-Reset-Start-Reset-Teardown'
+// @gtest TCx1.24: Call sequence 'Initialize-Start-Reset-Start-Teardown-Initialize-Start-Reset-Reset-Start-Teardown'
 //
 // @expected: CANERR_NOERROR
 //
-TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartTeardownInitializeStartResetStartResetTeardown, GTEST_ENABLED)) {
+TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartTeardownInitializeStartResetResetStartTeardown, GTEST_ENABLED)) {
     CCanDevice dut = CCanDevice(TEST_DEVICE(DUT1));
     CANAPI_Return_t retVal = CCanApi::FatalError;
     CANAPI_Status_t status = { CANSTAT_RESET };
@@ -1089,7 +1089,7 @@ TEST_F(CallSequences, GTEST_TESTCASE(InitializeStartResetStartTeardownInitialize
     EXPECT_EQ(CCanApi::NoError, dut.GetStatus(status));
     EXPECT_TRUE(status.can_stopped);
     // @- stop/reset DUT
-    EXPECT_EQ(CCanApi::NoError, dut.ResetController());
+    EXPECT_NE(CCanApi::NoError, dut.ResetController());
     EXPECT_EQ(CCanApi::NoError, dut.GetStatus(status));
     EXPECT_TRUE(status.can_stopped);
     // @- start DUT again with configured bit rate
@@ -1504,4 +1504,4 @@ TEST_F(CallSequences, GTEST_TESTCASE(ReadInitializeTeardown, GTEST_DISABLED)) {
     // @end.
 }
 
-//  $Id: TCx1_CallSequences.cc 1134 2023-08-06 17:58:59Z haumea $  Copyright (c) UV Software, Berlin.
+//  $Id: TCx1_CallSequences.cc 1336 2024-06-03 06:58:36Z makemake $  Copyright (c) UV Software, Berlin.

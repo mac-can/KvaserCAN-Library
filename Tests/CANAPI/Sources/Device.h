@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #ifndef DEVICE_H_INCLUDED
 #define DEVICE_H_INCLUDED
@@ -116,7 +116,14 @@ public:
     bool IsCanFdCapable() {
         CANAPI_OpMode_t opCapa = { CANMODE_FDOE };
         EChannelState state = CCanApi::ChannelNotTestable;
+#if (OPTION_CANAPI_LIBRARY != 0)
+        return (CCanDriver::ProbeChannel(m_nLibraryId, m_nChannelNo, opCapa, state) == CCanApi::NoError) ? true : false;
+#else
         return (CCanDriver::ProbeChannel(m_nChannelNo, opCapa, state) == CCanApi::NoError) ? true : false;
+#endif
+    }
+    bool IsCanIdAccepted(uint32_t canId, uint32_t accCode, uint32_t accMask) {
+        return (((canId ^ accCode) & accMask) == 0x00000000U) ? true : false;
     }
     // properties
     CANAPI_Return_t GetOpCapabilities(CANAPI_OpMode_t &opCapa) {
@@ -170,4 +177,4 @@ private:
 
 #endif // DEVICE_H_INCLUDED
 
-// $Id: Device.h 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin.
+// $Id: Device.h 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin.

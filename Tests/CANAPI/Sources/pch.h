@@ -28,7 +28,7 @@
 #include "Bitrates.h"
 #include "Properties.h"
 #include "Progress.h"
-#include "Timer64.h"
+#include "Timer.h"
 #include "Version.h"
 
 #endif // PRECOMPILED_HEADERS_INCLUDED

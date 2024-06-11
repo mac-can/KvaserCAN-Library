@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Interface Definition)
 //
-//  Copyright (C) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 /*!
     CAN API V3 Swift Wrapper for generic CAN Interfaces.
@@ -54,12 +54,12 @@
 
     @author   $Author: makemake $
 
-    @version  $Rev: 1196 $
+    @version  $Rev: 1277 $
  */
 import Foundation
 import CCanApi
 
-private let version = (major: 0, minor: 3, patch: 2)
+private let version = (major: 0, minor: 4, patch: 0)
 
 public class CanApi {
     private lazy var handle: CInt = -1  // CAN interface handle
@@ -140,10 +140,15 @@ public class CanApi {
         public var isBitrateSwitchingEnabled: Bool { get { return 0x40 == self.rawValue & 0x40 } }
         public var isNonIsoOperationEnabled: Bool { get { return 0x20 == self.rawValue & 0x20 } }
         public var isSharedAccessEnabled : Bool { get { return 0x10 == self.rawValue & 0x10 } }
+        public var areExtendedFramesDisabled: Bool { get { return 0x08 == self.rawValue & 0x08 } }
+        public var areRemoteFramesDisabled: Bool { get { return 0x04 == self.rawValue & 0x04 } }
+        public var areErrorFramesEnabled: Bool { get { return 0x02 == self.rawValue & 0x02 } }
+        public var isMonitorModeEnabled: Bool { get { return 0x01 == self.rawValue & 0x01 } }
+        // --- deprecated ---
         public var isExtendedFramesDisabled: Bool { get { return 0x08 == self.rawValue & 0x08 } }
         public var isRemoteFramesDisabled: Bool { get { return 0x04 == self.rawValue & 0x04 } }
         public var isErrorFramesEnabled: Bool { get { return 0x02 == self.rawValue & 0x02 } }
-        public var isMonitorModeEnabled: Bool { get { return 0x01 == self.rawValue & 0x01 } }
+        public var isListenOnlyEnabled: Bool { get { return 0x01 == self.rawValue & 0x01 } }
     }
     /*!
         @brief  CAN bit-rate settings (nominal and data phase):
@@ -503,7 +508,7 @@ public class CanApi {
         case MessageLost = -10  // message lost
         case TransmitterBusy = -20  // transmitter busy
         case ReceiverEmpty = -30  // receiver empty
-        case ErrorFrame = -40  // error frame
+        case QueueOverrun = -40  // queue overrun
         case Timeout = -50  // timed out
         case ResourceError = -90  // resource allocation
         case InvalidBaudrate = -91  //  illegal baudrate
@@ -529,7 +534,7 @@ public class CanApi {
                 case .MessageLost: return "message lost"
                 case .TransmitterBusy: return "transmitter busy"
                 case .ReceiverEmpty: return "receiver empty"
-                case .ErrorFrame: return "error frame"
+                case .QueueOverrun: return "queue overrun"
                 case .Timeout: return "timed out"
                 case .ResourceError: return "resource allocation"
                 case .InvalidBaudrate: return "illegal baudrate"
@@ -556,7 +561,7 @@ public class CanApi {
     /*!
         @brief  constant:  blocking read (wait infinitely)
      */
-    public static let blocking = UInt16(CANREAD_INFINITE)
+    public static let blocking = UInt16(CANWAIT_INFINITE)
 
     // MARK: - properties
 
@@ -624,6 +629,42 @@ public class CanApi {
             let result: CInt = can_property(self.handle, UInt16(CANPROP_GET_OP_CAPABILITY), &mode.byte, UInt32(MemoryLayout<UInt8>.size))
             guard result == CANERR_NOERROR else { return nil }
             return Mode(rawValue: mode.byte)
+        }
+    }
+    /*!
+        @brief  property:  CAN acceptance filter for 11-bit identifier
+     */
+    public var filter: (code: UInt32, mask: UInt32)? {
+        get {
+            var filter: UInt64 = 0
+            let result: CInt = can_property(self.handle, UInt16(CANPROP_GET_FILTER_11BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+            guard result == CANERR_NOERROR else { return nil }
+            return (code: UInt32(filter >> 32), mask: UInt32(filter & 0xFFFFFFFF))
+        }
+        set {
+            if let value = newValue {
+                var filter: UInt64 = (UInt64(value.code) << 32) | UInt64(value.mask)
+                let result: CInt = can_property(self.handle, UInt16(CANPROP_SET_FILTER_11BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+                guard result == CANERR_NOERROR else { return }
+            }
+        }
+    }
+    /*!
+        @brief  property:  CAN acceptance filter for 29-bit identifier
+     */
+    public var xtdFilter: (code: UInt32, mask: UInt32)? {
+        get {
+            var filter: UInt64 = 0
+            let result: CInt = can_property(self.handle, UInt16(CANPROP_GET_FILTER_29BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+            guard result == CANERR_NOERROR else { return nil }
+            return (code: UInt32(filter >> 32), mask: UInt32(filter & 0xFFFFFFFF))
+        }
+        set {
+            if let value = newValue {
+                var filter: UInt64 = (UInt64(value.code) << 32) | UInt64(value.mask)
+                let result: CInt = can_property(self.handle, UInt16(CANPROP_SET_FILTER_29BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+                guard result == CANERR_NOERROR else { return }
+            }
         }
     }
     /*!
@@ -1012,6 +1053,32 @@ public class CanApi {
         let result: CInt = can_property(self.handle, param, &array, nbyte)
         guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
     }
+    public func GetFilter11Bit() throws -> (code: UInt32, mask: UInt32) {
+        var filter: UInt64 = 0
+        let result: CInt = can_property(self.handle, UInt16(CANPROP_GET_FILTER_11BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        return (code: UInt32(filter >> 32), mask: UInt32(filter & 0xFFFFFFFF))
+    }
+    public func SetFilter11Bit(code: UInt32, mask: UInt32) throws {
+        var filter: UInt64 = (UInt64(code) << 32) | UInt64(mask)
+        let result: CInt = can_property(self.handle, UInt16(CANPROP_SET_FILTER_11BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+    }
+    public func GetFilter29Bit() throws -> (code: UInt32, mask: UInt32) {
+        var filter: UInt64 = 0
+        let result: CInt = can_property(self.handle, UInt16(CANPROP_GET_FILTER_29BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+        return (code: UInt32(filter >> 32), mask: UInt32(filter & 0xFFFFFFFF))
+    }
+    public func SetFilter29Bit(code: UInt32, mask: UInt32) throws {
+        var filter: UInt64 = (UInt64(code) << 32) | UInt64(mask)
+        let result: CInt = can_property(self.handle, UInt16(CANPROP_SET_FILTER_29BIT), &filter, UInt32(MemoryLayout<UInt64>.size))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+    }
+    public func ResetFilters() throws {
+        let result: CInt = can_property(self.handle, UInt16(CANPROP_SET_FILTER_RESET), nil, UInt32(0))
+        guard result == CANERR_NOERROR else { throw Error(rawValue: result) ?? Error.FatalError }
+    }
     public func GetHardwareVersion() throws -> String {
         guard let version = can_hardware(self.handle) else { throw Error.NullPointer }
         return String(cString: version)
@@ -1026,4 +1093,4 @@ public class CanApi {
     }
 }
 
-// $Id: CANAPI.swift 1196 2023-09-06 17:55:16Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: CANAPI.swift 1277 2024-04-22 09:04:58Z makemake $  Copyright (c) UV Software, Berlin //

@@ -2,13 +2,13 @@
 /*
  *  CAN Interface API, Version 3 (generic)
  *
- *  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+ *  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
  *  All rights reserved.
  *
  *  This file is part of CAN API V3.
  *
- *  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
- *  under the GNU General Public License v3.0 (or any later version).
+ *  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+ *  and under the GNU General Public License v3.0 (or any later version).
  *  You can choose between one of them if you use this file.
  *
  *  BSD 2-Clause "Simplified" License:
@@ -43,15 +43,15 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
  */
 /** @file        can_api.h
  *
  *  @brief       CAN API V3 for generic CAN Interfaces
  *
- *  @author      $Author: eris $
+ *  @author      $Author: quaoar $
  *
- *  @version     $Rev: 1090 $
+ *  @version     $Rev: 1286 $
  *
  *  @defgroup    can_api CAN Interface API, Version 3
  *  @{
@@ -76,9 +76,14 @@ extern "C" {
  *  @brief Options for conditional compilation.
  *  @{ */
 /** @note  Set define OPTION_CANAPI_LIBRARY to a non-zero value to compile
- *         the master loader library (e.g. in the build environment). Or
+ *         the CAN API V3 loader library (e.g. in the build environment). Or
  *         optionally set define OPTION_CANAPI_DRIVER to a non-zero value
- *         to compile a driver/wrapper library.
+ *         to compile a CAN API V3 driver/wrapper library (default).
+ */
+/** @note  Set define OPTION_CANAPI_RETVALS to a non-zero value to compile
+ *         with CAN API V2 return values (e.g. in the build environment).
+ *         This should be the default for the C interface. Unfortunately
+ *         the logic is swapped.
  */
 /** @note  Set define OPTION_CANAPI_DLLEXPORT to a non-zero value to compile
  *         as a dynamic link library (e.g. in the build environment).
@@ -136,28 +141,38 @@ typedef int                             can_handle_t;
 #elif (OPTION_CANAPI_DRIVER != 0)
 #define CAN_BOARD(lib, brd)             brd
 #else
-#error Remove the unneeded definition(s)!
+#error Remove the unneeded definition(s)
 #endif
 
 /*  -----------  types  --------------------------------------------------
  */
 
 #if (OPTION_CANAPI_LIBRARY != 0)
-/** @brief       CAN Board Vendor:
+/** @brief       CAN Board Vendor
+ *  @note        A CAN library from a board vendor is identified by its library id.
+ *  @remarks     Deprecated: This variable should not be used anymore!
+ *               Use the properties 'CANPROP_GET_VENDOR_ID' and
+ *               'CANPROP_GET_VENDOR_NAME' in conjunction with
+ *               'CANPROP_SET_FIRST_VENDOR' and 'CANPROP_SET_NEXT_VENDOR'.
  */
 typedef struct can_vendor_t_ {
-    int32_t library;                   /**< library id */
+    int32_t library;                   /**< library id. */
     char   *name;                      /**< vendor name */
 } can_vendor_t;
 #endif
-/** @brief       CAN Interface Board:
+/** @brief       CAN Interface Board
+ *  @note        A CAN interface board is identified by its channel no.
+ *  @remarks     Deprecated: This variable should not be used anymore!
+ *               Use the properties 'CANPROP_GET_CHANNEL_NO' and
+ *               'CANPROP_GET_CHANNEL_NAME' in conjunction with
+ *               'CANPROP_SET_FIRST_CHANNEL' and 'CANPROP_SET_NEXT_CHANNEL'.
  */
 typedef struct can_board_t_ {
 #if (OPTION_CANAPI_LIBRARY != 0)
-    int32_t library;                    /**< library id */
+    int32_t library;                    /**< library id. */
 #endif
-    int32_t type;                       /**< board type */
-    char   *name;                       /**< board name */
+    int32_t type;                       /**< channel no. */
+    char   *name;                       /**< channel name */
 } can_board_t;
 
 
@@ -172,6 +187,22 @@ CANAPI can_board_t can_boards[];        /**< list of CAN interface boards */
 
 /*  -----------  prototypes  ---------------------------------------------
  */
+#if (OPTION_CANAPI_LIBRARY != 0)
+/** @brief       sets the search path for readings library informations from
+ *               JSON files.
+ *
+ *  @note        The search path can only be set once, either by ths function
+ *                or by the non-default constructor with a path argument.
+ *
+ *  @param[in]   pathname - path name, or NULL for current working directory
+ *
+ *  @returns     true if the search path has been successfully set, or
+ *               false on error.
+ *
+ *  @retval      CANERR_YETINIT   - search path already set
+ */
+CANAPI int can_path(const char* pathname);
+#endif
 
 /** @brief       probes if the CAN interface (hardware and driver) given by
  *               the argument [ 'library' and ] 'channel' is present, and

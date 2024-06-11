@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 
@@ -190,7 +190,7 @@ TEST_F(ReadMessage, GTEST_TESTCASE(SunnydayScenario, GTEST_SUNNYDAY)) {
 
 // @gtest TC04.3: Read a CAN message if CAN channel is not initialized
 //
-// @expected: CANERR_HANDLE (would it not be better to return NOTINIT in C++ API?)
+// @expected: CANERR_NOTINIT (wrapper/driver libraries return CANERR_HANDLE)
 //
 TEST_F(ReadMessage, GTEST_TESTCASE(IfChannelNotInitialized, GTEST_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
@@ -236,7 +236,13 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfChannelNotInitialized, GTEST_ENABLED)) {
     CCounter counter = CCounter(true);
     // @- DUT1 try to read the message (with time-out)
     retVal = dut1.ReadMessage(rcvMsg, TEST_READ_TIMEOUT);
+#if (OPTION_CANAPI_LIBRARY != 0)
+    EXPECT_EQ(CCanApi::NotInitialized, retVal);
+#else
+    // @note: wrapper/driver libraries return CANERR_HANDLE in this case.
+    // @      Would it not be better to return NOTINIT in C++ API?
     EXPECT_EQ(CCanApi::InvalidHandle, retVal);
+#endif
     // @post:
     counter.Clear();
     // @- initialize DUT1 with configured settings
@@ -260,6 +266,14 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfChannelNotInitialized, GTEST_ENABLED)) {
     EXPECT_EQ(CCanApi::NoError, retVal);
     // @- compare sent and received message
     EXPECT_TRUE(dut1.CompareMessages(trmMsg, rcvMsg));
+#if (TC04_3_ISSUE_PCBUSB_BUFFERED_MSGS == WORKAROUND_ENABLED)
+    counter.Reset();
+    // @- issue(PCBUSB): buffered messages from device (PCAN-USB [Pro] FD)
+    while (dut1.ReadMessage(rcvMsg, TEST_READ_TIMEOUT) == CCanApi::NoError) {
+        counter.Increment();
+    }
+    counter.Clear();
+#endif
     // @- send some frames to DUT2 and receive some frames from DUT2
     int32_t frames = g_Options.GetNumberOfTestFrames();
     EXPECT_EQ(frames, dut1.SendSomeFrames(dut2, frames));
@@ -473,7 +487,7 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfControllerStopped, GTEST_ENABLED)) {
 
 // @gtest TC04.6: Read a CAN message if CAN channel was previously torn down
 //
-// @expected: CANERR_HANDLE (would it not be better to return NOTINIT in C++ API?)
+// @expected: CANERR_NOTINIT (wrapper/driver libraries return CANERR_HANDLE)
 //
 TEST_F(ReadMessage, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
@@ -553,7 +567,13 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
     CCounter counter = CCounter(true);
     // @- DUT1 try to read the message (with time-out)
     retVal = dut1.ReadMessage(rcvMsg, TEST_READ_TIMEOUT);
+#if (OPTION_CANAPI_LIBRARY != 0)
+    EXPECT_EQ(CCanApi::NotInitialized, retVal);
+#else
+    // @note: wrapper/driver libraries return CANERR_HANDLE in this case.
+    // @      Would it not be better to return NOTINIT in C++ API?
     EXPECT_EQ(CCanApi::InvalidHandle, retVal);
+#endif
     // @post:
     counter.Clear();
     // @- tear down DUT2
@@ -742,9 +762,19 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC04_8_ENABLED)) {
 #endif
     // @test:
     int32_t spam = (FEATURE_SIZE_RECEIVE_QUEUE + TEST_QRCVFULL);
-#if (TC04_8_ISSUE_QUEUE_SIZE == WORKAROUND_ENABLED)
+#if (TC04_8_ISSUE_PCBUSB_QUEUE_SIZE == WORKAROUND_ENABLED)
     // @- issue(PCBUSB.TOS): last element of the receive queue is not accessible
-    spam -= 1;
+    CANAPI_OpMode_t opCapa = { CANMODE_DEFAULT };
+    (void)dut1.GetOpCapabilities(opCapa);
+    if (!opCapa.fdoe)  // note: PCAN-USB devices only!
+        spam -= 1;
+#endif
+#if (TC04_8_ISSUE_PCANBASIC_QUEUE_SIZE == WORKAROUND_ENABLED)
+    // @- issue(PCANBasic): I didn't understand the issue
+    CANAPI_OpMode_t opCapa = { CANMODE_DEFAULT };
+    (void)dut1.GetOpCapabilities(opCapa);
+    if (opCapa.fdoe)  // note: PCAN-USB [Pro] FD devices only!
+        spam -= 1;
 #endif
     CProgress progress = CProgress(spam);
     // @- DUT2 spam the receive queue of DUT1 (with one message more than the queue can hold)
@@ -1365,7 +1395,7 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagRtrInOperationModeNoRtr, GTEST_ENABLE
 //
 // @expected: CANERR_NOERROR but status bit 'warning_level' is set and no status frame in the receive queue
 //
-#if defined(__MAC_11_0)
+#if !defined(__APPLE__) || defined(__MAC_11_0)
 #define GTEST_TC04_15_ENABLED   GTEST_ENABLED
 #else
 #define GTEST_TC04_15_ENABLED   GTEST_DISABLED
@@ -1394,14 +1424,19 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagStsInOperationModeNoErr, GTEST_TC04_1
     trmMsg.dlc = 0;
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
-#if (TC04_15_ISSUE_PCBUSB_WARNING_LEVEL == WORKAROUND_ENABLED)
-    ASSERT_TRUE(false) << "[  TC04.15 ] No warning level from device!";
-#endif
     // @
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
         GTEST_SKIP() << "This test cannot run if there is another device on bus!";
     // @pre:
+#if (TC04_15_ISSUE_PCBUSB_WARNING_LEVEL == WORKAROUND_ENABLED)
+    // @- issue(PCBUSB): no warning level from device -> abort test
+    ASSERT_TRUE(false) << "[  TC04.15 ] No warning level from device!";
+#endif
+#if (TC04_15_ISSUE_TOUCAN_STATUS == WORKAROUND_ENABLED)
+    // @- issue(MacCAN-TouCAN): issue #32 (no bus error states from device) -> run with ICA
+    EXPECT_TRUE(false) << "[  TC04.15 ] Issue #32 (no bus error states from device)";
+#endif
     // @- initialize DUT1 configured settings
     retVal = dut1.InitializeChannel();
     ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut1.InitializeChannel() failed with error code " << retVal;
@@ -1528,7 +1563,7 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagStsInOperationModeNoErr, GTEST_TC04_1
 //
 // @expected: CANERR_NOERROR but status bit 'warning_level' is set and a status frame in the receive queue
 //
-#if (FEATURE_ERROR_FRAMES != FEATURE_UNSUPPORTED) && defined(__MAC_11_0)
+#if (FEATURE_ERROR_FRAMES != FEATURE_UNSUPPORTED) && (!defined(__APPLE__) || defined(__MAC_11_0))
 #define GTEST_TC04_16_ENABLED  GTEST_ENABLED
 #else
 #define GTEST_TC04_16_ENABLED  GTEST_DISABLED
@@ -1844,9 +1879,9 @@ TEST_F(ReadMessage, GTEST_TESTCASE(InOperationModeListenOnly, GTEST_ENABLED)) {
 }
 
 // @gtest TC04.18: Read a CAN message from empty queue with different time-out values
-// 
+//
 // @expected: CANERR_RX_EMPTY after time-out time has expired
-// 
+//
 TEST_F(ReadMessage, GTEST_TESTCASE(WithDifferentTimeoutValues, GTEST_ENABLED)) {
     CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
     CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
@@ -1978,4 +2013,4 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithDifferentTimeoutValues, GTEST_ENABLED)) {
 // @todo: (1) blocking read
 // @todo: (2) test reentrancy
 
-//  $Id: TC04_ReadMessage.cc 1218 2023-10-14 12:18:19Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC04_ReadMessage.cc 1329 2024-05-30 18:13:31Z quaoar $  Copyright (c) UV Software, Berlin.

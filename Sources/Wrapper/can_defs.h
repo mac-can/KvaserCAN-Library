@@ -1,8 +1,8 @@
 /*  SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later */
 /*
- *  CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
+ *  CAN Interface API, Version 3 (for Kvaser USB CAN Interfaces)
  *
- *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -43,7 +43,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with MacCAN-KvaserCAN.  If not, see <https://www.gnu.org/licenses/>.
  */
 /** @addtogroup  can_api
  *  @{
@@ -54,6 +54,7 @@
 /*  -----------  includes  ------------------------------------------------
  */
 
+#include "Version.h"
 #include "CANAPI_Defines.h"
 #include "KvaserCAN_Defines.h"
 
@@ -79,5 +80,5 @@
 /*  ----------------------------------------------------------------------
  *  Uwe Vogt,  UV Software,  Chausseestrasse 33 A,  10115 Berlin,  Germany
  *  Tel.: +49-30-46799872,  Fax: +49-30-46799873,  Mobile: +49-170-3801903
- *  E-Mail: uwe.vogt@uv-software.de,  Homepage: http://www.uv-software.de/
+ *  E-Mail: uwe.vogt@uv-software.de, Homepage: https://www.uv-software.de/
  */

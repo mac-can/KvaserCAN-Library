@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 
@@ -54,6 +54,11 @@
 #else
 #warning CAN_FD_SUPPORTED not set, default = FEATURE_SUPPORTED
 #endif
+#endif
+#if (OPTION_CANAPI_LIBRARY != 0)
+#define TEST_GET_LIBRARY_ID(dut, arg)  g_Options.GetLibraryId(dut), (arg)
+#else
+#define TEST_GET_LIBRARY_ID(dut, arg)  (arg)
 #endif
 
 class InitializeChannel : public testing::Test {
@@ -355,10 +360,10 @@ TEST_F(InitializeChannel, GTEST_TESTCASE(WithValidChannelNo, GTEST_ENABLED)) {
     // @test:
     // @- loop over the list of devices to get the channel no.
     CCounter counter = CCounter();
-    bool found = CCanDevice::GetFirstChannel(info);
+    bool found = CCanDevice::GetFirstChannel(TEST_GET_LIBRARY_ID(DUT1, info));
     while (found) {
         // @-- try to initialize found channel with default mode (must be supported)
-        retVal = dut1.InitializeChannel(info.m_nChannelNo, opMode);
+        retVal = dut1.InitializeChannel(TEST_GET_LIBRARY_ID(DUT1, info.m_nChannelNo), opMode);
         if (retVal == CCanApi::NoError) {
             // @-- on success: tear down the channel straightaway
             (void)dut1.TeardownChannel();
@@ -420,13 +425,13 @@ TEST_F(InitializeChannel, GTEST_TESTCASE(WithInvalidChannelNo, GTEST_ENABLED)) {
     CANAPI_Return_t retVal;
     // @test:
     // @- try to initialize channel with invalid channel no. -1
-    retVal = dut1.InitializeChannel((-1), opMode);
+    retVal = dut1.InitializeChannel(TEST_GET_LIBRARY_ID(DUT1, (-1)), opMode);
     EXPECT_TRUE((retVal == CCanApi::NotInitialized) || (retVal <= CCanApi::VendorSpecific));
     // @- try to initialize channel with invalid channel no. -2
-    retVal = dut1.InitializeChannel((-2), opMode);
+    retVal = dut1.InitializeChannel(TEST_GET_LIBRARY_ID(DUT1, (-2)), opMode);
     EXPECT_TRUE((retVal == CCanApi::NotInitialized) || (retVal <= CCanApi::VendorSpecific));
     // @- try to initialize channel with invalid channel no. INT32_MIN
-    retVal = dut1.InitializeChannel(INT32_MIN, opMode);
+    retVal = dut1.InitializeChannel(TEST_GET_LIBRARY_ID(DUT1, INT32_MIN), opMode);
     EXPECT_TRUE((retVal == CCanApi::NotInitialized) || (retVal <= CCanApi::VendorSpecific));
     // @note: channel numbers are defined by the CAN device vendor.
     // @      Therefore, no assumptions can be made for positive values!
@@ -903,14 +908,62 @@ TEST_F(InitializeChannel, GTEST_TESTCASE(CheckBitrateSwitchingEnabledWithoutCanF
 #if (OPTION_CANAPI_LIBRARY != OPTION_DISBALED)
 // @gtest TC02.15: Initialize CAN channel with invalid library number(s)
 //
-// @expected: CANERR_xyz
+// @expected: CANERR_LIBRARY
 //
-TEST_F(InitializeChannel, GTEST_TESTCASE(WithInvalidLibraryId, GTEST_DISABLED)) {
-    // @note: this test case can only run with the loader library
-    // @todo: implement with CAN API V3 loader liabrary
-    // TODO: insert coin here
+TEST_F(InitializeChannel, GTEST_TESTCASE(WithInvalidLibraryId, GTEST_ENABLED)) {
+    CCanDevice dut1 = CCanDevice(TEST_DEVICE(DUT1));
+    CCanDevice dut2 = CCanDevice(TEST_DEVICE(DUT2));
+    CANAPI_OpMode_t opMode = { TEST_CANMODE };
+    CANAPI_Status_t status = {};
+    CANAPI_Return_t retVal;
+    // @test:
+    // @- try to initialize channel with invalid library id. -1
+    retVal = dut1.InitializeChannel((-1), g_Options.GetChannelNo(DUT1), opMode);
+    EXPECT_EQ(CCanApi::InvalidLibrary, retVal);
+    // @- try to initialize channel with invalid library id. -2
+    retVal = dut1.InitializeChannel((-2), g_Options.GetChannelNo(DUT1), opMode);
+    EXPECT_EQ(CCanApi::InvalidLibrary, retVal);
+    // @- try to initialize channel with invalid library id. INT32_MIN
+    retVal = dut1.InitializeChannel(INT32_MIN, g_Options.GetChannelNo(DUT1), opMode);
+    EXPECT_EQ(CCanApi::InvalidLibrary, retVal);
+    // @  note: library numbers are positive numbers, but
+    // @        no assumptions can be made for them!
+    //
+    // @post:
+    // @- initialize DUT1 with configured settings
+    retVal = dut1.InitializeChannel();
+    ASSERT_EQ(CCanApi::NoError, retVal) << "[  ERROR!  ] dut1.InitializeChannel() failed with error code " << retVal;
+    // @- get status of DUT1 and check to be in INIT state
+    retVal = dut1.GetStatus(status);
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    EXPECT_TRUE(status.can_stopped);
+    // @- start DUT1 with configured bit-rate settings
+    retVal = dut1.StartController();
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    // @- get status of DUT1 and check to be in RUNNING state
+    retVal = dut1.GetStatus(status);
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    EXPECT_FALSE(status.can_stopped);
+    // @- send some frames to DUT2 and receive some frames from DUT2
+    int32_t frames = g_Options.GetNumberOfTestFrames();
+    EXPECT_EQ(frames, dut1.SendSomeFrames(dut2, frames));
+    EXPECT_EQ(frames, dut1.ReceiveSomeFrames(dut2, frames));
+    // @- get status of DUT1 and check to be in RUNNING state
+    retVal = dut1.GetStatus(status);
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    EXPECT_FALSE(status.can_stopped);
+    // @- stop/reset DUT1
+    retVal = dut1.ResetController();
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    // @- get status of DUT1 and check to be in INIT state
+    retVal = dut1.GetStatus(status);
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    EXPECT_TRUE(status.can_stopped);
+    // @- tear down DUT1
+    retVal = dut1.TeardownChannel();
+    EXPECT_EQ(CCanApi::NoError, retVal);
     // @end.
 }
 #endif  // (OPTION_CANAPI_LIBRARY != OPTION_DISBALED)
 
-//  $Id: TC02_InitializeChannel.cc 1169 2023-08-22 19:55:08Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC02_InitializeChannel.cc 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin.

@@ -2,11 +2,13 @@
 //
 //  Software for Industrial Communication, Motion Control and Automation
 //
-//  Copyright (c) 2002-2022 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2002-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
-//  This class is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  Class CProgress
+//
+//  This class is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this class.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -41,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with this class.  If not, see <http://www.gnu.org/licenses/>.
+//  along with this class.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "Progress.h"
 #include <iostream>
@@ -138,4 +140,4 @@ void CCounter::Increment() {
 #endif
 }
 
-// $Id: Progress.cpp 798 2023-10-07 19:01:13Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Progress.cpp 811 2024-04-18 14:03:48Z quaoar $  Copyright (c) UV Software, Berlin //

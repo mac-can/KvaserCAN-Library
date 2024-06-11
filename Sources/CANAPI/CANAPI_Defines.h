@@ -2,13 +2,13 @@
 /*
  *  CAN Interface API, Version 3 (Definitions and Options)
  *
- *  Copyright (c) 2004-2021 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+ *  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
  *  All rights reserved.
  *
  *  This file is part of CAN API V3.
  *
- *  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
- *  under the GNU General Public License v3.0 (or any later version).
+ *  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+ *  and under the GNU General Public License v3.0 (or any later version).
  *  You can choose between one of them if you use this file.
  *
  *  BSD 2-Clause "Simplified" License:
@@ -43,15 +43,15 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
  */
 /** @file        CANAPI_Defines.h
  *
  *  @brief       CAN API V3 for generic CAN Interfaces - Definitions and Options
  *
- *  @author      $Author: eris $
+ *  @author      $Author: quaoar $
  *
- *  @version     $Rev: 993 $
+ *  @version     $Rev: 1293 $
  *
  *  @addtogroup  can_api
  *  @{
@@ -79,23 +79,25 @@ extern "C" {
 
 /** @name  Library IDs
  *  @brief Unique IDs to identify a CAN API library (CAN API V1 compatible)
+ *  @note  These defines are still valid, but IDs are taken from JSON files.
  *  @{ */
 #define CANLIB_IXXAT_VCI        100     /**< IXXAT Virtual CAN interfaces */
 #define CANLIB_IXXAT_CAC        800     /**< IXXAT canAnalyzer/32 Client */
-#define CANLIB_PEAK_PCAN        200     /**< PEAK PCAN interfaces */
+#define CANLIB_PEAK_PCAN        200     /**< PEAK PCAN-Light interfaces */
 #define CANLIB_VECTOR_XL        300     /**< Vector XL-Driver library */
 #define CANLIB_PCANBASIC        400     /**< PEAK PCAN-Basic interfaces */
-#define CANLIB_RUSOKU_LT        500     /**< Rusuko TouCAN interfaces */
+#define CANLIB_RUSOKU_LT        500     /**< Rusoku TouCAN interfaces */
 #define CANLIB_KVASER_32        600     /**< Kvaser CANLIB (canlib32) */
 #define CANLIB_ROCKETCAN        700     /**< CAN-over-IP (RocketCAN) */
 #define CANLIB_SERIALCAN        900     /**< Serial-Line (SerialCAN) */
-#define CANLIB_SOCKETCAN        1000    /**< Linux CAN (SocketCAN) */
+#define CANLIB_SOCKETCAN        1000    /**< Linux-CAN (SocketCAN) */
 #define CANLIB_CANAPILIB        (-1)    /**< CAN API Main Library */
-/** @note  Peak's PCAN-Light DLL is outdated, so the library ID can be reused.
+/** @note  PCAN-Light is outdated, its ID is reused by macCAN-PeakCAN.
  *  @} */
 
 /** @name  Library Names
  *  @brief Filenames of the CAN API libraries (depending on the platform)
+ *  @note  Theses defines are outdated. DLL names are taken from JSON files.
  *  @{ */
 #if defined(__linux__)
  #define CANAPI_PLATFORM       "Linux"
@@ -154,9 +156,9 @@ extern "C" {
 #define CAN_API_WEBSITE        "www.uv-software.com"
 #define CAN_API_CONTACT        "info@uv-software.com"
 #define CAN_API_LICENSE        "BSD-2-Clause OR GPL-3.0-or-later"
-#define CAN_API_COPYRIGHT      "Copyright (c) 2005-20%02u, UV Software, Berlin"
-#define CAN_API_HAZARD_NOTE    "Do not connect your CAN device to a real CAN network when using this program.\n" \
-                               "This can damage your application."
+#define CAN_API_COPYRIGHT      "Copyright (c) 2004-20%02u, UV Software, Berlin"
+#define CAN_API_HAZARD_NOTE    "If you connect your CAN device to a real CAN network when using this library,\n" \
+                               "you might damage your application."
 /** @} */
 
 

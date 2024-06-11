@@ -2,7 +2,7 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
@@ -221,13 +221,9 @@
     // @test:
     // @- try to stop/reset DUT1
     rc = can_reset(handle);
-#ifndef OPTION_CANAPI_RETVALS
-    XCTAssertEqual(CANERR_OFFLINE, rc);
-#else
-    // note: can_reset shall return CANERR_NOERROR even when
-    //       the CAN controller has not been started
+    // @  note: can_reset shall return CANERR_NOERROR even when
+    //          the CAN controller has not been started
     XCTAssertEqual(CANERR_NOERROR, rc);
-#endif
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -317,13 +313,9 @@
     // @test:
     // @- try to stop/reset DUT1 again
     rc = can_reset(handle);
-#ifndef OPTION_CANAPI_RETVALS
-    XCTAssertEqual(CANERR_OFFLINE, rc);
-#else
-    // note: can_reset shall return CANERR_NOERROR even when
-    //       the CAN controller has not been started
+    // @  note: can_reset shall return CANERR_NOERROR even when
+    //          the CAN controller has not been started
     XCTAssertEqual(CANERR_NOERROR, rc);
-#endif
     // @- get status of DUT1 and check to be in INIT state
     rc = can_status(handle, &status.byte);
     XCTAssertEqual(CANERR_NOERROR, rc);
@@ -398,4 +390,4 @@
 
 @end
 
-// $Id: test_can_reset.mm 1138 2023-08-10 18:25:16Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: test_can_reset.mm 1334 2024-06-02 10:00:20Z makemake $  Copyright (c) UV Software, Berlin //

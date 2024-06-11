@@ -1,7 +1,7 @@
 #
-#	CAN Interface API, Version 3 (for Kvaser CAN Interfaces)
+#	KvaserCAN - macOS User-Space Driver for Kvaser USB CAN Interfaces
 #
-#	Copyright (c) 2017-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+#	Copyright (c) 2017-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
 #	All rights reserved.
 #
 #	This file is part of MacCAN-KvaserCAN.
@@ -42,14 +42,25 @@
 #	GNU General Public License for more details.
 #
 #	You should have received a copy of the GNU General Public License
-#	along with MacCAN-KvaserCAN.  If not, see <http://www.gnu.org/licenses/>.
+#	along with MacCAN-KvaserCAN.  If not, see <https://www.gnu.org/licenses/>.
 #
 current_OS := $(shell sh -c 'uname 2>/dev/null || echo Unknown OS')
 current_OS := $(patsubst CYGWIN%,Cygwin,$(current_OS))
 current_OS := $(patsubst MINGW%,MinGW,$(current_OS))
 current_OS := $(patsubst MSYS%,MinGW,$(current_OS))
 
+MAJOR = 0
+MINOR = 3
+PATCH = 4
+
+ifeq ($(PATCH),0)
+VERSION = $(MAJOR).$(MINOR)
+else
+VERSION = $(MAJOR).$(MINOR).$(PATCH)
+endif
+
 HOME_DIR = ../..
+MAIN_DIR = .
 
 SOURCE_DIR = $(HOME_DIR)/Sources
 CANAPI_DIR = $(HOME_DIR)/Sources/CANAPI
@@ -64,29 +75,7 @@ OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o \
 	$(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
 	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
-
-ifeq ($(current_OS),Darwin)  # macOS - libUVCANKVL.dylib
-
-PROJECT = UVCANKVL
-LIBRARY = lib$(PROJECT)
-
-MAJOR = 0
-MINOR = 3
-PATCH = 3
-
-VERSION = $(MAJOR).$(MINOR).$(PATCH)
-TARGET  = $(LIBRARY).$(VERSION).dylib
-STATIC  = $(LIBRARY).a
-
-INSTALL_NAME = @rpath/$(TARGET)
-CURRENT_VERSION = $(MAJOR).$(MINOR).$(PATCH)
-COMPATIBILITY_VERSION = $(MAJOR).$(MINOR).0
-
-INSTALL = /usr/local/lib
-
-INCLUDE = /usr/local/include
-
-DEFINES = -DOPTION_CANAPI_KVASERCAN_DYLIB=1 \
+DEFINES = -DOPTION_CAN_2_0_ONLY=0 \
 	-DOPTION_CANAPI_DRIVER=1 \
 	-DOPTION_CANAPI_RETVALS=1 \
 	-DOPTION_CANAPI_COMPANIONS=1 \
@@ -105,8 +94,25 @@ HEADERS = -I$(SOURCE_DIR) \
 	-I$(DRIVER_DIR) \
 	-I$(WRAPPER_DIR)
 
+
+ifeq ($(current_OS),Darwin)  # macOS - libUVCANKVL.dylib
+
+PROJECT = UVCANKVL
+LIBRARY = lib$(PROJECT)
+
+TARGET  = $(LIBRARY).$(VERSION).dylib
+STATIC  = $(LIBRARY).a
+
+INSTALL_NAME = $(TARGET)
+CURRENT_VERSION = $(MAJOR).$(MINOR).$(PATCH)
+COMPATIBILITY_VERSION = $(MAJOR).$(MINOR).0
+
+INSTALL = /usr/local/lib
+
+DEFINES += -DOPTION_CANAPI_KVASERCAN_DYLIB=1
+
 CFLAGS += -O2 -Wall -Wextra -Wno-parentheses \
-	-fmessage-length=0 -fno-strict-aliasing \
+	-fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -114,14 +120,11 @@ CXXFLAGS += -O2 -g -Wall -Wextra -pthread \
 	$(DEFINES) \
 	$(HEADERS)
 
-LIBRARIES =
-
-LDFLAGS  += -lpthread \
-	-nostartfiles -dynamiclib -fvisibility=hidden \
-	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation \
-	-Wl,-install_name,$(INSTALL_NAME) \
+LDFLAGS += -nostartfiles -dynamiclib -fvisibility=hidden \
+	-Wl,-install_name,@rpath/$(INSTALL_NAME) \
 	-Wl,-current_version,$(CURRENT_VERSION) \
-	-Wl,-compatibility_version,$(COMPATIBILITY_VERSION)
+	-Wl,-compatibility_version,$(COMPATIBILITY_VERSION) \
+	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation
 
 LTFLAGS += -static
 
@@ -130,6 +133,8 @@ CFLAGS += -arch arm64 -arch x86_64
 CXXFLAGS += -arch arm64 -arch x86_64
 LDFLAGS += -arch arm64 -arch x86_64
 endif
+
+LIBRARIES = -lpthread
 
 CXX = clang++
 CC = clang
@@ -166,6 +171,7 @@ incdir:
 	@cp $(SOURCE_DIR)/KvaserCAN_Defines.h $(INCDIR)
 	@cp $(SOURCE_DIR)/KvaserCAN_Defaults.h $(INCDIR)
 	@cp $(CANAPI_DIR)/can_api.h $(INCDIR)
+	@cp $(CANAPI_DIR)/can_btr.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Types.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Defines.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANBTR_Defaults.h $(INCDIR)
@@ -185,6 +191,12 @@ ifeq ($(current_OS),Darwin)
 	$(RM) $(INSTALL)/$(LIBRARY).dylib ; $(LN) $(INSTALL)/$(TARGET) $(INSTALL)/$(LIBRARY).dylib
 endif
 
+
+$(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
+$(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/KvaserCAN_Driver.o: $(DRIVER_DIR)/KvaserCAN_Driver.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
@@ -216,15 +228,9 @@ $(OUTDIR)/MacCAN_MsgPipe.o: $(MACCAN_DIR)/MacCAN_MsgPipe.c
 $(OUTDIR)/MacCAN_Debug.o: $(MACCAN_DIR)/MacCAN_Debug.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
-$(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.c
-	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
-
-$(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
-	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
-
 
 $(STATIC): $(OBJECTS)
-	$(LT) $(LTFLAGS) -o $@ $(OBJECTS) $(LIBRARIES)
+	$(LT) $(LTFLAGS) -o $@ $(OBJECTS)
 	$(CP) $@ $(BINDIR)
 	@lipo -archs $@
 	@echo "\033[1mTarget '"$@"' successfully build\033[0m"

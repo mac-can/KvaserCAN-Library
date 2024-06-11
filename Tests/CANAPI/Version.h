@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,12 +43,12 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #ifndef VERSION_H_INCLUDED
 #define VERSION_H_INCLUDED
-// SVN revision number (update with each commit: VII)
-#define REVISION_NO  "$Rev: 1219 $"
+// SVN revision number (update with each commit: XXIV)
+#define REVISION_NO  "$Rev: 1336 $"
 #endif // VERSION_H_INCLUDED
 
-// $Id: Version.h 1219 2023-10-14 12:23:07Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Version.h 1336 2024-06-03 06:58:36Z makemake $  Copyright (c) UV Software, Berlin //

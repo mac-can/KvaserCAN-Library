@@ -2,13 +2,13 @@
 //
 //  CAN Interface API, Version 3 (Testing)
 //
-//  Copyright (c) 2004-2023 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
+//  Copyright (c) 2004-2024 Uwe Vogt, UV Software, Berlin (info@uv-software.com)
 //  All rights reserved.
 //
 //  This file is part of CAN API V3.
 //
-//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License and
-//  under the GNU General Public License v3.0 (or any later version).
+//  CAN API V3 is dual-licensed under the BSD 2-Clause "Simplified" License
+//  and under the GNU General Public License v3.0 (or any later version).
 //  You can choose between one of them if you use this file.
 //
 //  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
 //  GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License
-//  along with CAN API V3.  If not, see <http://www.gnu.org/licenses/>.
+//  along with CAN API V3.  If not, see <https://www.gnu.org/licenses/>.
 //
 #include "pch.h"
 #include <string.h>
@@ -514,7 +514,11 @@ void CCanDevice::ShowBitrateSettings(const char *prefix) {
 }
 
 bool CCanDevice::GetChannelInfoFromDeviceList(CCanApi::SChannelInfo &info) {
+#if (OPTION_CANAPI_LIBRARY != 0)
+    bool found = CCanDevice::GetFirstChannel(m_nLibraryId, info);
+#else
     bool found = CCanDevice::GetFirstChannel(info);
+#endif
     while (found) {
         if ((info.m_nLibraryId == m_nLibraryId) && (info.m_nChannelNo == m_nChannelNo)) {
             return true;
@@ -533,10 +537,17 @@ void CCanDevice::ShowChannelInformation(const char* prefix) {
     if (prefix)
         std::cout << prefix << ' ';
     if (GetStatus(status) != CCanApi::NoError) {
+#if (OPTION_CANAPI_LIBRARY != 0)
+        if ((retVal = InitializeChannel(m_nLibraryId, m_nChannelNo, opMode)) != CCanApi::NoError) {
+            std::cout << "error(" << retVal << "): channel " << m_nChannelNo << " could not be initialized" << std::endl;
+            return;
+        }
+#else
         if ((retVal = InitializeChannel(m_nChannelNo, opMode)) != CCanApi::NoError) {
             std::cout << "error(" << retVal << "): channel " << m_nChannelNo << " could not be initialized" << std::endl;
             return;
         }
+#endif
         bInitialized = false;
     }
     if ((retVal = GetProperty(CANPROP_GET_DEVICE_NAME, (void*)szDeviceName, CANPROP_MAX_BUFFER_SIZE)) != CCanApi::NoError) {
@@ -561,10 +572,17 @@ void CCanDevice::ShowChannelCapabilities(const char* prefix) {
     if (prefix)
         std::cout << prefix << ' ';
     if (GetStatus(status) != CCanApi::NoError) {
+#if (OPTION_CANAPI_LIBRARY != 0)
+        if ((retVal = InitializeChannel(m_nLibraryId, m_nChannelNo, opMode)) != CCanApi::NoError) {
+            std::cout << "error(" << retVal << "): channel " << m_nChannelNo << " could not be initialized" << std::endl;
+            return;
+        }
+#else
         if ((retVal = InitializeChannel(m_nChannelNo, opMode)) != CCanApi::NoError) {
             std::cout << "error(" << retVal << "): channel " << m_nChannelNo << " could not be initialized" << std::endl;
             return;
         }
+#endif
         bInitialized = false;
     }
     if ((retVal = GetProperty(CANPROP_GET_OP_CAPABILITY, (void*)&opCapa.byte, sizeof(uint8_t))) != CCanApi::NoError) {
@@ -590,4 +608,4 @@ void CCanDevice::ShowChannelCapabilities(const char* prefix) {
     std::cout << std::endl;
 }
 
-// $Id: Device.cpp 1217 2023-10-10 19:28:31Z haumea $  Copyright (c) UV Software, Berlin //
+// $Id: Device.cpp 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin //
