@@ -13,24 +13,26 @@ URL: https://github.com/google/googletest
 
 Current Version used by CAN API V3 C++ Testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-v1.14.0 (https://github.com/google/googletest/releases/tag/v1.14.0)
+v1.14.0 (https://github.com/google/googletest/releases/tag/v1.15.0)
 
 Installation and Usage of GoogleTest
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 1. Clone the GoogleTest main branch or download the sources from a tag
-   e.g. into '~/Projects/gtest'
-2. Copy all header files from '~/Projects/gtest\googletest\include'
-   into '$(PROJROOT)/Tests/CANAPI/GoogleTest/include'
-3. Build static libraries as Universal macOS Binary for macOS 11.0 with CMake
+   e.g. into 'C:\Projekte\gtest'
+2. Copy all header files from 'C:\Projekte\gtest\googletest\include\gtest'
+   into '$(PROJROOT)\Tests\GoogleTest\include\gtest'
+3. Build static libraries for x64 and x86 with CMake
    note: GoogleMock (aka gmock) does not need to be created for this project.
-4. Copy all files from '~/Projects/gtest/googletest/build/lib'
-   into '$(PROJROOT)/Tests/CANAPI/GoogleTest/macOS/lib'
+4. Copy all files from 'C:\Projekte\gtest\googletest\out\build\x64-Debug\lib'
+   into $(PROJROOT)\Tests\GoogleTest\build\x64-Debug\lib'
+   and all files from 'C:\Projekte\gtest\googletest\out\build\x86-Debug\lib'
+   into $(PROJROOT)\Tests\GoogleTest\build\x86-Debug\lib'
  
 Important Notes
 ~~~~~~~~~~~~~~~
-- Adapt the architecture and deployment settings according to the root project
+- By default the GoogleTest libraries are build with option /MDt
 - Since version 1.13.x Googletest requires at least C++14
 
 Last Updated
 ~~~~~~~~~~~~
-September 13, 2023
+August 17, 2024
