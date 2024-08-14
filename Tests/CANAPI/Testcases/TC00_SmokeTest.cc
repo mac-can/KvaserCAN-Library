@@ -240,7 +240,12 @@ TEST_F(SmokeTest, DefaultScenario) {
     CCanApi::EChannelState state;
     CANAPI_Status_t status = {};
     CANAPI_Return_t retVal;
-    
+#if (FEATURE_TRACEFILE == FEATURE_SUPPORTED)
+    uint8_t traceState = CANPARA_TRACE_ON;
+    uint8_t traceType = CANPARA_TRACE_TYPE_BINARY;
+    uint16_t traceMode = CANPARA_TRACE_MODE_PREFIX_DATE | CANPARA_TRACE_MODE_PREFIX_TIME;
+    char traceFile[CANPROP_MAX_STRING_LENGTH+1] = "";
+#endif    
     // @pre:
     // @- show test configuration
     dut1.ShowDeviceInformation("[   DUT1   ]");
@@ -279,6 +284,23 @@ TEST_F(SmokeTest, DefaultScenario) {
     retVal = dut1.GetStatus(status);
     EXPECT_EQ(CCanApi::NoError, retVal);
     EXPECT_FALSE(status.can_stopped);
+#if (FEATURE_TRACEFILE == FEATURE_SUPPORTED)
+    // @- open trace file for DUT1 (if supported)
+    traceType = CANPARA_TRACE_TYPE_BINARY;  // TODO: format from command line
+    retVal = dut1.SetProperty(CANPROP_SET_TRACE_TYPE, (void*)&traceType, sizeof(traceType));
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    traceMode = CANPARA_TRACE_MODE_PREFIX_DATE | CANPARA_TRACE_MODE_PREFIX_TIME;
+    retVal = dut1.SetProperty(CANPROP_SET_TRACE_MODE, (void*)&traceMode, sizeof(traceMode));
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    traceState = CANPARA_TRACE_ON;
+    retVal = dut1.SetProperty(CANPROP_SET_TRACE_ACTIVE, (void*)&traceState, sizeof(traceState));
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    // @- check if trace file is open
+    traceState = CANPARA_TRACE_OFF;
+    retVal = dut1.GetProperty(CANPROP_GET_TRACE_ACTIVE, (void*)&traceState, sizeof(traceState));
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    EXPECT_EQ(CANPARA_TRACE_ON, traceState);
+#endif
     // @- send some frames to DUT2 and receive some frames from DUT2
     int32_t frames = g_Options.GetNumberOfSmokeTestFrames();
     EXPECT_EQ(frames, dut1.SendSomeFrames(dut2, frames));
@@ -287,6 +309,24 @@ TEST_F(SmokeTest, DefaultScenario) {
     retVal = dut1.GetStatus(status);
     EXPECT_EQ(CCanApi::NoError, retVal);
     EXPECT_FALSE(status.can_stopped);
+#if (FEATURE_TRACEFILE == FEATURE_SUPPORTED)
+    // @- show file name of trace file written
+    if (CANPARA_TRACE_ON == traceState) {
+        if (dut1.GetProperty(CANPROP_GET_TRACE_FILE, (void*)traceFile, CANPROP_MAX_STRING_LENGTH) == CCanApi::NoError) {
+            traceFile[CANPROP_MAX_STRING_LENGTH] = '\0';
+            std::cout << "[   FILE   ] " << traceFile << std::endl;
+        }
+    }
+    // @- close trace file for DUT1
+    traceState = CANPARA_TRACE_OFF;
+    retVal = dut1.SetProperty(CANPROP_SET_TRACE_ACTIVE, (void*)&traceState, sizeof(traceState));
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    // @- check if trace file is closed
+    traceState = CANPARA_TRACE_ON;
+    retVal = dut1.GetProperty(CANPROP_GET_TRACE_ACTIVE, (void*)&traceState, sizeof(traceState));
+    EXPECT_EQ(CCanApi::NoError, retVal);
+    EXPECT_EQ(CANPARA_TRACE_OFF, traceState);
+#endif
     // @- stop/reset DUT1
     retVal = dut1.ResetController();
     EXPECT_EQ(CCanApi::NoError, retVal);
@@ -300,4 +340,4 @@ TEST_F(SmokeTest, DefaultScenario) {
     // @end.
 }
 
-//  $Id: TC00_SmokeTest.cc 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC00_SmokeTest.cc 1385 2024-08-07 18:32:28Z makemake $  Copyright (c) UV Software, Berlin.

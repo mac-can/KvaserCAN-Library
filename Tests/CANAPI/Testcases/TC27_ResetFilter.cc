@@ -112,7 +112,12 @@ TEST_F(ResetFilter, GTEST_TESTCASE(SunnydayScenario, GTEST_SUNNYDAY)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter11Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC27_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -139,8 +144,13 @@ TEST_F(ResetFilter, GTEST_TESTCASE(SunnydayScenario, GTEST_SUNNYDAY)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter29Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC27_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
-    EXPECT_EQ(maskGet, maskGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
+   EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
     retVal = dut1.ResetFilters();
@@ -270,7 +280,12 @@ TEST_F(ResetFilter, GTEST_TESTCASE(IfControllerNotStarted, GTEST_ENABLED)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter11Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC27_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -297,7 +312,12 @@ TEST_F(ResetFilter, GTEST_TESTCASE(IfControllerNotStarted, GTEST_ENABLED)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter29Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC27_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -478,7 +498,12 @@ TEST_F(ResetFilter, GTEST_TESTCASE(IfControllerStopped, GTEST_ENABLED)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter11Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC27_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -505,7 +530,12 @@ TEST_F(ResetFilter, GTEST_TESTCASE(IfControllerStopped, GTEST_ENABLED)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter29Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC27_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -598,4 +628,4 @@ TEST_F(ResetFilter, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
 
 #endif // FEATURE_FILTERING != FEATURE_UNSUPPORTED
 
-//  $Id: TC27_ResetFilter.cc 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC27_ResetFilter.cc 1373 2024-07-31 18:55:39Z gonggong $  Copyright (c) UV Software, Berlin.

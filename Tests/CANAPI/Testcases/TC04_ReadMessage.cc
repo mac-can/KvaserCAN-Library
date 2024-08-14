@@ -722,9 +722,9 @@ TEST_F(ReadMessage, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC04_8_ENABLED)) {
     struct timespec m0 = {}, m1 = {};
 #endif
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @pre:
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
@@ -954,9 +954,9 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagXtdInOperationModeXtd, GTEST_ENABLED)
     // @- get operation capabilities of DUT1
     retVal = dut1.GetOpCapabilities(opCapa);
     EXPECT_EQ(CCanApi::NoError, retVal);
-    // @- check if supressing extended frames is supported
+    // @- check if suppressing extended frames is supported
     if (!opCapa.nxtd)
-        GTEST_SKIP() << "Supressing extended frames is not supported by DUT1!";
+        GTEST_SKIP() << "Suppressing extended frames is not supported by DUT1!";
     // @- get operation mode of DUT1 and check bit NXTD is not set
     retVal = dut1.GetOpMode(opMode);
     EXPECT_EQ(CCanApi::NoError, retVal);
@@ -1059,9 +1059,9 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagXtdInOperationModeNoXtd, GTEST_ENABLE
     // @- tear down DUT1 again
     retVal = dut1.TeardownChannel();
     EXPECT_EQ(CCanApi::NoError, retVal);
-    // @ - check if supressing extended frames is supported
+    // @ - check if suppressing extended frames is supported
     if (!opCapa.nxtd)
-        GTEST_SKIP() << "Supressing extended frames is not supported by DUT1!";
+        GTEST_SKIP() << "Suppressing extended frames is not supported by DUT1!";
     // @- set operation mode bit NXTD (suppress extended frames)
     opMode = dut1.GetOpMode();
     opMode.nxtd = 1;
@@ -1180,9 +1180,9 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagRtrInOperationModeRtr, GTEST_ENABLED)
     // @- get operation capabilities of DUT1
     retVal = dut1.GetOpCapabilities(opCapa);
     EXPECT_EQ(CCanApi::NoError, retVal);
-    // @- check if supressing remote frames is supported
+    // @- check if suppressing remote frames is supported
     if (!opCapa.nrtr)
-        GTEST_SKIP() << "Supressing remote frames is not supported by DUT1!";
+        GTEST_SKIP() << "Suppressing remote frames is not supported by DUT1!";
     // @- get operation mode of DUT1 and check bit NRTR is not set
     retVal = dut1.GetOpMode(opMode);
     EXPECT_EQ(CCanApi::NoError, retVal);
@@ -1306,9 +1306,9 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithFlagRtrInOperationModeNoRtr, GTEST_ENABLE
     // @- tear down DUT1 again
     retVal = dut1.TeardownChannel();
     EXPECT_EQ(CCanApi::NoError, retVal);
-    // @ - check if supressing remote frames is supported
+    // @ - check if suppressing remote frames is supported
     if (!opCapa.nrtr)
-        GTEST_SKIP() << "Supressing remote frames is not supported by DUT1!";
+        GTEST_SKIP() << "Suppressing remote frames is not supported by DUT1!";
     // @- set operation mode bit NRTR (suppress remote frames)
      opMode = dut1.GetOpMode();
     opMode.nrtr = 1;
@@ -2013,4 +2013,4 @@ TEST_F(ReadMessage, GTEST_TESTCASE(WithDifferentTimeoutValues, GTEST_ENABLED)) {
 // @todo: (1) blocking read
 // @todo: (2) test reentrancy
 
-//  $Id: TC04_ReadMessage.cc 1329 2024-05-30 18:13:31Z quaoar $  Copyright (c) UV Software, Berlin.
+//  $Id: TC04_ReadMessage.cc 1389 2024-08-09 19:21:26Z makemake $  Copyright (c) UV Software, Berlin.

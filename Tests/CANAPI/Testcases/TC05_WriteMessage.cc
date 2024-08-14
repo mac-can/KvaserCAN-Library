@@ -1397,9 +1397,9 @@ TEST_F(WriteMessage, GTEST_TESTCASE(WithFlagXtdInOperationModeNoXtd, GTEST_ENABL
     // @- tear down DUT1 again
     retVal = dut1.TeardownChannel();
     EXPECT_EQ(CCanApi::NoError, retVal);
-    // @ - check if supressing extended frames is supported
+    // @ - check if suppressing extended frames is supported
     if (!opCapa.nxtd)
-        GTEST_SKIP() << "Supressing extended frames is not supported by DUT1!";
+        GTEST_SKIP() << "Suppressing extended frames is not supported by DUT1!";
     // @- set operation mode bit NXTD (suppress extended frames)
     opMode = g_Options.GetOpMode(DUT1);
     opMode.nxtd = 1;
@@ -1507,9 +1507,9 @@ TEST_F(WriteMessage, GTEST_TESTCASE(WithFlagRtrInOperationModeNoRtr, GTEST_ENABL
     // @- tear down DUT1 again
     retVal = dut1.TeardownChannel();
     EXPECT_EQ(CCanApi::NoError, retVal);
-    // @ - check if supressing remote frames is supported
+    // @ - check if suppressing remote frames is supported
     if (!opCapa.nrtr)
-        GTEST_SKIP() << "Supressing remote frames is not supported by DUT1!";
+        GTEST_SKIP() << "Suppressing remote frames is not supported by DUT1!";
     // @- set operation mode bit NRTR (suppress remote frames)
     opMode = g_Options.GetOpMode(DUT1);
     opMode.nrtr = 1;
@@ -2021,9 +2021,9 @@ TEST_F(WriteMessage, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TC04_19_ENABLED)) {
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @pre:
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
@@ -2223,4 +2223,4 @@ TEST_F(WriteMessage, GTEST_TESTCASE(WithFlagEsi, GTEST_ENABLED)) {
 // @todo: (1) blocking write
 // @todo: (2) test reentrancy
 
-//  $Id: TC05_WriteMessage.cc 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin.
+//  $Id: TC05_WriteMessage.cc 1389 2024-08-09 19:21:26Z makemake $  Copyright (c) UV Software, Berlin.

@@ -196,7 +196,12 @@ TEST_F(SetFilter29Bit, GTEST_TESTCASE(SunnydayScenario, GTEST_SUNNYDAY)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter29Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC25_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -337,7 +342,12 @@ TEST_F(SetFilter29Bit, GTEST_TESTCASE(IfControllerNotStarted, GTEST_ENABLED)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter29Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC25_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -498,7 +508,12 @@ TEST_F(SetFilter29Bit, GTEST_TESTCASE(IfControllerStopped, GTEST_ENABLED)) {
     codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
     retVal = dut1.GetFilter29Bit(codeGet, maskGet);
     EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC25_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
     EXPECT_EQ(codeSet, codeGet);
+#else
+    // @  issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+    EXPECT_EQ(codeSet & maskSet, codeGet);
+#endif
     EXPECT_EQ(maskGet, maskGet);
     // @- reset acceptance filter
     // @  note: SJA100 has only one filter for 11-bit and 29-bit identifier!
@@ -609,9 +624,9 @@ TEST_F(SetFilter29Bit, GTEST_TESTCASE(WithValidValues, GTEST_ENABLED)) {
     const uint32_t maskSet[4] = { 0x00000000U, 0x000000F0U, 0x0000070FU, 0x000007FFU };
     CANAPI_Return_t retVal;
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @pre:
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
@@ -638,7 +653,12 @@ TEST_F(SetFilter29Bit, GTEST_TESTCASE(WithValidValues, GTEST_ENABLED)) {
             codeGet = 0xFFFFFFFFU; maskGet = 0xFFFFFFFFU;
             retVal = dut1.GetFilter29Bit(codeGet, maskGet);
             EXPECT_EQ(CCanApi::NoError, retVal);
+#if (TC25_X_ISSUE_PCBUSB_FILTER_CODE != WORKAROUND_ENABLED)
             EXPECT_EQ(codeSet[i], codeGet);
+#else
+            // @   issue(PCBUSB): code is bit-wise ANDed with mask (Linux)
+            EXPECT_EQ(codeSet[i] & maskSet[j], codeGet);
+#endif
             EXPECT_EQ(maskSet[j], maskGet);
             // @-- start DUT1 with configured bit-rate settings
             retVal = dut1.StartController();
@@ -838,4 +858,4 @@ TEST_F(SetFilter29Bit, GTEST_TESTCASE(IfXtdFramesSuppressed, GTEST_ENABLED)) {
 
 #endif // FEATURE_FILTERING != FEATURE_UNSUPPORTED
 
-//  $Id: TC25_SetFilter29Bit.cc 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC25_SetFilter29Bit.cc 1389 2024-08-09 19:21:26Z makemake $  Copyright (c) UV Software, Berlin.

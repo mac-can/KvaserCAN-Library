@@ -91,13 +91,18 @@ TEST_F(GetProperty, GTEST_TESTCASE(SunnydayScenario, GTEST_SUNNYDAY)) {
     uint16_t param = testcase.GetFirstEntry();
     while (param != CANPROP_INVALID) {
         counter.Increment();
+        memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
         if (testcase.IsRequired()) {
             EXPECT_EQ(CCanApi::NoError, retVal);
+            RecordProperty(testcase.Mnemonic(), (retVal == CCanApi::NoError) ? "PASS" : "FAIL");
         } else if (retVal != CCanApi::NoError) {
             EXPECT_EQ(CCanApi::NotSupported, retVal);
+            RecordProperty(testcase.Mnemonic(), (retVal == CCanApi::NotSupported) ? "n/a" : "fail");
+        } else {
+            RecordProperty(testcase.Mnemonic(), "pass");
         }
         // next please
         param = testcase.GetNextEntry();
@@ -235,6 +240,7 @@ TEST_F(GetProperty, GTEST_TESTCASE(WithInvalidParmeterValue, GTEST_ENABLED)) {
     EXPECT_FALSE(status.can_stopped);
     // @test:
     CCounter counter = CCounter();
+    memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
     // @- try to get a property value with invalid value for parameter 'param'
     retVal = dut1.GetProperty(CANPROP_INVALID, (void*)buffer, CANPROP_MAX_BUFFER_SIZE);
     EXPECT_EQ(CCanApi::NotSupported, retVal);
@@ -299,6 +305,7 @@ TEST_F(GetProperty, GTEST_TESTCASE(WithWrongParameterSize, GTEST_ENABLED)) {
         // @-- exclude properties with size zero (they return no value)
         if (testcase.SizeOf() != 0U) {
             counter.Increment();
+            memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
             uint32_t size = CANPROP_MAX_BUFFER_SIZE;
             if ((testcase.SizeOf() != CANPROP_MAX_BUFFER_SIZE) && (param != CANPROP_GET_BUSLOAD))
                 size = testcase.SizeOf() - 1U;
@@ -365,6 +372,7 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelNotInitialized, GTEST_ENABLED)) {
     uint16_t param = testcase.GetFirstEntry();
     while (param != CANPROP_INVALID) {
         counter.Increment();
+        memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
@@ -447,6 +455,7 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelInitialized, GTEST_ENABLED)) {
     uint16_t param = testcase.GetFirstEntry();
     while (param != CANPROP_INVALID) {
         counter.Increment();
+        memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
@@ -524,6 +533,7 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfControllerStarted, GTEST_ENABLED)) {
     uint16_t param = testcase.GetFirstEntry();
     while (param != CANPROP_INVALID) {
         counter.Increment();
+        memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
@@ -612,6 +622,7 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfControllerStopped, GTEST_ENABLED)) {
     uint16_t param = testcase.GetFirstEntry();
     while (param != CANPROP_INVALID) {
         counter.Increment();
+        memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
@@ -686,6 +697,7 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
     uint16_t param = testcase.GetFirstEntry();
     while (param != CANPROP_INVALID) {
         counter.Increment();
+        memset(buffer, 0, CANPROP_MAX_BUFFER_SIZE);
         // printf("param=%i (%s)\n", param, testcase.Description());
         // @-- get property value (incl. pre-initialization parameter)
         retVal = dut1.GetProperty(param, (void*)buffer, testcase.SizeOf());
@@ -711,4 +723,4 @@ TEST_F(GetProperty, GTEST_TESTCASE(IfChannelTornDown, GTEST_ENABLED)) {
 }
 
 
-//  $Id: TC12_GetProperty.cc 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC12_GetProperty.cc 1390 2024-08-09 19:43:19Z makemake $  Copyright (c) UV Software, Berlin.

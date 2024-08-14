@@ -89,7 +89,7 @@
 //  - number of CAN frames to be send while in monitor mode
 //    note: not too big because of time-out interval.
 #define TEST_MONITOR  16  // default = 16
-//  - additional number of CAN frames to be send if recive queue is full
+//  - additional number of CAN frames to be send if receive queue is full
 //    note: not too big because of time-out interval.
 #define TEST_QRCVFULL  1  // default = 1
 //  - maximum number of CAN frames to be send until in bus off state
@@ -158,4 +158,4 @@
 #endif
 #endif // SETTINGS_H_INCLUDED
 
-//  $Id: Settings.h 1314 2024-05-26 08:39:33Z quaoar $  Copyright (c) UV Software, Berlin.
+//  $Id: Settings.h 1393 2024-08-13 15:08:28Z makemake $  Copyright (c) UV Software, Berlin.

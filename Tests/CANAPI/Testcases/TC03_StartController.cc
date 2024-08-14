@@ -662,9 +662,9 @@ TEST_F(StartController, GTEST_TESTCASE(WithSameCanBitrateIndexAfterCanStopped, G
     CANAPI_Status_t status = {};
     CANAPI_Return_t retVal;
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @loop over selected CAN 2.0 bit-timing indexes
     // @note: predefined BTR0BTR1 bit-timing table has 10 entries, index 0 to 9.
     // @      The index must be given as negative value to 'bitrate.index'!
@@ -796,9 +796,9 @@ TEST_F(StartController, GTEST_TESTCASE(WithDifferentCanBitrateIndexAfterCanStopp
     CANAPI_Status_t status = {};
     CANAPI_Return_t retVal;
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @loop over selected CAN 2.0 bit-timing indexes
     // @note: predefined BTR0BTR1 bit-timing table has 10 entries, index 0 to 9.
     // @      The index must be given as negative value to 'bitrate.index'!
@@ -1166,9 +1166,9 @@ TEST_F(StartController, GTEST_TESTCASE(WithSameCanBitrateSettingsAfterCanStopped
     CANAPI_Status_t status = {};
     CANAPI_Return_t retVal;
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @loop over selected CAN 2.0 bit-rate settings
     CCounter counter = CCounter();
     for (int i = 0; i < 3; i++) {
@@ -1293,9 +1293,9 @@ TEST_F(StartController, GTEST_TESTCASE(WithDifferentCanBitrateSettingsAfterCanSt
     CANAPI_Status_t status = {};
     CANAPI_Return_t retVal;
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @loop over selected CAN 2.0 bit-rate settings
     CCounter counter = CCounter();
     for (int i = 0; i < 3; i++) {
@@ -1696,9 +1696,9 @@ TEST_F(StartController, GTEST_TESTCASE(WithSameCanFdBitrateSettingsAfterCanStopp
     if ((!dut1.IsCanFdCapable() || !dut2.IsCanFdCapable()) || g_Options.RunCanClassicOnly())
         GTEST_SKIP() << "At least one device is not CAN FD capable!";
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @loop over selected CAN FD bit-rate settings
     CCounter counter = CCounter();
     for (int i = 0; i < 8; i++) {
@@ -1837,9 +1837,9 @@ TEST_F(StartController, GTEST_TESTCASE(WithDifferentCanFdBitrateSettingsAfterCan
     if ((!dut1.IsCanFdCapable() || !dut2.IsCanFdCapable()) || g_Options.RunCanClassicOnly())
         GTEST_SKIP() << "At least one device is not CAN FD capable!";
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @loop over selected CAN FD bit-rate settings
     CCounter counter = CCounter();
     for (int i = 0; i < 8; i++) {
@@ -2313,4 +2313,4 @@ TEST_F(StartController, GTEST_TESTCASE(WithCanFdBitrateSettingsInCan20Mode, GTES
 }
 #endif  // (CAN_FD_SUPPORTED == FEATURE_SUPPORTED)
 
-//  $Id: TC03_StartController.cc 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC03_StartController.cc 1389 2024-08-09 19:21:26Z makemake $  Copyright (c) UV Software, Berlin.

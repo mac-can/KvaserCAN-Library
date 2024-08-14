@@ -417,9 +417,9 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfInBusOffState, GTEST_TC09_8_ENABLED)) {
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
     // @
-    // @note: This test can be very fragile
+    // @note: This test is very fragile
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can be very fragile!";
+        GTEST_SKIP() << "This test is very fragile!";
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
         GTEST_SKIP() << "This test cannot run if there is another device on bus!";
@@ -587,9 +587,9 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfWarningLevelReached, GTEST_TC09_9_ENABLED)) {
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
     // @
-    // @note: This test can be very fragile
+    // @note: This test is very fragile
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can be very fragile!";
+        GTEST_SKIP() << "This test is very fragile!";
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
         GTEST_SKIP() << "This test cannot run if there is another device on bus!";
@@ -754,9 +754,9 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfErrorsOnBus, GTEST_TC09_10_ENABLED)) {
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
     // @
-    // @note: This test can be very fragile
+    // @note: This test is very fragile
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can be very fragile!";
+        GTEST_SKIP() << "This test is very fragile!";
     // @note: This test cannot run if there is another device on bus!
     if (g_Options.Is3rdDevicePresent())
         GTEST_SKIP() << "This test cannot run if there is another device on bus!";
@@ -935,9 +935,9 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfTransmitterBusy, GTEST_TC09_11_ENABLED)) {
     memset(trmMsg.data, 0, CANFD_MAX_LEN);
 #endif
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @pre:
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
@@ -1186,9 +1186,9 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC09_14_ENABLED)) {
     struct timespec m0 = {}, m1 = {};
 #endif
     // @
-    // @note: This test can take a very long time
+    // @note: This test takes quite a long time
     if (g_Options.RunQuick())
-        GTEST_SKIP() << "This test can take a very long time!";
+        GTEST_SKIP() << "This test takes quite a long time!";
     // @pre:
     // @- initialize DUT1 with configured settings
     retVal = dut1.InitializeChannel();
@@ -1354,4 +1354,4 @@ TEST_F(GetStatus, GTEST_TESTCASE(IfReceiveQueueFull, GTEST_TC09_14_ENABLED)) {
     // @end.
 }
 
-//  $Id: TC09_GetStatus.cc 1328 2024-05-29 18:49:38Z makemake $  Copyright (c) UV Software, Berlin.
+//  $Id: TC09_GetStatus.cc 1389 2024-08-09 19:21:26Z makemake $  Copyright (c) UV Software, Berlin.

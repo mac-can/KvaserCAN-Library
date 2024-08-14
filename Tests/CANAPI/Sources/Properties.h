@@ -70,9 +70,10 @@ public:
     bool IsRequired();
     bool IsModeRunning();
 	uint32_t SizeOf();
+    const char* Mnemonic();
     const char* Description();
 };
 #endif // PROPERTIES_H_INCLUDED
 
-// $Id: Properties.h 1272 2024-04-16 19:55:27Z makemake $  Copyright (c) UV Software, Berlin //
+// $Id: Properties.h 1390 2024-08-09 19:43:19Z makemake $  Copyright (c) UV Software, Berlin //
 
