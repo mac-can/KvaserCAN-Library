@@ -1,9 +1,7 @@
 ### Creation of USB User-Space Drivers for CAN Interfaces under macOS&reg;
 
-_Copyright &copy; 2012-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
+_Copyright &copy; 2012-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_ \
 _All rights reserved._
-
-Version $Rev: 1907 $
 
 # Running CAN and CAN FD on Mac&reg;
 
@@ -320,14 +318,12 @@ The MacCAN-Core sources are maintained in a SVN repo to synchronized them betwee
 This work is dual-licensed under the terms of the BSD 2-Clause "Simplified" License and under the terms of the GNU General Public License v3.0 (or any later version).
 You can choose between one of them if you use this work in whole or in part.
 
-`SPDX-License-Identifier: BSD-2-Clause OR GPL-3.0-or-later`
-
 ### Trademarks
 
 Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. \
 PCAN is a registered trademark of PEAK-System Technik GmbH, Darmstadt, Germany. \
 Qt is a registered trademark of The Qt Company Ltd. and its subsidiaries. \
-All other company, product and service names mentioned herein may be trademarks, registered trademarks, or service marks of their respective owners.
+All other company, product and service names mentioned herein are trademarks, registered trademarks or service marks of their respective owners.
 
 ### Contact
 

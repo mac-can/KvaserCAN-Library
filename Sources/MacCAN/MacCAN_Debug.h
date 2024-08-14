@@ -149,5 +149,5 @@ extern int can_log_write(unsigned char *buffer, size_t nbyte, const char *prefix
 #endif
 #endif /* MACCAN_DEBUG_H_INCLUDED */
 
-/* * $Id: MacCAN_Debug.h 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Debug.h 1908 2024-07-13 14:26:09Z makemake $ *** (c) UV Software, Berlin ***
  */

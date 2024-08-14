@@ -182,5 +182,5 @@ int can_log_printf(const char *format,...) {
     return rc;
 }
 
-/* * $Id: MacCAN_Debug.c 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Debug.c 1908 2024-07-13 14:26:09Z makemake $ *** (c) UV Software, Berlin ***
  */

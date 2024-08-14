@@ -71,5 +71,5 @@ extern CANPIP_Return_t CANPIP_Read(CANPIP_MsgPipe_t msgPipe, void *buffer, size_
 #endif
 #endif /* MACCAN_MSGPIPE_H_INCLUDED */
 
-/* * $Id: MacCAN_MsgPipe.h 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgPipe.h 1908 2024-07-13 14:26:09Z makemake $ *** (c) UV Software, Berlin ***
  */
