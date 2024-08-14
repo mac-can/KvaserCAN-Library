@@ -2,13 +2,13 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
  *
- *  MacCAN-Core is dual-licensed under the BSD 2-Clause "Simplified" License and
- *  under the GNU General Public License v3.0 (or any later version).
+ *  MacCAN-Core is dual-licensed under the BSD 2-Clause "Simplified" License
+ *  and under the GNU General Public License v3.0 (or any later version).
  *  You can choose between one of them if you use this file.
  *
  *  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MacCAN-Core.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with MacCAN-Core.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "MacCAN_IOUsbKit.h"
 #include "MacCAN_Devices.h"
@@ -77,8 +77,8 @@
 
 #define VERSION_MAJOR     0
 #define VERSION_MINOR     4
-#define VERSION_PATCH     1
-#define SVN_REVISION     "$Rev: 1816 $"
+#define VERSION_PATCH     2
+#define SVN_REVISION     "$Rev: 1907 $"
 
 /*#define OPTION_MACCAN_MULTICHANNEL  0  !* set globally: 0 = only one channel on multi-channel devices */
 /*#define OPTION_MACCAN_PIPE_TIMEOUT  0  !* set globally: 0 = do not use xxxPipeTO variant (e.g. macOS < 10.15) */
@@ -1908,5 +1908,5 @@ exit_worker_thread:
     return NULL;
 }
 
-/* * $Id: MacCAN_IOUsbKit.c 1816 2023-10-14 18:22:59Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.c 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
  */

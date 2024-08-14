@@ -2,13 +2,13 @@
 /*
  *  MacCAN - macOS User-Space Driver for USB-to-CAN Interfaces
  *
- *  Copyright (c) 2012-2021 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2012-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-Core.
  *
- *  MacCAN-Core is dual-licensed under the BSD 2-Clause "Simplified" License and
- *  under the GNU General Public License v3.0 (or any later version).
+ *  MacCAN-Core is dual-licensed under the BSD 2-Clause "Simplified" License
+ *  and under the GNU General Public License v3.0 (or any later version).
  *  You can choose between one of them if you use this file.
  *
  *  BSD 2-Clause "Simplified" License:
@@ -43,7 +43,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MacCAN-Core.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with MacCAN-Core.  If not, see <https://www.gnu.org/licenses/>.
  */
 #ifndef MACCAN_DEBUG_H_INCLUDED
 #define MACCAN_DEBUG_H_INCLUDED
@@ -149,5 +149,5 @@ extern int can_log_write(unsigned char *buffer, size_t nbyte, const char *prefix
 #endif
 #endif /* MACCAN_DEBUG_H_INCLUDED */
 
-/* * $Id: MacCAN_Debug.h 1001 2021-05-25 17:57:49Z eris $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Debug.h 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
  */
