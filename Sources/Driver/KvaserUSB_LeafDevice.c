@@ -1150,7 +1150,7 @@ static int ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
                             break;
                         if (message.sts && !(context->opMode & CANMODE_ERR))
                             break;
-                        if (CANQUE_Enqueue(context->msgQueue, (void*)&message) == CANUSB_SUCCESS) {
+                        if (CANQUE_Enqueue(context->msgQueue, (void*)&message, 0U) == CANUSB_SUCCESS) {
                             if (!message.sts)
                                 context->msgCounter++;
                             else

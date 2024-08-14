@@ -50,6 +50,9 @@
 
 #include "MacCAN_Common.h"
 
+#define CANQUE_BLOCKING_READ   0x00u
+#define CANQUE_BLOCKING_WRITE  0x01u
+
 typedef struct msg_queue_tag *CANQUE_MsgQueue_t;
 
 typedef int CANQUE_Return_t;
@@ -58,21 +61,37 @@ typedef int CANQUE_Return_t;
 extern "C" {
 #endif
 
-extern CANQUE_MsgQueue_t CANQUE_Create(size_t numElem, size_t elemSize);
+extern CANQUE_MsgQueue_t CANQUE_Create(size_t numElem, size_t elemSize, UInt8 mode);
 
 extern CANQUE_Return_t CANQUE_Destroy(CANQUE_MsgQueue_t msgQueue);
 
 extern CANQUE_Return_t CANQUE_Signal(CANQUE_MsgQueue_t msgQueue);
 
-extern CANQUE_Return_t CANQUE_Enqueue(CANQUE_MsgQueue_t msgQueue, void const *message);
+extern CANQUE_Return_t CANQUE_Enqueue(CANQUE_MsgQueue_t msgQueue, void const *message, UInt16 timeout);
 
 extern CANQUE_Return_t CANQUE_Dequeue(CANQUE_MsgQueue_t msgQueue, void *message, UInt16 timeout);
 
+extern CANQUE_Return_t CANQUE_Disable(CANQUE_MsgQueue_t msgQueue);
+
+extern CANQUE_Return_t CANQUE_Enable(CANQUE_MsgQueue_t msgQueue);
+
 extern CANQUE_Return_t CANQUE_Reset(CANQUE_MsgQueue_t msgQueue);
+
+#if (OPTION_MACCAN_FILE_DESCRIPTOR != 0)
+extern int CANQUE_FileDescriptor(CANQUE_MsgQueue_t msgQueue);
+#endif
+
+extern Boolean CANQUE_IsEnabled(CANQUE_MsgQueue_t msgQueue);
+
+extern Boolean CANQUE_IsEmpty(CANQUE_MsgQueue_t msgQueue);
+
+extern Boolean CANQUE_IsFull(CANQUE_MsgQueue_t msgQueue);
 
 extern Boolean CANQUE_OverflowFlag(CANQUE_MsgQueue_t msgQueue);
 
 extern UInt64 CANQUE_OverflowCounter(CANQUE_MsgQueue_t msgQueue);
+
+extern UInt32 CANQUE_QueueCount(CANQUE_MsgQueue_t msgQueue);
 
 extern UInt32 CANQUE_QueueSize(CANQUE_MsgQueue_t msgQueue);
 
@@ -83,5 +102,5 @@ extern UInt32 CANQUE_QueueHigh(CANQUE_MsgQueue_t msgQueue);
 #endif
 #endif /* MACCAN_MSGQUEUE_H_INCLUDED */
 
-/* * $Id: MacCAN_MsgQueue.h 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgQueue.h 2007 2024-08-09 17:19:00Z makemake $ *** (c) UV Software, Berlin ***
  */
