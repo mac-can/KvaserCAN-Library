@@ -1,4 +1,4 @@
-__CAN Monitor for Kvaser USB CAN Interfaces, Version 0.3.4__ \
+__CAN Monitor for Kvaser USB CAN Interfaces, Version 0.4__ \
 Copyright &copy; 2007,2012-2024 by Uwe Vogt, UV Software, Berlin
 
 ```
