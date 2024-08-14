@@ -4,3 +4,9 @@ doc/
 MacCAN.*
 # TODO: driver-independent type for CAN messages
 MacCAN_Types.h
+MacCAN_Message.h
+# TODO: driver-independent CAN trace file recorder
+MacCAN_Tracer.*
+MacCAN_CritFileIO.*
+# TODO: endpoint enumeration
+MacCAN_IOUsbEP.*

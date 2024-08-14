@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2020-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2020-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -202,7 +202,7 @@ CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device
     /* create a pipe context for the selected CAN channel on the device */
     uint8_t pipeRef = device->endpoints.bulkIn.pipeRef;
     size_t bufSize = device->endpoints.bulkIn.packetSize;
-    device->recvPipe = CANUSB_CreatePipeAsync(device->handle, pipeRef, bufSize);
+    device->recvPipe = CANUSB_CreatePipeAsync(device->handle, pipeRef, bufSize, true);
     if (device->recvPipe == NULL) {
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: asynchronous pipe context could not be created (NULL)\n", device->name, device->channelNo+1);
         (void)CANQUE_Destroy(device->recvData.msgQueue);

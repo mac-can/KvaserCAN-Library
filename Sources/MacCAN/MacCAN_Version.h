@@ -45,50 +45,17 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-Core.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MACCAN_DEVICES_H_INCLUDED
-#define MACCAN_DEVICES_H_INCLUDED
+#ifndef MACCAN_VERSION_H_INCLUDED
+#define MACCAN_VERSION_H_INCLUDED
 
-#include "MacCAN_Common.h"
+#define MACCAN_CORE_REV  "$Rev: 2009 $"  /* ? - update with each commit */
 
-#define CANDEV_LAST_ENTRY_IN_DEVICE_LIST  {0xFFFFU, 0xFFFFU, 0U, NULL, NULL}
+#define MACCAN_CORE_MAJOR  0
+#define MACCAN_CORE_MINOR  5
+#define MACCAN_CORE_PATCH  99
 
-typedef int CANDEV_Index_t;
+#endif /* MACCAN_VERSION_H_INCLUDED */
 
-typedef void *CANDEV_Descriptor_t;
-typedef void (*CANDEV_Callback_t)(CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-typedef struct can_device_tag {
-    UInt16 vendorId;
-    UInt16 productId;
-    UInt8 numChannels;
-    CANDEV_Callback_t cbkAdded;
-    CANDEV_Callback_t cbkRemoved;
-} CANDEV_Device_t, MacCAN_Device_t;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern const CANDEV_Device_t *CANDEV_GetFirstDevice(void);
-
-extern const CANDEV_Device_t *CANDEV_GetNextDevice(void);
-
-extern const CANDEV_Device_t *CANDEV_GetDeviceById(UInt16 vendorId, UInt16 productId);
-
-extern UInt16 CANDEV_GetVendorId(const CANDEV_Device_t *device);
-
-extern UInt16 CANDEV_GetProductId(const CANDEV_Device_t *device);
-
-extern UInt8 CANDEV_GetNumChannels(const CANDEV_Device_t *device);
-
-extern void CANDEV_DeviceAdded(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-extern void CANDEV_DeviceRemoved(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-#ifdef __cplusplus
-}
-#endif
-#endif /* MACCAN_DEVICES_H_INCLUDED */
-
-/* * $Id: MacCAN_Devices.h 1908 2024-07-13 14:26:09Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Version.h 2009 2024-08-10 15:22:06Z makemake $ *** (c) UV Software, Berlin ***
  */
+

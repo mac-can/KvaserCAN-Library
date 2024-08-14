@@ -10,7 +10,7 @@
 #	and under the GNU General Public License v3.0 (or any later version). You can
 #	choose between one of them if you use MacCAN-KvaserCAN in whole or in part.
 #
-#	BSD 2-Clause Simplified License:
+#	BSD 2-Clause "Simplified" License:
 #	Redistribution and use in source and binary forms, with or without
 #	modification, are permitted provided that the following conditions are met:
 #	1. Redistributions of source code must retain the above copyright notice, this
@@ -19,7 +19,7 @@
 #	   this list of conditions and the following disclaimer in the documentation
 #	   and/or other materials provided with the distribution.
 #
-#	MacCAN-KvaserCAN IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS AS IS
+#	MacCAN-KvaserCAN IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 #	AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 #	IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
 #	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
@@ -68,11 +68,12 @@ MACCAN_DIR = $(HOME_DIR)/Sources/MacCAN
 DRIVER_DIR = $(HOME_DIR)/Sources/Driver
 WRAPPER_DIR = $(HOME_DIR)/Sources/Wrapper
 
-OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o \
-	$(OUTDIR)/KvaserCAN_Devices.o $(OUTDIR)/KvaserUSB_Device.o \
+OBJECTS = $(OUTDIR)/KvaserCAN_Driver.o $(OUTDIR)/KvaserCAN_Devices.o \
 	$(OUTDIR)/KvaserUSB_LeafDevice.o $(OUTDIR)/KvaserUSB_MhydraDevice.o \
-	$(OUTDIR)/MacCAN_Devices.o $(OUTDIR)/MacCAN_IOUsbKit.o $(OUTDIR)/MacCAN_Debug.o \
+	$(OUTDIR)/KvaserUSB_Device.o \
+	$(OUTDIR)/MacCAN_Devices.o $(OUTDIR)/MacCAN_IOUsbKit.o \
 	$(OUTDIR)/MacCAN_MsgQueue.o $(OUTDIR)/MacCAN_MsgPipe.o \
+	$(OUTDIR)/MacCAN_Internal.o $(OUTDIR)/MacCAN_Debug.o \
 	$(OUTDIR)/can_api.o $(OUTDIR)/can_btr.o
 
 DEFINES = -DOPTION_CAN_2_0_ONLY=0 \
@@ -82,6 +83,7 @@ DEFINES = -DOPTION_CAN_2_0_ONLY=0 \
 	-DOPTION_MACCAN_PIPE_INFO=0 \
 	-DOPTION_MACCAN_PIPE_TIMEOUT=1 \
 	-DOPTION_MACCAN_MULTICHANNEL=0 \
+	-DOPTION_MACCAN_USB_STRINGS=0 \
 	-DOPTION_MACCAN_LOGGER=0 \
 	-DOPTION_MACCAN_DEBUG_LEVEL=0 \
 	-DOPTION_MACCAN_INSTRUMENTATION=0 \
@@ -112,7 +114,7 @@ INSTALL = /usr/local/lib
 DEFINES += -DOPTION_CANAPI_KVASERCAN_DYLIB=1
 
 CFLAGS += -O2 -Wall -Wextra -Wno-parentheses \
-	-fno-strict-aliasing \
+	-fmessage-length=0 -fno-strict-aliasing \
 	$(DEFINES) \
 	$(HEADERS)
 
@@ -121,10 +123,10 @@ CXXFLAGS += -O2 -g -Wall -Wextra -pthread \
 	$(HEADERS)
 
 LDFLAGS += -nostartfiles -dynamiclib -fvisibility=hidden \
+	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation \
 	-Wl,-install_name,@rpath/$(INSTALL_NAME) \
 	-Wl,-current_version,$(CURRENT_VERSION) \
-	-Wl,-compatibility_version,$(COMPATIBILITY_VERSION) \
-	-Wl,-framework -Wl,IOKit -Wl,-framework -Wl,CoreFoundation
+	-Wl,-compatibility_version,$(COMPATIBILITY_VERSION)
 
 LTFLAGS += -static
 
@@ -170,11 +172,11 @@ incdir:
 	@mkdir -p $(INCDIR)
 	@cp $(SOURCE_DIR)/KvaserCAN_Defines.h $(INCDIR)
 	@cp $(SOURCE_DIR)/KvaserCAN_Defaults.h $(INCDIR)
-	@cp $(CANAPI_DIR)/can_api.h $(INCDIR)
-	@cp $(CANAPI_DIR)/can_btr.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Types.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANAPI_Defines.h $(INCDIR)
 	@cp $(CANAPI_DIR)/CANBTR_Defaults.h $(INCDIR)
+	@cp $(CANAPI_DIR)/can_api.h $(INCDIR)
+	@cp $(CANAPI_DIR)/can_btr.h $(INCDIR)
 
 clean:
 	$(RM) $(TARGET) $(STATIC) $(OUTDIR)/*.o $(OUTDIR)/*.d
@@ -191,12 +193,6 @@ ifeq ($(current_OS),Darwin)
 	$(RM) $(INSTALL)/$(LIBRARY).dylib ; $(LN) $(INSTALL)/$(TARGET) $(INSTALL)/$(LIBRARY).dylib
 endif
 
-
-$(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.c
-	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
-
-$(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
-	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 $(OUTDIR)/KvaserCAN_Driver.o: $(DRIVER_DIR)/KvaserCAN_Driver.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
@@ -225,18 +221,31 @@ $(OUTDIR)/MacCAN_MsgQueue.o: $(MACCAN_DIR)/MacCAN_MsgQueue.c
 $(OUTDIR)/MacCAN_MsgPipe.o: $(MACCAN_DIR)/MacCAN_MsgPipe.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
+$(OUTDIR)/MacCAN_Internal.o: $(MACCAN_DIR)/MacCAN_Internal.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
 $(OUTDIR)/MacCAN_Debug.o: $(MACCAN_DIR)/MacCAN_Debug.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
+$(OUTDIR)/can_api.o: $(WRAPPER_DIR)/can_api.c
+	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
+
+$(OUTDIR)/can_btr.o: $(CANAPI_DIR)/can_btr.c
 	$(CC) $(CFLAGS) -MMD -MF $*.d -o $@ -c $<
 
 
 $(STATIC): $(OBJECTS)
 	$(LT) $(LTFLAGS) -o $@ $(OBJECTS)
-	$(CP) $@ $(BINDIR)
+ifeq ($(current_OS),Darwin)
 	@lipo -archs $@
+endif
+	$(CP) $@ $(BINDIR)
 	@echo "\033[1mTarget '"$@"' successfully build\033[0m"
 
 $(TARGET): $(OBJECTS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJECTS) $(LIBRARIES)
-	$(CP) $@ $(BINDIR)
+ifeq ($(current_OS),Darwin)
 	@lipo -archs $@
+endif
+	$(CP) $@ $(BINDIR)
 	@echo "\033[1mTarget '"$@"' successfully build\033[0m"

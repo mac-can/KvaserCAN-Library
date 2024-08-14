@@ -45,50 +45,72 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-Core.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MACCAN_DEVICES_H_INCLUDED
-#define MACCAN_DEVICES_H_INCLUDED
+#include "MacCAN_Internal.h"
+#include "MacCAN_Version.h"
 
-#include "MacCAN_Common.h"
+#include <stdio.h>
+#include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define CANDEV_LAST_ENTRY_IN_DEVICE_LIST  {0xFFFFU, 0xFFFFU, 0U, NULL, NULL}
+#include <errno.h>
+#include <assert.h>
 
-typedef int CANDEV_Index_t;
-
-typedef void *CANDEV_Descriptor_t;
-typedef void (*CANDEV_Callback_t)(CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-typedef struct can_device_tag {
-    UInt16 vendorId;
-    UInt16 productId;
-    UInt8 numChannels;
-    CANDEV_Callback_t cbkAdded;
-    CANDEV_Callback_t cbkRemoved;
-} CANDEV_Device_t, MacCAN_Device_t;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern const CANDEV_Device_t *CANDEV_GetFirstDevice(void);
-
-extern const CANDEV_Device_t *CANDEV_GetNextDevice(void);
-
-extern const CANDEV_Device_t *CANDEV_GetDeviceById(UInt16 vendorId, UInt16 productId);
-
-extern UInt16 CANDEV_GetVendorId(const CANDEV_Device_t *device);
-
-extern UInt16 CANDEV_GetProductId(const CANDEV_Device_t *device);
-
-extern UInt8 CANDEV_GetNumChannels(const CANDEV_Device_t *device);
-
-extern void CANDEV_DeviceAdded(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-extern void CANDEV_DeviceRemoved(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-#ifdef __cplusplus
+UInt8 CANUSB_GetCoreMajor(void) {
+    return (UInt8)MACCAN_CORE_MAJOR;
 }
-#endif
-#endif /* MACCAN_DEVICES_H_INCLUDED */
 
-/* * $Id: MacCAN_Devices.h 1908 2024-07-13 14:26:09Z makemake $ *** (c) UV Software, Berlin ***
+UInt8 CANUSB_GetCoreMinor(void) {
+    return (UInt8)MACCAN_CORE_MINOR;
+}
+
+UInt8 CANUSB_GetCorePatch(void) {
+    return (UInt8)MACCAN_CORE_PATCH;
+}
+
+int CANUSB_GetCoreRevNo(void) {
+    int rev = 0;
+    /* get SVN/RCS revision number from expanded keyword */
+    if (sscanf(MACCAN_CORE_REV, "\044Rev: %i\044", &rev) != 1)
+        rev = 0;
+    return rev;
+}
+
+UInt32 CANUSB_GetVersion(void) {
+    return ((UInt32)MACCAN_CORE_MAJOR << 24) |
+           ((UInt32)MACCAN_CORE_MINOR << 16) |
+           ((UInt32)MACCAN_CORE_PATCH << 8);
+}
+
+UInt32 CANUSB_GetRevision(void) {
+    return (UInt32)CANUSB_GetCoreRevNo();
+}
+
+UInt8 CANUSB_Dlc2Len(UInt8 dlc) {
+    const static UInt8 dlc_table[16] = {
+#if (OPTION_CAN_2_0_ONLY == 0)
+        0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 12U, 16U, 20U, 24U, 32U, 48U, 64U
+    };
+    return dlc_table[(dlc < 16U) ? dlc : 15U];
+#else
+    return (dlc < 8U) ? dlc : 8U;
+#endif
+}
+
+UInt8 CANUSB_Len2Dlc(UInt8 len) {
+#if (OPTION_CAN_2_0_ONLY == 0)
+    if(len > 48U) return 0x0FU;
+    if(len > 32U) return 0x0EU;
+    if(len > 24U) return 0x0DU;
+    if(len > 20U) return 0x0CU;
+    if(len > 16U) return 0x0BU;
+    if(len > 12U) return 0x0AU;
+    if(len > 8U) return 0x09U;
+#else
+    if(len > 8U) return 0x08U;
+#endif
+    return len;
+}
+
+/* * $Id: MacCAN_Internal.c 1911 2024-07-13 18:13:21Z makemake $ *** (c) UV Software, Berlin ***
  */

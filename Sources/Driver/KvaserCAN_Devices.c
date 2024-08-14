@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2022 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2022-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -133,7 +133,7 @@ const CANDEV_Device_t CANDEV_Devices[] = {
     #error Device not supported!
 #endif
 #if (OPTION_USB_LEAF_PRO_HS_V2_DEVICE != 0)
-    {KVASER_VENDOR_ID, USB_LEAF_PRO_HS_V2_PRODUCT_ID, USB_LEAF_PRO_HS_V2_NUM_CHANNELS},
+    {KVASER_VENDOR_ID, USB_LEAF_PRO_HS_V2_PRODUCT_ID, USB_LEAF_PRO_HS_V2_NUM_CHANNELS, NULL, NULL},
 #endif
 #if (OPTION_USB_USBCAN_PRO_2HS_V2_DEVICE != 0)
     #error Device not supported!
@@ -154,7 +154,7 @@ const CANDEV_Device_t CANDEV_Devices[] = {
     #error Device not supported!
 #endif
 #if (OPTION_USB_HYBRID_PRO_CANLIN_DEVICE != 0)
-    {KVASER_VENDOR_ID, USB_HYBRID_PRO_CANLIN_PRODUCT_ID, USB_HYBRID_PRO_CANLIN_NUM_CHANNELS},
+    {KVASER_VENDOR_ID, USB_HYBRID_PRO_CANLIN_PRODUCT_ID, USB_HYBRID_PRO_CANLIN_NUM_CHANNELS, NULL, NULL},
 #endif
 #if (OPTION_USB_BLACKBIRD_PRO_HS_V2_DEVICE != 0)
     #error Device not supported!
@@ -166,7 +166,7 @@ const CANDEV_Device_t CANDEV_Devices[] = {
     #error Device not supported!
 #endif
 #if (OPTION_USB_U100P_DEVICE != 0)
-    {KVASER_VENDOR_ID, USB_U100P_PRODUCT_ID, USB_U100P_NUM_CHANNELS},
+    {KVASER_VENDOR_ID, USB_U100P_PRODUCT_ID, USB_U100P_NUM_CHANNELS, NULL, NULL},
 #endif
 #if (OPTION_USB_U100S_DEVICE != 0)
     #error Device not supported!
@@ -181,7 +181,7 @@ const CANDEV_Device_t CANDEV_Devices[] = {
     #error Device not supported!
 #endif
 #if (OPTION_USB_LEAF_LITE_V2_DEVICE != 0)
-    {KVASER_VENDOR_ID, USB_LEAF_LITE_V2_PRODUCT_ID, USB_LEAF_LITE_V2_NUM_CHANNELS},
+    {KVASER_VENDOR_ID, USB_LEAF_LITE_V2_PRODUCT_ID, USB_LEAF_LITE_V2_NUM_CHANNELS, NULL, NULL},
 #endif
 #if (OPTION_USB_MINI_PCI_EXPRESS_HS_DEVICE != 0)
     #error Device not supported!

@@ -56,6 +56,8 @@
 		44CC011F277BB95200EF9361 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 44CC011E277BB91100EF9361 /* main.cpp */; };
 		44CF180E283E90C000A747B5 /* KvaserCAN_Devices.c in Sources */ = {isa = PBXBuildFile; fileRef = 44CF180D283E90C000A747B5 /* KvaserCAN_Devices.c */; };
 		44CF180F283E90C000A747B5 /* KvaserCAN_Devices.c in Sources */ = {isa = PBXBuildFile; fileRef = 44CF180D283E90C000A747B5 /* KvaserCAN_Devices.c */; };
+		44E20A3D2C6CA4F4003676B5 /* MacCAN_Internal.c in Sources */ = {isa = PBXBuildFile; fileRef = 44E20A3C2C6CA4F4003676B5 /* MacCAN_Internal.c */; };
+		44E20A3E2C6CA4F4003676B5 /* MacCAN_Internal.c in Sources */ = {isa = PBXBuildFile; fileRef = 44E20A3C2C6CA4F4003676B5 /* MacCAN_Internal.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -136,6 +138,8 @@
 		44CC011E277BB91100EF9361 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = Sources/main.cpp; sourceTree = "<group>"; };
 		44CF180C283E90C000A747B5 /* KvaserCAN_Devices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KvaserCAN_Devices.h; path = ../Sources/Driver/KvaserCAN_Devices.h; sourceTree = "<group>"; };
 		44CF180D283E90C000A747B5 /* KvaserCAN_Devices.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = KvaserCAN_Devices.c; path = ../Sources/Driver/KvaserCAN_Devices.c; sourceTree = "<group>"; };
+		44E20A3B2C6CA4F4003676B5 /* MacCAN_Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MacCAN_Internal.h; path = ../Sources/MacCAN/MacCAN_Internal.h; sourceTree = "<group>"; };
+		44E20A3C2C6CA4F4003676B5 /* MacCAN_Internal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = MacCAN_Internal.c; path = ../Sources/MacCAN/MacCAN_Internal.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -196,6 +200,8 @@
 				0FD97E3725D1EA1300C8A7C7 /* MacCAN_MsgPipe.h */,
 				0FD97E3925D1EA1300C8A7C7 /* MacCAN_MsgQueue.c */,
 				0FD97E3825D1EA1300C8A7C7 /* MacCAN_MsgQueue.h */,
+				44E20A3C2C6CA4F4003676B5 /* MacCAN_Internal.c */,
+				44E20A3B2C6CA4F4003676B5 /* MacCAN_Internal.h */,
 				0FD97E3225D1C06400C8A7C7 /* KvaserUSB_Common.h */,
 				0FD97E3325D1C06400C8A7C7 /* KvaserUSB_Device.c */,
 				0FD97E3125D1C06400C8A7C7 /* KvaserUSB_Device.h */,
@@ -348,6 +354,7 @@
 				0FDA0A7F25D33EF700E50E4B /* KvaserCAN.cpp in Sources */,
 				0FD97E3C25D1EA1300C8A7C7 /* MacCAN_MsgPipe.c in Sources */,
 				0FD97E2525D1BB3C00C8A7C7 /* MacCAN_Devices.c in Sources */,
+				44E20A3D2C6CA4F4003676B5 /* MacCAN_Internal.c in Sources */,
 				0FD97E2725D1BB3C00C8A7C7 /* MacCAN_IOUsbKit.c in Sources */,
 				0F84AA45268BA44F00DA70C3 /* can_api.c in Sources */,
 				0FD97E3425D1C06400C8A7C7 /* KvaserUSB_Device.c in Sources */,
@@ -378,6 +385,7 @@
 				44999AD9278CDEB400C466E9 /* test_can_start.mm in Sources */,
 				44999AE3278CDEB400C466E9 /* test_can_property.mm in Sources */,
 				44999AC0278CDE1300C466E9 /* MacCAN_Debug.c in Sources */,
+				44E20A3E2C6CA4F4003676B5 /* MacCAN_Internal.c in Sources */,
 				44C35CE62A9E962C00001CBD /* Bitrates.cpp in Sources */,
 				44999AC8278CDE3900C466E9 /* KvaserCAN_Driver.c in Sources */,
 				44999ADF278CDEB400C466E9 /* test_can_version.mm in Sources */,

@@ -91,5 +91,36 @@ const CANDEV_Device_t *CANDEV_GetDeviceById(UInt16 vendorId, UInt16 productId)
     return ptrDevice;
 }
 
-/* * $Id: MacCAN_Devices.c 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
+UInt16 CANDEV_GetVendorId(const CANDEV_Device_t *device) {
+    if (device)
+        return device->vendorId;
+    else
+        return 0U;
+}
+
+UInt16 CANDEV_GetProductId(const CANDEV_Device_t *device) {
+    if (device)
+        return device->productId;
+    else
+        return 0U;
+}
+
+UInt8 CANDEV_GetNumChannels(const CANDEV_Device_t *device) {
+    if (device)
+        return device->numChannels;
+    else
+        return 0U;
+}
+
+void CANDEV_DeviceAdded(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor) {
+    if (device && device->cbkAdded)
+        device->cbkAdded(index, descriptor);
+}
+
+void CANDEV_DeviceRemoved(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor) {
+    if (device && device->cbkRemoved)
+        device->cbkRemoved(index, descriptor);
+}
+
+/* * $Id: MacCAN_Devices.c 1908 2024-07-13 14:26:09Z makemake $ *** (c) UV Software, Berlin ***
  */

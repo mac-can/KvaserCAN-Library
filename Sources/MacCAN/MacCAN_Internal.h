@@ -45,50 +45,31 @@
  *  You should have received a copy of the GNU General Public License
  *  along with MacCAN-Core.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef MACCAN_DEVICES_H_INCLUDED
-#define MACCAN_DEVICES_H_INCLUDED
+#ifndef MACCAN_INTERNA_H_INCLUDED
+#define MACCAN_INTERNA_H_INCLUDED
 
 #include "MacCAN_Common.h"
-
-#define CANDEV_LAST_ENTRY_IN_DEVICE_LIST  {0xFFFFU, 0xFFFFU, 0U, NULL, NULL}
-
-typedef int CANDEV_Index_t;
-
-typedef void *CANDEV_Descriptor_t;
-typedef void (*CANDEV_Callback_t)(CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-typedef struct can_device_tag {
-    UInt16 vendorId;
-    UInt16 productId;
-    UInt8 numChannels;
-    CANDEV_Callback_t cbkAdded;
-    CANDEV_Callback_t cbkRemoved;
-} CANDEV_Device_t, MacCAN_Device_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const CANDEV_Device_t *CANDEV_GetFirstDevice(void);
+/* - - MacCAN-Core version information - - 
+ */
+extern UInt8 CANUSB_GetCoreMajor(void);
+extern UInt8 CANUSB_GetCoreMinor(void);
+extern UInt8 CANUSB_GetCorePatch(void);
+extern int CANUSB_GetCoreRevNo(void);
 
-extern const CANDEV_Device_t *CANDEV_GetNextDevice(void);
-
-extern const CANDEV_Device_t *CANDEV_GetDeviceById(UInt16 vendorId, UInt16 productId);
-
-extern UInt16 CANDEV_GetVendorId(const CANDEV_Device_t *device);
-
-extern UInt16 CANDEV_GetProductId(const CANDEV_Device_t *device);
-
-extern UInt8 CANDEV_GetNumChannels(const CANDEV_Device_t *device);
-
-extern void CANDEV_DeviceAdded(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
-
-extern void CANDEV_DeviceRemoved(const CANDEV_Device_t *device, CANDEV_Index_t index, CANDEV_Descriptor_t *descriptor);
+/* - - CAN FD DLC/length conversion - - 
+ */
+extern UInt8 CANUSB_Dlc2Len(UInt8 dlc);
+extern UInt8 CANUSB_Len2Dlc(UInt8 len);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* MACCAN_DEVICES_H_INCLUDED */
+#endif /* MACCAN_INTERNA_H_INCLUDED */
 
-/* * $Id: MacCAN_Devices.h 1908 2024-07-13 14:26:09Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Internal.h 1911 2024-07-13 18:13:21Z makemake $ *** (c) UV Software, Berlin ***
  */

@@ -2,7 +2,7 @@
 /*
  *  KvaserCAN - macOS User-Space Driver for Kvaser CAN Interfaces
  *
- *  Copyright (c) 2021-2023 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
+ *  Copyright (c) 2021-2024 Uwe Vogt, UV Software, Berlin (info@mac-can.com)
  *  All rights reserved.
  *
  *  This file is part of MacCAN-KvaserCAN.
@@ -84,7 +84,7 @@
 
 #define MIN(x,y)  (((x) < (y)) ? (x) : (y))
 
-static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size);
+static int ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size);
 static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency);
 static bool DecodeMessage(KvaserUSB_CanMessage_t *message, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency);
 
@@ -1456,7 +1456,7 @@ CANUSB_Return_t Mhydra_GetTransceiverInfo(KvaserUSB_Device_t *device, KvaserUSB_
     return retVal;
 }
 
-static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
+static int ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
     KvaserUSB_RecvData_t *context = (KvaserUSB_RecvData_t*)refCon;
     KvaserUSB_CanMessage_t message;
     UInt32 index = 0U;
@@ -1579,8 +1579,10 @@ static void ReceptionCallback(void *refCon, UInt8 *buffer, UInt32 size) {
     if (index < hydra->length) {
         memmove(&hydra->buffer[0], &hydra->buffer[index], (size_t)(hydra->length - index));  // TODO: array boundaries
         hydra->length -= index;
-    } else
+    } else {
         hydra->length = 0U;
+    }
+    return 0;
 }
 
 static bool UpdateEventData(KvaserUSB_EventData_t *event, uint8_t *buffer, uint32_t nbyte, KvaserUSB_Frequency_t frequency) {

@@ -50,6 +50,40 @@
 
 #include <MacTypes.h>
 
+#ifndef CANUSB_MAX_DEVICES
+#define CANUSB_MAX_DEVICES  42
+#endif
+#define CANUSB_INVALID_INDEX  (-1)
+#define CANUSB_INVALID_HANDLE  (-1)
+
+#define CANUSB_ANY_VENDOR_ID  0xFFFFU
+#define CANUSB_ANY_PRODUCT_ID  0xFFFFU
+
+/* USB endpoint properties */
+#define USBPIPE_DIR_OUT   0U
+#define USBPIPE_DIR_IN    1U
+#define USBPIPE_DIR_NONE  2U
+#define USBPIPE_DIR_ANY   3U
+
+#define USBPIPE_TYPE_CTRL  0U
+#define USBPIPE_TYPE_ISOC  1U
+#define USBPIPE_TYPE_BULK  2U
+#define USBPIPE_TYPE_INTR  3U
+#define USBPIPE_TYPE_ANY 0xFFU
+
+/* USB device request (setup packet) */
+#define USBREQ_HOST_TO_DEVICE  0x00U
+#define USBREQ_DEVICE_TO_HOST  0x80U
+
+#define USBREQ_TYPE_STANDARD  0x00U
+#define USBREQ_TYPE_CLASS     0x20U
+#define USBREQ_TYPE_VENDOR    0x40U
+
+#define USBREQ_RECIPIENT_DEVICE     0x00U
+#define USBREQ_RECIPIENT_INTERFACE  0x01U
+#define USBREQ_RECIPIENT_ENDPOINT   0x02U
+#define USBREQ_RECIPIENT_OTHER      0x03U
+
 /* CAN API V3 compatible error codes */
 #define CANUSB_ERROR_FATAL     (-99)
 #define CANUSB_ERROR_NOTSUPP   (-98)
@@ -67,7 +101,9 @@
 #define CANUSB_ERROR_BUSY      (-20)
 #define CANUSB_ERROR_OK          (0)
 /* MacCAN specific error codes */
-#define CANUSB_ERROR_STALLED   CANUSB_ERROR_BUSY
+#define CANUSB_ERROR_STALLED   (-21) // TX_STUCK
+#define CANUSB_ERROR_DISABLED  (-41) // QUE_DISABLED
+#define CANUSB_ERROR_FULL      CANUSB_ERROR_OVERRUN
 #define CANUSB_SUCCESS         CANUSB_ERROR_OK
 
 /* CAN API V3 compatible board states */
@@ -83,10 +119,14 @@
 extern "C" {
 #endif
 
+extern UInt32 CANUSB_GetVersion(void);
+
+extern UInt32 CANUSB_GetRevision(void);
+
 #ifdef __cplusplus
 }
 #endif
 #endif /* MACCAN_COMMON_H_INCLUDED */
 
-/* * $Id: MacCAN_Common.h 1907 2024-07-13 14:24:36Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Common.h 2007 2024-08-09 17:19:00Z makemake $ *** (c) UV Software, Berlin ***
  */
