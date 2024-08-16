@@ -53,8 +53,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <unistd.h>
+#include <time.h>
+#include <sched.h>
+
 #include <errno.h>
 #include <assert.h>
+
+#define POSIX_DEPRECATED 0  /* set to non-zero value to use deprecated 'usleep' */
+#if (POSIX_DEPRECATED != 0)
+#warning Compilation with deprecated function 'usleep'
+#endif
 
 UInt8 CANUSB_GetCoreMajor(void) {
     return (UInt8)MACCAN_CORE_MAJOR;
@@ -112,5 +121,29 @@ UInt8 CANUSB_Len2Dlc(UInt8 len) {
     return len;
 }
 
-/* * $Id: MacCAN_Internal.c 1911 2024-07-13 18:13:21Z makemake $ *** (c) UV Software, Berlin ***
+Boolean CANUSB_Sleep(UInt32 microseconds) {
+#if (POSIX_DEPRECATED != 0)
+    if (microseconds)
+        return (usleep((useconds_t)microseconds) != 0) ? false : true;
+    else
+        return (sched_yield() != 0) ? false : true;
+#else
+    int rc;
+    struct timespec delay;
+    if (microseconds) {
+        delay.tv_sec = (time_t)(microseconds / (UInt32)1000000);
+        delay.tv_nsec = (long)((microseconds % (UInt32)1000000) * (UInt32)1000);
+        errno = 0;
+        while ((rc = nanosleep(&delay, &delay)) != 0) {
+            if (errno != EINTR)
+                break;
+        }
+    } else {
+        rc = sched_yield();
+    }
+    return (rc != 0) ? false : true;
+#endif
+}
+
+/* * $Id: MacCAN_Internal.c 2028 2024-08-16 08:24:21Z makemake $ *** (c) UV Software, Berlin ***
  */

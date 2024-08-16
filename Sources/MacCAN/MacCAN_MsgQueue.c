@@ -123,7 +123,7 @@ CANQUE_MsgQueue_t CANQUE_Create(size_t numElem, size_t elemSize, UInt8 mode) {
         return NULL;
     }
     bzero(msgQueue, sizeof(struct msg_queue_tag));
-    if ((msgQueue->queueElem = calloc(numElem, elemSize))) {
+    if ((msgQueue->queueElem = (UInt8*)calloc(numElem, elemSize))) {
         /* message queue with Posix wait condition */
         if ((pthread_mutex_init(&msgQueue->wait.mutex, NULL) == 0)
         &&  (pthread_cond_init(&msgQueue->wait.cond, NULL) == 0)
@@ -522,5 +522,5 @@ static Boolean DequeueElement(CANQUE_MsgQueue_t queue, void *element) {
         return false;
 }
 
-/* * $Id: MacCAN_MsgQueue.c 2007 2024-08-09 17:19:00Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_MsgQueue.c 2024 2024-08-15 15:02:33Z makemake $ *** (c) UV Software, Berlin ***
  */

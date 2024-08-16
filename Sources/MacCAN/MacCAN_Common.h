@@ -50,9 +50,6 @@
 
 #include <MacTypes.h>
 
-#ifndef CANUSB_MAX_DEVICES
-#define CANUSB_MAX_DEVICES  42
-#endif
 #define CANUSB_INVALID_INDEX  (-1)
 #define CANUSB_INVALID_HANDLE  (-1)
 
@@ -104,6 +101,7 @@
 #define CANUSB_ERROR_STALLED   (-21) // TX_STUCK
 #define CANUSB_ERROR_DISABLED  (-41) // QUE_DISABLED
 #define CANUSB_ERROR_FULL      CANUSB_ERROR_OVERRUN
+#define CANUSB_ERROR_INDEX     CANUSB_ERROR_HANDLE
 #define CANUSB_SUCCESS         CANUSB_ERROR_OK
 
 /* CAN API V3 compatible board states */
@@ -114,6 +112,8 @@
 
 /* CAN API V3 compatible time-out value */
 #define CANUSB_INFINITE  (65535U)
+#define CANUSB_MICROSECONDS  (1U)
+#define CANUSB_MILLISECONDS  (1000U)
 
 #ifdef __cplusplus
 extern "C" {
@@ -123,10 +123,12 @@ extern UInt32 CANUSB_GetVersion(void);
 
 extern UInt32 CANUSB_GetRevision(void);
 
+extern Boolean CANUSB_Sleep(UInt32 microseconds);
+
 #ifdef __cplusplus
 }
 #endif
 #endif /* MACCAN_COMMON_H_INCLUDED */
 
-/* * $Id: MacCAN_Common.h 2007 2024-08-09 17:19:00Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Common.h 2028 2024-08-16 08:24:21Z makemake $ *** (c) UV Software, Berlin ***
  */

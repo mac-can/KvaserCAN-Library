@@ -111,6 +111,10 @@ extern CANUSB_Return_t CANUSB_WritePipeAsync(CANUSB_AsyncPipe_t asyncPipe, const
                                                                            CANUSB_AsyncPipeCbk_t callback, CANUSB_Context_t context);
 extern Boolean CANUSB_IsPipeAsyncRunning(CANUSB_AsyncPipe_t asyncPipe);
 
+extern Boolean CANUSB_IsDevicePresent(CANUSB_Index_t index);
+
+extern CANUSB_Index_t CANUSB_MaxDevices(void);
+
 extern CANUSB_Index_t CANUSB_GetFirstDevice(void);
 
 extern CANUSB_Index_t CANUSB_GetNextDevice(void);
@@ -154,7 +158,6 @@ extern CANUSB_Return_t CANUSB_GetDeviceSerialNumber(CANUSB_Index_t index, char *
 #endif
 
 /* === Deprecated === */
-extern Boolean CANUSB_IsDevicePresent(CANUSB_Index_t index);
 extern Boolean CANUSB_IsDeviceInUse(CANUSB_Index_t index);
 extern Boolean CANUSB_IsDeviceOpened(CANUSB_Index_t index);
 #define CANUSB_Plugging_t  CANUSB_DetachedCbk_t
@@ -171,5 +174,5 @@ extern Boolean CANUSB_IsDeviceOpened(CANUSB_Index_t index);
 #endif
 #endif /* MACCAN_IOUSBKIT_H_INCLUDED */
 
-/* * $Id: MacCAN_IOUsbKit.h 1915 2024-07-14 16:18:13Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.h 2027 2024-08-16 07:18:04Z makemake $ *** (c) UV Software, Berlin ***
  */

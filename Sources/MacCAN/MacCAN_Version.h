@@ -48,7 +48,7 @@
 #ifndef MACCAN_VERSION_H_INCLUDED
 #define MACCAN_VERSION_H_INCLUDED
 
-#define MACCAN_CORE_REV  "$Rev: 2009 $"  /* ? - update with each commit */
+#define MACCAN_CORE_REV  "$Rev: 2028 $"  /* ?? - update with each commit */
 
 #define MACCAN_CORE_MAJOR  0
 #define MACCAN_CORE_MINOR  5
@@ -56,6 +56,6 @@
 
 #endif /* MACCAN_VERSION_H_INCLUDED */
 
-/* * $Id: MacCAN_Version.h 2009 2024-08-10 15:22:06Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_Version.h 2028 2024-08-16 08:24:21Z makemake $ *** (c) UV Software, Berlin ***
  */
 
