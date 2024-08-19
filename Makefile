@@ -88,7 +88,7 @@ xctest:
 	$(MAKE) -C Trial $@
 
 smoketest:
-	$(MAKE) -C Tests/CANAPI clean all
+	$(MAKE) -C Tests/CANAPI all
 	./Tests/CANAPI/kvl_testing --gtest_filter="SmokeTest.*"
 
 build_no:

@@ -164,6 +164,7 @@ CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device
     CANUSB_Return_t retVal = CANUSB_ERROR_FATAL;
     CANUSB_Handle_t handle = CANUSB_INVALID_HANDLE;
     CANUSB_Index_t index = channel;
+    KvaserUSB_CanChannel_t canChannel = 0U;  // TODO: get CAN channel from channel no.
 
     /* sanity check */
     if (!device)
@@ -172,43 +173,24 @@ CANUSB_Return_t KvaserUSB_OpenUsbDevice(CANUSB_Index_t channel, KvaserUSB_Device
         return CANUSB_ERROR_YETINIT;
 
     /* open the USB device at index, if and only if the vendor ID matches */
-    handle = CANUSB_OpenDevice(index, KVASER_VENDOR_ID, CANUSB_ANY_PRODUCT_ID);
+    handle = CANUSB_OpenDevice(index, canChannel, KVASER_VENDOR_ID, CANUSB_ANY_PRODUCT_ID);
     if (handle < 0) {
 //        MACCAN_DEBUG_ERROR("+++ MacCAN-Core: device could not be opened (%02x)\n", channel);
         return CANUSB_ERROR_NOTINIT;
     }
     /* get the USB configuration of the device (also check the CAN channel number) */
-    retVal = GetUsbConfiguration(handle, 0U, device);  // TODO: multi-channel devices
+    retVal = GetUsbConfiguration(handle, canChannel, device);  // TODO: multi-channel devices
     if (retVal < 0) {
 //        MACCAN_DEBUG_ERROR("+++ MacCAN-Core: configuration could not be read (%02x)\n", channel);
-        (void)CANUSB_CloseDevice(handle);
+        (void)CANUSB_CloseDevice(handle, canChannel);
         return retVal;
     }
     /* create a pipe for data exchange */
     device->recvData.msgPipe = CANPIP_Create();
     if (device->recvData.msgPipe == NULL) {
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: pipe could not be created (NULL)\n", device->name, device->channelNo+1);
-        (void)CANUSB_CloseDevice(handle);
+        (void)CANUSB_CloseDevice(handle, canChannel);
         return retVal;;
-    }
-    /* create a message queue for received CAN frames */
-    device->recvData.msgQueue = CANQUE_Create(KVASER_RECEIVE_QUEUE_SIZE, sizeof(KvaserUSB_CanMessage_t), CANQUE_BLOCKING_READ);
-    if (device->recvData.msgQueue == NULL) {
-//        MACCAN_DEBUG_ERROR("+++ %s CAN%u: message queue could not be created (NULL)\n", device->name, device->channelNo+1);
-        (void)CANPIP_Destroy(device->recvData.msgPipe);
-        (void)CANUSB_CloseDevice(handle);
-        return retVal;;
-    }
-    /* create a pipe context for the selected CAN channel on the device */
-    uint8_t pipeRef = device->endpoints.bulkIn.pipeRef;
-    size_t bufSize = device->endpoints.bulkIn.packetSize;
-    device->recvPipe = CANUSB_CreatePipeAsync(device->handle, pipeRef, bufSize, true);
-    if (device->recvPipe == NULL) {
-//        MACCAN_DEBUG_ERROR("+++ %s CAN%u: asynchronous pipe context could not be created (NULL)\n", device->name, device->channelNo+1);
-        (void)CANQUE_Destroy(device->recvData.msgQueue);
-        (void)CANPIP_Destroy(device->recvData.msgPipe);
-        (void)CANUSB_CloseDevice(handle);
-        return CANUSB_ERROR_RESOURCE;
     }
     return retVal;
 }
@@ -225,7 +207,7 @@ CANUSB_Return_t KvaserUSB_CloseUsbDevice(KvaserUSB_Device_t *device) {
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: asynchronous pipe could not be stopped (%i)\n", device->name, device->channelNo+1, retVal);
     /* close the USB device */
-    retVal = CANUSB_CloseDevice(device->handle);
+    retVal = CANUSB_CloseDevice(device->handle, device->channelNo);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s CAN%u: device could not be closed (%i)\n", device->name, device->channelNo+1, retVal);
     /* destroy the pipe context */
@@ -314,8 +296,23 @@ CANUSB_Return_t KvaserUSB_StartReception(KvaserUSB_Device_t *device, CANUSB_Asyn
     if (!device->configured)
         return CANUSB_ERROR_NOTINIT;
 
+    /* create a message queue for received CAN frames */
+    device->recvData.msgQueue = CANQUE_Create(KVASER_RECEIVE_QUEUE_SIZE, sizeof(KvaserUSB_CanMessage_t), CANQUE_BLOCKING_READ);
+    if (device->recvData.msgQueue == NULL) {
+//        MACCAN_DEBUG_ERROR("+++ %s CAN%u: message queue could not be created (NULL)\n", device->name, device->channelNo+1);
+        return CANUSB_ERROR_RESOURCE;
+    }
+    /* create a pipe context for the selected CAN channel on the device */
+    uint8_t pipeRef = device->endpoints.bulkIn.pipeRef;
+    size_t bufSize = device->endpoints.bulkIn.packetSize;
+    device->recvPipe = CANUSB_CreatePipeAsync(device->handle, pipeRef, bufSize, true, callback, (void*)&device->recvData);
+    if (device->recvPipe == NULL) {
+//        MACCAN_DEBUG_ERROR("+++ %s CAN%u: asynchronous pipe context could not be created (NULL)\n", device->name, device->channelNo+1);
+        (void)CANQUE_Destroy(device->recvData.msgQueue);
+        return CANUSB_ERROR_RESOURCE;
+    }
     /* start asynchronous read on endpoint */
-    retVal = CANUSB_ReadPipeAsync(device->recvPipe, callback, (void*)&device->recvData);
+    retVal = CANUSB_ReadPipeAsync(device->recvPipe);
 //    if (retVal < 0)
 //        MACCAN_DEBUG_ERROR("+++ %s #%u: reception loop could not be started (%i)\n", device->name, device->channelNo, retVal);
 

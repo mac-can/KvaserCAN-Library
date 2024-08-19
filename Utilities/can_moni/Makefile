@@ -70,6 +70,12 @@ endif
 
 LIBRARIES = -lpthread
 
+CHECKER  = warning,information
+IGNORE   = -i Options_w.cpp -i dosopt.c
+ifeq ($(HUNTER),BUGS)
+CHECKER += --bug-hunting
+endif
+
 CXX = clang++
 CC = clang
 LD = clang++
@@ -101,12 +107,16 @@ bindir:
 incdir:
 	@mkdir -p $(INCDIR)
 
+check:
+	cppcheck --enable=$(CHECKER) --suppressions-list=$(PROJ_DIR)/suppress.txt \
+	-D__APPLE__ $(DEFINES) $(HEADERS) $(IGNORE) $(MAIN_DIR)
+
 clean:
-	$(RM) $(TARGET) $(OUTDIR)/*.o $(OUTDIR)/*.d
+	@-$(RM) $(TARGET) $(OUTDIR)/*.o $(OUTDIR)/*.d
 
 pristine:
-	$(RM) $(TARGET) $(OUTDIR)/*.o $(OUTDIR)/*.d
-	$(RM) $(BINDIR)/$(TARGET)
+	@-$(RM) $(TARGET) $(OUTDIR)/*.o $(OUTDIR)/*.d
+	@-$(RM) $(BINDIR)/$(TARGET)
 
 install:
 	@echo "Copying binary file..."

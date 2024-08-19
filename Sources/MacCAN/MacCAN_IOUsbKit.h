@@ -87,11 +87,11 @@ extern CANUSB_Return_t CANUSB_Teardown(void);
 
 extern CANUSB_Return_t CANUSB_DeviceRequest(CANUSB_Index_t index, CANUSB_DeviceRequest_t request, void *buffer, UInt16 size, UInt32 *transferred);
 
-extern CANUSB_Handle_t CANUSB_OpenDevice(CANUSB_Index_t index, UInt16 vendorId, UInt16 productId);
+extern CANUSB_Handle_t CANUSB_OpenDevice(CANUSB_Index_t index, UInt8 channel, UInt16 vendorId, UInt16 productId);
 
-extern CANUSB_Return_t CANUSB_CloseDevice(CANUSB_Handle_t handle);
+extern CANUSB_Return_t CANUSB_CloseDevice(CANUSB_Handle_t handle, UInt8 channel);
 
-extern CANUSB_Return_t CANUSB_RegisterDetachedCallback(CANUSB_Handle_t handle, CANUSB_DetachedCbk_t callback, CANUSB_Context_t context);
+extern CANUSB_Return_t CANUSB_RegisterDetachedCallback(CANUSB_Handle_t handle, UInt8 channel, CANUSB_DetachedCbk_t callback, CANUSB_Context_t context);
 
 extern CANUSB_Return_t CANUSB_ReadPipe(CANUSB_Handle_t handle, UInt8 pipeRef, void *buffer, UInt32 *size, UInt16 timeout);
 
@@ -99,16 +99,17 @@ extern CANUSB_Return_t CANUSB_WritePipe(CANUSB_Handle_t handle, UInt8 pipeRef, c
 
 extern CANUSB_Return_t CANUSB_ResetPipe(CANUSB_Handle_t handle, UInt8 pipeRef);
 
-extern CANUSB_AsyncPipe_t CANUSB_CreatePipeAsync(CANUSB_Handle_t handle, UInt8 pipeRef, size_t bufferSize, Boolean doubleBuffer);
+extern CANUSB_AsyncPipe_t CANUSB_CreatePipeAsync(CANUSB_Handle_t handle, UInt8 pipeRef, size_t bufferSize, Boolean doubleBuffer,
+                                                 CANUSB_AsyncPipeCbk_t callback, CANUSB_Context_t context);
 
 extern CANUSB_Return_t CANUSB_DestroyPipeAsync(CANUSB_AsyncPipe_t asyncPipe);
 
 extern CANUSB_Return_t CANUSB_AbortPipeAsync(CANUSB_AsyncPipe_t asyncPipe);
 
-extern CANUSB_Return_t CANUSB_ReadPipeAsync(CANUSB_AsyncPipe_t asyncPipe, CANUSB_AsyncPipeCbk_t callback, CANUSB_Context_t context);
+extern CANUSB_Return_t CANUSB_ReadPipeAsync(CANUSB_AsyncPipe_t asyncPipe);
 
-extern CANUSB_Return_t CANUSB_WritePipeAsync(CANUSB_AsyncPipe_t asyncPipe, const void *buffer, UInt32 size, UInt16 timeout,
-                                                                           CANUSB_AsyncPipeCbk_t callback, CANUSB_Context_t context);
+extern CANUSB_Return_t CANUSB_WritePipeAsync(CANUSB_AsyncPipe_t asyncPipe, const void *buffer, UInt32 size, UInt16 timeout);
+
 extern Boolean CANUSB_IsPipeAsyncRunning(CANUSB_AsyncPipe_t asyncPipe);
 
 extern Boolean CANUSB_IsDevicePresent(CANUSB_Index_t index);
@@ -174,5 +175,5 @@ extern Boolean CANUSB_IsDeviceOpened(CANUSB_Index_t index);
 #endif
 #endif /* MACCAN_IOUSBKIT_H_INCLUDED */
 
-/* * $Id: MacCAN_IOUsbKit.h 2027 2024-08-16 07:18:04Z makemake $ *** (c) UV Software, Berlin ***
+/* * $Id: MacCAN_IOUsbKit.h 2037 2024-08-19 16:15:02Z makemake $ *** (c) UV Software, Berlin ***
  */
