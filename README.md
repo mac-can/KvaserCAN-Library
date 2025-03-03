@@ -1,6 +1,6 @@
 ### macOS&reg; User-Space Driver for USB CAN Interfaces from Kvaser
 
-_Copyright &copy; 2017-2024  Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
+_Copyright &copy; 2017-2025 Uwe Vogt, UV Software, Berlin (info@mac-can.com)_
 
 ![macOS Build](https://github.com/mac-can/KvaserCAN-Library/actions/workflows/macos-build.yml/badge.svg)
 
@@ -179,7 +179,7 @@ You can choose between one of them if you use these portions of this work in who
 
 ### Trademarks
 
-Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. \
+Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries and regions. \
 Windows is a registered trademark of Microsoft Corporation in the United States and/or other countries. \
 Linux is a registered trademark of Linus Torvalds. \
 All other company, product and service names mentioned herein may be trademarks, registered trademarks, or service marks of their respective owners.
@@ -190,5 +190,5 @@ _If you connect your CAN device to a real CAN network when using this library, y
 
 ### Contact
 
-E-Mail: mailto://info@mac.can.com \
+E-Mail: mailto://info@mac-can.com \
 Internet: https://www.mac-can.net
