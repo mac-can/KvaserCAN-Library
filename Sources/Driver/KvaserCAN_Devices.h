@@ -54,7 +54,7 @@
 /** @name  Supported Kvaser Leaf Interfaces
  *  @brief Options to activate single devices from USB-to-CAN Leaf device family.
  *  @{ */
-#define OPTION_USB_LEAF_DEVEL_DEVICE             0 ///< Kvaser Leaf prototype (P010v2 and v3)
+#define OPTION_USB_LEAF_DEVEL_DEVICE             1 ///< Kvaser Leaf prototype (P010v2 and v3)
 #define OPTION_USB_LEAF_LITE_DEVICE              0 ///< Kvaser Leaf Light (P010v3)
 #define OPTION_USB_LEAF_PRO_DEVICE               0 ///< Kvaser Leaf Professional HS
 #define OPTION_USB_LEAF_SPRO_DEVICE              0 ///< Kvaser Leaf SemiPro HS
@@ -126,9 +126,15 @@ typedef enum kavser_device_family_t_ {
  *  @brief Tbd.
  *  @{ */
 #if (OPTION_USB_LEAF_DEVEL_DEVICE != 0)
-    #define USB_LEAF_DEVEL_PRODUCT_ID  10U
-    #define USB_LEAF_DEVEL_DRV_FAMILY  KVASER_USB_LEAF_DEVICE_FAMILY
-    #error Device properties not defined!
+    #define USB_LEAF_DEVEL_PRODUCT_ID  279U
+    #define USB_LEAF_DEVEL_DRV_FAMILY  KVASER_USB_MHYDRA_DEVICE_FAMILY
+    #define USB_LEAF_DEVEL_NUM_CHANNELS         1U
+    #define USB_LEAF_DEVEL_CAN_CLOCK            80U  // likely correct
+    #define USB_LEAF_DEVEL_TIMER_FREQ           20U  // likely correct
+    #define USB_LEAF_DEVEL_CAP_CANFD            true
+    #define USB_LEAF_DEVEL_CAP_NONISO           false
+    #define USB_LEAF_DEVEL_CAP_SILENT_MODE      true
+    #define USB_LEAF_DEVEL_CAP_ERROR_FRAME      false
 #endif
 /** @} */
 

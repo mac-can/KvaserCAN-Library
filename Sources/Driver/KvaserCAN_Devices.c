@@ -52,7 +52,7 @@
 
 const CANDEV_Device_t CANDEV_Devices[] = {
 #if (OPTION_USB_LEAF_DEVEL_DEVICE != 0)
-    #error Device not supported!
+    {KVASER_VENDOR_ID, USB_LEAF_DEVEL_DRV_FAMILY, USB_LEAF_DEVEL_NUM_CHANNELS},
 #endif
 #if (OPTION_USB_LEAF_LITE_DEVICE != 0)
     #error Device not supported!
@@ -219,7 +219,11 @@ static const struct kavser_can_device_t_ {
     bool capErrorFrame;
 } Kvaser_Devices[] = {
 #if (OPTION_USB_LEAF_DEVEL_DEVICE != 0)
-    #error Device not supported!
+    {USB_LEAF_DEVEL_PRODUCT_ID, USB_LEAF_DEVEL_DRV_FAMILY,
+     USB_LEAF_DEVEL_NUM_CHANNELS, USB_LEAF_DEVEL_CAN_CLOCK,
+     USB_LEAF_DEVEL_TIMER_FREQ, USB_LEAF_DEVEL_CAP_CANFD,
+     USB_LEAF_DEVEL_CAP_NONISO, USB_LEAF_DEVEL_CAP_SILENT_MODE,
+     USB_LEAF_DEVEL_CAP_ERROR_FRAME},
 #endif
 #if (OPTION_USB_LEAF_LITE_DEVICE != 0)
     #error Device not supported!
