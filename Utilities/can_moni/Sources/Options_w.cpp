@@ -125,7 +125,7 @@ static const char* c_szWarranty = CAN_MONI_WARRANTY;
 static const char* c_szLicense = CAN_MONI_LICENSE;
 static const char* c_szBasename = CAN_MONI_PROGRAM;
 static const char* c_szInterface = "(unknown)";
-static const char* c_szExcludeList = "~0x00-0x7FF";
+static const char* c_szExcludeList = nullptr;
 
 #if (USE_BASENAME != 0)
 static char* basename(char* path);
