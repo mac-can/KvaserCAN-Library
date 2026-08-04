@@ -665,7 +665,7 @@ uint64_t CCanDevice::TransmitterTest(time_t duration, CANAPI_OpMode_t opMode, ui
 
     fprintf(stderr, "\nPress ^C to abort.\n");
     message.id  = id;
-    message.xtd = 0;
+    message.xtd = (id > CAN_MAX_STD_ID) ? 1 : 0;;
     message.rtr = 0;
 #if (CAN_FD_SUPPORTED != 0)
     message.fdf = opMode.fdoe;
@@ -745,7 +745,7 @@ uint64_t CCanDevice::TransmitterTest(uint64_t count, CANAPI_OpMode_t opMode, boo
 
     fprintf(stderr, "\nPress ^C to abort.\n");
     message.id  = id;
-    message.xtd = 0;
+    message.xtd = (id > CAN_MAX_STD_ID) ? 1 : 0;
     message.rtr = 0;
 #if (CAN_FD_SUPPORTED != 0)
     message.fdf = opMode.fdoe;
